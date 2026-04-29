@@ -81,11 +81,11 @@ export const Navbar: React.FC<NavbarProps> = memo(({
               </svg>
             ) : (
               <img
-                src="/icons/logo.svg"
+                src="/icons/logo.png"
                 alt="The Daily Logos"
                 width={32}
                 height={32}
-                className="relative w-8 h-8 transition-all duration-300"
+                className="relative w-8 h-8 transition-all duration-300 rounded-sm"
               />
             )}
           </div>
