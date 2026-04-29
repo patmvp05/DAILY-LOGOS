@@ -68,7 +68,8 @@ service cloud.firestore {
              data.name is string &&
              data.description is string &&
              data.url is string &&
-             data.url.size() <= 500;
+             data.url.size() <= 500 &&
+             data.url.matches('(?i)^https?://.*');
     }
 
     function isValidCompletedBook(data) {
