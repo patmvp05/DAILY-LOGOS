@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'autoUpdate',
         manifest: false,
-        includeAssets: ['icons/logo.jpeg'],
+        includeAssets: ['icons/logo.png'],
         workbox: {
           globPatterns: ['**/*.{js,css,html,svg,woff2}'],
           runtimeCaching: [

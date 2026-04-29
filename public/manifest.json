@@ -8,27 +8,27 @@
   "description": "Clean, modern daily Bible reading plan.",
   "icons": [
     {
-      "src": "/icons/logo.jpeg",
+      "src": "/icons/logo.png",
       "sizes": "192x192",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/logo.jpeg",
+      "src": "/icons/logo.png",
       "sizes": "512x512",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/logo.jpeg",
+      "src": "/icons/logo.png",
       "sizes": "192x192",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/icons/logo.jpeg",
+      "src": "/icons/logo.png",
       "sizes": "512x512",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ]
