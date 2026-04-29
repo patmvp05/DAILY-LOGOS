@@ -25,7 +25,7 @@ import {
   Headphones
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { cn } from '../../lib/utils';
+import { cn, isValidSecureUrl } from '../../lib/utils';
 import { XpWindowHeader } from '../XpWindowHeader';
 import { setUserSettings } from '../../lib/sync';
 import { useApp } from '../../state/AppContext';
@@ -56,7 +56,7 @@ interface SettingsModalProps {
    isSigningIn
  }) => {
   const { state, dispatch } = useApp();
-  const { setShowSettings, setShowProverbModal, setJournalDraft } = useUi();
+  const { setShowSettings, setShowProverbModal, setJournalDraft, showToast } = useUi();
   const { user } = useAuth();
   const [settingsTab, setSettingsTab] = React.useState<'general' | 'journals' | 'devotionals'>('general');
   const [newDevotional, setNewDevotional] = React.useState({ name: '', description: '', url: '' });
@@ -337,6 +337,10 @@ interface SettingsModalProps {
                     <button 
                       onClick={() => {
                         if (newDevotional.name && newDevotional.url) {
+                          if (!isValidSecureUrl(newDevotional.url)) {
+                            showToast("Please enter a valid URL starting with http:// or https://", "error");
+                            return;
+                          }
                           dispatch({ 
                             type: 'ADD_DEVOTIONAL', 
                             devotional: { 
@@ -347,6 +351,7 @@ interface SettingsModalProps {
                             } 
                           });
                           setNewDevotional({ name: '', description: '', url: '' });
+                          showToast("Devotional added successfully!", "success");
                         }
                       }}
                       className={cn(
