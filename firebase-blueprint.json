@@ -1,0 +1,100 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and settings",
+      "type": "object",
+      "properties": {
+        "startDate": { "type": "string", "format": "date-time" },
+        "theme": { "type": "string", "enum": ["light", "dark"] },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["startDate", "theme", "updatedAt"]
+    },
+    "Progress": {
+      "title": "Progress",
+      "description": "Reading progress for a specific category",
+      "type": "object",
+      "properties": {
+        "categoryId": { "type": "string" },
+        "bookIndex": { "type": "integer" },
+        "chapter": { "type": "integer" },
+        "lastReadAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["categoryId", "bookIndex", "chapter"]
+    },
+    "History": {
+      "title": "History",
+      "description": "A single reading log entry",
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "categoryId": { "type": "string" },
+        "categoryName": { "type": "string" },
+        "bookName": { "type": "string" },
+        "chapter": { "type": "integer" }
+      },
+      "required": ["timestamp", "categoryId", "bookName", "chapter"]
+    },
+    "Journal": {
+      "title": "Journal",
+      "description": "A proverb journal entry",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "chapter": { "type": "integer" },
+        "content": { "type": "string" },
+        "verse": { "type": "string" }
+      },
+      "required": ["date", "chapter", "content"]
+    },
+    "Devotional": {
+      "title": "Devotional",
+      "description": "Custom devotional configuration",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "url": { "type": "string" }
+      },
+      "required": ["name", "url"]
+    },
+    "CompletedBook": {
+      "title": "CompletedBook",
+      "description": "Marker for a completed book",
+      "type": "object",
+      "properties": {
+        "categoryId": { "type": "string" },
+        "bookName": { "type": "string" },
+        "completedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["categoryId", "bookName"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "Global user settings"
+    },
+    "users/{userId}/progress/{categoryId}": {
+      "schema": "Progress",
+      "description": "Category-specific progress"
+    },
+    "users/{userId}/history/{historyId}": {
+      "schema": "History",
+      "description": "Reading history entries"
+    },
+    "users/{userId}/journals/{journalId}": {
+      "schema": "Journal",
+      "description": "Daily proverb journals"
+    },
+    "users/{userId}/devotionals/{devotionalId}": {
+      "schema": "Devotional",
+      "description": "User-added devotionals"
+    },
+    "users/{userId}/completedBooks/{bookKey}": {
+      "schema": "CompletedBook",
+      "description": "Tracked completed bible books"
+    }
+  }
+}

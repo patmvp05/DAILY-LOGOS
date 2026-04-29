@@ -1,0 +1,126 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 3. Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // 2. Validation Helpers
+    function isValidUser(data) {
+      return data.keys().hasAll(['startDate', 'theme', 'updatedAt']) &&
+             data.startDate is string &&
+             data.theme in ['light', 'dark', 'system', 'xp', 'audible'] &&
+             data.updatedAt == request.time;
+    }
+
+    function isValidProgress(data) {
+      return data.keys().hasAll(['categoryId', 'bookIndex', 'chapter']) &&
+             data.categoryId is string &&
+             data.bookIndex is int &&
+             data.chapter is int &&
+             (data.keys().hasAny(['lastReadAt']) ? data.lastReadAt is string : true);
+    }
+
+    function isValidHistory(data) {
+      return data.keys().hasAll(['timestamp', 'timestampMillis', 'categoryId', 'categoryName', 'bookName', 'chapter']) &&
+             data.timestamp is string &&
+             data.timestampMillis is number &&
+             data.categoryId is string &&
+             data.categoryName is string &&
+             data.bookName is string &&
+             data.chapter is int;
+    }
+
+    function isValidJournal(data) {
+      return data.keys().hasAll(['date', 'chapter', 'content']) &&
+             data.date is string &&
+             data.chapter is int &&
+             data.content is string &&
+             data.content.size() <= 10000 &&
+             (data.keys().hasAny(['verse']) ? (data.verse is string || data.verse == null) : true);
+    }
+
+    function isValidDevotional(data) {
+      return data.keys().hasAll(['name', 'description', 'url']) &&
+             data.keys().size() == 3 &&
+             data.name is string &&
+             data.description is string &&
+             data.url is string &&
+             data.url.size() <= 500;
+    }
+
+    function isValidCompletedBook(data) {
+      return data.keys().hasAll(['categoryId', 'bookName', 'completedAt']) &&
+             data.keys().size() == 3 &&
+             data.categoryId is string &&
+             data.bookName is string &&
+             data.completedAt is string;
+    }
+
+    // Collection Rules
+    match /diag/{userId} {
+      allow write: if isOwner(userId) && incoming().keys().hasOnly(['heartBeat']) && incoming().heartBeat == request.time;
+      allow read: if isOwner(userId);
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['theme', 'updatedAt', 'startDate'])
+      );
+
+      match /progress/{categoryId} {
+        allow list, get: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidProgress(incoming()) && isValidId(categoryId);
+        allow delete: if isOwner(userId);
+      }
+
+      match /history/{historyId} {
+        allow list, get: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidHistory(incoming()) && isValidId(historyId);
+        allow delete: if isOwner(userId);
+      }
+
+      match /journals/{journalId} {
+        allow list, get: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidJournal(incoming()) && isValidId(journalId);
+        allow delete: if isOwner(userId);
+      }
+
+      match /devotionals/{devotionalId} {
+        allow list, get: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidDevotional(incoming()) && isValidId(devotionalId);
+        allow delete: if isOwner(userId);
+      }
+
+      match /completedBooks/{bookKey} {
+        allow list, get: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidCompletedBook(incoming()) && isValidId(bookKey);
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

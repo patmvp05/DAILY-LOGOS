@@ -1,0 +1,274 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter Variable", sans-serif;
+  --color-evernote: #00a82d;
+  --color-evernote-hover: #008f26;
+  --breakpoint-xs: 360px;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --audible-bg: #FFFFFF;
+    --audible-nav: #FFFFFF;
+    --audible-text-primary: #111111;
+    --audible-text-secondary: #5A5A5A;
+    --audible-border: #E5E5E5;
+    
+    --sat: env(safe-area-inset-top, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+  }
+
+  .dark {
+    --audible-bg: #0F0F0F;
+    --audible-nav: #0F0F0F;
+    --audible-text-primary: #F0F0F0;
+    --audible-text-secondary: #888888;
+    --audible-border: #2A2A2A;
+  }
+
+  /* Audible Theme overrides */
+  .audible {
+    --audible-bg: #F5F5F5;
+    --audible-nav: #FFFFFF;
+    --audible-text-primary: #111111;
+    --audible-text-secondary: #4A4A4A;
+    --audible-border: #E5E5E5;
+  }
+  
+  .audible.dark {
+    --audible-bg: #000000;
+    --audible-nav: #0F0F0F;
+    --audible-text-primary: #F0F0F0;
+    --audible-text-secondary: #888888;
+    --audible-border: #1F1F1F;
+  }
+
+  body {
+    @apply font-sans bg-[var(--audible-bg)] text-[var(--audible-text-primary)] antialiased transition-colors duration-300 leading-[1.55];
+    min-height: 100dvh;
+    padding: var(--sat) var(--sar) var(--sab) var(--sal);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+  }
+
+  .tabular-nums {
+    font-feature-settings: "tnum";
+  }
+
+  .ios-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .scroll-shadow-top {
+    box-shadow: inset 0 10px 10px -10px rgba(0,0,0,0.1);
+  }
+
+  .scroll-shadow-bottom {
+    box-shadow: inset 0 -10px 10px -10px rgba(0,0,0,0.1);
+  }
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-[var(--audible-bg)];
+}
+
+.dark ::-webkit-scrollbar-track {
+  @apply bg-[var(--audible-bg)];
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CCCCCC;
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #333333;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-effect {
+  background-image: linear-gradient(90deg, rgba(255,255,255,0) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+@keyframes pulse-scale {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.dot-pulse {
+  animation: pulse-scale 2s infinite ease-in-out;
+}
+
+/* Windows XP Theme Styles */
+@layer components {
+  .theme-xp {
+    --background: #ECE9D8;
+    --foreground: #000000;
+    --primary: #316AC5;
+    --border: #003C74;
+    font-family: 'Tahoma', sans-serif !important;
+    background: #004E98;
+    background-size: cover !important;
+    color: black !important;
+    font-size: 13px;
+  }
+
+  .theme-xp body {
+    background: transparent !important;
+  }
+  
+  .theme-xp * {
+    border-color: #003C74;
+    font-family: 'Tahoma', sans-serif !important;
+  }
+
+  .theme-xp h1, .theme-xp h2, .theme-xp h3, .theme-xp h4 {
+    font-family: 'Tahoma', 'Franklin Gothic Medium', sans-serif !important;
+    font-weight: bold !important;
+  }
+
+  .theme-xp .xp-taskbar {
+    background: linear-gradient(to bottom, #1F3D7A 0%, #3169C4 100%);
+    border-top: 1px solid #000000;
+    @apply h-8 w-full fixed bottom-0 left-0 flex items-center z-50;
+    box-shadow: inset 0 1px 1px #5588ff;
+  }
+
+  .theme-xp .xp-start-button {
+    background: linear-gradient(to bottom, #388e3c 0%, #4caf50 50%, #388e3c 100%);
+    box-shadow: 2px 0 5px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.5);
+    border-radius: 0 12px 12px 0 !important;
+    @apply flex items-center gap-2 px-6 h-full text-white font-black italic border-r border-[#1a4d1a] hover:brightness-110 active:brightness-90 transition-all;
+    font-size: 14px;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+  }
+
+  .theme-xp .xp-window {
+    border: 1px solid #003C74;
+    @apply rounded-t-[4px] bg-[#ECE9D8] overflow-hidden;
+    box-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+  }
+
+  .theme-xp .xp-title-bar {
+    background: linear-gradient(to right, #0A246A 0%, #A6CAF0 100%);
+    @apply h-6 flex items-center justify-between px-2 text-white font-bold;
+    font-family: 'Tahoma', sans-serif !important;
+    font-size: 11px;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+  }
+
+  .theme-xp .xp-control-buttons {
+    @apply flex gap-1 items-center;
+  }
+
+  .theme-xp .xp-orb {
+    @apply w-4 h-4 rounded-full flex items-center justify-center font-black text-[9px] shadow-sm transition-all hover:brightness-110 active:scale-95;
+    box-shadow: inset -1px -1px 2px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.5);
+  }
+
+  .theme-xp .xp-orb-close { background: radial-gradient(circle at 30% 30%, #ff5f56, #ff1a1a); color: white; }
+  .theme-xp .xp-orb-min { background: radial-gradient(circle at 30% 30%, #ffbd2e, #ff9f00); color: #805000; }
+  .theme-xp .xp-orb-max { background: radial-gradient(circle at 30% 30%, #27c93f, #1a9e30); color: #005000; }
+
+  .theme-xp .xp-button {
+    background: #ECE9D8;
+    border: none !important;
+    @apply rounded-none px-4 py-1 text-black font-bold text-xs transition-all hover:bg-[#D3E5FA];
+    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf;
+  }
+
+  .theme-xp .xp-button:active {
+    box-shadow: inset 1px 1px #0a0a0a, inset -1px -1px #fff, inset 2px 2px grey, inset -2px -2px #dfdfdf;
+    @apply translate-x-[1px] translate-y-[1px];
+  }
+
+  .theme-xp .uber-card {
+    background-color: #ECE9D8 !important;
+    border: 1px solid #003C74 !important;
+    border-radius: 4px 4px 0 0 !important;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2) !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .theme-xp .xp-content {
+    @apply p-3 bg-[#ECE9D8] text-black h-full overflow-y-auto;
+    font-size: 12px;
+  }
+
+  .theme-xp .xp-start-menu {
+    @apply fixed bottom-8 left-0 w-80 bg-[#D3D3D3] border-2 border-[#316AC5] rounded-t-lg shadow-2xl z-[100] overflow-hidden;
+  }
+  
+  .theme-xp .xp-start-menu-header {
+    background: linear-gradient(to bottom, #1059CA 0%, #1579F2 100%);
+    @apply p-3 flex items-center gap-3 text-white border-b border-white/20 font-bold;
+  }
+  
+  .theme-xp .xp-menu-item {
+    @apply flex items-center gap-2 px-2 py-1 hover:bg-[#316AC5] hover:text-white rounded-none text-[11px] font-medium w-full text-left;
+  }
+
+  .theme-xp .xp-input {
+    @apply border-2 border-[#919B9C] rounded-none px-2 py-1 bg-white focus:border-[#316AC5] outline-none text-black;
+  }
+
+  /* Scrollbar for XP */
+  .theme-xp ::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+  }
+  .theme-xp ::-webkit-scrollbar-track {
+    background: #D4D0C8;
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1);
+  }
+  .theme-xp ::-webkit-scrollbar-thumb {
+    background: #316AC5;
+    border: 1px solid #003C74;
+    box-shadow: inset 1px 1px 1px rgba(255,255,255,0.3);
+    border-radius: 0;
+  }
+  .theme-xp ::-webkit-scrollbar-thumb:hover {
+    background: #4A89DC;
+  }
+}
+
+@layer components {
+  .uber-card {
+    @apply border border-gray-100 transition-colors duration-200;
+  }
+  
+  .uber-card:hover {
+    @apply border-black;
+  }
+
+  .uber-btn {
+    @apply transition-colors duration-150 active:scale-[0.98];
+  }
+}
