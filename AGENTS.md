@@ -1,9 +1,20 @@
-# Persistent Instructions for The Daily Logos
+# Agent Instructions — Daily Logos
 
-## Bible Translations
-- **Proverbs**: MUST always use the local `/public/proverbs.json` file, which contains the ESV (English Standard Version) translation.
-- **Other Books**: Use the Bolls Life API with the KJV (King James Version) as default.
+## Bible Translation for Proverbs
 
-## Deployment & Syncing
-- **CRITICAL**: The application depends on `/public/proverbs.json`. Do NOT delete, rename, or revert the fetching logic for this file. 
-- If the file is missing in the local environment, it may be due to a sync issue with GitHub. Do NOT "fix" this by reverting to the KJV API; instead, preserve the ESV logic.
+**The Proverbs fetching logic was intentionally changed by the project owner.**
+
+Proverbs now uses the **Bolls.life API** with the **World English Bible (WEB)** translation.
+There is **no local `public/proverbs.json` file**. It was intentionally deleted.
+
+### What the code does (do not change this)
+- `src/lib/proverbCache.ts`: fetches `https://bolls.life/get-chapter/WEB/20/{chapter}/`
+- `src/lib/bibleCache.ts`: also uses `WEB` for Proverbs chapter previews
+- All other books: continue using `KJV` via Bolls.life — this is correct
+
+### Rules
+- Do NOT fetch from `/proverbs.json` — the file does not exist
+- Do NOT add back `public/proverbs.json`
+- Do NOT change `WEB` to `KJV` or `ESV`
+- Do NOT revert `proverbCache.ts` or `bibleCache.ts` to local file logic
+- This is an **approved change** — do not undo it
