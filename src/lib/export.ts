@@ -4,10 +4,10 @@
  */
 
 import { format, parseISO } from 'date-fns';
-import type { ProverbJournal } from '../types.ts';
+import { ProverbJournal } from '../types';
 
-export const generateJournalsMarkdown = (journals: ProverbJournal[]): string => {
-  if (journals.length === 0) return '';
+export const exportJournalsAsMarkdown = (journals: ProverbJournal[]) => {
+  if (journals.length === 0) return;
 
   let md = `# Daily Logos - Proverb Journals\nExported on: ${format(new Date(), 'PPPP')}\n\n`;
   
@@ -19,13 +19,6 @@ export const generateJournalsMarkdown = (journals: ProverbJournal[]): string => 
     md += `**Reflection:**\n${j.content}\n\n`;
     md += `---\n\n`;
   });
-
-  return md;
-};
-
-export const exportJournalsAsMarkdown = (journals: ProverbJournal[]) => {
-  const md = generateJournalsMarkdown(journals);
-  if (!md) return;
 
   const blob = new Blob([md], { type: 'text/markdown' });
   const url = URL.createObjectURL(blob);

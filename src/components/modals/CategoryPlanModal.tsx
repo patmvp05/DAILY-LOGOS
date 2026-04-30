@@ -94,40 +94,38 @@ const CategoryPlanModal: React.FC<CategoryPlanModalProps> = ({
                 <span className="text-[10px] uppercase font-black tracking-[0.12em] text-[var(--audible-text-secondary)] dark:text-zinc-600">Section {i + 1}</span>
                 <h4 className={cn("text-xl sm:text-2xl font-black tracking-tight mb-4 text-[var(--audible-text-primary)]", state.settings.theme === 'xp' ? "text-black opacity-80" : "")}>{cat.name}</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
-                  {(() => {
+                  {cat.books.map(book => {
+                    const isCompleted = state.completedBooks.has(`${cat.id}:${book.name}`);
                     const prog = state.progress.find(p => p.categoryId === cat.id)!;
-                    return cat.books.map(book => {
-                      const isCompleted = state.completedBooks.has(`${cat.id}:${book.name}`);
-                      const isCurrent = cat.books[prog.bookIndex].name === book.name;
-
-                      return (
-                        <motion.button
-                          key={book.name}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => toggleBookCompletion(cat.id, book.name)}
-                          className={cn(
-                            "flex justify-between items-baseline group/book text-left p-2 -m-2 transition-all rounded-lg min-h-[36px]",
-                            state.settings.theme === 'xp' ? "hover:bg-blue-50" : "hover:bg-gray-50 dark:hover:bg-white/5"
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            {isCompleted && <Check size={12} className={state.settings.theme === 'xp' ? "text-blue-600" : "text-evernote"} strokeWidth={4} />}
-                            <span className={cn(
-                              "text-sm font-bold uppercase tracking-tight transition-all",
-                              isCompleted ? (state.settings.theme === 'xp' ? "text-blue-700/40 line-through" : "text-evernote line-through opacity-40") :
-                              isCurrent ? (state.settings.theme === 'xp' ? "text-black" : "text-[var(--audible-text-primary)]") : "text-zinc-400 dark:text-zinc-500"
-                            )}>
-                              {book.name}
-                            </span>
-                          </div>
+                    const isCurrent = cat.books[prog.bookIndex].name === book.name;
+                    
+                    return (
+                      <motion.button 
+                        key={book.name} 
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => toggleBookCompletion(cat.id, book.name)}
+                        className={cn(
+                          "flex justify-between items-baseline group/book text-left p-2 -m-2 transition-all rounded-lg min-h-[36px]",
+                          state.settings.theme === 'xp' ? "hover:bg-blue-50" : "hover:bg-gray-50 dark:hover:bg-white/5"
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          {isCompleted && <Check size={12} className={state.settings.theme === 'xp' ? "text-blue-600" : "text-evernote"} strokeWidth={4} />}
                           <span className={cn(
-                            "text-[10px] font-mono tabular-nums",
-                            state.settings.theme === 'xp' ? "text-blue-700/40 group-hover/book:text-blue-700" : "text-zinc-300 dark:text-zinc-600 group-hover/book:text-[var(--audible-text-primary)]"
-                          )}>{book.chapters} CH.</span>
-                        </motion.button>
-                      );
-                    });
-                  })()}
+                            "text-sm font-bold uppercase tracking-tight transition-all",
+                            isCompleted ? (state.settings.theme === 'xp' ? "text-blue-700/40 line-through" : "text-evernote line-through opacity-40") : 
+                            isCurrent ? (state.settings.theme === 'xp' ? "text-black" : "text-[var(--audible-text-primary)]") : "text-zinc-400 dark:text-zinc-500"
+                          )}>
+                            {book.name}
+                          </span>
+                        </div>
+                        <span className={cn(
+                          "text-[10px] font-mono tabular-nums",
+                          state.settings.theme === 'xp' ? "text-blue-700/40 group-hover/book:text-blue-700" : "text-zinc-300 dark:text-zinc-600 group-hover/book:text-[var(--audible-text-primary)]"
+                        )}>{book.chapters} CH.</span>
+                      </motion.button>
+                    );
+                  })}
                 </div>
               </motion.div>
             ))}

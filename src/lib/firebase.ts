@@ -23,8 +23,7 @@ import {
   collection, 
   deleteDoc, 
   writeBatch, 
-  onSnapshot,
-  QueryDocumentSnapshot
+  onSnapshot 
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
@@ -93,10 +92,3 @@ export const getHistoryCollection = (userId: string) => collection(db, 'users', 
 export const getJournalsCollection = (userId: string) => collection(db, 'users', userId, 'journals');
 export const getDevotionalsCollection = (userId: string) => collection(db, 'users', userId, 'devotionals');
 export const getCompletedBooksCollection = (userId: string) => collection(db, 'users', userId, 'completedBooks');
-
-/**
- * Generic helper to map Firestore document snapshots to typed objects.
- */
-export const mapDocs = <T>(docs: QueryDocumentSnapshot[]): T[] => {
-  return docs.map((doc) => ({ id: doc.id, ...doc.data() } as T));
-};

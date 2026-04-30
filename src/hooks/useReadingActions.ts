@@ -19,12 +19,11 @@ import {
   resetUserData
 } from '../lib/sync';
 import { useUi } from '../state/UiContext';
-import { type User } from 'firebase/auth';
 
 export function useReadingActions(
   state: AppState, 
   dispatch: Dispatch<AppAction>, 
-  user: User | null
+  user: any // Ideally use a more specific User type
 ) {
   const { showToast, setConfirmDialog, setJournalDraft, setShowProverbModal, setSelectingCategoryId } = useUi();
   
