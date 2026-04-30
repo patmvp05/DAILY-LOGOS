@@ -1,19 +1,17 @@
 # Agent Instructions
 
-## Proverbs Translation
+## Bible Translation for Proverbs
 
-The daily proverb uses the **World English Bible (WEB)** translation fetched live from the **Bolls.life API**.
+Proverbs is fetched from the **Bolls.life API** using the **World English Bible (WEB)** translation.
 
-### Current implementation
-- `src/lib/proverbCache.ts` fetches from `https://bolls.life/get-chapter/WEB/20/{chapter}/`
-- `src/lib/bibleCache.ts` also uses WEB for Proverbs chapter previews
-- **There is NO `public/proverbs.json` file** — it was intentionally removed
+- Fetch URL: `https://bolls.life/get-chapter/WEB/20/{chapter}/`
+- Book ID for Proverbs on Bolls.life: `20`
+- Translation code: `WEB`
 
-### Rules — DO NOT violate these
-- Do NOT add back `public/proverbs.json`
-- Do NOT change `TRANSLATION = 'WEB'` to `'KJV'` or any other value
-- Do NOT switch Proverbs fetching back to a local file
-- Do NOT change the fetch URL away from `bolls.life/get-chapter/WEB/20/`
+All other Bible books use `KJV` via the same Bolls.life API. This is correct.
 
-### Other books
-All other Bible books use KJV via the Bolls.life API — this is correct and intentional.
+## Rules
+
+- Do NOT use a local file for Proverbs. There is no `public/proverbs.json`.
+- Do NOT change the translation from `WEB` to `KJV` or anything else.
+- Do NOT add or restore any local Bible data files.
