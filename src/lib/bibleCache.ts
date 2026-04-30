@@ -38,16 +38,34 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
 
   try {
     const bookId = BOLLS_BIBLE_BOOK_IDS[bookName] || 1;
-    const response = await fetch(`https://bolls.life/get-chapter/KJV/${bookId}/${chapter}/`, {
-      signal: controller.signal
-    });
+    let data: any[];
 
-    if (!response.ok) {
-      throw new Error(`Bolls Life error: ${response.status}`);
+    if (bookName === 'Proverbs') {
+      const response = await fetch('/proverbs.json', {
+        signal: controller.signal
+      });
+      if (!response.ok) throw new Error(`Proverbs JSON fetch error: ${response.status}`);
+      const fullData = await response.json();
+      const chapterData = fullData[chapter.toString()];
+      if (!chapterData) throw new Error(`Chapter ${chapter} not found in local proverbs.json`);
+      
+      data = Object.entries(chapterData).map(([v, text]) => ({
+        verse: parseInt(v),
+        text: text as string
+      })).sort((a, b) => a.verse - b.verse);
+    } else {
+      const response = await fetch(`https://bolls.life/get-chapter/KJV/${bookId}/${chapter}/`, {
+        signal: controller.signal
+      });
+
+      if (!response.ok) {
+        throw new Error(`Bolls Life error: ${response.status}`);
+      }
+      
+      data = await response.json();
     }
     
-    const data = await response.json();
-    if (!Array.isArray(data)) throw new Error("Invalid response from Bolls Life");
+    if (!Array.isArray(data)) throw new Error("Invalid response format");
 
     const firstVerse = data.length > 0 
       ? (data[0].text || "")

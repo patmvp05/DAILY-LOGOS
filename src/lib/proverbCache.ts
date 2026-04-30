@@ -51,32 +51,28 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
   const timeoutId = setTimeout(() => controller.abort(), 10000);
 
   try {
-    const response = await fetch(`https://bolls.life/get-chapter/KJV/20/${chapter}/`, {
+    const response = await fetch('/proverbs.json', {
       signal: controller.signal
     });
 
-    if (!response.ok) throw new Error(`Bolls Life error: ${response.status}`);
-    const data = await response.json();
+    if (!response.ok) throw new Error(`Proverbs JSON fetch error: ${response.status}`);
+    const fullData = await response.json();
+    const chapterData = fullData[chapter.toString()];
     
-    if (!Array.isArray(data)) throw new Error("Invalid response from Bolls Life");
+    if (!chapterData) throw new Error(`Chapter ${chapter} not found in local proverbs.json`);
+
+    // Convert {"1": "text", "2": "text"} to [{ verse: 1, text: "text" }, ...]
+    const verses = Object.entries(chapterData).map(([v, text]) => ({
+      verse: parseInt(v),
+      text: (text as string).trim()
+    })).sort((a, b) => a.verse - b.verse);
 
     const result: ProverbResponse = {
       reference: `Proverbs ${chapter}`,
-      verses: data.map((v: any) => ({
-        verse: v.verse,
-        text: (v.text || "")
-          .replace(/<S>[^<]*<\/S>/gi, '') // Remove Strong's numbers and their tags
-          .replace(/<[^>]*>/g, '')      // Remove any other residual tags
-          .replace(/^\[\d+\]\s*/, '')   // Remove [1] at start
-          .trim()
-      })),
-      text: data.map((v: any) => (v.text || "")
-        .replace(/<S>[^<]*<\/S>/gi, '')
-        .replace(/<[^>]*>/g, '')
-        .trim()
-      ).join(' '),
-      translation_id: 'kjv',
-      translation_name: 'King James Version'
+      verses,
+      text: verses.map(v => v.text).join(' '),
+      translation_id: 'esv',
+      translation_name: 'English Standard Version'
     };
 
     try {
