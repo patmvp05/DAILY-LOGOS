@@ -12,7 +12,7 @@ export function useAppStats(state: AppState) {
   const streak = useMemo(() => {
     if (state.history.length === 0) return 0;
     const dateSet = new Set<string>();
-    for (const h of state.history) dateSet.add(h.timestamp.split('T')[0]);
+    for (const h of state.history) dateSet.add(format(new Date(h.timestamp), 'yyyy-MM-dd'));
     const dates = Array.from(dateSet).sort((a, b) => b.localeCompare(a));
     const today = format(new Date(), 'yyyy-MM-dd');
     const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
@@ -37,15 +37,14 @@ export function useAppStats(state: AppState) {
     let totalRead = 0;
     CATEGORIES.forEach(cat => {
       const p = state.progress.find(prog => prog.categoryId === cat.id);
-      if (!p) return;
       
       for (let i = 0; i < cat.books.length; i++) {
         const book = cat.books[i];
         const isCompleted = state.completedBooks.has(`${cat.id}:${book.name}`);
         
-        if (i < p.bookIndex) {
+        if (p && i < p.bookIndex) {
           totalRead += book.chapters;
-        } else if (i === p.bookIndex) {
+        } else if (p && i === p.bookIndex) {
           totalRead += isCompleted ? book.chapters : (p.chapter - 1);
         } else {
           if (isCompleted) totalRead += book.chapters;
