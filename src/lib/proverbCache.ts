@@ -14,7 +14,7 @@ interface ProverbResponse {
 const CACHE_PREFIX = 'proverb_cache_v9_';
 
 export async function getProverb(chapter: number): Promise<ProverbResponse> {
-  const translation = 'ESV';
+  const translation = 'KJV';
   const today = new Date().toISOString().split('T')[0];
   const cacheKey = `${CACHE_PREFIX}${translation}_${chapter}_${today}`;
   
