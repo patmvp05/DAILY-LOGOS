@@ -12,7 +12,8 @@ import {
   getHistoryCollection, 
   getJournalsCollection, 
   getDevotionalsCollection, 
-  getCompletedBooksCollection 
+  getCompletedBooksCollection,
+  mapDocs
 } from '../lib/firebase';
 import { AppAction } from '../state/appReducer';
 import { AppState, Progress, HistoryEntry, ProverbJournal, Devotional } from '../types';
@@ -110,15 +111,15 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
           }
 
           if (journalsSnap) {
-            partialState.proverbJournals = journalsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as ProverbJournal));
+            partialState.proverbJournals = mapDocs<ProverbJournal>(journalsSnap.docs);
           }
 
           if (devotionalsSnap) {
-            partialState.customDevotionals = devotionalsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Devotional));
+            partialState.customDevotionals = mapDocs<Devotional>(devotionalsSnap.docs);
           }
 
           if (historySnap) {
-            partialState.history = historySnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as HistoryEntry));
+            partialState.history = mapDocs<HistoryEntry>(historySnap.docs);
           }
 
           // Apply whatever we managed to load
@@ -194,19 +195,19 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
 
         // Subscription 4: Journals
         setupListener('Journals', getJournalsCollection(user.uid), (snap) => {
-          const journals = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProverbJournal));
+          const journals = mapDocs<ProverbJournal>(snap.docs);
           queueMicrotask(() => dispatch({ type: 'CLOUD_SYNC_JOURNALS', journals }));
         });
 
         // Subscription 5: Devotionals
         setupListener('Devotionals', getDevotionalsCollection(user.uid), (snap) => {
-          const devotionals = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Devotional));
+          const devotionals = mapDocs<Devotional>(snap.docs);
           queueMicrotask(() => dispatch({ type: 'CLOUD_SYNC_DEVOTIONALS', devotionals }));
         });
 
         // Subscription 6: History
         setupListener('History', historyQuery, (snap) => {
-          const history = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as HistoryEntry));
+          const history = mapDocs<HistoryEntry>(snap.docs);
           queueMicrotask(() => dispatch({ type: 'CLOUD_SYNC_HISTORY', history }));
         });
 
