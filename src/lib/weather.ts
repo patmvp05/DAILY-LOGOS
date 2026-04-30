@@ -14,8 +14,51 @@ export interface WeatherSnapshot {
 }
 
 const CACHE_KEY = 'dl_weather_v1';
-const LAT = 10.7626;
-const LON = 106.6602;
+const FALLBACK_LAT = 10.7626;
+const FALLBACK_LON = 106.6602;
+const FALLBACK_CITY = 'Ho Chi Minh City';
+
+interface LocationData {
+  lat: number;
+  lon: number;
+  city: string;
+}
+
+async function getUserLocation(signal: AbortSignal): Promise<LocationData> {
+  const defaultLoc = { lat: FALLBACK_LAT, lon: FALLBACK_LON, city: FALLBACK_CITY };
+
+  if (!navigator.geolocation) return defaultLoc;
+
+  try {
+    const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        timeout: 5000,
+        maximumAge: 1000 * 60 * 60 * 1 // 1 hour
+      });
+      // Handle abort from our timeout controller
+      signal.addEventListener('abort', () => reject(new Error('Aborted')));
+    });
+
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+
+    // Attempt reverse geocoding to get city name
+    try {
+      const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`, { signal });
+      if (geoRes.ok) {
+        const geoData = await geoRes.json();
+        const city = geoData.city || geoData.locality || FALLBACK_CITY;
+        return { lat, lon, city };
+      }
+    } catch (e) {
+      // Silently fall back to coordinates without city if reverse geocoding fails
+    }
+
+    return { lat, lon, city: 'Unknown Location' };
+  } catch (e) {
+    return defaultLoc;
+  }
+}
 
 const WEATHER_CODE_MAP: Record<number, string> = {
   0: 'Clear',
@@ -70,7 +113,9 @@ export async function fetchWeather(): Promise<WeatherSnapshot> {
   const timeoutId = setTimeout(() => controller.abort(), 10000);
 
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&temperature_unit=fahrenheit&timezone=auto`;
+    const loc = await getUserLocation(controller.signal);
+
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&temperature_unit=fahrenheit&timezone=auto`;
     const response = await fetch(url, { 
       mode: 'cors',
       signal: controller.signal 
@@ -89,7 +134,7 @@ export async function fetchWeather(): Promise<WeatherSnapshot> {
       lowF: Math.round(daily.temperature_2m_min[0]),
       conditionCode: current.weather_code,
       conditionLabel: WEATHER_CODE_MAP[current.weather_code] || 'Clear',
-      city: 'Ho Chi Minh City',
+      city: loc.city,
       fetchedAt: Date.now()
     };
 
