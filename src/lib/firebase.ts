@@ -49,8 +49,10 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // Step 1: Firestore-safe ID helper
 export const bookKeyToDocId = (key: string): string => {
-  // Replace anything not a-z, A-Z, 0-9, _, - with _
-  return key.replace(/[^a-zA-Z0-9_-]/g, '_');
+  // Use URI encoding to prevent collisions, then replace chars to ensure Firestore compatibility
+  return encodeURIComponent(key)
+    .replace(/[.!~*'()_-]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)
+    .replace(/%/g, '_');
 };
 
 export const signInWithGoogle = async (useRedirect = false) => {
