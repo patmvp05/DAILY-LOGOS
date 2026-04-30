@@ -14,7 +14,8 @@ interface ProverbResponse {
 const CACHE_PREFIX = 'proverb_cache_v9_';
 
 export async function getProverb(chapter: number): Promise<ProverbResponse> {
-  const translation = 'KJV';
+  // ESV is intentional — proverbs.json contains ESV text. Do not change to KJV.
+  const translation = 'ESV';
   const today = new Date().toISOString().split('T')[0];
   const cacheKey = `${CACHE_PREFIX}${translation}_${chapter}_${today}`;
   
