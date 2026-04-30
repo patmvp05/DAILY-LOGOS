@@ -8,7 +8,7 @@ import { getProverb } from '../lib/proverbCache';
 
 export function useProverb(dayOfMonth: number) {
   const [proverbSnippet, setProverbSnippet] = useState<string | null>(null);
-  const [proverbContent, setProverbContent] = useState<{ verses?: { verse: number, text: string }[], text?: string } | null>(null);
+  const [proverbContent, setProverbContent] = useState<any | null>(null);
   const [isFetchingProverb, setIsFetchingProverb] = useState(false);
 
   useEffect(() => {

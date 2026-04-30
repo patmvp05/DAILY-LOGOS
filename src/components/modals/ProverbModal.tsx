@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, Check, Sparkles, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../../lib/utils';
@@ -25,16 +25,16 @@ interface ProverbModalProps {
   saveProverbJournal: (content: string, verse: string, id: string | null) => void;
 }
 
-const ProverbModal: React.FC<ProverbModalProps> = ({
+function ProverbModal({
   dayOfMonth,
   isFetchingProverb,
   proverbContent,
   saveProverbJournal,
-}) => {
+}: ProverbModalProps) {
   const { state } = useApp();
   const { setShowProverbModal, journalDraft, setJournalDraft } = useUi();
-  const [journalVerse, setJournalVerse] = React.useState(journalDraft.verse);
-  const [journalContent, setJournalContent] = React.useState(journalDraft.content);
+  const [journalVerse, setJournalVerse] = useState(journalDraft.verse);
+  const [journalContent, setJournalContent] = useState(journalDraft.content);
 
   const onClose = () => {
     setShowProverbModal(false);
@@ -44,6 +44,7 @@ const ProverbModal: React.FC<ProverbModalProps> = ({
   return (
     <>
       <motion.div 
+        key="proverb-overlay"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -51,6 +52,7 @@ const ProverbModal: React.FC<ProverbModalProps> = ({
         className="fixed inset-0 bg-black/80 backdrop-blur-md z-[500]"
       />
       <motion.div 
+        key="proverb-window"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
@@ -197,6 +199,6 @@ const ProverbModal: React.FC<ProverbModalProps> = ({
       </motion.div>
     </>
   );
-};
+}
 
 export default ProverbModal;

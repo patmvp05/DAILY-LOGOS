@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { memo } from 'react';
+import React, { useState, useMemo, useEffect, memo } from 'react';
 import { 
   Check, 
   Layers, 
@@ -49,7 +49,7 @@ interface DashboardProps {
   advanceChapter: (catId: string, diff: number) => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = memo(({
+function DashboardComponent({
   dayNumber,
   todayReadingStats,
   streak,
@@ -68,10 +68,10 @@ export const Dashboard: React.FC<DashboardProps> = memo(({
   handleLogin,
   setSelectingCategoryId,
   advanceChapter
-}) => {
-  const [chapterInfos, setChapterInfos] = React.useState<Record<string, { firstVerse: string, readTime: number }>>({});
+}: DashboardProps) {
+  const [chapterInfos, setChapterInfos] = useState<Record<string, { firstVerse: string, readTime: number }>>({});
 
-  const catProgress = React.useMemo(() => {
+  const catProgress = useMemo(() => {
     const results: Record<string, { pct: number, chaptersRead: number, totalChapters: number }> = {};
     CATEGORIES.forEach(cat => {
       const prog = state.progress.find(p => p.categoryId === cat.id);
@@ -106,7 +106,7 @@ export const Dashboard: React.FC<DashboardProps> = memo(({
     return results;
   }, [state.progress, state.completedBooks]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let active = true;
     
     async function loadInfos() {
@@ -595,4 +595,6 @@ export const Dashboard: React.FC<DashboardProps> = memo(({
       </div>
     </main>
   );
-});
+}
+
+export const Dashboard = memo(DashboardComponent);

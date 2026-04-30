@@ -42,7 +42,7 @@ interface NavbarProps {
   isAuthLoading: boolean;
 }
 
-export const Navbar: React.FC<NavbarProps> = memo(({
+function NavbarComponent({
   user,
   syncStatus,
   lastSyncTime,
@@ -57,7 +57,7 @@ export const Navbar: React.FC<NavbarProps> = memo(({
   isDeveloper,
   isSigningIn,
   isAuthLoading
-}) => {
+}: NavbarProps) {
   const isStandalone = useStandaloneDetection();
 
   return (
@@ -271,4 +271,6 @@ export const Navbar: React.FC<NavbarProps> = memo(({
       </div>
     </nav>
   );
-});
+}
+
+export const Navbar = memo(NavbarComponent);
