@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type React from 'react';
 import { useState, useEffect } from 'react';
 import { syncTracker } from '../lib/sync';
 import { useFirestoreSync } from './useFirestoreSync';
+import { type User } from 'firebase/auth';
+import type { AppAction } from '../state/appReducer';
 
-export function useSyncState(user: any, dispatch: any) {
+export function useSyncState(user: User | null, dispatch: React.Dispatch<AppAction>) {
   const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error' | 'idle'>('idle');
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [showSyncCheck, setShowSyncCheck] = useState(false);
