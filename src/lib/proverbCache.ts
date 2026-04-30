@@ -14,7 +14,7 @@ interface ProverbResponse {
 const CACHE_PREFIX = 'proverb_cache_v9_';
 
 export async function getProverb(chapter: number): Promise<ProverbResponse> {
-  const translation = 'KJV';
+  const translation = 'ESV'; // ALWAYS use ESV for Daily Proverbs (local JSON)
   const today = new Date().toISOString().split('T')[0];
   const cacheKey = `${CACHE_PREFIX}${translation}_${chapter}_${today}`;
   
@@ -51,7 +51,7 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
   const timeoutId = setTimeout(() => controller.abort(), 10000);
 
   try {
-    const response = await fetch('/proverbs.json', {
+    const response = await fetch('/proverbs.json', { // Local ESV File
       signal: controller.signal
     });
 

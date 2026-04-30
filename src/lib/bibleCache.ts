@@ -41,6 +41,7 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
     let data: any[];
 
     if (bookName === 'Proverbs') {
+      // Proverbs MUST use the local ESV JSON file per user requirement
       const response = await fetch('/proverbs.json', {
         signal: controller.signal
       });
