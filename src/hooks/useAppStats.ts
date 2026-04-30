@@ -19,9 +19,11 @@ export function useAppStats(state: AppState) {
     if (dates[0] !== today && dates[0] !== yesterday) return 0;
     let currentStreak = 1;
     for (let i = 0; i < dates.length - 1; i++) {
-        const d1 = parseISO(dates[i]);
-        const d2 = parseISO(dates[i+1]);
-        if (differenceInDays(d1, d2) === 1) currentStreak++;
+        const d1 = Date.parse(dates[i]);
+        const d2 = Date.parse(dates[i+1]);
+        // Date.parse on 'yyyy-MM-dd' strings assumes UTC, avoiding timezone issues.
+        // 86400000 milliseconds is exactly one day.
+        if (Math.round((d1 - d2) / 86400000) === 1) currentStreak++;
         else break;
     }
     return currentStreak;
