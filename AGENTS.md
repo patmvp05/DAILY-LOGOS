@@ -1,17 +1,9 @@
-# Agent Instructions
+# Persistent Instructions for The Daily Logos
 
-## Bible Translation for Proverbs
+## Bible Translations
+- **Proverbs**: MUST always use the local `/public/proverbs.json` file, which contains the ESV (English Standard Version) translation.
+- **Other Books**: Use the Bolls Life API with the KJV (King James Version) as default.
 
-Proverbs is fetched from the **Bolls.life API** using the **World English Bible (WEB)** translation.
-
-- Fetch URL: `https://bolls.life/get-chapter/WEB/20/{chapter}/`
-- Book ID for Proverbs on Bolls.life: `20`
-- Translation code: `WEB`
-
-All other Bible books use `KJV` via the same Bolls.life API. This is correct.
-
-## Rules
-
-- Do NOT use a local file for Proverbs. There is no `public/proverbs.json`.
-- Do NOT change the translation from `WEB` to `KJV` or anything else.
-- Do NOT add or restore any local Bible data files.
+## Deployment & Syncing
+- **CRITICAL**: The application depends on `/public/proverbs.json`. Do NOT delete, rename, or revert the fetching logic for this file. 
+- If the file is missing in the local environment, it may be due to a sync issue with GitHub. Do NOT "fix" this by reverting to the KJV API; instead, preserve the ESV logic.
