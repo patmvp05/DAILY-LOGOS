@@ -13,7 +13,7 @@ interface ChapterInfo {
 }
 
 export async function getChapterInfo(bookName: string, chapter: number): Promise<ChapterInfo> {
-  const translation = 'KJV';
+  const translation = bookName === 'Proverbs' ? 'ESV' : 'KJV';
   const cacheKey = `${CACHE_PREFIX}${translation}_${bookName}_${chapter}`;
   
   // Check cache
