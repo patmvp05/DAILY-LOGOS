@@ -7,6 +7,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ExternalLink, Check } from 'lucide-react';
 import { useUi } from '../../state/UiContext';
+import { isValidSecureUrl } from '../../lib/utils';
 
 const DevotionalModal: React.FC = () => {
   const { activeDevotion, setActiveDevotion } = useUi();
@@ -14,6 +15,8 @@ const DevotionalModal: React.FC = () => {
   const onClose = () => setActiveDevotion(null);
 
   if (!activeDevotion) return null;
+
+  const isSecure = isValidSecureUrl(activeDevotion.url);
 
   return (
     <>
@@ -36,15 +39,17 @@ const DevotionalModal: React.FC = () => {
             <p className="text-[10px] text-[var(--audible-text-secondary)] font-bold uppercase tracking-tight truncate max-w-[250px] sm:max-w-md opacity-60">{activeDevotion.url}</p>
           </div>
           <div className="flex items-center gap-4">
-            <a 
-              href={activeDevotion.url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="p-2 text-[var(--audible-text-secondary)] hover:text-evernote transition-all"
-              title="Open in new tab"
-            >
-              <ExternalLink size={20} />
-            </a>
+            {isSecure && (
+              <a
+                href={activeDevotion.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 text-[var(--audible-text-secondary)] hover:text-evernote transition-all"
+                title="Open in new tab"
+              >
+                <ExternalLink size={20} />
+              </a>
+            )}
             <button 
               onClick={onClose}
               className="p-3 bg-black dark:bg-white text-white dark:text-black rounded-full hover:scale-110 active:scale-95 transition-all shadow-md"
@@ -54,12 +59,18 @@ const DevotionalModal: React.FC = () => {
           </div>
         </div>
         <div className="flex-1 bg-white relative">
-          <iframe 
-            src={activeDevotion.url} 
-            className="w-full h-full border-none"
-            title={activeDevotion.name}
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-          />
+          {isSecure ? (
+            <iframe
+              src={activeDevotion.url}
+              className="w-full h-full border-none"
+              title={activeDevotion.name}
+              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-[var(--audible-text-secondary)]">
+              <p>Invalid or insecure URL.</p>
+            </div>
+          )}
         </div>
       </motion.div>
     </>
