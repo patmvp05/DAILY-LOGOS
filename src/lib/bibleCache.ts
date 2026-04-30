@@ -40,29 +40,13 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
     const bookId = BOLLS_BIBLE_BOOK_IDS[bookName] || 1;
     let data: any[];
 
-    if (bookName === 'Proverbs') {
-      // Proverbs MUST use the local ESV JSON file per user requirement
-      const response = await fetch('/proverbs.json', {
-        signal: controller.signal
-      });
-      if (!response.ok) throw new Error(`Proverbs JSON fetch error: ${response.status}`);
-      const fullData = await response.json();
-      const chapterData = fullData[chapter.toString()];
-      if (!chapterData) throw new Error(`Chapter ${chapter} not found in local proverbs.json`);
-      
-      data = Object.entries(chapterData).map(([v, text]) => ({
-        verse: parseInt(v),
-        text: text as string
-      })).sort((a, b) => a.verse - b.verse);
-    } else {
-      const response = await fetch(`https://bolls.life/get-chapter/KJV/${bookId}/${chapter}/`, {
+    {
+      const translation = bookName === 'Proverbs' ? 'WEB' : 'KJV';
+      const response = await fetch(`https://bolls.life/get-chapter/${translation}/${bookId}/${chapter}/`, {
         signal: controller.signal
       });
 
-      if (!response.ok) {
-        throw new Error(`Bolls Life error: ${response.status}`);
-      }
-      
+      if (!response.ok) throw new Error(`Bolls Life error: ${response.status}`);
       data = await response.json();
     }
     
