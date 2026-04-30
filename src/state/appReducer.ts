@@ -43,7 +43,7 @@ function isFingerprintMatch(a: any[], b: any[]): boolean {
  * Merges state non-destructively.
  * Ensures cloud-empty never overwrites local-non-empty.
  */
-function mergeAppState(current: AppState, incoming: Partial<AppState>): AppState {
+export function mergeAppState(current: AppState, incoming: Partial<AppState>): AppState {
   const next = { ...current };
 
   // History: merge unique, sort, slice
