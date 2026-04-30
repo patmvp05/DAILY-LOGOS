@@ -110,7 +110,7 @@ function ProverbModal({
               <div className="prose dark:prose-invert max-w-none">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-evernote mb-8 flex items-center gap-2">
                   <Sparkles size={12} />
-                  {proverbContent?.translation_name || "King James Version (KJV)"}
+                  {proverbContent?.translation_name || "English Standard Version (ESV)"}
                 </p>
                 <div className="space-y-6 text-xl leading-relaxed text-gray-800 dark:text-gray-200 font-serif">
                   {proverbContent?.verses ? (
