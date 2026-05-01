@@ -33,7 +33,7 @@ interface NavbarProps {
   handleLogin: (redirect?: boolean) => void;
   logout: () => void;
   toggleTheme: () => void;
-  theme: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook';
+  theme: 'light' | 'dark' | 'system' | 'xp' | 'audible';
   setShowHistory: (val: boolean) => void;
   setShowSettings: (val: boolean) => void;
   startDate: string;
@@ -67,32 +67,17 @@ function NavbarComponent({
     )}>
       <div className="flex items-center gap-4 lg:gap-8">
         <div className="flex items-center gap-3">
-          <div className={cn(
-            "relative group p-1 rounded-sm",
-            theme === 'textbook' ? "bg-[#EDE3C5] border border-[#C8B48A]" : "bg-white dark:bg-zinc-800"
-          )}>
+          <div className="relative group bg-white dark:bg-zinc-800 p-1 rounded-sm">
             {theme === 'xp' ? (
-              <svg
-                width="32" height="32" viewBox="0 0 32 32" fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+              <svg 
+                width="32" height="32" viewBox="0 0 32 32" fill="none" 
+                xmlns="http://www.w3.org/2000/svg" 
                 className="relative transition-all duration-300"
               >
                 <rect x="2" y="2" width="13" height="13" fill="#F44336" rx="1" />
                 <rect x="17" y="2" width="13" height="13" fill="#4CAF50" rx="1" />
                 <rect x="2" y="17" width="13" height="13" fill="#0054E3" rx="1" />
                 <rect x="17" y="17" width="13" height="13" fill="#FFEB3B" rx="1" />
-              </svg>
-            ) : theme === 'textbook' ? (
-              /* Periodic-table element cell logo */
-              <svg
-                width="32" height="32" viewBox="0 0 32 32" fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="relative transition-all duration-300"
-              >
-                <rect x="0.5" y="0.5" width="31" height="31" rx="1.5" fill="#FAF5E4" stroke="#C8B48A" strokeWidth="1"/>
-                <text x="4" y="8" fontFamily="Georgia, serif" fontSize="5" fill="#8B5E3C" fontWeight="bold">1</text>
-                <text x="16" y="20" fontFamily="Georgia, serif" fontSize="13" fill="#2A1F0E" fontWeight="bold" textAnchor="middle">Λ</text>
-                <text x="16" y="29" fontFamily="Georgia, serif" fontSize="4.5" fill="#7A6045" textAnchor="middle" letterSpacing="0.5">LOGOS</text>
               </svg>
             ) : (
               <img
@@ -106,8 +91,7 @@ function NavbarComponent({
           </div>
           <span className={cn(
             "text-xl font-black tracking-tighter uppercase hidden sm:block",
-            theme === 'xp' && "font-serif normal-case italic text-white drop-shadow-md",
-            theme === 'textbook' && "font-serif normal-case tracking-wide text-[#2A1F0E]"
+            theme === 'xp' && "font-serif normal-case italic text-white drop-shadow-md"
           )}>
             The Daily Logos
           </span>
