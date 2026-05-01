@@ -46,10 +46,14 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
   }, []);
 
   useEffect(() => {
-    refresh();
+    let mounted = true;
+    const init = async () => {
+      if (mounted) await refresh();
+    };
+    init();
 
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === 'visible' && mounted) {
         refresh();
       }
     };

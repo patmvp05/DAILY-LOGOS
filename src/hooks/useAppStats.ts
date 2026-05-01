@@ -6,7 +6,7 @@
 import { useMemo } from 'react';
 import { format, differenceInDays, parseISO, subDays } from 'date-fns';
 import { AppState } from '../types';
-import { CATEGORIES, CATEGORIES_BY_ID } from '../constants';
+import { CATEGORIES } from '../constants';
 
 export function useAppStats(state: AppState) {
   const streak = useMemo(() => {

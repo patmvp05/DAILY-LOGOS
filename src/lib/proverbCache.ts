@@ -51,18 +51,38 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
   const timeoutId = setTimeout(() => controller.abort(), 10000);
 
   try {
-    const response = await fetch('/proverbs.json', { // Local ESV File
-      signal: controller.signal
-    });
+    let data: any = null;
+    try {
+      const response = await fetch('/proverbs.json', { // Local ESV File
+        signal: controller.signal
+      });
 
-    if (!response.ok) throw new Error(`Proverbs JSON fetch error: ${response.status}`);
-    const fullData = await response.json();
-    const chapterData = fullData[chapter.toString()];
-    
-    if (!chapterData) throw new Error(`Chapter ${chapter} not found in local proverbs.json`);
+      if (response.ok) {
+        const fullData = await response.json();
+        data = fullData[chapter.toString()];
+      }
+    } catch (e) {
+      console.warn("Local proverbs.json missing or failed, trying Bolls.life ESV API");
+    }
 
-    // Convert {"1": "text", "2": "text"} to [{ verse: 1, text: "text" }, ...]
-    const verses = Object.entries(chapterData).map(([v, text]) => ({
+    if (!data) {
+      // Fallback to Bolls.life ESV API as per updated instructions
+      const response = await fetch(`https://bolls.life/get-chapter/ESV/20/${chapter}/`, {
+        signal: controller.signal
+      });
+      if (!response.ok) throw new Error(`Proverbs API fetch error: ${response.status}`);
+      const apiData = await response.json();
+      if (!Array.isArray(apiData)) throw new Error("Invalid API response format");
+      
+      // Convert Bolls format [{ verse: 1, text: "..." }] to map for consistent processing
+      const map: Record<string, string> = {};
+      apiData.forEach((v: any) => { map[v.verse.toString()] = v.text; });
+      data = map;
+    }
+
+    if (!data) throw new Error(`Chapter ${chapter} not found`);
+
+    const verses = Object.entries(data as Record<string, string>).map(([v, text]) => ({
       verse: parseInt(v),
       text: (text as string).trim()
     })).sort((a, b) => a.verse - b.verse);

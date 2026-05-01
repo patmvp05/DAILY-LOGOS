@@ -11,16 +11,21 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@eslint/js": "^10.0.1",
     "@fontsource-variable/inter": "^5.2.8",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
     "firebase": "^12.12.1",
+    "globals": "^17.5.0",
     "idb-keyval": "^6.2.1",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "typescript-eslint": "^8.59.1"
   },
   "devDependencies": {
     "@firebase/eslint-plugin-security-rules": "^0.0.2",

@@ -21,7 +21,6 @@ import { useAuth } from './hooks/useAuth';
 import { useTheme } from './hooks/useTheme';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useScrollLock } from './hooks/useScrollLock';
-import { useDebounce } from './hooks/useDebounce';
 import { useReadingActions } from './hooks/useReadingActions';
 import { useAppStats } from './hooks/useAppStats';
 import { useSyncState } from './hooks/useSyncState';
@@ -96,7 +95,7 @@ export default function App() {
     }
   }, [needRefresh, showToast, updateServiceWorker, setNeedRefresh]);
 
-  const handleLoginLocal = useCallback(async (useRedirect = false) => {
+  const handleLoginLocal = useCallback(async function loginFn(useRedirect = false) {
     setIsSigningIn(true);
     try { await login(useRedirect); } 
     catch (error: any) {
@@ -104,7 +103,7 @@ export default function App() {
         showToast("Popup blocked! Try alternative login.", "error");
         setConfirmDialog({
           isOpen: true, title: "Alternative Login", message: "The sign-in window was blocked. Try redirect mode?",
-          onConfirm: () => handleLoginLocal(true)
+          onConfirm: () => loginFn(true)
         });
       } else showToast(`Login failed: ${error.message || 'Check your connection'}`, "error");
     } finally { setIsSigningIn(false); }
