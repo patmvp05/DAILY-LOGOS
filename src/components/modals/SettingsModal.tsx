@@ -5,25 +5,24 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import {
-  Settings as SettingsIcon,
-  Check,
-  Sun,
-  Moon,
-  Monitor,
-  Calendar,
-  RefreshCw,
-  Cloud,
-  RotateCcw,
-  Download,
-  Trash2,
-  FileText,
-  LogOut,
+import { 
+  Settings as SettingsIcon, 
+  Check, 
+  Sun, 
+  Moon, 
+  Monitor, 
+  Calendar, 
+  RefreshCw, 
+  Cloud, 
+  RotateCcw, 
+  Download, 
+  Trash2, 
+  FileText, 
+  LogOut, 
   User as UserIcon,
   LogIn,
   ChevronRight,
-  Headphones,
-  BookOpen
+  Headphones
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '../../lib/utils';
@@ -184,7 +183,6 @@ interface SettingsModalProps {
                     { id: 'system', name: 'System', Icon: Monitor },
                     { id: 'audible', name: 'Audible', Icon: Headphones },
                     { id: 'xp', name: 'XP', Icon: Monitor },
-                    { id: 'textbook', name: 'Textbook', Icon: BookOpen },
                   ].map(({ id, name, Icon }) => (
                     <button
                       key={id}
@@ -197,11 +195,10 @@ interface SettingsModalProps {
                       }}
                       className={cn(
                         "flex flex-col items-center gap-2 p-4 border rounded-xl transition-all",
-                        state.settings.theme === id
-                          ? "border-evernote bg-evernote/[0.03] text-evernote shadow-sm"
+                        state.settings.theme === id 
+                          ? "border-evernote bg-evernote/[0.03] text-evernote shadow-sm" 
                           : "border-[var(--audible-border)] text-zinc-400 dark:text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700",
-                        id === 'xp' && state.settings.theme === 'xp' ? "border-[#0054E3] bg-[#ECE9D8] text-[#0054E3]" : "",
-                        id === 'textbook' && state.settings.theme === 'textbook' ? "border-[#8B5E3C] bg-[#FAF5E4] text-[#8B5E3C]" : ""
+                        id === 'xp' && state.settings.theme === 'xp' ? "border-[#0054E3] bg-[#ECE9D8] text-[#0054E3]" : ""
                       )}
                     >
                       <Icon size={18} />

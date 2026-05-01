@@ -60,7 +60,7 @@ export default function App() {
   const todayReadingStats = useMemo(() => {
     const todayKey = format(new Date(), 'yyyy-MM-dd');
     const todayEntries = state.history.filter(
-      h => format(new Date(h.timestamp), 'yyyy-MM-dd') === todayKey
+      h => h.timestamp.split('T')[0] === todayKey
     );
     const minutes = todayEntries.reduce((sum, h) => {
       const perCh = BOOK_READ_MINUTES[h.bookName] ?? DEFAULT_BOOK_MINUTES;
