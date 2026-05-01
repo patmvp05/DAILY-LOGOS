@@ -46,7 +46,7 @@ service cloud.firestore {
     function isValidHistory(data) {
       return data.keys().hasAll(['timestamp', 'timestampMillis', 'categoryId', 'categoryName', 'bookName', 'chapter']) &&
              data.timestamp is string &&
-             data.timestampMillis is number &&
+             data.timestampMillis is int &&
              data.categoryId is string &&
              data.categoryName is string &&
              data.bookName is string &&
