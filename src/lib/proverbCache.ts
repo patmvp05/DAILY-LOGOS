@@ -66,24 +66,32 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
     }
 
     if (!data) {
-      // Fallback to Bolls.life ESV API as per updated instructions
-      // Try ESV first, then KJV if ESV fails
+      // Fallback to Bolls.life API
+      // Try both with and without trailing slash as some environments vary
       for (const trans of ['ESV', 'KJV']) {
-        try {
-          const response = await fetch(`https://bolls.life/get-chapter/${trans}/20/${chapter}`, { // No trailing slash
-            signal: controller.signal
-          });
-          if (response.ok) {
-            const apiData = await response.json();
-            if (Array.isArray(apiData)) {
-              const map: Record<string, string> = {};
-              apiData.forEach((v: any) => { map[v.verse.toString()] = v.text; });
-              data = map;
-              break; 
+        if (data) break;
+        const urls = [
+          `https://bolls.life/get-chapter/${trans}/20/${chapter}`,
+          `https://bolls.life/get-chapter/${trans}/20/${chapter}/`
+        ];
+        
+        for (const url of urls) {
+          try {
+            const response = await fetch(url, {
+              signal: controller.signal
+            });
+            if (response.ok) {
+              const apiData = await response.json();
+              if (Array.isArray(apiData) && apiData.length > 0) {
+                const map: Record<string, string> = {};
+                apiData.forEach((v: any) => { map[v.verse.toString()] = v.text; });
+                data = map;
+                break; 
+              }
             }
+          } catch (e) {
+            console.warn(`Bolls.life fetch failed for ${url}`, e);
           }
-        } catch (e) {
-          console.warn(`Bolls.life ${trans} fetch failed`, e);
         }
       }
     }

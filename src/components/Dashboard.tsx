@@ -33,6 +33,8 @@ interface DashboardProps {
   dayNumber: number;
   streak: number;
   overallProgress: number;
+  totalRead: number;
+  totalChaptersCount: number;
   lastReadProgress: Progress | undefined;
   proverbSnippet: string | null;
   dayOfMonth: number;
@@ -54,6 +56,8 @@ function DashboardComponent({
   todayReadingStats,
   streak,
   overallProgress,
+  totalRead,
+  totalChaptersCount,
   lastReadProgress,
   proverbSnippet,
   dayOfMonth,
@@ -84,8 +88,9 @@ function DashboardComponent({
       for (let i = 0; i < cat.books.length; i++) {
         const book = cat.books[i];
         const isCompletedManually = state.completedBooks.has(`${cat.id}:${book.name}`);
+        const isPastBook = i < prog.bookIndex;
         
-        if (isCompletedManually) {
+        if (isCompletedManually || isPastBook) {
           chaptersRead += book.chapters;
         } else if (i === prog.bookIndex) {
           chaptersRead += Math.max(0, prog.chapter - 1);
@@ -253,15 +258,7 @@ function DashboardComponent({
                 <h2 className="text-5xl font-black tracking-tighter">{streak}</h2>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-black uppercase tracking-widest text-evernote animate-pulse">Day Streak</span>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    {state.history.some(entry => isSameDay(parseISO(entry.timestamp), new Date())) ? (
-                      <span className="flex items-center gap-1 text-[8px] font-black text-evernote uppercase">
-                        <Check size={10} className="stroke-[4]" /> Read Today
-                      </span>
-                    ) : (
-                      <span className="text-[8px] font-black text-zinc-400 uppercase">Not read today</span>
-                    )}
-                  </div>
+                  <span className="text-[9px] font-bold text-[var(--audible-text-secondary)] uppercase tracking-[0.12em] italic opacity-70 leading-none">Consistent Growth</span>
                 </div>
               </div>
               
@@ -350,7 +347,12 @@ function DashboardComponent({
 
                 <div className="flex justify-between items-end">
                   <span className="text-[10px] font-black uppercase tracking-[0.12em] text-[var(--audible-text-secondary)]">Overall Progress</span>
-                  <span className="text-sm font-black text-[var(--audible-text-primary)] tabular-nums">{overallProgress}%</span>
+                  <div className="text-right">
+                    <span className="text-sm font-black text-[var(--audible-text-primary)] tabular-nums block leading-none">{overallProgress}%</span>
+                    <span className="text-[9px] font-bold text-[var(--audible-text-secondary)] uppercase tracking-tighter opacity-50 tabular-nums">
+                      {totalRead} / {totalChaptersCount} Chapters
+                    </span>
+                  </div>
                 </div>
                 <div 
                   className={cn(

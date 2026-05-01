@@ -52,10 +52,10 @@ export default function App() {
 
   const { syncStatus, lastSyncTime, showSyncCheck } = useSyncState(user, dispatch);
   const { proverbSnippet, proverbContent, isFetchingProverb } = useProverb(dayOfMonth);
-  const { streak, dayNumber, overallProgress, lastReadProgress } = useAppStats(state);
+  const { streak, dayNumber, overallProgress, totalRead, totalChaptersCount, lastReadProgress } = useAppStats(state);
   const { advanceChapter } = useReadingActions(state, dispatch, user);
   const prefersDark = usePrefersDark();
-
+  
   const todayReadingStats = useMemo(() => {
     const todayKey = format(new Date(), 'yyyy-MM-dd');
     const todayEntries = state.history.filter(
@@ -146,7 +146,7 @@ export default function App() {
     <div className={cn("min-h-[100dvh] transition-colors duration-300", state.settings.theme === 'xp' ? "theme-xp" : "bg-[var(--audible-bg)] text-[var(--audible-text-primary)]", state.settings.theme === 'dark' && "dark", state.settings.theme === 'audible' && "audible", (state.settings.theme === 'audible' || state.settings.theme === 'system') && prefersDark && "dark")}>
       <Navbar user={user} syncStatus={syncStatus} lastSyncTime={lastSyncTime} showSyncCheck={showSyncCheck} handleLogin={handleLoginLocal} logout={logout} toggleTheme={toggleTheme} theme={state.settings.theme} setShowHistory={setShowHistory} setShowSettings={setShowSettings} startDate={state.settings.startDate} isDeveloper={user?.email === 'patmvp05@gmail.com'} isSigningIn={isSigningIn} isAuthLoading={isAuthLoading} />
       <main className="pt-20 pb-20">
-        <Dashboard todayReadingStats={todayReadingStats} dayNumber={dayNumber} streak={streak} overallProgress={overallProgress} lastReadProgress={lastReadProgress} proverbSnippet={proverbSnippet} dayOfMonth={dayOfMonth} state={state} syncStatus={syncStatus} user={user} isAuthLoading={isAuthLoading} isSigningIn={isSigningIn} handleLogin={handleLoginLocal} advanceChapter={advanceChapter} setActivePlanCategory={setActivePlanCategory} setSelectingCategoryId={setSelectingCategoryId} setActiveDevotion={setActiveDevotion} setShowProverbModal={handleShowProverbModal} />
+        <Dashboard todayReadingStats={todayReadingStats} dayNumber={dayNumber} streak={streak} overallProgress={overallProgress} totalRead={totalRead} totalChaptersCount={totalChaptersCount} lastReadProgress={lastReadProgress} proverbSnippet={proverbSnippet} dayOfMonth={dayOfMonth} state={state} syncStatus={syncStatus} user={user} isAuthLoading={isAuthLoading} isSigningIn={isSigningIn} handleLogin={handleLoginLocal} advanceChapter={advanceChapter} setActivePlanCategory={setActivePlanCategory} setSelectingCategoryId={setSelectingCategoryId} setActiveDevotion={setActiveDevotion} setShowProverbModal={handleShowProverbModal} />
       </main>
       <AppModals syncStatus={syncStatus} lastSyncTime={lastSyncTime} showSyncCheck={showSyncCheck} isSigningIn={isSigningIn} proverbContent={proverbContent} isFetchingProverb={isFetchingProverb} dayOfMonth={dayOfMonth} />
       <ConfirmDialog isOpen={confirmDialog.isOpen} title={confirmDialog.title} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onClose={closeConfirmDialog} />

@@ -33,29 +33,28 @@ export function useAppStats(state: AppState) {
 
   const totalChaptersCount = useMemo(() => CATEGORIES.reduce((acc, cat) => acc + cat.books.reduce((bAcc, b) => bAcc + b.chapters, 0), 0), []);
 
-  const overallProgress = useMemo(() => {
-    let totalRead = 0;
-    
-    // We count chapters read across all disjoint categories
+  const totalRead = useMemo(() => {
+    let count = 0;
     CATEGORIES.forEach(cat => {
       const p = state.progress.find(prog => prog.categoryId === cat.id);
-      
       cat.books.forEach((book, idx) => {
         const isCompleted = state.completedBooks.has(`${cat.id}:${book.name}`);
-        
-        if (isCompleted) {
-          totalRead += book.chapters;
+        const isPastBook = p && idx < p.bookIndex;
+        if (isCompleted || isPastBook) {
+          count += book.chapters;
         } else if (p && idx === p.bookIndex) {
-          // If NOT completed, we add what's read so far in the current book
-          totalRead += Math.max(0, p.chapter - 1);
+          count += Math.max(0, p.chapter - 1);
         }
-        // Note: we don't count books BEFORE bookIndex as "auto-completed" anymore
-        // unless they are explicitly in completedBooks.
       });
     });
+    return count;
+  }, [state.progress, state.completedBooks]);
 
-    return Math.min(100, Math.round((totalRead / totalChaptersCount) * 100));
-  }, [state.progress, state.completedBooks, totalChaptersCount]);
+  const overallProgress = useMemo(() => {
+    // Provide 1 decimal place of precision so the user sees it moving more frequently
+    const pct = (totalRead / totalChaptersCount) * 100;
+    return Math.min(100, Math.round(pct * 10) / 10);
+  }, [totalRead, totalChaptersCount]);
 
   const lastReadProgress = useMemo(() => {
     return [...state.progress]
@@ -67,6 +66,8 @@ export function useAppStats(state: AppState) {
     streak,
     dayNumber,
     overallProgress,
+    totalRead,
+    totalChaptersCount,
     lastReadProgress
   };
 }
