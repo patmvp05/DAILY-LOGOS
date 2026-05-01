@@ -67,17 +67,25 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
 
     if (!data) {
       // Fallback to Bolls.life ESV API as per updated instructions
-      const response = await fetch(`https://bolls.life/get-chapter/ESV/20/${chapter}/`, {
-        signal: controller.signal
-      });
-      if (!response.ok) throw new Error(`Proverbs API fetch error: ${response.status}`);
-      const apiData = await response.json();
-      if (!Array.isArray(apiData)) throw new Error("Invalid API response format");
-      
-      // Convert Bolls format [{ verse: 1, text: "..." }] to map for consistent processing
-      const map: Record<string, string> = {};
-      apiData.forEach((v: any) => { map[v.verse.toString()] = v.text; });
-      data = map;
+      // Try ESV first, then KJV if ESV fails
+      for (const trans of ['ESV', 'KJV']) {
+        try {
+          const response = await fetch(`https://bolls.life/get-chapter/${trans}/20/${chapter}`, { // No trailing slash
+            signal: controller.signal
+          });
+          if (response.ok) {
+            const apiData = await response.json();
+            if (Array.isArray(apiData)) {
+              const map: Record<string, string> = {};
+              apiData.forEach((v: any) => { map[v.verse.toString()] = v.text; });
+              data = map;
+              break; 
+            }
+          }
+        } catch (e) {
+          console.warn(`Bolls.life ${trans} fetch failed`, e);
+        }
+      }
     }
 
     if (!data) throw new Error(`Chapter ${chapter} not found`);

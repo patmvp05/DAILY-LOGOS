@@ -85,18 +85,10 @@ function DashboardComponent({
         const book = cat.books[i];
         const isCompletedManually = state.completedBooks.has(`${cat.id}:${book.name}`);
         
-        if (i < prog.bookIndex) {
+        if (isCompletedManually) {
           chaptersRead += book.chapters;
         } else if (i === prog.bookIndex) {
-          if (isCompletedManually) {
-            chaptersRead += book.chapters;
-          } else {
-            chaptersRead += (prog.chapter - 1);
-          }
-        } else {
-          if (isCompletedManually) {
-            chaptersRead += book.chapters;
-          }
+          chaptersRead += Math.max(0, prog.chapter - 1);
         }
       }
 
@@ -261,7 +253,15 @@ function DashboardComponent({
                 <h2 className="text-5xl font-black tracking-tighter">{streak}</h2>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-black uppercase tracking-widest text-evernote animate-pulse">Day Streak</span>
-                  <span className="text-[9px] font-bold text-[var(--audible-text-secondary)] uppercase tracking-[0.12em] italic opacity-70 leading-none">Consistent Growth</span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    {state.history.some(entry => isSameDay(parseISO(entry.timestamp), new Date())) ? (
+                      <span className="flex items-center gap-1 text-[8px] font-black text-evernote uppercase">
+                        <Check size={10} className="stroke-[4]" /> Read Today
+                      </span>
+                    ) : (
+                      <span className="text-[8px] font-black text-zinc-400 uppercase">Not read today</span>
+                    )}
+                  </div>
                 </div>
               </div>
               
