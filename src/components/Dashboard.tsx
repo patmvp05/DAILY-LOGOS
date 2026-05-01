@@ -185,9 +185,7 @@ function DashboardComponent({
                 <div className="flex items-center gap-5">
                   <div className={cn(
                     "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105 active:scale-95",
-                    state.settings.theme === 'xp' ? "bg-blue-600 text-white shadow-inner"
-                    : state.settings.theme === 'textbook' ? "bg-[#8B4513] text-[#FAF3E3] shadow-[0_0_8px_rgba(139,69,19,0.3)]"
-                    : "bg-evernote text-white shadow-[0_0_8px_rgba(0,168,45,0.3)] dark:shadow-[0_0_12px_rgba(0,168,45,0.2)]"
+                    state.settings.theme === 'xp' ? "bg-blue-600 text-white shadow-inner" : "bg-evernote text-white shadow-[0_0_8px_rgba(0,168,45,0.3)] dark:shadow-[0_0_12px_rgba(0,168,45,0.2)]"
                   )}>
                     <Play size={24} fill="currentColor" />
                   </div>
@@ -453,14 +451,9 @@ function DashboardComponent({
                 key={cat.id}
                 className={cn(
                   "relative p-8 h-56 border flex flex-col justify-between group transition-all duration-300 rounded-xl overflow-hidden",
-                  state.settings.theme === 'xp' ? "uber-card"
-                  : state.settings.theme === 'textbook' ? (
-                    bookIsCompleted
-                      ? "bg-[#8B4513] text-[#FAF3E3] border-[#6B3410] shadow-[0_0_20px_-10px_rgba(139,69,19,0.5)]"
-                      : "bg-[var(--audible-card)] border-[var(--audible-border)] hover:border-[#8B4513] hover:translate-y-[-2px] shadow-sm hover:shadow-md tb-element-cell"
-                  ) : (
-                    bookIsCompleted
-                      ? "bg-evernote text-white border-evernote shadow-[0_0_20px_-10px_rgba(0,168,45,0.6)]"
+                  state.settings.theme === 'xp' ? "uber-card" : (
+                    bookIsCompleted 
+                      ? "bg-evernote text-white border-evernote shadow-[0_0_20px_-10px_rgba(0,168,45,0.6)]" 
                       : "bg-[var(--audible-card)] border-[var(--audible-border)] hover:border-evernote hover:translate-y-[-2px] shadow-sm hover:shadow-md"
                   )
                 )}
@@ -472,9 +465,7 @@ function DashboardComponent({
                   {!bookIsCompleted && state.settings.theme !== 'xp' && (
                     <div className={cn(
                       "absolute top-0 -left-8 w-1 h-full transition-all",
-                      state.settings.theme === 'textbook'
-                        ? (isDone ? "bg-[#8B4513]" : "bg-[#8B4513] opacity-0 group-hover:opacity-100")
-                        : (isDone || bookIsCompleted) ? "bg-evernote" : "bg-evernote opacity-0 group-hover:opacity-100"
+                      (isDone || bookIsCompleted) ? "bg-evernote" : "bg-evernote opacity-0 group-hover:opacity-100"
                     )} />
                   )}
 
@@ -487,10 +478,7 @@ function DashboardComponent({
                     </span>
 
                     {!isDone && !bookIsCompleted && (
-                      <span className={cn(
-                        "text-[8px] font-black uppercase animate-pulse tracking-[0.12em] block leading-none",
-                        state.settings.theme === 'textbook' ? "text-[#8B4513]" : "text-evernote"
-                      )}>
+                      <span className="text-[8px] font-black uppercase text-evernote animate-pulse tracking-[0.12em] block leading-none">
                         Next to Read
                       </span>
                     )}
@@ -575,25 +563,21 @@ function DashboardComponent({
                               </span>
                             </div>
                             <div 
-                              role="progressbar"
-                              aria-valuenow={safePct}
-                              aria-valuemin={0}
-                              aria-valuemax={100}
+                              role="progressbar" 
+                              aria-valuenow={safePct} 
+                              aria-valuemin={0} 
+                              aria-valuemax={100} 
                               aria-label={`${cat.name} reading progress`}
                               className={cn(
                                 "relative w-full h-[6px] rounded-full overflow-hidden",
-                                state.settings.theme === 'xp' ? "bg-[#D4D0C8] border border-[#919B9C] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.2)]"
-                                : state.settings.theme === 'textbook' ? (bookIsCompleted ? "bg-[#FAF3E3]/20" : "bg-[#C8A97D]/40")
-                                : bookIsCompleted ? "bg-white/20" : "bg-zinc-200 dark:bg-zinc-800"
+                                state.settings.theme === 'xp' ? "bg-[#D4D0C8] border border-[#919B9C] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.2)]" : bookIsCompleted ? "bg-white/20" : "bg-zinc-200 dark:bg-zinc-800"
                               )}
                             >
-                              <div
+                              <div 
                                 className={cn(
                                   "h-full rounded-full transition-all duration-500 ease-out",
-                                  state.settings.theme === 'xp' ? "bg-[#316AC5]"
-                                  : state.settings.theme === 'textbook' ? (bookIsCompleted ? "bg-[#FAF3E3]" : "bg-[#8B4513]")
-                                  : bookIsCompleted ? "bg-white" : "bg-evernote",
-                                  safePct < 100 && state.settings.theme !== 'xp' && state.settings.theme !== 'textbook' && !bookIsCompleted && "shimmer-effect"
+                                  state.settings.theme === 'xp' ? "bg-[#316AC5]" : bookIsCompleted ? "bg-white" : "bg-evernote",
+                                  safePct < 100 && state.settings.theme !== 'xp' && !bookIsCompleted && "shimmer-effect"
                                 )}
                                 style={{ width: `${safePct}%` }}
                               />
