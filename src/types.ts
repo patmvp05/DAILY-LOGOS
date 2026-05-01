@@ -14,7 +14,7 @@ export interface Progress {
 export interface UserSettings {
   startDate: string; // ISO string
   userName?: string;
-  theme: 'light' | 'dark' | 'system' | 'xp' | 'audible';
+  theme: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook';
 }
 
 export interface HistoryEntry {
