@@ -67,11 +67,11 @@ function NavbarComponent({
     )}>
       <div className="flex items-center gap-4 lg:gap-8">
         <div className="flex items-center gap-3">
-          <div className="relative group bg-white dark:bg-zinc-800 p-1 rounded-sm">
+          <div className="relative group">
             {theme === 'xp' ? (
-              <svg 
-                width="32" height="32" viewBox="0 0 32 32" fill="none" 
-                xmlns="http://www.w3.org/2000/svg" 
+              <svg
+                width="40" height="40" viewBox="0 0 32 32" fill="none"
+                xmlns="http://www.w3.org/2000/svg"
                 className="relative transition-all duration-300"
               >
                 <rect x="2" y="2" width="13" height="13" fill="#F44336" rx="1" />
@@ -83,9 +83,9 @@ function NavbarComponent({
               <img
                 src="/icons/logo.svg"
                 alt="The Daily Logos"
-                width={32}
-                height={32}
-                className="relative w-8 h-8 transition-all duration-300"
+                width={44}
+                height={44}
+                className="relative w-11 h-11 transition-all duration-300 drop-shadow-sm"
               />
             )}
           </div>
