@@ -23,7 +23,7 @@ import {
 import { format, parseISO, isToday, subDays, isSameDay } from 'date-fns';
 import { CATEGORIES, CATEGORIES_BY_ID } from '../constants';
 import { AppState, Progress, HistoryEntry } from '../types';
-import { cn } from '../lib/utils';
+import { cn, computeProgressStats } from '../lib/utils';
 import { XpWindowHeader } from './XpWindowHeader';
 
 import { getChapterInfo } from '../lib/bibleCache';
@@ -75,55 +75,47 @@ function DashboardComponent({
 }: DashboardProps) {
   const [chapterInfos, setChapterInfos] = useState<Record<string, { firstVerse: string, readTime: number }>>({});
 
-  const catProgress = useMemo(() => {
-    const results: Record<string, { pct: number, chaptersRead: number, totalChapters: number }> = {};
-    CATEGORIES.forEach(cat => {
-      const prog = state.progress.find(p => p.categoryId === cat.id);
-      if (!prog) return;
-
-      const totalChapters = cat.books.reduce((sum, b) => sum + b.chapters, 0);
-      if (totalChapters === 0) return;
-
-      let chaptersRead = 0;
-      for (let i = 0; i < cat.books.length; i++) {
-        const book = cat.books[i];
-        const isCompletedManually = state.completedBooks.has(`${cat.id}:${book.name}`);
-        const isPastBook = i < prog.bookIndex;
-        
-        if (isCompletedManually || isPastBook) {
-          chaptersRead += book.chapters;
-        } else if (i === prog.bookIndex) {
-          chaptersRead += Math.max(0, prog.chapter - 1);
-        }
-      }
-
-      const pct = Math.min(Math.round((chaptersRead / totalChapters) * 100), 100);
-      results[cat.id] = { pct, chaptersRead, totalChapters };
-    });
-    return results;
-  }, [state.progress, state.completedBooks]);
+  const { catProgress } = useMemo(() => 
+    computeProgressStats(state.progress, state.completedBooks),
+  [state.progress, state.completedBooks]);
 
   useEffect(() => {
     let active = true;
     
     async function loadInfos() {
-      for (const prog of state.progress) {
-        if (!active) break;
-        const category = CATEGORIES_BY_ID.get(prog.categoryId);
-        if (!category) continue;
-        const book = category.books[prog.bookIndex];
-        const key = `${prog.categoryId}:${prog.bookIndex}:${prog.chapter}`;
-        
-        if (!chapterInfos[key]) {
-          try {
-            const info = await getChapterInfo(book.name, prog.chapter);
-            if (active) {
-              setChapterInfos(prev => ({ ...prev, [key]: info }));
-            }
-          } catch (e) {
-            console.error("Failed to fetch chapter info", e);
-          }
+      // 1. Identify which chapters need fetching (not already in chapterInfos)
+      const tasks = state.progress
+        .map(prog => {
+          const category = CATEGORIES_BY_ID.get(prog.categoryId);
+          if (!category) return null;
+          const book = category.books[prog.bookIndex];
+          const key = `${prog.categoryId}:${prog.bookIndex}:${prog.chapter}`;
+          if (chapterInfos[key]) return null;
+          return { key, bookName: book.name, chapter: prog.chapter };
+        })
+        .filter((t): t is { key: string, bookName: string, chapter: number } => t !== null);
+
+      if (tasks.length === 0) return;
+
+      try {
+        // 2. Fetch all missing chapter infos in parallel
+        const results = await Promise.all(
+          tasks.map(async (task) => {
+            const info = await getChapterInfo(task.bookName, task.chapter);
+            return { key: task.key, info };
+          })
+        );
+
+        // 3. Batch update the state once to avoid multiple re-renders
+        if (active) {
+          const updates: Record<string, { firstVerse: string, readTime: number }> = {};
+          results.forEach(res => {
+            updates[res.key] = res.info;
+          });
+          setChapterInfos(prev => ({ ...prev, ...updates }));
         }
+      } catch (e) {
+        console.error("Failed to fetch chapter infos in parallel", e);
       }
     }
 
@@ -166,6 +158,18 @@ function DashboardComponent({
                     <span className="flex items-center gap-1 text-[9px] text-evernote font-black uppercase animate-pulse">
                       <Cloud size={10} />
                       Syncing...
+                    </span>
+                  )}
+                  {syncStatus === 'offline' && (
+                    <span className="flex items-center gap-1 text-[9px] text-zinc-400 font-black uppercase">
+                      <Cloud size={10} className="text-zinc-400" />
+                      Offline Mode
+                    </span>
+                  )}
+                  {syncStatus === 'error' && (
+                    <span className="flex items-center gap-1 text-[9px] text-red-500 font-black uppercase">
+                      <Cloud size={10} className="text-red-500" />
+                      Sync Error
                     </span>
                   )}
                 </div>

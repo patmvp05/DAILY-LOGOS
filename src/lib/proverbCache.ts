@@ -11,43 +11,77 @@ interface ProverbResponse {
   text: string;
   translation_id: string;
   translation_name: string;
+  _cachedAt?: number;
 }
 
-const CACHE_PREFIX = 'proverb_cache_v9_';
+const CACHE_PREFIX = 'proverb_cache_v11_';
+
+// L1 Cache (In-Memory) to avoid repeated localStorage hits and re-parsing
+const memoryCache = new Map<number, ProverbResponse>();
+let hasPruned = false;
+
+/**
+ * Background task to prune old cache versions without blocking the main thread.
+ */
+const lazyPrune = () => {
+  if (hasPruned) return;
+  hasPruned = true;
+  
+  setTimeout(() => {
+    try {
+      // Use backward iteration for safe removal while looping
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key?.startsWith('proverb_cache_') && !key.startsWith(CACHE_PREFIX)) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch (e) {
+      console.warn("Background cache pruning failed");
+    }
+  }, 0);
+};
+
+export async function prefetchProverbs() {
+  const day = new Date().getDate();
+  const days = [
+    day === 1 ? 31 : day - 1,
+    day,
+    day === 31 ? 1 : day + 1
+  ];
+  
+  for (const d of days) {
+    try {
+      await getProverb(d);
+    } catch (e) {
+      // Ignore prefetch failures
+    }
+  }
+}
 
 export async function getProverb(chapter: number): Promise<ProverbResponse> {
-  const translation = 'ESV'; // ALWAYS use ESV for Daily Proverbs (local JSON)
-  const today = new Date().toISOString().split('T')[0];
-  const cacheKey = `${CACHE_PREFIX}${translation}_${chapter}_${today}`;
-  
-  // Check cache
-  let cached = null;
-  try {
-    cached = localStorage.getItem(cacheKey);
-  } catch (e) {
-    console.warn("localStorage access denied in proverbCache");
-  }
-  
-  if (cached) {
-    try {
-      return JSON.parse(cached);
-    } catch (e) {
-      try { localStorage.removeItem(cacheKey); } catch(_) {}
-    }
-  }
+  // 1. Check L1 Cache (Memory) - Fastest
+  const memCached = memoryCache.get(chapter);
+  if (memCached) return memCached;
 
-  // Prune old caches
+  const translation = 'ESV'; 
+  const cacheKey = `${CACHE_PREFIX}${translation}_${chapter}`;
+  
+  // 2. Check L2 Cache (localStorage) - Permanent key (no daily expiry)
   try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith(CACHE_PREFIX) && !key.includes(`_${today}`)) {
-        localStorage.removeItem(key);
-      }
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      memoryCache.set(chapter, parsed);
+      
+      // Lazily prune on successful cache hit if not already done
+      lazyPrune();
+      return parsed;
     }
   } catch (e) {
-    console.warn("localStorage pruning failed");
+    // Continue To Fetch
   }
-
+  
   // Fetch with timeout
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -108,14 +142,20 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
       verses,
       text: verses.map(v => v.text).join(' '),
       translation_id: data.trans.toLowerCase(),
-      translation_name: data.trans.includes('ESV') ? 'English Standard Version' : 'King James Version'
+      translation_name: data.trans.includes('ESV') ? 'English Standard Version' : 'King James Version',
+      _cachedAt: Date.now()
     };
 
+    // Update both caches
+    memoryCache.set(chapter, result);
     try {
       localStorage.setItem(cacheKey, JSON.stringify(result));
+      // Trigger lazy pruning after a successful write
+      lazyPrune();
     } catch (e) {
       console.warn("Failed to cache proverb likely due to Private Mode");
     }
+    
     return result;
   } finally {
     clearTimeout(timeoutId);

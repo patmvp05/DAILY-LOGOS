@@ -13,11 +13,18 @@ interface ChapterInfo {
   readTime: number;
 }
 
+// L1 Cache (In-Memory) to avoid repeated localStorage hits and JSON parsing
+const memoryCache = new Map<string, ChapterInfo>();
+
 export async function getChapterInfo(bookName: string, chapter: number): Promise<ChapterInfo> {
   const translation = 'KJV';
   const cacheKey = `${CACHE_PREFIX}${translation}_${bookName}_${chapter}`;
   
-  // Check cache
+  // 1. Check L1 Cache first (Memory)
+  const memCached = memoryCache.get(cacheKey);
+  if (memCached) return memCached;
+
+  // 2. Check L2 Cache (localStorage)
   let cached = null;
   try {
     cached = localStorage.getItem(cacheKey);
@@ -27,7 +34,9 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
   
   if (cached) {
     try {
-      return JSON.parse(cached);
+      const parsed = JSON.parse(cached);
+      memoryCache.set(cacheKey, parsed);
+      return parsed;
     } catch (e) {
       try { localStorage.removeItem(cacheKey); } catch(_) {}
     }
@@ -95,6 +104,8 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
       readTime
     };
 
+    // 3. Update both caches
+    memoryCache.set(cacheKey, result);
     try {
       localStorage.setItem(cacheKey, JSON.stringify(result));
     } catch (e) {

@@ -103,29 +103,47 @@ export const loadStateAsync = async (): Promise<Partial<AppState> | null> => {
   return null;
 };
 
-export const saveState = async (state: AppState) => {
-  try {
-    const toSave = {
-      ...state,
-      completedBooks: Array.from(state.completedBooks)
-    };
-    const json = JSON.stringify(toSave);
-    
-    // Write to both
-    localStorage.setItem(STORAGE_KEY, json);
-    await set(STORAGE_KEY, toSave).catch(e => console.warn("IDB write failed:", e));
+let lastSavedJson = '';
+let lastSnapshotLength = 0;
 
-    // History snapshot safety net
-    if (state.history && state.history.length > 0) {
-      const snapshot = {
-        data: state.history,
-        timestamp: Date.now()
-      };
-      await set(SNAPSHOT_KEY, snapshot).catch(() => {});
-    }
-  } catch (error) {
-    console.error("Storage save failed:", error);
-  }
+export const saveState = async (state: AppState) => {
+  // Move processing off the immediate render cycle to avoid blocking the main thread
+  return new Promise<void>((resolve) => {
+    setTimeout(async () => {
+      try {
+        const toSave = {
+          ...state,
+          completedBooks: Array.from(state.completedBooks)
+        };
+        const json = JSON.stringify(toSave);
+        
+        // Skip write if nothing changed
+        if (json === lastSavedJson) {
+          resolve();
+          return;
+        }
+        lastSavedJson = json;
+
+        // Write to both
+        localStorage.setItem(STORAGE_KEY, json);
+        await set(STORAGE_KEY, toSave).catch(e => console.warn("IDB write failed:", e));
+
+        // History snapshot safety net - skip if length hasn't changed
+        if (state.history && state.history.length > 0 && state.history.length !== lastSnapshotLength) {
+          lastSnapshotLength = state.history.length;
+          const snapshot = {
+            data: state.history,
+            timestamp: Date.now()
+          };
+          await set(SNAPSHOT_KEY, snapshot).catch(() => {});
+        }
+        resolve();
+      } catch (error) {
+        console.error("Storage save failed:", error);
+        resolve();
+      }
+    }, 0);
+  });
 };
 
 export const loadHistorySnapshot = async (): Promise<{ data: HistoryEntry[], timestamp: number } | null> => {

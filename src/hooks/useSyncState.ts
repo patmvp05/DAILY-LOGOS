@@ -8,7 +8,7 @@ import { syncTracker } from '../lib/sync';
 import { useFirestoreSync } from './useFirestoreSync';
 
 export function useSyncState(user: any, dispatch: any) {
-  const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error' | 'idle'>('idle');
+  const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error' | 'idle' | 'offline'>('idle');
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [showSyncCheck, setShowSyncCheck] = useState(false);
 

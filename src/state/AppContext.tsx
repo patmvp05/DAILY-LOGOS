@@ -9,6 +9,8 @@ import { AppState } from '../types';
 import { appReducer, AppAction } from './appReducer';
 import { loadState, saveState, loadStateAsync, loadHistorySnapshot } from '../lib/storage';
 import { useDebounce } from '../hooks/useDebounce';
+import { processSyncQueue } from '../lib/sync';
+import { prefetchProverbs } from '../lib/proverbCache';
 
 interface AppContextType {
   state: AppState;
@@ -25,6 +27,23 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     saveState(debouncedState);
   }, [debouncedState]);
+
+  // Network listener for sync
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log("[AppContext] Back online, triggering sync...");
+      processSyncQueue();
+    };
+
+    window.addEventListener('online', handleOnline);
+    // Initial check
+    if (navigator.onLine) {
+      processSyncQueue();
+      prefetchProverbs();
+    }
+
+    return () => window.removeEventListener('online', handleOnline);
+  }, []);
 
   // Async Hydration from IndexedDB + Snapshot check
   useEffect(() => {

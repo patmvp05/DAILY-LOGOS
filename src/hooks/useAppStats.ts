@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 import { format, differenceInDays, parseISO, subDays, isToday, isSameDay } from 'date-fns';
 import { AppState } from '../types';
 import { CATEGORIES } from '../constants';
+import { computeProgressStats } from '../lib/utils';
 
 export function useAppStats(state: AppState) {
   const streak = useMemo(() => {
@@ -56,30 +57,9 @@ export function useAppStats(state: AppState) {
     differenceInDays(new Date(), parseISO(state.settings.startDate)) + 1,
   [state.settings.startDate]);
 
-  const totalChaptersCount = useMemo(() => CATEGORIES.reduce((acc, cat) => acc + cat.books.reduce((bAcc, b) => bAcc + b.chapters, 0), 0), []);
-
-  const totalRead = useMemo(() => {
-    let count = 0;
-    CATEGORIES.forEach(cat => {
-      const p = state.progress.find(prog => prog.categoryId === cat.id);
-      cat.books.forEach((book, idx) => {
-        const isCompleted = state.completedBooks.has(`${cat.id}:${book.name}`);
-        const isPastBook = p && idx < p.bookIndex;
-        if (isCompleted || isPastBook) {
-          count += book.chapters;
-        } else if (p && idx === p.bookIndex) {
-          count += Math.max(0, p.chapter - 1);
-        }
-      });
-    });
-    return count;
-  }, [state.progress, state.completedBooks]);
-
-  const overallProgress = useMemo(() => {
-    // Provide 1 decimal place of precision so the user sees it moving more frequently
-    const pct = (totalRead / totalChaptersCount) * 100;
-    return Math.min(100, Math.round(pct * 10) / 10);
-  }, [totalRead, totalChaptersCount]);
+  const { overallProgress, totalRead, totalChaptersCount } = useMemo(() => 
+    computeProgressStats(state.progress, state.completedBooks),
+  [state.progress, state.completedBooks]);
 
   const lastReadProgress = useMemo(() => {
     return [...state.progress]
