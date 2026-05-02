@@ -5,24 +5,25 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { 
-  Settings as SettingsIcon, 
-  Check, 
-  Sun, 
-  Moon, 
-  Monitor, 
-  Calendar, 
-  RefreshCw, 
-  Cloud, 
-  RotateCcw, 
-  Download, 
-  Trash2, 
-  FileText, 
-  LogOut, 
+import {
+  Settings as SettingsIcon,
+  Check,
+  Sun,
+  Moon,
+  Monitor,
+  Calendar,
+  RefreshCw,
+  Cloud,
+  RotateCcw,
+  Download,
+  Trash2,
+  FileText,
+  LogOut,
   User as UserIcon,
   LogIn,
   ChevronRight,
-  Headphones
+  Headphones,
+  BookOpen
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '../../lib/utils';
@@ -183,6 +184,7 @@ interface SettingsModalProps {
                     { id: 'system', name: 'System', Icon: Monitor },
                     { id: 'audible', name: 'Audible', Icon: Headphones },
                     { id: 'xp', name: 'XP', Icon: Monitor },
+                    { id: 'textbook', name: 'Textbook', Icon: BookOpen },
                   ].map(({ id, name, Icon }) => (
                     <button
                       key={id}
