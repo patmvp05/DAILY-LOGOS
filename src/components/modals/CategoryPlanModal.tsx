@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Layers, Check } from 'lucide-react';
 import { CATEGORIES_BY_ID, CATEGORIES } from '../../constants';
 import { cn } from '../../lib/utils';

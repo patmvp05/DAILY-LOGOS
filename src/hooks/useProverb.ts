@@ -30,14 +30,7 @@ export function useProverb(dayOfMonth: number) {
       }
     };
 
-    // Defer non-critical work
-    if ('requestIdleCallback' in window) {
-      const handle = (window as any).requestIdleCallback(() => fetchSnippet());
-      return () => (window as any).cancelIdleCallback(handle);
-    } else {
-      const timer = setTimeout(fetchSnippet, 100);
-      return () => clearTimeout(timer);
-    }
+    fetchSnippet();
   }, [dayOfMonth]);
 
   return {

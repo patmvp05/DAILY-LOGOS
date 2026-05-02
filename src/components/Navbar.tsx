@@ -4,7 +4,7 @@
  */
 
 import React, { memo, Suspense, lazy } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
   LogIn, 
@@ -273,4 +273,4 @@ function NavbarComponent({
   );
 }
 
-export const Navbar = memo(NavbarComponent);
+export const Navbar = NavbarComponent;

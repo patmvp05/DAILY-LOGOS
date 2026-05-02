@@ -4,6 +4,7 @@
  */
 
 import { BOLLS_BIBLE_BOOK_IDS } from '../constants';
+import { fetchWithProxy } from './api';
 
 const CACHE_PREFIX = 'bible_chapter_cache_v7_';
 
@@ -38,35 +39,41 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
 
   try {
     const bookId = BOLLS_BIBLE_BOOK_IDS[bookName] || 1;
-    let data: any[];
+    let data: any[] | null = null;
 
     if (bookName === 'Proverbs') {
-      // Proverbs MUST use the local ESV JSON file per user requirement
-      const response = await fetch('/proverbs.json', {
-        signal: controller.signal
-      });
-      if (!response.ok) throw new Error(`Proverbs JSON fetch error: ${response.status}`);
-      const fullData = await response.json();
-      const chapterData = fullData[chapter.toString()];
-      if (!chapterData) throw new Error(`Chapter ${chapter} not found in local proverbs.json`);
-      
-      data = Object.entries(chapterData).map(([v, text]) => ({
-        verse: parseInt(v),
-        text: text as string
-      })).sort((a, b) => a.verse - b.verse);
-    } else {
-      const response = await fetch(`https://bolls.life/get-chapter/KJV/${bookId}/${chapter}/`, {
-        signal: controller.signal
-      });
-
-      if (!response.ok) {
-        throw new Error(`Bolls Life error: ${response.status}`);
+      // Proverbs should try ESV first via API for consistent translation
+      for (const trans of ['ESV', 'KJV']) {
+        try {
+          const apiData = await fetchWithProxy(`https://bolls.life/get-chapter/${trans}/20/${chapter}/`, controller.signal);
+          if (Array.isArray(apiData)) {
+            data = apiData;
+            break;
+          }
+        } catch (e) {}
       }
-      
-      data = await response.json();
+    } else {
+      try {
+        data = await fetchWithProxy(`https://bolls.life/get-chapter/KJV/${bookId}/${chapter}/`, controller.signal);
+      } catch (e) {
+        data = null;
+      }
+    }
+
+    // Fallback if Bolls.life failed
+    if (!data || !Array.isArray(data)) {
+      try {
+        const response = await fetch(`https://bible-api.com/${bookName}+${chapter}?translation=kjv`, { signal: controller.signal });
+        if (response.ok) {
+          const apiData = await response.json();
+          if (apiData.verses && apiData.verses.length > 0) {
+            data = apiData.verses;
+          }
+        }
+      } catch (e) {}
     }
     
-    if (!Array.isArray(data)) throw new Error("Invalid response format");
+    if (!data || !Array.isArray(data)) throw new Error("Invalid response format or data not found");
 
     const firstVerse = data.length > 0 
       ? (data[0].text || "")

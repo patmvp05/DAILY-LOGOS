@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, Check, Sparkles, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../../lib/utils';
@@ -23,6 +23,7 @@ interface ProverbModalProps {
   isFetchingProverb: boolean;
   proverbContent: ProverbContent | null;
   saveProverbJournal: (content: string, verse: string, id: string | null) => void;
+  logProverbRead: (chapter: number) => void;
 }
 
 function ProverbModal({
@@ -30,11 +31,22 @@ function ProverbModal({
   isFetchingProverb,
   proverbContent,
   saveProverbJournal,
+  logProverbRead,
 }: ProverbModalProps) {
   const { state } = useApp();
   const { setShowProverbModal, journalDraft, setJournalDraft } = useUi();
   const [journalVerse, setJournalVerse] = useState(journalDraft.verse);
   const [journalContent, setJournalContent] = useState(journalDraft.content);
+
+  // Scroll tracking to trigger read completion
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const { scrollTop, scrollHeight, clientHeight } = target;
+    // If within 50px of bottom, count as read
+    if (scrollTop + clientHeight >= scrollHeight - 50) {
+      logProverbRead(dayOfMonth);
+    }
+  };
 
   const onClose = () => {
     setShowProverbModal(false);
@@ -94,7 +106,10 @@ function ProverbModal({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto flex flex-col lg:flex-row bg-white dark:bg-zinc-950">
+        <div 
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto flex flex-col lg:flex-row bg-white dark:bg-zinc-950"
+        >
           {/* Bible Content */}
           <div className="w-full lg:flex-1 p-6 sm:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-gray-100 dark:border-zinc-800">
             {isFetchingProverb ? (

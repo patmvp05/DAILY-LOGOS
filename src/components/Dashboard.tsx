@@ -599,4 +599,4 @@ function DashboardComponent({
   );
 }
 
-export const Dashboard = memo(DashboardComponent);
+export const Dashboard = DashboardComponent;

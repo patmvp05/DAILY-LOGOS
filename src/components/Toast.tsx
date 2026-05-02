@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Info, AlertCircle } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useStandaloneDetection } from '../hooks/useStandaloneDetection';

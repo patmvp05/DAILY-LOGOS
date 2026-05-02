@@ -4,25 +4,50 @@
  */
 
 import { useMemo } from 'react';
-import { format, differenceInDays, parseISO, subDays } from 'date-fns';
+import { format, differenceInDays, parseISO, subDays, isToday, isSameDay } from 'date-fns';
 import { AppState } from '../types';
 import { CATEGORIES } from '../constants';
 
 export function useAppStats(state: AppState) {
   const streak = useMemo(() => {
     if (state.history.length === 0) return 0;
-    const dateSet = new Set<string>();
-    for (const h of state.history) dateSet.add(h.timestamp.split('T')[0]);
-    const dates = Array.from(dateSet).sort((a, b) => b.localeCompare(a));
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
-    if (dates[0] !== today && dates[0] !== yesterday) return 0;
+    
+    // Sort history by timestamp descending
+    const sortedHistory = [...state.history].sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
+    const today = new Date();
+    const yesterday = subDays(today, 1);
+    
+    // Check if user has read today or yesterday
+    const lastRead = new Date(sortedHistory[0].timestamp);
+    const hasReadToday = isToday(lastRead);
+    const hasReadYesterday = isSameDay(lastRead, yesterday);
+
+    if (!hasReadToday && !hasReadYesterday) return 0;
+
+    // Build a unique set of days read (ISO dates)
+    const uniqueDays = new Set<string>();
+    sortedHistory.forEach(h => {
+      try {
+        uniqueDays.add(format(parseISO(h.timestamp), 'yyyy-MM-dd'));
+      } catch (e) {
+        // Skip invalid timestamps
+      }
+    });
+
+    const dayStrings = Array.from(uniqueDays).sort((a, b) => b.localeCompare(a));
+    
     let currentStreak = 1;
-    for (let i = 0; i < dates.length - 1; i++) {
-        const d1 = parseISO(dates[i]);
-        const d2 = parseISO(dates[i+1]);
-        if (differenceInDays(d1, d2) === 1) currentStreak++;
-        else break;
+    for (let i = 0; i < dayStrings.length - 1; i++) {
+      const d1 = parseISO(dayStrings[i]);
+      const d2 = parseISO(dayStrings[i + 1]);
+      if (differenceInDays(d1, d2) === 1) {
+        currentStreak++;
+      } else {
+        break;
+      }
     }
     return currentStreak;
   }, [state.history]);

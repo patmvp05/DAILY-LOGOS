@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { ExternalLink, Check } from 'lucide-react';
 import { useUi } from '../../state/UiContext';
 

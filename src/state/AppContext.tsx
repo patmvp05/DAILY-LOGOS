@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as React from 'react';
-import { createContext, useContext, useReducer, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useMemo } from 'react';
 import type { ReactNode, Dispatch } from 'react';
 import { AppState } from '../types';
 import { appReducer, AppAction } from './appReducer';
@@ -19,7 +18,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(appReducer, loadState());
+  const [state, dispatch] = useReducer(appReducer, undefined, loadState);
   const debouncedState = useDebounce(state, 500);
 
   // Sync state to local storage

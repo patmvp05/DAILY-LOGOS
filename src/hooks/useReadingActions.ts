@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useRef, Dispatch, useEffect } from 'react';
-import { format } from 'date-fns';
+import { format, isToday, parseISO } from 'date-fns';
 import { AppState, HistoryEntry, ProverbJournal } from '../types';
 import { AppAction } from '../state/appReducer';
 import { CATEGORIES_BY_ID, CATEGORIES } from '../constants';
@@ -229,12 +229,48 @@ export function useReadingActions(
     });
   }, [state, user, dispatch, setConfirmDialog, showToast]);
 
+  const logProverbRead = useCallback((chapter: number) => {
+    // Check if already logged today
+    const alreadyLogged = state.history.some(h => 
+      h.bookName === 'Proverbs' && 
+      h.chapter === chapter && 
+      (() => {
+        try {
+          return isToday(parseISO(h.timestamp));
+        } catch (e) {
+          return false;
+        }
+      })()
+    );
+
+    if (alreadyLogged) return;
+
+    const entry: HistoryEntry = {
+      id: `proverb_${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      timestampMillis: Date.now(),
+      categoryId: 'wisdom',
+      categoryName: 'Wisdom',
+      bookName: 'Proverbs',
+      chapter,
+    };
+
+    dispatch({ type: 'LOG_HISTORY', entry });
+    if (user) {
+      writeActionBatch(user.uid, {
+        history: [entry]
+      }).catch(e => console.error("Proverb sync failed:", e));
+    }
+    triggerHaptic('medium');
+  }, [state.history, user, dispatch]);
+
   return {
     advanceChapter,
     jumpToBook,
     toggleBookCompletion,
     saveProverbJournal,
     deleteJournal,
-    resetProgress
+    resetProgress,
+    logProverbRead
   };
 }

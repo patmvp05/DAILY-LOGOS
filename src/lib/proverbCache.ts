@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { fetchWithProxy } from './api';
+
 interface ProverbResponse {
   reference: string;
   verses: { verse: number; text: string }[];
@@ -52,53 +54,51 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
 
   try {
     let data: any = null;
-    try {
-      const response = await fetch('/proverbs.json', { // Local ESV File
-        signal: controller.signal
-      });
-
-      if (response.ok) {
-        const fullData = await response.json();
-        data = fullData[chapter.toString()];
-      }
-    } catch (e) {
-      console.warn("Local proverbs.json missing or failed, trying Bolls.life ESV API");
-    }
-
-    if (!data) {
-      // Fallback to Bolls.life API
-      // Try both with and without trailing slash as some environments vary
-      for (const trans of ['ESV', 'KJV']) {
-        if (data) break;
-        const urls = [
-          `https://bolls.life/get-chapter/${trans}/20/${chapter}`,
-          `https://bolls.life/get-chapter/${trans}/20/${chapter}/`
-        ];
-        
-        for (const url of urls) {
-          try {
-            const response = await fetch(url, {
-              signal: controller.signal
-            });
-            if (response.ok) {
-              const apiData = await response.json();
-              if (Array.isArray(apiData) && apiData.length > 0) {
-                const map: Record<string, string> = {};
-                apiData.forEach((v: any) => { map[v.verse.toString()] = v.text; });
-                data = map;
-                break; 
-              }
-            }
-          } catch (e) {
-            console.warn(`Bolls.life fetch failed for ${url}`, e);
+    
+    // 1. Try Bolls.life API as primary source (ESV then KJV)
+    for (const trans of ['ESV', 'KJV']) {
+      if (data) break;
+      const urls = [
+        `https://bolls.life/get-chapter/${trans}/20/${chapter}/`,
+        `https://bolls.life/get-chapter/${trans}/20/${chapter}`
+      ];
+      
+      for (const url of urls) {
+        try {
+          const apiData = await fetchWithProxy(url, controller.signal);
+          if (Array.isArray(apiData) && apiData.length > 0) {
+            const map: Record<string, string> = {};
+            apiData.forEach((v: any) => { map[v.verse.toString()] = v.text; });
+            data = { map, trans };
+            break; 
           }
+        } catch (e) {
+          console.warn(`Bolls.life fetch failed for ${url}`, e);
         }
       }
     }
 
-    if (!data) throw new Error(`Chapter ${chapter} not found`);
+    // 2. Fallback to bible-api.com (Very reliable, CORS-friendly)
+    if (!data) {
+      try {
+        console.log("Falling back to bible-api.com for Proverbs", chapter);
+        const response = await fetch(`https://bible-api.com/proverbs+${chapter}?translation=kjv`, { signal: controller.signal });
+        if (response.ok) {
+          const apiData = await response.json();
+          if (apiData.verses && apiData.verses.length > 0) {
+            const map: Record<string, string> = {};
+            apiData.verses.forEach((v: any) => { map[v.verse.toString()] = v.text; });
+            data = { map, trans: 'KJV (Fallback)' };
+          }
+        }
+      } catch (e) {
+        console.error("Bible-api.com fallback failed", e);
+      }
+    }
 
-    const verses = Object.entries(data as Record<string, string>).map(([v, text]) => ({
+    if (!data) throw new Error(`Proverbs chapter ${chapter} could not be loaded from any source.`);
+
+    const verses = Object.entries(data.map as Record<string, string>).map(([v, text]) => ({
       verse: parseInt(v),
       text: (text as string).trim()
     })).sort((a, b) => a.verse - b.verse);
@@ -107,8 +107,8 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
       reference: `Proverbs ${chapter}`,
       verses,
       text: verses.map(v => v.text).join(' '),
-      translation_id: 'esv',
-      translation_name: 'English Standard Version'
+      translation_id: data.trans.toLowerCase(),
+      translation_name: data.trans.includes('ESV') ? 'English Standard Version' : 'King James Version'
     };
 
     try {

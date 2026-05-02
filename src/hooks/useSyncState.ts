@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { syncTracker } from '../lib/sync';
 import { useFirestoreSync } from './useFirestoreSync';
 
@@ -24,12 +24,12 @@ export function useSyncState(user: any, dispatch: any) {
     return unsub;
   }, []);
 
-  useFirestoreSync(user, dispatch, (status) => {
+  const onFirestoreSyncStatusChange = useCallback((status: 'idle' | 'syncing' | 'synced' | 'error') => {
     setSyncStatus(prev => prev === 'idle' ? status : prev);
-    if (status === 'synced' && syncStatus === 'idle') {
-      setLastSyncTime(new Date());
-    }
-  });
+    // Note: lastSyncTime is handled in syncTracker subscription above for logic consistency
+  }, []);
+
+  useFirestoreSync(user, dispatch, onFirestoreSyncStatusChange);
 
   return {
     syncStatus,

@@ -30,7 +30,7 @@ interface AppModalsProps {
   dayOfMonth: number;
 }
  
- export function AppModals({
+export function AppModals({
    syncStatus,
    lastSyncTime,
    showSyncCheck,
@@ -51,7 +51,7 @@ interface AppModalsProps {
    } = useUi();
  
    const { user, loading: isAuthLoading, logout, login } = useAuth();
-   const { toggleBookCompletion, jumpToBook, saveProverbJournal, resetProgress } = useReadingActions(state, dispatch, user);
+   const { toggleBookCompletion, jumpToBook, saveProverbJournal, resetProgress, logProverbRead } = useReadingActions(state, dispatch, user);
  
    return (
      <Suspense fallback={<ModalLoader />}>
@@ -76,6 +76,7 @@ interface AppModalsProps {
           isFetchingProverb={isFetchingProverb}
           proverbContent={proverbContent}
           saveProverbJournal={saveProverbJournal}
+          logProverbRead={logProverbRead}
         />
       )}
 

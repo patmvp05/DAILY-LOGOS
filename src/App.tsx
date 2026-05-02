@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Monitor, Cloud } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -33,7 +33,6 @@ import { Dashboard } from './components/Dashboard';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { Toast } from './components/Toast';
 import { AppModals } from './components/AppModals';
-import { useRegisterSW } from 'virtual:pwa-register/react';
 
 export default function App() {
   const { state, dispatch } = useApp();
@@ -57,9 +56,14 @@ export default function App() {
   const prefersDark = usePrefersDark();
   
   const todayReadingStats = useMemo(() => {
-    const todayKey = format(new Date(), 'yyyy-MM-dd');
     const todayEntries = state.history.filter(
-      h => h.timestamp.split('T')[0] === todayKey
+      h => {
+        try {
+          return isToday(parseISO(h.timestamp));
+        } catch (e) {
+          return false;
+        }
+      }
     );
     const minutes = todayEntries.reduce((sum, h) => {
       const perCh = BOOK_READ_MINUTES[h.bookName] ?? DEFAULT_BOOK_MINUTES;
@@ -69,31 +73,6 @@ export default function App() {
   }, [state.history]);
 
   useTheme(state.settings.theme);
-
-  // PWA Support
-  const {
-    needRefresh: [needRefresh, setNeedRefresh],
-    updateServiceWorker,
-  } = useRegisterSW({
-    onRegistered(r) {
-      console.log('SW Registered:', r);
-    },
-    onRegisterError(error) {
-      console.log('SW registration error', error);
-    },
-  });
-
-  useEffect(() => {
-    if (needRefresh) {
-      showToast("A new version of Daily Logos is available!", "info", {
-        label: "Update Now",
-        onClick: () => {
-          updateServiceWorker(true);
-          setNeedRefresh(false);
-        }
-      });
-    }
-  }, [needRefresh, showToast, updateServiceWorker, setNeedRefresh]);
 
   const handleLoginLocal = useCallback(async function loginFn(useRedirect = false) {
     setIsSigningIn(true);
