@@ -182,6 +182,7 @@ interface SettingsModalProps {
                     { id: 'dark', name: 'Dark', Icon: Moon },
                     { id: 'system', name: 'System', Icon: Monitor },
                     { id: 'audible', name: 'Audible', Icon: Headphones },
+                    { id: 'textbook', name: 'Textbook', Icon: FileText },
                     { id: 'xp', name: 'XP', Icon: Monitor },
                   ].map(({ id, name, Icon }) => (
                     <button

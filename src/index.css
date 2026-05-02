@@ -18,6 +18,10 @@
     --audible-text-secondary: #5A5A5A;
     --audible-border: #E5E5E5;
     
+    --textbook-bg: #F5EDD8;
+    --textbook-text: #2D2A26;
+    --textbook-border: #D3CDB9;
+    
     --sat: env(safe-area-inset-top, 0px);
     --sar: env(safe-area-inset-right, 0px);
     --sab: env(safe-area-inset-bottom, 0px);
@@ -122,6 +126,19 @@
 .dot-pulse {
   animation: pulse-scale 2s infinite ease-in-out;
 }
+
+  .theme-textbook {
+    --audible-bg: var(--textbook-bg);
+    --audible-nav: var(--textbook-bg);
+    --audible-text-primary: var(--textbook-text);
+    --audible-text-secondary: #6B665E;
+    --audible-border: var(--textbook-border);
+    font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif !important;
+  }
+
+  .theme-textbook * {
+    border-color: var(--textbook-border);
+  }
 
 /* Windows XP Theme Styles */
 @layer components {

@@ -107,7 +107,7 @@ export default function App() {
   }, [state.restoredFromSnapshot, showToast, dispatch]);
 
   const toggleTheme = useCallback(() => {
-    const themes: ('light' | 'dark' | 'system' | 'xp' | 'audible')[] = ['light', 'dark', 'system', 'xp', 'audible'];
+    const themes: ('light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook')[] = ['light', 'dark', 'system', 'xp', 'audible', 'textbook'];
     const currentIndex = themes.indexOf(state.settings.theme);
     const newTheme = themes[(currentIndex + 1) % themes.length];
     dispatch({ type: 'SET_THEME', theme: newTheme });
@@ -122,7 +122,7 @@ export default function App() {
   }, [setJournalDraft, setShowProverbModal]);
 
   return (
-    <div className={cn("min-h-[100dvh] transition-colors duration-300", state.settings.theme === 'xp' ? "theme-xp" : "bg-[var(--audible-bg)] text-[var(--audible-text-primary)]", state.settings.theme === 'dark' && "dark", state.settings.theme === 'audible' && "audible", (state.settings.theme === 'audible' || state.settings.theme === 'system') && prefersDark && "dark")}>
+    <div className={cn("min-h-[100dvh] transition-colors duration-300", state.settings.theme === 'xp' ? "theme-xp" : state.settings.theme === 'textbook' ? "theme-textbook" : "bg-[var(--audible-bg)] text-[var(--audible-text-primary)]", state.settings.theme === 'dark' && "dark", state.settings.theme === 'audible' && "audible", (state.settings.theme === 'audible' || state.settings.theme === 'system') && prefersDark && "dark")}>
       <Navbar user={user} syncStatus={syncStatus} lastSyncTime={lastSyncTime} showSyncCheck={showSyncCheck} handleLogin={handleLoginLocal} logout={logout} toggleTheme={toggleTheme} theme={state.settings.theme} setShowHistory={setShowHistory} setShowSettings={setShowSettings} startDate={state.settings.startDate} isDeveloper={user?.email === 'patmvp05@gmail.com'} isSigningIn={isSigningIn} isAuthLoading={isAuthLoading} />
       <main className="pt-20 pb-20">
         <Dashboard todayReadingStats={todayReadingStats} dayNumber={dayNumber} streak={streak} overallProgress={overallProgress} totalRead={totalRead} totalChaptersCount={totalChaptersCount} lastReadProgress={lastReadProgress} proverbSnippet={proverbSnippet} dayOfMonth={dayOfMonth} state={state} syncStatus={syncStatus} user={user} isAuthLoading={isAuthLoading} isSigningIn={isSigningIn} handleLogin={handleLoginLocal} advanceChapter={advanceChapter} setActivePlanCategory={setActivePlanCategory} setSelectingCategoryId={setSelectingCategoryId} setActiveDevotion={setActiveDevotion} setShowProverbModal={handleShowProverbModal} />

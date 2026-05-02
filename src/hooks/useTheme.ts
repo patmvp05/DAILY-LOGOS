@@ -5,10 +5,10 @@
 
 import { useEffect } from 'react';
 
-export function useTheme(theme: 'light' | 'dark' | 'system' | 'xp' | 'audible') {
+export function useTheme(theme: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook') {
   useEffect(() => {
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark', 'theme-xp', 'audible');
+    root.classList.remove('light', 'dark', 'theme-xp', 'audible', 'theme-textbook');
 
     if (theme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -18,6 +18,9 @@ export function useTheme(theme: 'light' | 'dark' | 'system' | 'xp' | 'audible') 
       const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       root.classList.add('audible');
       root.classList.add(isSystemDark ? 'dark' : 'light');
+    } else if (theme === 'textbook') {
+      root.classList.add('theme-textbook');
+      root.classList.add('light'); // Textbook theme is light-based
     } else if (theme === 'xp') {
       root.classList.add('theme-xp');
       // Apply background dynamically to avoid loading it for non-XP users

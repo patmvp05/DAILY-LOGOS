@@ -16,6 +16,7 @@ import {
   Monitor, 
   History, 
   RotateCw,
+  FileText,
   User as UserIcon,
   Settings 
 } from 'lucide-react';
@@ -33,7 +34,7 @@ interface NavbarProps {
   handleLogin: (redirect?: boolean) => void;
   logout: () => void;
   toggleTheme: () => void;
-  theme: 'light' | 'dark' | 'system' | 'xp' | 'audible';
+  theme: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook';
   setShowHistory: (val: boolean) => void;
   setShowSettings: (val: boolean) => void;
   startDate: string;
@@ -67,7 +68,7 @@ function NavbarComponent({
     )}>
       <div className="flex items-center gap-4 lg:gap-8">
         <div className="flex items-center gap-3">
-          <div className="relative group bg-white dark:bg-zinc-800 p-1 rounded-sm">
+          <div className="relative group">
             {theme === 'xp' ? (
               <svg 
                 width="32" height="32" viewBox="0 0 32 32" fill="none" 
@@ -83,9 +84,9 @@ function NavbarComponent({
               <img
                 src="/icons/logo.svg"
                 alt="The Daily Logos"
-                width={32}
-                height={32}
-                className="relative w-8 h-8 transition-all duration-300"
+                width={40}
+                height={40}
+                className="relative w-10 h-10 transition-all duration-300 group-hover:scale-105 active:scale-95"
               />
             )}
           </div>
@@ -214,7 +215,7 @@ function NavbarComponent({
             "text-[10px] uppercase tracking-widest font-bold mb-0.5 transition-colors",
             theme === 'xp' ? "text-blue-700 font-bold" : "text-gray-400 group-hover:text-black dark:group-hover:text-white"
           )}>
-            {theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : theme === 'xp' ? 'XP Mode' : 'Auto'}
+            {theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : theme === 'xp' ? 'XP Mode' : theme === 'textbook' ? 'Textbook' : 'Auto'}
           </p>
           {theme === 'light' ? (
             <Sun size={20} className="text-gray-300 group-hover:text-black transition-colors" />
@@ -222,6 +223,8 @@ function NavbarComponent({
             <Moon size={20} className="text-gray-300 group-hover:text-white transition-colors" />
           ) : theme === 'xp' ? (
             <Monitor size={20} className="text-blue-600" />
+          ) : theme === 'textbook' ? (
+            <FileText size={20} className="text-[#6B665E]" />
           ) : (
             <Monitor size={20} className="text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors" />
           )}
