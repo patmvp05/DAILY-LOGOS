@@ -107,7 +107,7 @@ export default function App() {
   }, [state.restoredFromSnapshot, showToast, dispatch]);
 
   const toggleTheme = useCallback(() => {
-    const themes: ('light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook')[] = ['light', 'dark', 'system', 'xp', 'audible', 'textbook'];
+    const themes: ('light' | 'dark' | 'system' | 'xp' | 'audible')[] = ['light', 'dark', 'system', 'xp', 'audible'];
     const currentIndex = themes.indexOf(state.settings.theme);
     const newTheme = themes[(currentIndex + 1) % themes.length];
     dispatch({ type: 'SET_THEME', theme: newTheme });

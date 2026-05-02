@@ -239,42 +239,6 @@
     @apply border-2 border-[#919B9C] rounded-none px-2 py-1 bg-white focus:border-[#316AC5] outline-none text-black;
   }
 
-  /* ============================================
-     TEXTBOOK THEME — Vintage Parchment
-     ============================================ */
-  .theme-textbook {
-    --audible-bg: #F5EDD8;
-    --audible-nav: #EDE3C5;
-    --audible-card: #FAF5E4;
-    --audible-border: #C8B48A;
-    --audible-text-primary: #2A1F0E;
-    --audible-text-secondary: #7A6045;
-    --tb-accent: #8B5E3C;
-
-    font-family: 'Georgia', 'Times New Roman', serif !important;
-    background-color: #F5EDD8 !important;
-    color: #2A1F0E !important;
-  }
-
-  .theme-textbook body {
-    background-color: #F5EDD8 !important;
-  }
-
-  .theme-textbook h1,
-  .theme-textbook h2,
-  .theme-textbook h3,
-  .theme-textbook h4 {
-    font-family: 'Georgia', 'Times New Roman', serif !important;
-    letter-spacing: -0.01em;
-  }
-
-  .theme-textbook ::-webkit-scrollbar { width: 6px; }
-  .theme-textbook ::-webkit-scrollbar-track { background: #EDE3C5; }
-  .theme-textbook ::-webkit-scrollbar-thumb {
-    background: #C8B48A;
-    border-radius: 9999px;
-  }
-
   /* Scrollbar for XP */
   .theme-xp ::-webkit-scrollbar {
     width: 16px;
