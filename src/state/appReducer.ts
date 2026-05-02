@@ -19,7 +19,7 @@ export type AppAction =
   | { type: 'JUMP_TO_BOOK', categoryId: string, bookIndex: number, key: string }
   | { type: 'UPSERT_JOURNAL', journal: ProverbJournal }
   | { type: 'DELETE_JOURNAL', id: string }
-  | { type: 'SET_THEME', theme: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook' }
+  | { type: 'SET_THEME', theme: 'light' | 'dark' | 'system' | 'xp' | 'audible' }
   | { type: 'ADD_DEVOTIONAL', devotional: Devotional }
   | { type: 'DELETE_DEVOTIONAL', id: string }
   | { type: 'LOG_HISTORY', entry: HistoryEntry }
