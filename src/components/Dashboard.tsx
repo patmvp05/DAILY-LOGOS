@@ -79,6 +79,20 @@ function DashboardComponent({
     computeProgressStats(state.progress, state.completedBooks),
   [state.progress, state.completedBooks]);
 
+  // Optimize history lookup for streak dots: Pre-compute a Set of local date strings for all read days
+  const readDatesSet = useMemo(() => {
+    const dates = new Set<string>();
+    state.history.forEach(entry => {
+      try {
+        if (entry.timestamp) {
+          const dateStr = format(parseISO(entry.timestamp), 'yyyy-MM-dd');
+          dates.add(dateStr);
+        }
+      } catch (e) {}
+    });
+    return dates;
+  }, [state.history]);
+
   useEffect(() => {
     let active = true;
     
@@ -270,7 +284,8 @@ function DashboardComponent({
                 {Array.from({ length: 7 }).map((_, i) => {
                   const checkDate = subDays(new Date(), 6 - i);
                   const isTodayVisit = i === 6;
-                  const hasReadOnDay = state.history.some(entry => isSameDay(parseISO(entry.timestamp), checkDate));
+                  const dateStr = format(checkDate, 'yyyy-MM-dd');
+                  const hasReadOnDay = readDatesSet.has(dateStr);
                   return (
                     <div key={i} className="flex flex-col items-center gap-1">
                       <div className={cn(
@@ -444,7 +459,7 @@ function DashboardComponent({
 
           {CATEGORIES.map((cat, idx) => {
             const prog = state.progress.find(p => p.categoryId === cat.id);
-            if (!prog) return null; // Skip if progress not available yet
+            if (!prog) return null;
             
             const book = cat.books[prog.bookIndex];
             const isDone = prog.lastReadAt && isToday(parseISO(prog.lastReadAt));
@@ -453,148 +468,20 @@ function DashboardComponent({
             const info = chapterInfos[infoKey];
             
             return (
-              <div
+              <CategoryCard 
                 key={cat.id}
-                className={cn(
-                  "relative p-8 h-56 border flex flex-col justify-between group transition-all duration-300 rounded-xl overflow-hidden",
-                  state.settings.theme === 'xp' ? "uber-card" : (
-                    bookIsCompleted 
-                      ? "bg-evernote text-white border-evernote shadow-[0_0_20px_-10px_rgba(0,168,45,0.6)]" 
-                      : "bg-[var(--audible-card)] border-[var(--audible-border)] hover:border-evernote hover:translate-y-[-2px] shadow-sm hover:shadow-md"
-                  )
-                )}
-              >
-                {state.settings.theme === 'xp' && (
-                  <XpWindowHeader title={`Section ${idx + 1}: ${cat.name}`} icon={Layers} />
-                )}
-                <div className={cn("flex flex-col h-full justify-between relative", state.settings.theme === 'xp' && "xp-content")}>
-                  {!bookIsCompleted && state.settings.theme !== 'xp' && (
-                    <div className={cn(
-                      "absolute top-0 -left-8 w-1 h-full transition-all",
-                      (isDone || bookIsCompleted) ? "bg-evernote" : "bg-evernote opacity-0 group-hover:opacity-100"
-                    )} />
-                  )}
-
-                  <div className={cn(!bookIsCompleted && "border-l-4 border-evernote pl-4 -ml-8 flex flex-col gap-1")}>
-                    <span className={cn(
-                      "text-[10px] uppercase tracking-[0.12em] font-black block leading-none",
-                      bookIsCompleted ? "text-white/60" : "text-[var(--audible-text-secondary)]"
-                    )}>
-                      PART 0{idx + 1} / {cat.name} {info && `· ~${info.readTime} MIN`}
-                    </span>
-
-                    {!isDone && !bookIsCompleted && (
-                      <span className="text-[8px] font-black uppercase text-evernote animate-pulse tracking-[0.12em] block leading-none">
-                        Next to Read
-                      </span>
-                    )}
-
-                    <button 
-                      onClick={() => setSelectingCategoryId(cat.id)}
-                      className="group/btn flex items-center gap-2 mt-1 w-full text-left"
-                    >
-                      <div className="relative">
-                        <h3 className={cn(
-                          "text-2xl font-black tracking-tight transition-transform uppercase group-hover/btn:scale-[1.01]",
-                          bookIsCompleted ? "text-white" : isDone ? "text-zinc-400 dark:text-zinc-600" : "text-[var(--audible-text-primary)]"
-                        )}>
-                          {book.name} {prog.chapter}
-                        </h3>
-                      </div>
-                      <ChevronRight size={18} className={cn("transition-all opacity-0 group-hover/btn:opacity-100 group-hover/btn:translate-x-0.5", bookIsCompleted ? "text-white" : "text-evernote")} />
-                    </button>
-
-                    {info && (
-                      <p className={cn(
-                        "text-[10px] font-bold italic line-clamp-1 opacity-50",
-                        bookIsCompleted ? "text-white" : "text-[var(--audible-text-secondary)]"
-                      )}>
-                        {info.firstVerse}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-3">
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); advanceChapter(cat.id, -1); }}
-                          className={cn(
-                            "w-9 h-9 rounded-full border flex items-center justify-center transition-all duration-200",
-                            state.settings.theme === 'xp' ? "xp-button bg-[#ECE9D8] text-black" : (
-                              bookIsCompleted 
-                                ? "border-white/20 hover:bg-white hover:text-evernote" 
-                                : "border-[var(--audible-border)] hover:bg-[var(--audible-text-primary)] hover:text-white dark:hover:bg-white dark:hover:text-black hover:border-transparent active:scale-90"
-                            )
-                          )}
-                          title="Go back one chapter"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <div className="relative group/plus">
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); advanceChapter(cat.id, 1); }}
-                            className={cn(
-                              "w-11 h-11 rounded-full border-2 flex items-center justify-center transition-all duration-200 shadow-sm",
-                              state.settings.theme === 'xp' ? "xp-button bg-[#ECE9D8] text-black border-2 border-blue-600/50" : (
-                                bookIsCompleted 
-                                  ? "border-white text-white hover:bg-white hover:text-evernote shadow-[0_0_12px_rgba(255,255,255,0.2)]" 
-                                  : "border-evernote text-evernote hover:bg-evernote hover:text-white dark:hover:bg-evernote active:scale-90"
-                              )
-                            )}
-                            title="Advance chapter"
-                          >
-                            <Plus size={20} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {catProgress[cat.id] && (() => {
-                        const pct = catProgress[cat.id].pct;
-                        const safePct = Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
-                        return (
-                          <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-                            <div className="flex justify-between items-center px-0.5">
-                              <span className={cn(
-                                "text-[9px] font-black uppercase tracking-[0.12em]",
-                                state.settings.theme === 'xp' ? "text-blue-700" : bookIsCompleted ? "text-white/80" : "text-[var(--audible-text-secondary)]"
-                              )}>
-                                {safePct === 100 ? 'COMPLETE' : `${safePct}%`}
-                              </span>
-                              <span className={cn(
-                                "text-[9px] font-black uppercase tracking-[0.12em] hidden xs:inline opacity-60",
-                                state.settings.theme === 'xp' ? "text-blue-700" : bookIsCompleted ? "text-white/60" : "text-[var(--audible-text-secondary)]"
-                              )}>
-                                OF {cat.name}
-                              </span>
-                            </div>
-                            <div 
-                              role="progressbar" 
-                              aria-valuenow={safePct} 
-                              aria-valuemin={0} 
-                              aria-valuemax={100} 
-                              aria-label={`${cat.name} reading progress`}
-                              className={cn(
-                                "relative w-full h-[6px] rounded-full overflow-hidden",
-                                state.settings.theme === 'xp' ? "bg-[#D4D0C8] border border-[#919B9C] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.2)]" : bookIsCompleted ? "bg-white/20" : "bg-zinc-200 dark:bg-zinc-800"
-                              )}
-                            >
-                              <div 
-                                className={cn(
-                                  "h-full rounded-full transition-all duration-500 ease-out",
-                                  state.settings.theme === 'xp' ? "bg-[#316AC5]" : bookIsCompleted ? "bg-white" : "bg-evernote",
-                                  safePct < 100 && state.settings.theme !== 'xp' && !bookIsCompleted && "shimmer-effect"
-                                )}
-                                style={{ width: `${safePct}%` }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                </div>
-              </div>
+                cat={cat}
+                idx={idx}
+                prog={prog}
+                book={book}
+                isDone={isDone as boolean}
+                bookIsCompleted={bookIsCompleted}
+                info={info}
+                theme={state.settings.theme}
+                progressStats={catProgress[cat.id]}
+                advanceChapter={advanceChapter}
+                setSelectingCategoryId={setSelectingCategoryId}
+              />
             );
           })}
         </div>
@@ -603,4 +490,176 @@ function DashboardComponent({
   );
 }
 
-export const Dashboard = DashboardComponent;
+interface CategoryCardProps {
+  cat: any;
+  idx: number;
+  prog: Progress;
+  book: any;
+  isDone: boolean;
+  bookIsCompleted: boolean;
+  info: { firstVerse: string, readTime: number } | undefined;
+  theme: string;
+  progressStats: { pct: number; chaptersRead: number; totalChapters: number } | undefined;
+  advanceChapter: (catId: string, diff: number) => void;
+  setSelectingCategoryId: (catId: string) => void;
+}
+
+const CategoryCard = memo(({
+  cat,
+  idx,
+  prog,
+  book,
+  isDone,
+  bookIsCompleted,
+  info,
+  theme,
+  progressStats,
+  advanceChapter,
+  setSelectingCategoryId
+}: CategoryCardProps) => {
+  return (
+    <div
+      className={cn(
+        "relative p-8 h-56 border flex flex-col justify-between group transition-all duration-300 rounded-xl overflow-hidden",
+        theme === 'xp' ? "uber-card" : (
+          bookIsCompleted 
+            ? "bg-evernote text-white border-evernote shadow-[0_0_20px_-10px_rgba(0,168,45,0.6)]" 
+            : "bg-[var(--audible-card)] border-[var(--audible-border)] hover:border-evernote hover:translate-y-[-2px] shadow-sm hover:shadow-md"
+        )
+      )}
+    >
+      {theme === 'xp' && (
+        <XpWindowHeader title={`Section ${idx + 1}: ${cat.name}`} icon={Layers} />
+      )}
+      <div className={cn("flex flex-col h-full justify-between relative", theme === 'xp' && "xp-content")}>
+        {!bookIsCompleted && theme !== 'xp' && (
+          <div className={cn(
+            "absolute top-0 -left-8 w-1 h-full transition-all",
+            (isDone || bookIsCompleted) ? "bg-evernote" : "bg-evernote opacity-0 group-hover:opacity-100"
+          )} />
+        )}
+
+        <div className={cn(!bookIsCompleted && "border-l-4 border-evernote pl-4 -ml-8 flex flex-col gap-1")}>
+          <span className={cn(
+            "text-[10px] uppercase tracking-[0.12em] font-black block leading-none",
+            bookIsCompleted ? "text-white/60" : "text-[var(--audible-text-secondary)]"
+          )}>
+            PART 0{idx + 1} / {cat.name} {info && `· ~${info.readTime} MIN`}
+          </span>
+
+          {!isDone && !bookIsCompleted && (
+            <span className="text-[8px] font-black uppercase text-evernote animate-pulse tracking-[0.12em] block leading-none">
+              Next to Read
+            </span>
+          )}
+
+          <button 
+            onClick={() => setSelectingCategoryId(cat.id)}
+            className="group/btn flex items-center gap-2 mt-1 w-full text-left"
+          >
+            <div className="relative">
+              <h3 className={cn(
+                "text-2xl font-black tracking-tight transition-transform uppercase group-hover/btn:scale-[1.01]",
+                bookIsCompleted ? "text-white" : isDone ? "text-zinc-400 dark:text-zinc-600" : "text-[var(--audible-text-primary)]"
+              )}>
+                {book.name} {prog.chapter}
+              </h3>
+            </div>
+            <ChevronRight size={18} className={cn("transition-all opacity-0 group-hover/btn:opacity-100 group-hover/btn:translate-x-0.5", bookIsCompleted ? "text-white" : "text-evernote")} />
+          </button>
+
+          {info && (
+            <p className={cn(
+              "text-[10px] font-bold italic line-clamp-1 opacity-50",
+              bookIsCompleted ? "text-white" : "text-[var(--audible-text-secondary)]"
+            )}>
+              {info.firstVerse}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={(e) => { e.stopPropagation(); advanceChapter(cat.id, -1); }}
+                className={cn(
+                  "w-9 h-9 rounded-full border flex items-center justify-center transition-all duration-200",
+                  theme === 'xp' ? "xp-button bg-[#ECE9D8] text-black" : (
+                    bookIsCompleted 
+                      ? "border-white/20 hover:bg-white hover:text-evernote" 
+                      : "border-[var(--audible-border)] hover:bg-[var(--audible-text-primary)] hover:text-white dark:hover:bg-white dark:hover:text-black hover:border-transparent active:scale-90"
+                  )
+                )}
+                title="Go back one chapter"
+              >
+                <Minus size={14} />
+              </button>
+              <div className="relative group/plus">
+                <button 
+                  onClick={(e) => { e.stopPropagation(); advanceChapter(cat.id, 1); }}
+                  className={cn(
+                    "w-11 h-11 rounded-full border-2 flex items-center justify-center transition-all duration-200 shadow-sm",
+                    theme === 'xp' ? "xp-button bg-[#ECE9D8] text-black border-2 border-blue-600/50" : (
+                      bookIsCompleted 
+                        ? "border-white text-white hover:bg-white hover:text-evernote shadow-[0_0_12px_rgba(255,255,255,0.2)]" 
+                        : "border-evernote text-evernote hover:bg-evernote hover:text-white dark:hover:bg-evernote active:scale-90"
+                    )
+                  )}
+                  title="Advance chapter"
+                >
+                  <Plus size={20} />
+                </button>
+              </div>
+            </div>
+
+            {progressStats && (() => {
+              const pct = progressStats.pct;
+              const safePct = Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
+              return (
+                <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                  <div className="flex justify-between items-center px-0.5">
+                    <span className={cn(
+                      "text-[9px] font-black uppercase tracking-[0.12em]",
+                      theme === 'xp' ? "text-blue-700" : bookIsCompleted ? "text-white/80" : "text-[var(--audible-text-secondary)]"
+                    )}>
+                      {safePct === 100 ? 'COMPLETE' : `${safePct}%`}
+                    </span>
+                    <span className={cn(
+                      "text-[9px] font-black uppercase tracking-[0.12em] hidden xs:inline opacity-60",
+                      theme === 'xp' ? "text-blue-700" : bookIsCompleted ? "text-white/60" : "text-[var(--audible-text-secondary)]"
+                    )}>
+                      OF {cat.name}
+                    </span>
+                  </div>
+                  <div 
+                    role="progressbar" 
+                    aria-valuenow={safePct} 
+                    aria-valuemin={0} 
+                    aria-valuemax={100} 
+                    aria-label={`${cat.name} reading progress`}
+                    className={cn(
+                      "relative w-full h-[6px] rounded-full overflow-hidden",
+                      theme === 'xp' ? "bg-[#D4D0C8] border border-[#919B9C] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.2)]" : bookIsCompleted ? "bg-white/20" : "bg-zinc-200 dark:bg-zinc-800"
+                    )}
+                  >
+                    <div 
+                      className={cn(
+                        "h-full rounded-full transition-all duration-500 ease-out",
+                        theme === 'xp' ? "bg-[#316AC5]" : bookIsCompleted ? "bg-white" : "bg-evernote",
+                        safePct < 100 && theme !== 'xp' && !bookIsCompleted && "shimmer-effect"
+                      )}
+                      style={{ width: `${safePct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+export const Dashboard = memo(DashboardComponent);

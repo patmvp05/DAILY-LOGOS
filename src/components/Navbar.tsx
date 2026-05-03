@@ -43,7 +43,7 @@ interface NavbarProps {
   isAuthLoading: boolean;
 }
 
-function NavbarComponent({
+const NavbarComponent = memo(({
   user,
   syncStatus,
   lastSyncTime,
@@ -58,7 +58,7 @@ function NavbarComponent({
   isDeveloper,
   isSigningIn,
   isAuthLoading
-}: NavbarProps) {
+}: NavbarProps) => {
   const isStandalone = useStandaloneDetection();
 
   return (
@@ -274,6 +274,6 @@ function NavbarComponent({
       </div>
     </nav>
   );
-}
+});
 
 export const Navbar = NavbarComponent;

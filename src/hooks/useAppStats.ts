@@ -13,43 +13,41 @@ export function useAppStats(state: AppState) {
   const streak = useMemo(() => {
     if (state.history.length === 0) return 0;
     
-    // Sort history by timestamp descending
-    const sortedHistory = [...state.history].sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
+    const now = new Date();
+    const todayStr = format(now, 'yyyy-MM-dd');
+    const yesterdayStr = format(subDays(now, 1), 'yyyy-MM-dd');
 
-    const today = new Date();
-    const yesterday = subDays(today, 1);
-    
-    // Check if user has read today or yesterday
-    const lastRead = new Date(sortedHistory[0].timestamp);
-    const hasReadToday = isToday(lastRead);
-    const hasReadYesterday = isSameDay(lastRead, yesterday);
-
-    if (!hasReadToday && !hasReadYesterday) return 0;
-
-    // Build a unique set of days read (ISO dates)
+    // We use a Set of local YYYY-MM-DD strings for O(1) daily lookup
     const uniqueDays = new Set<string>();
-    sortedHistory.forEach(h => {
-      try {
-        uniqueDays.add(format(parseISO(h.timestamp), 'yyyy-MM-dd'));
-      } catch (e) {
-        // Skip invalid timestamps
-      }
-    });
-
-    const dayStrings = Array.from(uniqueDays).sort((a, b) => b.localeCompare(a));
     
-    let currentStreak = 1;
-    for (let i = 0; i < dayStrings.length - 1; i++) {
-      const d1 = parseISO(dayStrings[i]);
-      const d2 = parseISO(dayStrings[i + 1]);
-      if (differenceInDays(d1, d2) === 1) {
-        currentStreak++;
-      } else {
-        break;
+    for (const h of state.history) {
+      try {
+        // Convert ISO timestamp to local YYYY-MM-DD string
+        const dateStr = format(parseISO(h.timestamp), 'yyyy-MM-dd');
+        uniqueDays.add(dateStr);
+      } catch (e) {
+        // Fallback for potentially malformed data
+        const date = h.timestamp.split('T')[0];
+        if (date) uniqueDays.add(date);
       }
     }
+
+    if (uniqueDays.size === 0) return 0;
+    
+    // Streak is active only if they read today or yesterday (local time)
+    if (!uniqueDays.has(todayStr) && !uniqueDays.has(yesterdayStr)) return 0;
+
+    let currentStreak = 0;
+    let checkDate = uniqueDays.has(todayStr) ? now : subDays(now, 1);
+    
+    // Iteratively count backwards from the most recent reading day
+    while (uniqueDays.has(format(checkDate, 'yyyy-MM-dd'))) {
+      currentStreak++;
+      checkDate = subDays(checkDate, 1);
+      // Safety break to prevent infinite loops with system clock edge cases
+      if (currentStreak > 10000) break;
+    }
+    
     return currentStreak;
   }, [state.history]);
 

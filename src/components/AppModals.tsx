@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, lazy } from 'react';
+import { memo, Suspense, lazy } from 'react';
 import ModalLoader from './ModalLoader';
 import { useApp } from '../state/AppContext';
 import { useUi } from '../state/UiContext';
@@ -30,7 +30,7 @@ interface AppModalsProps {
   dayOfMonth: number;
 }
  
-export function AppModals({
+export const AppModals = memo(({
    syncStatus,
    lastSyncTime,
    showSyncCheck,
@@ -38,7 +38,7 @@ export function AppModals({
    proverbContent,
    isFetchingProverb,
    dayOfMonth
- }: AppModalsProps) {
+ }: AppModalsProps) => {
    const { state, dispatch } = useApp();
    const { 
      showSettings, setShowSettings,
@@ -88,4 +88,4 @@ export function AppModals({
       )}
     </Suspense>
   );
-}
+});
