@@ -132,10 +132,16 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
 
     if (!data) throw new Error(`Proverbs chapter ${chapter} could not be loaded from any source.`);
 
-    const verses = Object.entries(data.map as Record<string, string>).map(([v, text]) => ({
-      verse: parseInt(v),
-      text: (text as string).trim()
-    })).sort((a, b) => a.verse - b.verse);
+    // Robust extraction of verses
+    const verses = Object.entries(data.map as Record<string, string>).map(([v, text]) => {
+      const textVal = typeof text === 'string' ? text : ((text as any).text || (text as any).content || "");
+      return {
+        verse: parseInt(v),
+        text: textVal.replace(/<S>[^<]*<\/S>/gi, '').replace(/<[^>]*>/g, '').trim()
+      };
+    }).sort((a, b) => a.verse - b.verse);
+
+    if (verses.length === 0) throw new Error("No verses found in extracted data");
 
     const result: ProverbResponse = {
       reference: `Proverbs ${chapter}`,

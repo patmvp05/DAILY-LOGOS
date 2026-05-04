@@ -37,6 +37,7 @@ interface DashboardProps {
   totalChaptersCount: number;
   lastReadProgress: Progress | undefined;
   proverbSnippet: string | null;
+  isFetchingProverb: boolean;
   dayOfMonth: number;
   state: AppState;
   syncStatus: string;
@@ -60,6 +61,7 @@ function DashboardComponent({
   totalChaptersCount,
   lastReadProgress,
   proverbSnippet,
+  isFetchingProverb,
   dayOfMonth,
   state,
   syncStatus,
@@ -249,7 +251,12 @@ function DashboardComponent({
               <Sparkles className={cn("absolute top-4 right-4 group-hover:scale-110 transition-transform", state.settings.theme === 'xp' ? "text-blue-600/20" : "text-evernote/10 dark:text-evernote/20")} size={48} />
               <p className={cn("text-[10px] uppercase tracking-[0.12em] font-black mb-4", state.settings.theme === 'xp' ? "text-blue-700" : "text-[var(--audible-text-secondary)]")}>Daily Proverb</p>
               <h2 className={cn("text-3xl font-black mb-2 tracking-tight", state.settings.theme === 'xp' ? "text-black" : "text-[var(--audible-text-primary)] uppercase")}>Proverbs {dayOfMonth}</h2>
-              {proverbSnippet ? (
+              {isFetchingProverb ? (
+                <div className="space-y-2 animate-pulse">
+                  <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-3/4" />
+                  <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2" />
+                </div>
+              ) : proverbSnippet ? (
                 <div className="space-y-2">
                   <p className="text-sm italic text-zinc-500 dark:text-zinc-500 leading-relaxed line-clamp-2 italic">
                     "{proverbSnippet}"
@@ -568,13 +575,15 @@ const CategoryCard = memo(({
             <ChevronRight size={18} className={cn("transition-all opacity-0 group-hover/btn:opacity-100 group-hover/btn:translate-x-0.5", bookIsCompleted ? "text-white" : "text-evernote")} />
           </button>
 
-          {info && (
+          {info ? (
             <p className={cn(
               "text-[10px] font-bold italic line-clamp-1 opacity-50",
               bookIsCompleted ? "text-white" : "text-[var(--audible-text-secondary)]"
             )}>
               {info.firstVerse}
             </p>
+          ) : (
+            <div className="h-3 w-32 bg-zinc-100 dark:bg-zinc-800/50 rounded animate-pulse" />
           )}
         </div>
 

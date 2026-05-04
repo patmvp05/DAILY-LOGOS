@@ -84,17 +84,26 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
     
     if (!data || !Array.isArray(data)) throw new Error("Invalid response format or data not found");
 
-    const firstVerse = data.length > 0 
-      ? (data[0].text || "")
-          .replace(/<S>[^<]*<\/S>/gi, '') // Remove Strong's tag AND its content
+    // Robust extraction of first verse
+    let firstVerseRaw = "";
+    if (data.length > 0) {
+      // Find the first verse (usually index 0, but handle it safely)
+      const firstVal = data[0];
+      firstVerseRaw = typeof firstVal === 'string' ? firstVal : (firstVal.text || firstVal.content || "");
+    }
+
+    const firstVerse = firstVerseRaw
+      ? firstVerseRaw
+          .replace(/<S>[^<]*<\/S>/gi, '') // Remove Strong's tags
           .replace(/<[^>]*>/g, '')      // Remove any other tags
           .replace(/^\[\d+\]\s*/, '')   // Remove [1] at start
           .trim() 
       : "Text not available";
     
     const wordCount = data.reduce((acc: number, v: any) => {
-      const cleanText = (v.text || "").replace(/<S>[^<]*<\/S>/gi, '').replace(/<[^>]*>/g, '').trim();
-      return acc + cleanText.split(/\s+/).length;
+      const textVal = typeof v === 'string' ? v : (v.text || v.content || "");
+      const cleanText = textVal.replace(/<S>[^<]*<\/S>/gi, '').replace(/<[^>]*>/g, '').trim();
+      return acc + (cleanText ? cleanText.split(/\s+/).length : 0);
     }, 0);
     
     const readTime = Math.max(1, Math.round(wordCount / 225));

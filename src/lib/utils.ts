@@ -46,13 +46,16 @@ export function computeProgressStats(progress: Progress[], completedBooks: Set<s
       }
     }
 
-    overallTotalRead += chaptersRead;
-    const pct = totalChapters > 0 ? Math.min(Math.round((chaptersRead / totalChapters) * 100), 100) : 0;
-    catProgress[cat.id] = { pct, chaptersRead, totalChapters };
+    overallTotalRead += Math.min(chaptersRead, totalChapters);
+    const pct = totalChapters > 0 ? Math.min((chaptersRead / totalChapters) * 100, 100) : 0;
+    catProgress[cat.id] = { 
+      pct: Math.round(pct * 10) / 10, 
+      chaptersRead: Math.min(chaptersRead, totalChapters), 
+      totalChapters 
+    };
   });
 
   const overallPct = overallTotalChapters > 0 ? (overallTotalRead / overallTotalChapters) * 100 : 0;
-  // Precision of 1 decimal place
   const overallProgress = Math.min(100, Math.round(overallPct * 10) / 10);
 
   return {
