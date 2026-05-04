@@ -32,7 +32,7 @@ service cloud.firestore {
       return data.keys().hasAll(['startDate', 'theme', 'updatedAt']) &&
              data.startDate is string &&
              data.theme in ['light', 'dark', 'system', 'xp', 'audible', 'textbook'] &&
-             data.updatedAt == request.time;
+             data.updatedAt != null;
     }
 
     function isValidProgress(data) {
@@ -81,7 +81,7 @@ service cloud.firestore {
 
     // Collection Rules
     match /diag/{userId} {
-      allow write: if isOwner(userId) && incoming().keys().hasOnly(['heartBeat']) && incoming().heartBeat == request.time;
+      allow write: if isOwner(userId) && incoming().keys().hasOnly(['heartBeat']) && incoming().heartBeat != null;
       allow read: if isOwner(userId);
     }
 

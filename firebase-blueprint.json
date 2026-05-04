@@ -6,7 +6,7 @@
       "type": "object",
       "properties": {
         "startDate": { "type": "string", "format": "date-time" },
-        "theme": { "type": "string", "enum": ["light", "dark"] },
+        "theme": { "type": "string", "enum": ["light", "dark", "system", "xp", "audible", "textbook"] },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["startDate", "theme", "updatedAt"]
@@ -32,9 +32,10 @@
         "categoryId": { "type": "string" },
         "categoryName": { "type": "string" },
         "bookName": { "type": "string" },
-        "chapter": { "type": "integer" }
+        "chapter": { "type": "integer" },
+        "timestampMillis": { "type": "integer" }
       },
-      "required": ["timestamp", "categoryId", "bookName", "chapter"]
+      "required": ["timestamp", "categoryId", "categoryName", "bookName", "chapter", "timestampMillis"]
     },
     "Journal": {
       "title": "Journal",
@@ -57,7 +58,7 @@
         "description": { "type": "string" },
         "url": { "type": "string" }
       },
-      "required": ["name", "url"]
+      "required": ["name", "description", "url"]
     },
     "CompletedBook": {
       "title": "CompletedBook",
@@ -68,7 +69,7 @@
         "bookName": { "type": "string" },
         "completedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["categoryId", "bookName"]
+      "required": ["categoryId", "bookName", "completedAt"]
     }
   },
   "firestore": {

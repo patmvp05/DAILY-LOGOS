@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
   return {
     plugins: [
       react(), 
@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
     ],
     build: {
       target: 'es2022',
-      cssCodeSplit: true,
+      sourcemap: true,
     },
     resolve: {
       alias: {

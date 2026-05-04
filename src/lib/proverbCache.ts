@@ -4,6 +4,7 @@
  */
 
 import { fetchWithProxy } from './api';
+import { get, set } from 'idb-keyval';
 
 interface ProverbResponse {
   reference: string;
@@ -67,16 +68,15 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
   const translation = 'ESV'; 
   const cacheKey = `${CACHE_PREFIX}${translation}_${chapter}`;
   
-  // 2. Check L2 Cache (localStorage) - Permanent key (no daily expiry)
+  // 2. Check L2 Cache (IndexedDB) - Permanent key (no daily expiry)
   try {
-    const cached = localStorage.getItem(cacheKey);
+    const cached = await get<ProverbResponse>(cacheKey);
     if (cached) {
-      const parsed = JSON.parse(cached);
-      memoryCache.set(chapter, parsed);
+      memoryCache.set(chapter, cached);
       
       // Lazily prune on successful cache hit if not already done
       lazyPrune();
-      return parsed;
+      return cached;
     }
   } catch (e) {
     // Continue To Fetch
@@ -155,11 +155,11 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
     // Update both caches
     memoryCache.set(chapter, result);
     try {
-      localStorage.setItem(cacheKey, JSON.stringify(result));
+      await set(cacheKey, result);
       // Trigger lazy pruning after a successful write
       lazyPrune();
     } catch (e) {
-      console.warn("Failed to cache proverb likely due to Private Mode");
+      console.warn("Failed to cache proverb likely due to storage limits or private mode");
     }
     
     return result;
