@@ -51,6 +51,14 @@ export interface UiContextType {
   confirmDialog: ConfirmDialogState;
   setConfirmDialog: (val: ConfirmDialogState) => void;
   closeConfirmDialog: () => void;
+
+  // Sync State
+  syncStatus: string;
+  setSyncStatus: (val: string) => void;
+  lastSyncTime: Date | null;
+  setLastSyncTime: (val: Date | null) => void;
+  showSyncCheck: boolean;
+  setShowSyncCheck: (val: boolean) => void;
 }
 
 export const UiContext = createContext<UiContextType | undefined>(undefined);

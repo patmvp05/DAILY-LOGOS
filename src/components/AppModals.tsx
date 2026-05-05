@@ -20,38 +20,27 @@ const BookSelectorModal = lazy(() => import('./modals/BookSelectorModal'));
 const DevotionalModal = lazy(() => import('./modals/DevotionalModal'));
 const StartMenu = lazy(() => import('./StartMenu'));
 
+import { useProverb } from '../hooks/useProverb';
+
 interface AppModalsProps {
-  syncStatus: string;
-  lastSyncTime: Date | null;
-  showSyncCheck: boolean;
   isSigningIn: boolean;
-  proverbContent: any;
-  isFetchingProverb: boolean;
-  dayOfMonth: number;
 }
  
 export const AppModals = memo(({
-   syncStatus,
-   lastSyncTime,
-   showSyncCheck,
-   isSigningIn,
-   proverbContent,
-   isFetchingProverb,
-   dayOfMonth
+   isSigningIn
  }: AppModalsProps) => {
    const { state, dispatch } = useApp();
    const { 
-     showSettings, setShowSettings,
-     showHistory, setShowHistory,
-     activePlanCategory, setActivePlanCategory,
-     selectingCategoryId, setSelectingCategoryId,
-     activeDevotion, setActiveDevotion,
-     showProverbModal, setShowProverbModal,
-     isStartMenuOpen, setIsStartMenuOpen,
+     showSettings, showHistory, activePlanCategory, selectingCategoryId,
+     activeDevotion, showProverbModal,
+     syncStatus, lastSyncTime, showSyncCheck
    } = useUi();
  
    const { user, loading: isAuthLoading, logout, login } = useAuth();
    const { toggleBookCompletion, jumpToBook, saveProverbJournal, resetProgress, logProverbRead } = useReadingActions(state, dispatch, user);
+   
+   const dayOfMonth = new Date().getDate();
+   const { proverbContent, isFetchingProverb } = useProverb(dayOfMonth);
  
    return (
      <Suspense fallback={<ModalLoader />}>

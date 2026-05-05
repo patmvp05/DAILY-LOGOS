@@ -20,62 +20,61 @@ import {
   Bookmark
 } from 'lucide-react';
 import { format, parseISO, isToday, subDays } from 'date-fns';
-import { CATEGORIES, CATEGORIES_BY_ID } from '../constants';
-import { AppState, Progress, HistoryEntry } from '../types';
-import { User } from 'firebase/auth';
+import { CATEGORIES, CATEGORIES_BY_ID, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
+import { Progress } from '../types';
 import { cn, computeProgressStats } from '../lib/utils';
 import { XpWindowHeader } from './XpWindowHeader';
-
 import { getChapterInfo } from '../lib/bibleCache';
 
+import { useApp } from '../state/AppContextCore';
+import { useUi } from '../state/UiContextCore';
+import { useAppStats } from '../hooks/useAppStats';
+import { useReadingActions } from '../hooks/useReadingActions';
+import { useProverb } from '../hooks/useProverb';
+
 interface DashboardProps {
-  todayReadingStats: { minutes: number; chapterCount: number; entries: HistoryEntry[] };
-  dayNumber: number;
-  streak: number;
-  overallProgress: number;
-  totalRead: number;
-  totalChaptersCount: number;
-  lastReadProgress: Progress | undefined;
-  proverbSnippet: string | null;
-  isFetchingProverb: boolean;
-  dayOfMonth: number;
-  state: AppState;
-  syncStatus: string;
-  user: User | null;
-  isAuthLoading: boolean;
-  isSigningIn: boolean;
-  setActivePlanCategory: (catId: string) => void;
-  setShowProverbModal: (val: boolean) => void;
-  setActiveDevotion: (dev: { name: string, url: string }) => void;
   handleLogin: (redirect?: boolean) => void;
-  setSelectingCategoryId: (catId: string) => void;
-  advanceChapter: (catId: string, diff: number) => void;
+  isSigningIn: boolean;
 }
 
 function DashboardComponent({
-  dayNumber,
-  todayReadingStats,
-  streak,
-  overallProgress,
-  totalRead,
-  totalChaptersCount,
-  lastReadProgress,
-  proverbSnippet,
-  isFetchingProverb,
-  dayOfMonth,
-  state,
-  syncStatus,
-  user,
-  isAuthLoading,
-  isSigningIn,
-  setActivePlanCategory,
-  setShowProverbModal,
-  setActiveDevotion,
   handleLogin,
-  setSelectingCategoryId,
-  advanceChapter
+  isSigningIn
 }: DashboardProps) {
+  const { state, dispatch } = useApp();
+  const { streak, dayNumber, overallProgress, totalRead, totalChaptersCount, lastReadProgress } = useAppStats(state);
+  const { advanceChapter } = useReadingActions(state, dispatch, null);
+  const dayOfMonth = new Date().getDate();
+  const { proverbSnippet, isFetchingProverb } = useProverb(dayOfMonth);
+
+  const { 
+    setActivePlanCategory, setShowProverbModal, setActiveDevotion, 
+    setSelectingCategoryId, setJournalDraft, syncStatus
+  } = useUi();
+
   const [chapterInfos, setChapterInfos] = useState<Record<string, { firstVerse: string, readTime: number }>>({});
+
+  const handleShowProverbModal = (val: boolean) => {
+    if (val) setJournalDraft({ id: null, content: '', verse: '' });
+    setShowProverbModal(val);
+  };
+
+  const todayReadingStats = useMemo(() => {
+    const todayEntries = state.history.filter(
+      h => {
+        try {
+          return isToday(parseISO(h.timestamp));
+        } catch {
+          return false;
+        }
+      }
+    );
+    const minutes = todayEntries.reduce((sum, h) => {
+      const perCh = BOOK_READ_MINUTES[h.bookName] ?? DEFAULT_BOOK_MINUTES;
+      return sum + perCh;
+    }, 0);
+    return { minutes, chapterCount: todayEntries.length, entries: todayEntries };
+  }, [state.history]);
 
   const { catProgress } = useMemo(() => 
     computeProgressStats(state.progress, state.completedBooks),
@@ -238,7 +237,7 @@ function DashboardComponent({
 
           {/* Proverb of the Day */}
           <button 
-            onClick={() => setShowProverbModal(true)}
+            onClick={() => handleShowProverbModal(true)}
             className={cn(
                 "w-full p-8 mb-6 relative overflow-hidden group text-left block transition-all rounded-xl",
                 state.settings.theme === 'xp' ? "uber-card" : "bg-[var(--audible-card)] border border-[var(--audible-border)] shadow-sm hover:shadow-lg hover:translate-y-[-2px] hover:border-evernote/30"

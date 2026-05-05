@@ -46,7 +46,7 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
   }, []);
 
   useEffect(() => {
-    let mounted = true;
+    const mounted = true;
     const init = async () => {
       if (mounted) await refresh();
     };

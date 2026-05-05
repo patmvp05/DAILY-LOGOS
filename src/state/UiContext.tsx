@@ -36,6 +36,10 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
     onConfirm: () => {}
   });
 
+  const [syncStatus, setSyncStatus] = React.useState<string>('idle');
+  const [lastSyncTime, setLastSyncTime] = React.useState<Date | null>(null);
+  const [showSyncCheck, setShowSyncCheck] = React.useState(false);
+
   const closeConfirmDialog = () => setConfirmDialog(prev => ({ ...prev, isOpen: false }));
 
   const showToast = (message: string, type: ToastType = 'success', action?: ToastState['action']) => {
@@ -52,11 +56,14 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
     isStartMenuOpen, setIsStartMenuOpen,
     confirmDialog, setConfirmDialog, closeConfirmDialog,
     toast, setToast, showToast,
-    journalDraft, setJournalDraft
+    journalDraft, setJournalDraft,
+    syncStatus, setSyncStatus,
+    lastSyncTime, setLastSyncTime,
+    showSyncCheck, setShowSyncCheck
   }), [
     showSettings, showHistory, activePlanCategory, selectingCategoryId,
     activeDevotion, showProverbModal, isStartMenuOpen, confirmDialog,
-    toast, journalDraft
+    toast, journalDraft, syncStatus, lastSyncTime, showSyncCheck
   ]);
 
   return (

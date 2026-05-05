@@ -16,8 +16,8 @@ export interface WeatherSnapshot {
 }
 
 const CACHE_KEY = 'dl_weather_v1';
-const LAT = 10.7626;
-const LON = 106.6602;
+const DEFAULT_LAT = 31.7683; // Jerusalem
+const DEFAULT_LON = 35.2137;
 
 const WEATHER_CODE_MAP: Record<number, string> = {
   0: 'Clear',
@@ -68,11 +68,38 @@ export function getCachedWeather(): WeatherSnapshot | null {
 }
 
 export async function fetchWeather(): Promise<WeatherSnapshot> {
+  let lat = DEFAULT_LAT;
+  let lon = DEFAULT_LON;
+  let city = 'Jerusalem';
+
+  try {
+    const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+    });
+    lat = pos.coords.latitude;
+    lon = pos.coords.longitude;
+    city = 'Current Location';
+    
+    // Try to get city name
+    try {
+      const geoUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
+      const res = await fetch(geoUrl);
+      const geoData = await res.json();
+      if (geoData) {
+        city = geoData.city || geoData.locality || geoData.principalSubdivision || 'Current Location';
+      }
+    } catch (e) {
+      console.warn('Reverse geocoding failed', e);
+    }
+  } catch (e) {
+    console.warn('Geolocation failed, using default', e);
+  }
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 12000);
 
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&temperature_unit=fahrenheit&timezone=auto`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&temperature_unit=fahrenheit&timezone=auto`;
     const data = await fetchWithProxy(url, controller.signal);
     clearTimeout(timeoutId);
 
@@ -87,7 +114,7 @@ export async function fetchWeather(): Promise<WeatherSnapshot> {
       lowF: Math.round(daily.temperature_2m_min[0]),
       conditionCode: current.weather_code,
       conditionLabel: WEATHER_CODE_MAP[current.weather_code] || 'Clear',
-      city: 'Ho Chi Minh City',
+      city,
       fetchedAt: Date.now()
     };
 

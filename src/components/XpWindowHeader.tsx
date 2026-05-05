@@ -9,7 +9,7 @@ import { X } from 'lucide-react';
 interface XpWindowHeaderProps {
   title: string;
   onClose?: () => void;
-  icon?: any;
+  icon?: React.ElementType;
 }
 
 export const XpWindowHeader: React.FC<XpWindowHeaderProps> = ({ title, onClose, icon: Icon }) => (
