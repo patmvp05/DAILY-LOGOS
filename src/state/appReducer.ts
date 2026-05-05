@@ -27,7 +27,7 @@ export type AppAction =
   | { type: 'SET_START_DATE', date: string }
   | { type: 'CLEAR_RESTORED_FLAG' };
 
-const HISTORY_CAP = 50; // User requested cap at 50 during cleanup
+export const HISTORY_CAP = 50; // User requested cap at 50 during cleanup
 
 /**
  * Checks if two lists of objects are likely identical using a fast fingerprint.
