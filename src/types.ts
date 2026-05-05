@@ -49,5 +49,6 @@ export interface AppState {
   proverbJournals: ProverbJournal[];
   customDevotionals: Devotional[];
   completedBooks: Set<string>; // "categoryId:bookName"
-  restoredFromSnapshot?: boolean; // UI flag for one-time toast
+  restoredFromSnapshot?: boolean; // UI flag for one-time local restoration toast
+  isCloudHydrated?: boolean; // UI flag for cloud sync completion
 }

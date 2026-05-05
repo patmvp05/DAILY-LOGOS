@@ -5,18 +5,40 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { RefreshCw, Check, AlertCircle } from 'lucide-react';
+import { RefreshCw, Check, AlertCircle, Cloud } from 'lucide-react';
 
 interface SyncStatusBadgeProps {
-  status: 'synced' | 'syncing' | 'error' | 'idle';
+  status: 'synced' | 'syncing' | 'error' | 'idle' | 'offline';
 }
 
 export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({ status }) => {
-  if (status === 'idle') return null;
-
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 text-[10px] uppercase font-black tracking-widest">
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 text-[10px] uppercase font-black tracking-widest min-h-[32px]">
       <AnimatePresence mode="wait">
+        {status === 'idle' && (
+          <motion.div
+            key="idle"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center gap-2 text-white/40"
+          >
+            <Cloud className="w-3.5 h-3.5" />
+            <span>Login to Sync</span>
+          </motion.div>
+        )}
+        {status === 'offline' && (
+          <motion.div
+            key="offline"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center gap-2 text-amber-500"
+          >
+            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            <span>Offline</span>
+          </motion.div>
+        )}
         {status === 'syncing' && (
           <motion.div
             key="syncing"

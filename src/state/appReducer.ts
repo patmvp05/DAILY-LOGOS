@@ -7,7 +7,7 @@ import { AppState, Progress as ProgressType, HistoryEntry, ProverbJournal, Devot
 
 export type AppAction = 
   | { type: 'REPLACE_STATE', state: AppState }
-  | { type: 'HYDRATE_STATE', state: Partial<AppState>, restoredFromSnapshot?: boolean }
+  | { type: 'HYDRATE_STATE', state: Partial<AppState>, restoredFromSnapshot?: boolean, isCloudData?: boolean }
   | { type: 'CLOUD_SYNC_PROGRESS', progress: ProgressType[] }
   | { type: 'CLOUD_SYNC_COMPLETED', completed: string[] }
   | { type: 'CLOUD_SYNC_JOURNALS', journals: ProverbJournal[] }
@@ -25,7 +25,7 @@ export type AppAction =
   | { type: 'LOG_HISTORY', entry: HistoryEntry }
   | { type: 'CLEAR_HISTORY' }
   | { type: 'SET_START_DATE', date: string }
-  | { type: 'CLEAR_RESTORED_FLAG' };
+  | { type: 'CLEAR_SYNC_FLAGS' };
 
 export const HISTORY_CAP = 50; // User requested cap at 50 during cleanup
 
@@ -125,13 +125,14 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'HYDRATE_STATE': {
       const merged = mergeAppState(state, action.state);
-      if (action.restoredFromSnapshot) {
-        return { ...merged, restoredFromSnapshot: true };
-      }
-      return merged;
+      return { 
+        ...merged, 
+        restoredFromSnapshot: action.restoredFromSnapshot || merged.restoredFromSnapshot,
+        isCloudHydrated: action.isCloudData || merged.isCloudHydrated
+      };
     }
-    case 'CLEAR_RESTORED_FLAG': {
-      return { ...state, restoredFromSnapshot: false };
+    case 'CLEAR_SYNC_FLAGS': {
+      return { ...state, restoredFromSnapshot: false, isCloudHydrated: false };
     }
     case 'CLOUD_SYNC_USER_DATA': {
       const newStartDate = action.data.startDate || state.settings.startDate;

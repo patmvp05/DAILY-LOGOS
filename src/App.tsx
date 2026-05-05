@@ -86,11 +86,14 @@ export default function App() {
   useScrollLock(showSettings || showHistory || !!activePlanCategory || !!selectingCategoryId || !!activeDevotion || showProverbModal || isStartMenuOpen);
   
   useEffect(() => {
-    if (state.restoredFromSnapshot) {
+    if (state.isCloudHydrated) {
+      showToast("Reading history synced from cloud.", "success");
+      dispatch({ type: 'CLEAR_SYNC_FLAGS' });
+    } else if (state.restoredFromSnapshot) {
       showToast("Restored your reading history from local backup.", "info");
-      dispatch({ type: 'CLEAR_RESTORED_FLAG' });
+      dispatch({ type: 'CLEAR_SYNC_FLAGS' });
     }
-  }, [state.restoredFromSnapshot, showToast, dispatch]);
+  }, [state.isCloudHydrated, state.restoredFromSnapshot, showToast, dispatch]);
 
   const toggleTheme = useCallback(() => {
     const themes: ('light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook')[] = ['light', 'dark', 'system', 'xp', 'audible', 'textbook'];

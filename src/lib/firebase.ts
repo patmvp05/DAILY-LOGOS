@@ -37,14 +37,15 @@ export const auth = getAuth(app);
 // Initialize Firestore with persistent local cache for offline-first behavior
 let db;
 try {
+  // If we're using the placeholder, this might fail or be useless, but it prevents the build error
   db = initializeFirestore(app, {
     localCache: persistentLocalCache({ 
       tabManager: persistentMultipleTabManager() 
     })
-  }, firebaseConfig.firestoreDatabaseId || '(default)');
+  }, (firebaseConfig as any).firestoreDatabaseId || '(default)');
 } catch (e) {
   console.warn("Firestore persistent cache failed, falling back to basic init:", e);
-  db = getFirestore(app, firebaseConfig.firestoreDatabaseId || '(default)');
+  db = getFirestore(app, (firebaseConfig as any).firestoreDatabaseId || '(default)');
 }
 export { db };
 

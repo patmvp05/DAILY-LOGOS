@@ -45,7 +45,7 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     const checkInitialSyncDone = () => {
       if (!isInitialLoadComplete.current && initialLoadTracker.current.size >= collectionsToSync.length) {
         isInitialLoadComplete.current = true;
-        dispatch({ type: 'HYDRATE_STATE', state: initialData.current, restoredFromSnapshot: true });
+        dispatch({ type: 'HYDRATE_STATE', state: initialData.current, isCloudData: true });
         setSyncStatus('synced');
       }
     };
