@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { fetchWithProxy } from './api';
+
 export interface WeatherSnapshot {
   tempF: number;
   highF: number;
@@ -67,19 +69,15 @@ export function getCachedWeather(): WeatherSnapshot | null {
 
 export async function fetchWeather(): Promise<WeatherSnapshot> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000);
+  const timeoutId = setTimeout(() => controller.abort(), 12000);
 
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&temperature_unit=fahrenheit&timezone=auto`;
-    const response = await fetch(url, { 
-      mode: 'cors',
-      signal: controller.signal 
-    });
+    const data = await fetchWithProxy(url, controller.signal);
     clearTimeout(timeoutId);
 
-    if (!response.ok) throw new Error('Weather fetch failed');
+    if (!data || !data.current || !data.daily) throw new Error('Weather data invalid');
 
-    const data = await response.json();
     const current = data.current;
     const daily = data.daily;
 
@@ -96,7 +94,7 @@ export async function fetchWeather(): Promise<WeatherSnapshot> {
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify({ snapshot, ts: Date.now() }));
     } catch (e) {
-      // Ignore quota errors or private mode
+      // Ignore quota errors
     }
 
     return snapshot;

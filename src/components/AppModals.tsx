@@ -5,8 +5,8 @@
 
 import { memo, Suspense, lazy } from 'react';
 import ModalLoader from './ModalLoader';
-import { useApp } from '../state/AppContext';
-import { useUi } from '../state/UiContext';
+import { useApp } from '../state/AppContextCore';
+import { useUi } from '../state/UiContextCore';
 import { useAuth } from '../hooks/useAuth';
 import { useReadingActions } from '../hooks/useReadingActions';
 import { exportJournalsAsMarkdown } from '../lib/export';

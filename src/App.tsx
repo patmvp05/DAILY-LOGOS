@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Monitor, Cloud } from 'lucide-react';
 import { format, isToday, parseISO } from 'date-fns';
 
@@ -13,8 +13,8 @@ import { setUserSettings } from './lib/sync';
 import { BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from './constants';
 
 // State & Contexts
-import { useApp } from './state/AppContext';
-import { useUi } from './state/UiContext';
+import { useApp } from './state/AppContextCore';
+import { useUi } from './state/UiContextCore';
 
 // Hooks
 import { useAuth } from './hooks/useAuth';
@@ -35,6 +35,7 @@ import { Toast } from './components/Toast';
 import { AppModals } from './components/AppModals';
 
 export default function App() {
+  console.log("[App] Rendering...");
   const { state, dispatch } = useApp();
   const { 
     showSettings, setShowSettings, showHistory, setShowHistory, 
@@ -46,7 +47,7 @@ export default function App() {
   } = useUi();
 
   const { user, loading: isAuthLoading, login, logout } = useAuth();
-  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isSigningIn, setIsSigningIn] = React.useState(false);
   const dayOfMonth = new Date().getDate();
 
   const { syncStatus, lastSyncTime, showSyncCheck } = useSyncState(user, dispatch);
@@ -55,12 +56,12 @@ export default function App() {
   const { advanceChapter } = useReadingActions(state, dispatch, user);
   const prefersDark = usePrefersDark();
   
-  const todayReadingStats = useMemo(() => {
+  const todayReadingStats = React.useMemo(() => {
     const todayEntries = state.history.filter(
       h => {
         try {
           return isToday(parseISO(h.timestamp));
-        } catch (e) {
+        } catch {
           return false;
         }
       }

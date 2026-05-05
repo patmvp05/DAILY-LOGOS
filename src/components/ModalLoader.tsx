@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useApp } from '../state/AppContext';
+import { useApp } from '../state/AppContextCore';
 import { cn } from '../lib/utils';
 
 export default function ModalLoader() {

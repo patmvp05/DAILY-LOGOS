@@ -7,17 +7,21 @@
 const PROXY_BASE_URL = 'https://bibleproxy-gen-lang-client-0538747272.a.run.app';
 
 export async function fetchWithProxy(url: string, signal?: AbortSignal) {
-  try {
-    // Attempt proxy fetch first to avoid CORS and provide server-side reliability
-    const proxyUrl = `${PROXY_BASE_URL}/bibleProxy?path=${encodeURIComponent(url)}`;
-    const response = await fetch(proxyUrl, { signal });
-    if (response.ok) return await response.json();
-  } catch (e) {
-    console.warn("Proxy fetch failed or not yet deployed, falling back to direct fetch", e);
+  // If we're hitting bolls.life, we definitely want the proxy to avoid CORS
+  if (url.includes('bolls.life')) {
+    try {
+      // Note: If using v2 functions directly on Cloud Run, the path might just be /
+      // If using the default firebase-functions export, it's often /bibleProxy
+      const proxyUrl = `${PROXY_BASE_URL}/bibleProxy?path=${encodeURIComponent(url)}`;
+      const response = await fetch(proxyUrl, { signal });
+      if (response.ok) return await response.json();
+    } catch (e) {
+      console.warn("Proxy fetch failed, falling back to direct fetch", e);
+    }
   }
   
   // Fallback to direct fetch
   const response = await fetch(url, { signal });
   if (response.ok) return await response.json();
-  throw new Error(`Fetch failed: ${response.status}`);
+  throw new Error(`API fetch failed with status ${response.status} for ${url}`);
 }

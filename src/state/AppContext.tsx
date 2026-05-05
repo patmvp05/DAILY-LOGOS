@@ -3,25 +3,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useContext, useReducer, useEffect, useMemo } from 'react';
-import type { ReactNode, Dispatch } from 'react';
-import { AppState } from '../types';
-import { appReducer, AppAction } from './appReducer';
+import React, { useEffect, useMemo, useRef } from 'react';
+import type { ReactNode } from 'react';
+import { appReducer } from './appReducer';
 import { loadState, saveState, loadStateAsync, loadHistorySnapshot } from '../lib/storage';
-import { useDebounce } from '../hooks/useDebounce';
 import { processSyncQueue } from '../lib/sync';
 import { prefetchProverbs } from '../lib/proverbCache';
-
-interface AppContextType {
-  state: AppState;
-  dispatch: Dispatch<AppAction>;
-}
-
-const AppContext = createContext<AppContextType | undefined>(undefined);
+import { AppContext } from './AppContextCore';
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(appReducer, undefined, loadState);
-  const debouncedState = useDebounce(state, 500);
+  console.log("[AppContextProvider] Rendering...");
+  // Use a strictly static initial state first to rule out any issues with loadState
+  const [state, dispatch] = React.useReducer(appReducer, {
+    progress: [],
+    history: [],
+    completedBooks: new Set(),
+    proverbJournals: [],
+    customDevotionals: [],
+    settings: {
+      startDate: new Date().toISOString(),
+      theme: 'system',
+      userName: ''
+    }
+  });
+  const [debouncedState, setDebouncedState] = React.useState(state);
+
+  const hydrated = React.useRef(false);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedState(state);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [state]);
 
   // Sync state to local storage
   useEffect(() => {
@@ -47,6 +61,9 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
 
   // Async Hydration from IndexedDB + Snapshot check
   useEffect(() => {
+    if (hydrated.current) return;
+    hydrated.current = true;
+
     async function hydrate() {
       try {
         const idbState = await loadStateAsync();
@@ -74,7 +91,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       }
     }
     hydrate();
-  }, []);
+  }, [dispatch, state.history.length]);
 
   const value = useMemo(() => ({ state, dispatch }), [state]);
 
@@ -83,12 +100,4 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       {children}
     </AppContext.Provider>
   );
-}
-
-export function useApp() {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error('useApp must be used within an AppContextProvider');
-  }
-  return context;
 }

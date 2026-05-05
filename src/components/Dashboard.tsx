@@ -5,7 +5,6 @@
 
 import React, { useState, useMemo, useEffect, memo } from 'react';
 import { 
-  Check, 
   Layers, 
   Play, 
   ArrowRight, 
@@ -20,9 +19,10 @@ import {
   Plus,
   Bookmark
 } from 'lucide-react';
-import { format, parseISO, isToday, subDays, isSameDay } from 'date-fns';
+import { format, parseISO, isToday, subDays } from 'date-fns';
 import { CATEGORIES, CATEGORIES_BY_ID } from '../constants';
 import { AppState, Progress, HistoryEntry } from '../types';
+import { User } from 'firebase/auth';
 import { cn, computeProgressStats } from '../lib/utils';
 import { XpWindowHeader } from './XpWindowHeader';
 
@@ -41,7 +41,7 @@ interface DashboardProps {
   dayOfMonth: number;
   state: AppState;
   syncStatus: string;
-  user: any;
+  user: User | null;
   isAuthLoading: boolean;
   isSigningIn: boolean;
   setActivePlanCategory: (catId: string) => void;
@@ -412,12 +412,12 @@ function DashboardComponent({
       {/* Right Grid Area: The 7 Sections */}
       <div className="lg:col-span-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          {!user && (
+          {!user && !isAuthLoading && (
             <div 
-              onClick={() => !isAuthLoading && handleLogin(false)}
+              onClick={() => !isSigningIn && handleLogin(false)}
               className={cn(
                 "relative p-6 h-56 border border-evernote bg-evernote/[0.03] flex flex-col justify-between group transition-all duration-300 rounded-xl overflow-hidden cursor-pointer text-left focus:outline-none shadow-sm hover:shadow-md",
-                isAuthLoading && "opacity-60 cursor-wait"
+                isSigningIn && "opacity-60 cursor-wait"
               )}
             >
               <div className="absolute top-0 left-0 w-full h-1.5 bg-evernote" />
@@ -498,10 +498,10 @@ function DashboardComponent({
 }
 
 interface CategoryCardProps {
-  cat: any;
+  cat: typeof CATEGORIES[number];
   idx: number;
   prog: Progress;
-  book: any;
+  book: typeof CATEGORIES[number]['books'][number];
   isDone: boolean;
   bookIsCompleted: boolean;
   info: { firstVerse: string, readTime: number } | undefined;

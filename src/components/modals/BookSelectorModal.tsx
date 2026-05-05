@@ -4,12 +4,12 @@
  */
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Check } from 'lucide-react';
 import { CATEGORIES_BY_ID } from '../../constants';
 import { cn } from '../../lib/utils';
-import { useApp } from '../../state/AppContext';
-import { useUi } from '../../state/UiContext';
+import { useApp } from '../../state/AppContextCore';
+import { useUi } from '../../state/UiContextCore';
 import { useStandaloneDetection } from '../../hooks/useStandaloneDetection';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 

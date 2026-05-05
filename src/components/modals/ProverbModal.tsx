@@ -4,13 +4,13 @@
  */
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, Check, Sparkles, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../../lib/utils';
 import { XpWindowHeader } from '../XpWindowHeader';
-import { useApp } from '../../state/AppContext';
-import { useUi } from '../../state/UiContext';
+import { useApp } from '../../state/AppContextCore';
+import { useUi } from '../../state/UiContextCore';
 
 interface ProverbContent {
   verses?: { verse: number; text: string }[];

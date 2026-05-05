@@ -18,7 +18,7 @@ import {
   deleteJournal as deleteJournalFromCloud,
   resetUserData
 } from '../lib/sync';
-import { useUi } from '../state/UiContext';
+import { useUi } from '../state/UiContextCore';
 
 export function useReadingActions(
   state: AppState, 

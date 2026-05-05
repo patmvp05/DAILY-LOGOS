@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { 
   User as UserIcon, 
   Settings as SettingsIcon, 
@@ -13,7 +13,7 @@ import {
   Book, 
   LogOut 
 } from 'lucide-react';
-import { useUi } from '../state/UiContext';
+import { useUi } from '../state/UiContextCore';
 import { useAuth } from '../hooks/useAuth';
 
 const StartMenu: React.FC = () => {

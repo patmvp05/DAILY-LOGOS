@@ -12,16 +12,35 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check redirect result on mount
-    handleRedirectResult()
-      .catch(err => console.error("Redirect error:", err));
+    let unsubscribed = false;
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
+    const initAuth = async () => {
+      try {
+        // Check redirect result on mount
+        const result = await handleRedirectResult();
+        if (result && !unsubscribed) {
+          setUser(result);
+        }
+      } catch (err) {
+        console.error("Redirect error during init:", err);
+      } finally {
+        // Only stop loading once onAuthStateChanged also fires
+      }
+    };
+
+    initAuth();
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      if (!unsubscribed) {
+        setUser(currentUser);
+        setLoading(false);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribed = true;
+      unsubscribeAuth();
+    };
   }, []);
 
   const login = async (useRedirect = false) => {

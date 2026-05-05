@@ -4,9 +4,9 @@
  */
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ExternalLink, Check } from 'lucide-react';
-import { useUi } from '../../state/UiContext';
+import { useUi } from '../../state/UiContextCore';
 
 const DevotionalModal: React.FC = () => {
   const { activeDevotion, setActiveDevotion } = useUi();

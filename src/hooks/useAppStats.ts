@@ -4,9 +4,8 @@
  */
 
 import { useMemo } from 'react';
-import { format, differenceInDays, parseISO, subDays, isToday, isSameDay } from 'date-fns';
+import { format, differenceInDays, parseISO, subDays } from 'date-fns';
 import { AppState } from '../types';
-import { CATEGORIES } from '../constants';
 import { computeProgressStats } from '../lib/utils';
 
 export function useAppStats(state: AppState) {
@@ -25,7 +24,7 @@ export function useAppStats(state: AppState) {
         // Convert ISO timestamp to local YYYY-MM-DD string
         const dateStr = format(parseISO(h.timestamp), 'yyyy-MM-dd');
         uniqueDays.add(dateStr);
-      } catch (e) {
+      } catch {
         // Fallback for potentially malformed data
         const date = h.timestamp.split('T')[0];
         if (date) uniqueDays.add(date);

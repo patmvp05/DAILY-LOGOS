@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sun, CloudSun, Cloud, CloudFog, CloudRain, CloudSnow, CloudLightning } from 'lucide-react';
 import { fetchWeather, getCachedWeather, WeatherSnapshot } from '../lib/weather';
-import { useApp } from '../state/AppContext';
+import { useApp } from '../state/AppContextCore';
 import { cn } from '../lib/utils';
 
 const WeatherIcon = ({ code, className }: { code: number; className?: string }) => {

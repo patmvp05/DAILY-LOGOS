@@ -4,13 +4,13 @@
  */
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { History, Check, Trash2, Ghost } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '../../lib/utils';
 import { XpWindowHeader } from '../XpWindowHeader';
-import { useApp } from '../../state/AppContext';
-import { useUi } from '../../state/UiContext';
+import { useApp } from '../../state/AppContextCore';
+import { useUi } from '../../state/UiContextCore';
 import { useStandaloneDetection } from '../../hooks/useStandaloneDetection';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 

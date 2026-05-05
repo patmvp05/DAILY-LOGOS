@@ -45,7 +45,6 @@ export { db };
 setPersistence(auth, browserLocalPersistence).catch(err => console.error("Persistence failed:", err));
 
 const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // Step 1: Firestore-safe ID helper
 export const bookKeyToDocId = (key: string): string => {

@@ -3,18 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { syncTracker } from '../lib/sync';
 import { useFirestoreSync } from './useFirestoreSync';
 
 export function useSyncState(user: any, dispatch: any) {
-  const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error' | 'idle' | 'offline'>('idle');
+  const [writeSyncStatus, setWriteSyncStatus] = useState<'synced' | 'syncing' | 'error' | 'idle' | 'offline'>('idle');
+  const [cloudSyncStatus, setCloudSyncStatus] = useState<'idle' | 'syncing' | 'synced' | 'error'>('idle');
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [showSyncCheck, setShowSyncCheck] = useState(false);
 
+  // Deriving global sync status
+  const syncStatus = useMemo(() => {
+    if (writeSyncStatus === 'offline') return 'offline';
+    if (writeSyncStatus === 'syncing' || cloudSyncStatus === 'syncing') return 'syncing';
+    if (writeSyncStatus === 'error' || cloudSyncStatus === 'error') return 'error';
+    return (writeSyncStatus === 'synced' || cloudSyncStatus === 'synced') ? 'synced' : 'idle';
+  }, [writeSyncStatus, cloudSyncStatus]);
+
   useEffect(() => {
     const unsub = syncTracker.subscribe((status) => {
-      setSyncStatus(status);
+      setWriteSyncStatus(status);
       if (status === 'synced') {
         setLastSyncTime(new Date());
         setShowSyncCheck(true);
@@ -25,8 +34,10 @@ export function useSyncState(user: any, dispatch: any) {
   }, []);
 
   const onFirestoreSyncStatusChange = useCallback((status: 'idle' | 'syncing' | 'synced' | 'error') => {
-    setSyncStatus(prev => prev === 'idle' ? status : prev);
-    // Note: lastSyncTime is handled in syncTracker subscription above for logic consistency
+    setCloudSyncStatus(status);
+    if (status === 'synced') {
+      setLastSyncTime(new Date());
+    }
   }, []);
 
   useFirestoreSync(user, dispatch, onFirestoreSyncStatusChange);
