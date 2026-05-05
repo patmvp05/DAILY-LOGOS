@@ -5,6 +5,10 @@ import App from './App.tsx';
 import './index.css';
 import { AppContextProvider } from './state/AppContext';
 import { UiContextProvider } from './state/UiContext';
+import { registerSW } from 'virtual:pwa-register';
+
+// Register service worker
+registerSW({ immediate: true });
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

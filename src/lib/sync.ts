@@ -11,9 +11,28 @@ import {
   writeBatch,
   getDocs
 } from 'firebase/firestore';
-import { db, getUserRef, getProgressCollection, getHistoryCollection, getJournalsCollection, getDevotionalsCollection, getCompletedBooksCollection, bookKeyToDocId } from './firebase';
+import { db, getUserRef, getProgressCollection, getHistoryCollection, getJournalsCollection, getDevotionalsCollection, getCompletedBooksCollection, bookKeyToDocId, getDocsCacheFirst, getDocCacheFirst } from './firebase';
 import { Progress, UserSettings, HistoryEntry, ProverbJournal, Devotional } from '../types';
 import { addToSyncQueue, getSyncQueue, removeFromSyncQueue } from './syncQueue';
+
+/**
+ * Example of a converted read function using cache-first pattern.
+ * High-performance fetch for initial data load.
+ */
+export async function fetchUserStatsCacheFirst(uid: string) {
+  try {
+    const userSnap = await getDocCacheFirst(getUserRef(uid));
+    const historySnap = await getDocsCacheFirst(getHistoryCollection(uid));
+    
+    return {
+      settings: userSnap.exists() ? userSnap.data() as UserSettings : null,
+      historyCount: historySnap.size
+    };
+  } catch (error) {
+    console.error("Cache-first fetch failed:", error);
+    return null;
+  }
+}
 
 type Listener = (status: 'idle' | 'syncing' | 'synced' | 'error' | 'offline') => void;
 let inflight = 0;
@@ -166,7 +185,7 @@ export const resetUserData = wrap('resetUserData', async (uid: string) => {
   ];
   
   await Promise.all(collections.map(async (col) => {
-    const snap = await getDocs(col);
+    const snap = await getDocsCacheFirst(col);
     if (!snap.empty) {
       const batch = writeBatch(db);
       snap.docs.forEach(d => batch.delete(d.ref));

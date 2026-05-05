@@ -23,23 +23,63 @@ import {
   collection, 
   deleteDoc, 
   writeBatch, 
-  onSnapshot 
+  onSnapshot,
+  getDocFromCache,
+  getDocFromServer,
+  getDocsFromCache,
+  getDocsFromServer,
+  getDoc,
+  getDocs,
+  DocumentReference,
+  CollectionReference,
+  Query
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
+// Initialize Firestore with persistent local cache for offline-first behavior
 let db;
 try {
   db = initializeFirestore(app, {
-    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+    localCache: persistentLocalCache({ 
+      tabManager: persistentMultipleTabManager() 
+    })
   }, firebaseConfig.firestoreDatabaseId || '(default)');
 } catch (e) {
-  console.warn("Firestore persistent cache failed, falling back to memory:", e);
+  console.warn("Firestore persistent cache failed, falling back to basic init:", e);
   db = getFirestore(app, firebaseConfig.firestoreDatabaseId || '(default)');
 }
 export { db };
+
+/**
+ * Cache-first document fetcher. 
+ * Tries local IndexedDB cache first for speed, falls back to network if not found or offline.
+ */
+export async function getDocCacheFirst<T>(ref: DocumentReference<T>) {
+  try {
+    // Try cache first
+    return await getDocFromCache(ref);
+  } catch (e) {
+    // Fallback to server if cache miss or error
+    return await getDoc(ref);
+  }
+}
+
+/**
+ * Cache-first collection/query fetcher.
+ */
+export async function getDocsCacheFirst<T>(colOrQuery: CollectionReference<T> | Query<T>) {
+  try {
+    const snap = await getDocsFromCache(colOrQuery);
+    // If we got metadata that says it's from cache and we have docs, we are good
+    if (!snap.empty) return snap;
+    throw new Error("Cache empty");
+  } catch (e) {
+    return await getDocs(colOrQuery);
+  }
+}
 
 // Ensure persistence is set to local storage for better stability on Safari
 setPersistence(auth, browserLocalPersistence).catch(err => console.error("Persistence failed:", err));

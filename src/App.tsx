@@ -29,10 +29,11 @@ import { usePrefersDark } from './hooks/usePrefersDark';
 
 // Components
 import { Navbar } from './components/Navbar';
-import { Dashboard } from './components/Dashboard';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { Toast } from './components/Toast';
-import { AppModals } from './components/AppModals';
+
+const Dashboard = React.lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
+const AppModals = React.lazy(() => import('./components/AppModals').then(m => ({ default: m.AppModals })));
 
 export default function App() {
   console.log("[App] Rendering...");
@@ -126,9 +127,13 @@ export default function App() {
     <div className={cn("min-h-[100dvh] transition-colors duration-300", state.settings.theme === 'xp' ? "theme-xp" : state.settings.theme === 'textbook' ? "theme-textbook" : "bg-[var(--audible-bg)] text-[var(--audible-text-primary)]", state.settings.theme === 'dark' && "dark", state.settings.theme === 'audible' && "audible", (state.settings.theme === 'audible' || state.settings.theme === 'system') && prefersDark && "dark")}>
       <Navbar user={user} syncStatus={syncStatus} lastSyncTime={lastSyncTime} showSyncCheck={showSyncCheck} handleLogin={handleLoginLocal} logout={logout} toggleTheme={toggleTheme} theme={state.settings.theme} setShowHistory={setShowHistory} setShowSettings={setShowSettings} startDate={state.settings.startDate} isDeveloper={user?.email === 'patmvp05@gmail.com'} isSigningIn={isSigningIn} isAuthLoading={isAuthLoading} />
       <main className="pt-20 pb-20">
-        <Dashboard todayReadingStats={todayReadingStats} dayNumber={dayNumber} streak={streak} overallProgress={overallProgress} totalRead={totalRead} totalChaptersCount={totalChaptersCount} lastReadProgress={lastReadProgress} proverbSnippet={proverbSnippet} isFetchingProverb={isFetchingProverb} dayOfMonth={dayOfMonth} state={state} syncStatus={syncStatus} user={user} isAuthLoading={isAuthLoading} isSigningIn={isSigningIn} handleLogin={handleLoginLocal} advanceChapter={advanceChapter} setActivePlanCategory={setActivePlanCategory} setSelectingCategoryId={setSelectingCategoryId} setActiveDevotion={setActiveDevotion} setShowProverbModal={handleShowProverbModal} />
+        <React.Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><div className="w-8 h-8 border-4 border-evernote border-t-transparent rounded-full animate-spin" /></div>}>
+          <Dashboard todayReadingStats={todayReadingStats} dayNumber={dayNumber} streak={streak} overallProgress={overallProgress} totalRead={totalRead} totalChaptersCount={totalChaptersCount} lastReadProgress={lastReadProgress} proverbSnippet={proverbSnippet} isFetchingProverb={isFetchingProverb} dayOfMonth={dayOfMonth} state={state} syncStatus={syncStatus} user={user} isAuthLoading={isAuthLoading} isSigningIn={isSigningIn} handleLogin={handleLoginLocal} advanceChapter={advanceChapter} setActivePlanCategory={setActivePlanCategory} setSelectingCategoryId={setSelectingCategoryId} setActiveDevotion={setActiveDevotion} setShowProverbModal={handleShowProverbModal} />
+        </React.Suspense>
       </main>
-      <AppModals syncStatus={syncStatus} lastSyncTime={lastSyncTime} showSyncCheck={showSyncCheck} isSigningIn={isSigningIn} proverbContent={proverbContent} isFetchingProverb={isFetchingProverb} dayOfMonth={dayOfMonth} />
+      <React.Suspense fallback={null}>
+        <AppModals syncStatus={syncStatus} lastSyncTime={lastSyncTime} showSyncCheck={showSyncCheck} isSigningIn={isSigningIn} proverbContent={proverbContent} isFetchingProverb={isFetchingProverb} dayOfMonth={dayOfMonth} />
+      </React.Suspense>
       <ConfirmDialog isOpen={confirmDialog.isOpen} title={confirmDialog.title} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onClose={closeConfirmDialog} />
       <Toast message={toast?.message || null} type={toast?.type} onClear={() => setToast(null)} />
       {state.settings.theme === 'xp' && (
