@@ -7,7 +7,10 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { syncTracker } from '../lib/sync';
 import { useFirestoreSync } from './useFirestoreSync';
 
-export function useSyncState(user: any, dispatch: any) {
+import { type User } from 'firebase/auth';
+import { type AppAction } from '../state/appReducer';
+
+export function useSyncState(user: User | null, dispatch: React.Dispatch<AppAction>) {
   const [writeSyncStatus, setWriteSyncStatus] = useState<'synced' | 'syncing' | 'error' | 'idle' | 'offline'>('idle');
   const [cloudSyncStatus, setCloudSyncStatus] = useState<'idle' | 'syncing' | 'synced' | 'error'>('idle');
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);

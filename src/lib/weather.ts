@@ -62,7 +62,7 @@ export function getCachedWeather(): WeatherSnapshot | null {
     if (ageMs > 1000 * 60 * 60 * 6) return null;
     
     return snapshot;
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -86,13 +86,18 @@ export async function fetchWeather(): Promise<WeatherSnapshot> {
       const res = await fetch(geoUrl);
       const geoData = await res.json();
       if (geoData) {
-        city = geoData.city || geoData.locality || geoData.principalSubdivision || 'Current Location';
+        // More robust city selection
+        city = geoData.city || 
+               geoData.locality || 
+               geoData.principalSubdivision || 
+               geoData.countryName ||
+               'My Location';
       }
-    } catch (e) {
-      console.warn('Reverse geocoding failed', e);
+    } catch {
+      city = 'My Location';
     }
-  } catch (e) {
-    console.warn('Geolocation failed, using default', e);
+  } catch (err) {
+    console.warn('Geolocation failed, using default', err);
   }
 
   const controller = new AbortController();
@@ -120,7 +125,7 @@ export async function fetchWeather(): Promise<WeatherSnapshot> {
 
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify({ snapshot, ts: Date.now() }));
-    } catch (e) {
+    } catch {
       // Ignore quota errors
     }
 

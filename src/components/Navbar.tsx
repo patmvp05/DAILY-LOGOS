@@ -6,7 +6,6 @@
 import React, { memo, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Plus, 
   LogIn, 
   RefreshCw, 
   Check, 
@@ -15,19 +14,18 @@ import {
   Moon, 
   Monitor, 
   History, 
-  RotateCw,
   FileText,
-  User as UserIcon,
-  Settings 
+  User as UserIcon 
 } from 'lucide-react';
-import { format, parseISO, formatDistanceToNow } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { cn } from '../lib/utils';
 import { useStandaloneDetection } from '../hooks/useStandaloneDetection';
+import { type User } from 'firebase/auth';
 
 const WeatherWidget = lazy(() => import('./WeatherWidget'));
 
 interface NavbarProps {
-  user: any;
+  user: User | null;
   syncStatus: string;
   lastSyncTime: Date | null;
   showSyncCheck: boolean;
@@ -38,7 +36,6 @@ interface NavbarProps {
   setShowHistory: (val: boolean) => void;
   setShowSettings: (val: boolean) => void;
   startDate: string;
-  isDeveloper: boolean;
   isSigningIn: boolean;
   isAuthLoading: boolean;
 }
@@ -55,7 +52,6 @@ const NavbarComponent = memo(({
   setShowHistory,
   setShowSettings,
   startDate,
-  isDeveloper,
   isSigningIn,
   isAuthLoading
 }: NavbarProps) => {

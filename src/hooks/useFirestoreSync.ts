@@ -4,7 +4,17 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+import { 
+  onSnapshot, 
+  query, 
+  orderBy, 
+  limit, 
+  type QuerySnapshot, 
+  type DocumentSnapshot,
+  type DocumentReference,
+  type CollectionReference,
+  type Query
+} from 'firebase/firestore';
 import { type User } from 'firebase/auth';
 import { 
   getUserRef, 
@@ -40,11 +50,11 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
       }
     };
 
-    const setupListener = (
+    const setupListener = <T>(
       name: string, 
-      ref: any, 
+      ref: DocumentReference | CollectionReference | Query, 
       stateKey: keyof AppState | null,
-      onUpdate: (snap: any) => any,
+      onUpdate: (snap: DocumentSnapshot | QuerySnapshot) => T,
       action: AppAction['type']
     ) => {
       let retryCount = 0;
@@ -61,18 +71,18 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
           
           if (!isInitialLoadComplete.current) {
             if (stateKey) {
-              (initialData.current as any)[stateKey] = processedData;
+              (initialData.current as Record<string, unknown>)[stateKey] = processedData;
             }
             initialLoadTracker.current.add(name);
             checkInitialSyncDone();
           } else {
             // After initial load, dispatch normally
             if (action === 'CLOUD_SYNC_USER_DATA') dispatch({ type: action, data: processedData });
-            else if (action === 'CLOUD_SYNC_PROGRESS') dispatch({ type: action, progress: processedData });
+            else if (action === 'CLOUD_SYNC_PROGRESS') dispatch({ type: action, progress: processedData as Progress[] });
             else if (action === 'CLOUD_SYNC_COMPLETED') dispatch({ type: action, completed: Array.from(processedData as Set<string>) });
-            else if (action === 'CLOUD_SYNC_JOURNALS') dispatch({ type: action, journals: processedData });
-            else if (action === 'CLOUD_SYNC_DEVOTIONALS') dispatch({ type: action, devotionals: processedData });
-            else if (action === 'CLOUD_SYNC_HISTORY') dispatch({ type: action, history: processedData });
+            else if (action === 'CLOUD_SYNC_JOURNALS') dispatch({ type: action, journals: processedData as ProverbJournal[] });
+            else if (action === 'CLOUD_SYNC_DEVOTIONALS') dispatch({ type: action, devotionals: processedData as Devotional[] });
+            else if (action === 'CLOUD_SYNC_HISTORY') dispatch({ type: action, history: processedData as HistoryEntry[] });
           }
         }, (err) => {
           console.error(`${name} sync error:`, err);
@@ -95,37 +105,37 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     };
 
     // 1. User Settings
-    setupListener('UserSettings', getUserRef(user.uid), 'settings', (doc) => {
+    setupListener('UserSettings', getUserRef(user.uid), 'settings', (doc: DocumentSnapshot) => {
       return doc.exists() ? doc.data() : { startDate: new Date().toISOString(), theme: 'system' };
     }, 'CLOUD_SYNC_USER_DATA');
 
     // 2. Progress
-    setupListener('Progress', getProgressCollection(user.uid), 'progress', (snap) => {
-      return snap.docs.map((doc: any) => {
+    setupListener('Progress', getProgressCollection(user.uid), 'progress', (snap: QuerySnapshot) => {
+      return snap.docs.map((doc) => {
         const data = doc.data();
-        const updatedAtMillis = data.updatedAt?.toMillis?.() || (data.lastReadAt ? new Date(data.lastReadAt).getTime() : 0);
-        return { ...data, updatedAtMillis } as Progress;
+        const updatedAtMillis = (data.updatedAt as { toMillis?: () => number })?.toMillis?.() || (data.lastReadAt ? new Date(data.lastReadAt as string).getTime() : 0);
+        return { ...data, updatedAtMillis } as unknown as Progress;
       });
     }, 'CLOUD_SYNC_PROGRESS');
 
     // 3. Completed Books
-    setupListener('CompletedBooks', getCompletedBooksCollection(user.uid), 'completedBooks', (snap) => {
-      const completed = snap.docs.map((doc: any) => {
+    setupListener('CompletedBooks', getCompletedBooksCollection(user.uid), 'completedBooks', (snap: QuerySnapshot) => {
+      const completed = snap.docs.map((doc) => {
         const d = doc.data();
         if (d.categoryId && d.bookName) return `${d.categoryId}:${d.bookName}`;
-        return d.key;
+        return d.key as string;
       }).filter((k: string): k is string => !!k);
       return new Set(completed);
     }, 'CLOUD_SYNC_COMPLETED');
 
     // 4. Journals
-    setupListener('Journals', getJournalsCollection(user.uid), 'proverbJournals', (snap) => {
-      return snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as ProverbJournal));
+    setupListener('Journals', getJournalsCollection(user.uid), 'proverbJournals', (snap: QuerySnapshot) => {
+      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as ProverbJournal));
     }, 'CLOUD_SYNC_JOURNALS');
 
     // 5. Devotionals
-    setupListener('Devotionals', getDevotionalsCollection(user.uid), 'customDevotionals', (snap) => {
-      return snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Devotional));
+    setupListener('Devotionals', getDevotionalsCollection(user.uid), 'customDevotionals', (snap: QuerySnapshot) => {
+      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as Devotional));
     }, 'CLOUD_SYNC_DEVOTIONALS');
 
     // 6. History
@@ -134,18 +144,20 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
       orderBy('timestampMillis', 'desc'), 
       limit(HISTORY_CAP)
     );
-    setupListener('History', historyQuery, 'history', (snap) => {
-      return snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as HistoryEntry));
+    setupListener('History', historyQuery, 'history', (snap: QuerySnapshot) => {
+      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as HistoryEntry));
     }, 'CLOUD_SYNC_HISTORY');
 
+    const timeoutsForCleanup = retryTimeouts.current;
+    const trackerForCleanup = initialLoadTracker.current;
+
     return () => {
-      const timeouts = retryTimeouts.current;
       isActive = false;
       currentUnsubs.forEach(u => u());
-      Object.keys(timeouts).forEach(k => {
-        if (timeouts[k]) clearTimeout(timeouts[k]);
+      Object.keys(timeoutsForCleanup).forEach(k => {
+        if (timeoutsForCleanup[k]) window.clearTimeout(timeoutsForCleanup[k]);
       });
-      initialLoadTracker.current.clear();
+      trackerForCleanup.clear();
     };
   }, [user, dispatch, setSyncStatus]);
 }

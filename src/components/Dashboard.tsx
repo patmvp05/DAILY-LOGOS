@@ -89,7 +89,7 @@ function DashboardComponent({
           const dateStr = format(parseISO(entry.timestamp), 'yyyy-MM-dd');
           dates.add(dateStr);
         }
-      } catch (e) {}
+      } catch { /* ignored */ }
     });
     return dates;
   }, [state.history]);
@@ -136,7 +136,7 @@ function DashboardComponent({
 
     loadInfos();
     return () => { active = false; };
-  }, [state.progress]);
+  }, [state.progress, chapterInfos]);
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-8 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 transition-opacity duration-300">

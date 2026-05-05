@@ -5,15 +5,13 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Cloud, RefreshCw, Check, AlertCircle } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { RefreshCw, Check, AlertCircle } from 'lucide-react';
 
 interface SyncStatusBadgeProps {
   status: 'synced' | 'syncing' | 'error' | 'idle';
-  lastSyncTime: Date | null;
 }
 
-export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({ status, lastSyncTime }) => {
+export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({ status }) => {
   if (status === 'idle') return null;
 
   return (

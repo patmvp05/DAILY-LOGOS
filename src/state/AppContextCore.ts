@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import type { Dispatch } from 'react';
 import { AppState } from '../types';
 import { AppAction } from '../state/appReducer';

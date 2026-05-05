@@ -122,12 +122,20 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
       </div>
 
       <div className="flex lg:hidden flex-col leading-tight">
-        <span className={cn(
-          "text-sm font-black tracking-tighter",
-          isXP ? "text-black" : "text-[var(--audible-text-primary)]"
-        )}>
-          {weather.tempF}°F
-        </span>
+        <div className="flex items-baseline gap-1">
+          <span className={cn(
+            "text-sm font-black tracking-tighter",
+            isXP ? "text-black" : "text-[var(--audible-text-primary)]"
+          )}>
+            {weather.tempF}°F
+          </span>
+          <span className={cn(
+            "text-[7px] uppercase font-black tracking-tight opacity-60 truncate max-w-[50px]",
+            isXP ? "text-[#003C74]" : "text-[var(--audible-text-secondary)]"
+          )}>
+            {weather.city}
+          </span>
+        </div>
         <span className={cn(
           "text-[8px] font-bold tracking-tight opacity-70",
           isXP ? "text-[#003C74]" : "text-[var(--audible-text-secondary)]"

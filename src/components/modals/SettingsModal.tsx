@@ -183,9 +183,10 @@ interface SettingsModalProps {
                       key={id}
                       type="button"
                       onClick={() => {
-                        dispatch({ type: 'SET_THEME', theme: id as any });
+                        const themeId = id as AppState['settings']['theme'];
+                        dispatch({ type: 'SET_THEME', theme: themeId });
                         if (user) {
-                          setUserSettings(user.uid, { theme: id as any, startDate: state.settings.startDate });
+                          setUserSettings(user.uid, { theme: themeId, startDate: state.settings.startDate });
                         }
                       }}
                       className={cn(

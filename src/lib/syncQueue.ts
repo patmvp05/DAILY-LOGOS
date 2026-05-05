@@ -10,7 +10,7 @@ const QUEUE_KEY = 'daily_logos_sync_queue';
 export interface PendingAction {
   id: string;
   type: 'writeActionBatch' | 'writeCompletedBook' | 'deleteCompletedBook' | 'writeJournal' | 'deleteJournal' | 'setUserSettings' | 'resetUserData';
-  payload: any;
+  payload: unknown[];
   timestamp: number;
 }
 
@@ -30,7 +30,7 @@ export async function getSyncQueue(): Promise<PendingAction[]> {
   try {
     const queue = await get(QUEUE_KEY);
     return Array.isArray(queue) ? queue : [];
-  } catch (e) {
+  } catch {
     return [];
   }
 }

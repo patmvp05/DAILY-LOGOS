@@ -64,16 +64,9 @@ export const loadState = (): AppState => {
     completedBooks: new Set<string>(),
   };
 
-  let stored: string | null = null;
   try {
-    stored = localStorage.getItem(STORAGE_KEY);
-  } catch (error) {
-    console.warn("localStorage access failed:", error);
-    return defaultState;
-  }
-  if (!stored) return defaultState;
-
-  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return defaultState;
     const parsed = JSON.parse(stored);
     return {
       progress: parsed.progress || defaultState.progress,
@@ -84,6 +77,7 @@ export const loadState = (): AppState => {
       completedBooks: parsed.completedBooks ? new Set(parsed.completedBooks) : defaultState.completedBooks,
     };
   } catch (error) {
+    console.warn("Storage load failed:", error);
     return defaultState;
   }
 };
@@ -149,7 +143,7 @@ export const saveState = async (state: AppState) => {
 export const loadHistorySnapshot = async (): Promise<{ data: HistoryEntry[], timestamp: number } | null> => {
   try {
     return await get(SNAPSHOT_KEY);
-  } catch (e) {
+  } catch {
     return null;
   }
 };

@@ -13,7 +13,7 @@ export type AppAction =
   | { type: 'CLOUD_SYNC_JOURNALS', journals: ProverbJournal[] }
   | { type: 'CLOUD_SYNC_DEVOTIONALS', devotionals: Devotional[] }
   | { type: 'CLOUD_SYNC_HISTORY', history: HistoryEntry[] }
-  | { type: 'CLOUD_SYNC_USER_DATA', data: any }
+  | { type: 'CLOUD_SYNC_USER_DATA', data: { startDate?: string; theme?: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook' } }
   | { type: 'UPDATE_PROGRESS', categoryId: string, bookIndex: number, chapter: number }
   | { type: 'TOGGLE_BOOK', key: string }
   | { type: 'JUMP_TO_BOOK', categoryId: string, bookIndex: number, key: string }
@@ -33,7 +33,7 @@ export const HISTORY_CAP = 50; // User requested cap at 50 during cleanup
  * Checks if two lists of objects are likely identical using a fast fingerprint.
  * (Same length + same first/last IDs)
  */
-function isFingerprintMatch(a: any[], b: any[]): boolean {
+function isFingerprintMatch<T extends { id: string }>(a: T[], b: T[]): boolean {
   if (a.length !== b.length) return false;
   if (a.length === 0) return true;
   return a[0].id === b[0].id && a[a.length - 1].id === b[b.length - 1].id;
@@ -88,7 +88,7 @@ function mergeAppState(current: AppState, incoming: Partial<AppState>): AppState
   if (incoming.completedBooks) {
     const incomingSet = incoming.completedBooks instanceof Set 
       ? incoming.completedBooks 
-      : new Set(incoming.completedBooks as any);
+      : new Set(incoming.completedBooks as string[]);
     
     if (incomingSet.size === 0 && current.completedBooks.size > 0) {
       // Don't overwrite

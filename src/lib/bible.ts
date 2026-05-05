@@ -32,8 +32,8 @@ export function calculateNextProgress(
   let chaptersToMove = amount;
   let currentBookIndex = currentProgress.bookIndex;
   let currentChapter = currentProgress.chapter;
-  let newlyCompletedKeys: string[] = [];
-  let historySteps: HistoryStep[] = [];
+  const newlyCompletedKeys: string[] = [];
+  const historySteps: HistoryStep[] = [];
 
   if (chaptersToMove > 0) {
     while (chaptersToMove > 0) {
@@ -60,7 +60,6 @@ export function calculateNextProgress(
         } else {
           // Stay at last chapter of last book
           // We already recorded the last chapter as read
-          chaptersToMove = 0;
           break;
         }
       }
@@ -77,14 +76,13 @@ export function calculateNextProgress(
         currentChapter = category.books[currentBookIndex].chapters;
         
         // Remove book from completed if we move back into it
-        const bookKey = `${categoryId}:${category.books[currentBookIndex].name}`;
-        if (completedBooks.has(bookKey)) {
+        // const bookKey = `${categoryId}:${category.books[currentBookIndex].name}`;
+        // if (completedBooks.has(bookKey)) {
           // Note: newlyCompletedKeys doesn't track removals usually, 
           // but we can't easily undo in this pure function without changing signature.
-        }
+        // }
       } else {
         currentChapter = 1;
-        backSteps = 0;
         break;
       }
       backSteps--;

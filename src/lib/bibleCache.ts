@@ -28,7 +28,7 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
   let cached = null;
   try {
     cached = localStorage.getItem(cacheKey);
-  } catch (e) {
+  } catch {
     console.warn("localStorage access denied in bibleCache");
   }
   
@@ -37,8 +37,8 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
       const parsed = JSON.parse(cached);
       memoryCache.set(cacheKey, parsed);
       return parsed;
-    } catch (e) {
-      try { localStorage.removeItem(cacheKey); } catch(_) {}
+    } catch {
+      try { localStorage.removeItem(cacheKey); } catch { /* ignored */ }
     }
   }
 
@@ -48,7 +48,7 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
 
   try {
     const bookId = BOLLS_BIBLE_BOOK_IDS[bookName] || 1;
-    let data: any[] | null = null;
+    let data: { text?: string; content?: string }[] | string[] | null = null;
 
     if (bookName === 'Proverbs') {
       // Proverbs should try ESV first via API for consistent translation
@@ -56,15 +56,15 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
         try {
           const apiData = await fetchWithProxy(`https://bolls.life/get-chapter/${trans}/20/${chapter}/`, controller.signal);
           if (Array.isArray(apiData)) {
-            data = apiData;
+            data = apiData as { text?: string; content?: string }[];
             break;
           }
-        } catch (e) {}
+        } catch { /* ignored */ }
       }
     } else {
       try {
-        data = await fetchWithProxy(`https://bolls.life/get-chapter/KJV/${bookId}/${chapter}/`, controller.signal);
-      } catch (e) {
+        data = await fetchWithProxy(`https://bolls.life/get-chapter/KJV/${bookId}/${chapter}/`, controller.signal) as { text?: string; content?: string }[];
+      } catch {
         data = null;
       }
     }
@@ -76,10 +76,10 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
         if (response.ok) {
           const apiData = await response.json();
           if (apiData.verses && apiData.verses.length > 0) {
-            data = apiData.verses;
+            data = apiData.verses as { text?: string; content?: string }[];
           }
         }
-      } catch (e) {}
+      } catch { /* ignored */ }
     }
     
     if (!data || !Array.isArray(data)) throw new Error("Invalid response format or data not found");
@@ -100,7 +100,7 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
           .trim() 
       : "Text not available";
     
-    const wordCount = data.reduce((acc: number, v: any) => {
+    const wordCount = data.reduce((acc: number, v: string | { text?: string; content?: string }) => {
       const textVal = typeof v === 'string' ? v : (v.text || v.content || "");
       const cleanText = textVal.replace(/<S>[^<]*<\/S>/gi, '').replace(/<[^>]*>/g, '').trim();
       return acc + (cleanText ? cleanText.split(/\s+/).length : 0);
@@ -117,7 +117,7 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
     memoryCache.set(cacheKey, result);
     try {
       localStorage.setItem(cacheKey, JSON.stringify(result));
-    } catch (e) {
+    } catch {
       console.warn("Failed to cache bible chapter info");
     }
     

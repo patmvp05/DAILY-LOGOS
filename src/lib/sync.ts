@@ -8,12 +8,11 @@ import {
   setDoc, 
   deleteDoc, 
   serverTimestamp,
-  writeBatch,
-  getDocs
+  writeBatch
 } from 'firebase/firestore';
 import { db, getUserRef, getProgressCollection, getHistoryCollection, getJournalsCollection, getDevotionalsCollection, getCompletedBooksCollection, bookKeyToDocId, getDocsCacheFirst, getDocCacheFirst } from './firebase';
-import { Progress, UserSettings, HistoryEntry, ProverbJournal, Devotional } from '../types';
-import { addToSyncQueue, getSyncQueue, removeFromSyncQueue } from './syncQueue';
+import { Progress, UserSettings, HistoryEntry, ProverbJournal } from '../types';
+import { addToSyncQueue, getSyncQueue, removeFromSyncQueue, type PendingAction } from './syncQueue';
 
 /**
  * Example of a converted read function using cache-first pattern.
@@ -171,11 +170,11 @@ const _resetUserData = async (uid: string) => {
   });
 };
 
-const wrap = <T extends (...args: any[]) => Promise<any>>(type: string, fn: T): T => {
+const wrap = <T extends (...args: unknown[]) => Promise<unknown>>(type: string, fn: T): T => {
   return (async (...args: Parameters<T>) => {
     if (!navigator.onLine) {
       console.log(`[Sync] Offline. Queuing ${type}`);
-      await addToSyncQueue({ type: type as any, payload: args });
+      await addToSyncQueue({ type: type as PendingAction['type'], payload: args as unknown[] });
       notify();
       return;
     }
@@ -185,9 +184,9 @@ const wrap = <T extends (...args: any[]) => Promise<any>>(type: string, fn: T): 
       const result = await fn(...args);
       syncTracker.end(true);
       return result;
-    } catch (e) {
-      console.warn(`[Sync] Action ${type} failed, queuing for retry:`, e);
-      await addToSyncQueue({ type: type as any, payload: args });
+    } catch (_e) {
+      console.warn(`[Sync] Action ${type} failed, queuing for retry:`, _e);
+      await addToSyncQueue({ type: type as PendingAction['type'], payload: args as unknown[] });
       syncTracker.end(false);
     }
   }) as T;
@@ -214,14 +213,14 @@ export async function processSyncQueue() {
   syncTracker.begin();
 
   // Mapping of action types to their internal implementations
-  const handlers: Record<string, (...args: any[]) => Promise<void>> = {
-    writeCompletedBook: _writeCompletedBook,
-    deleteCompletedBook: _deleteCompletedBook,
-    writeJournal: _writeJournal,
-    deleteJournal: _deleteJournal,
-    writeActionBatch: _writeActionBatch,
-    setUserSettings: _setUserSettings,
-    resetUserData: _resetUserData,
+  const handlers: Record<string, (...args: unknown[]) => Promise<void>> = {
+    writeCompletedBook: _writeCompletedBook as (...args: unknown[]) => Promise<void>,
+    deleteCompletedBook: _deleteCompletedBook as (...args: unknown[]) => Promise<void>,
+    writeJournal: _writeJournal as (...args: unknown[]) => Promise<void>,
+    deleteJournal: _deleteJournal as (...args: unknown[]) => Promise<void>,
+    writeActionBatch: _writeActionBatch as (...args: unknown[]) => Promise<void>,
+    setUserSettings: _setUserSettings as (...args: unknown[]) => Promise<void>,
+    resetUserData: _resetUserData as (...args: unknown[]) => Promise<void>,
   };
 
   for (const action of queue) {

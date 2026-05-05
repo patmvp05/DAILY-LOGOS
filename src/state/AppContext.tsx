@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { appReducer } from './appReducer';
-import { loadState, saveState, loadStateAsync, loadHistorySnapshot } from '../lib/storage';
+import { saveState, loadStateAsync, loadHistorySnapshot } from '../lib/storage';
 import { processSyncQueue } from '../lib/sync';
 import { prefetchProverbs } from '../lib/proverbCache';
 import { AppContext } from './AppContextCore';

@@ -20,10 +20,12 @@ import {
 } from '../lib/sync';
 import { useUi } from '../state/UiContextCore';
 
+import { type User } from 'firebase/auth';
+
 export function useReadingActions(
   state: AppState, 
   dispatch: Dispatch<AppAction>, 
-  user: any // Ideally use a more specific User type
+  user: User | null
 ) {
   const { showToast, setConfirmDialog, setJournalDraft, setShowProverbModal, setSelectingCategoryId } = useUi();
   
@@ -39,12 +41,13 @@ export function useReadingActions(
   }, [state, dispatch, user]);
 
   const pendingTaps = useRef<Record<string, number>>({});
-  const flushTimeouts = useRef<Record<string, any>>({});
+  const flushTimeouts = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   // Cleanup pending flushes on unmount
   useEffect(() => {
+    const currentTimeouts = flushTimeouts.current;
     return () => {
-      Object.values(flushTimeouts.current).forEach(clearTimeout);
+      Object.values(currentTimeouts).forEach(clearTimeout);
     };
   }, []);
 
@@ -92,7 +95,7 @@ export function useReadingActions(
           const [catId, bookName] = k.split(':');
           return { categoryId: catId, bookName };
         })
-      }).catch(e => console.error("Sync failed:", e));
+      }).catch(err => console.error("Sync failed:", err));
     }
   }, []);
 
@@ -222,7 +225,7 @@ export function useReadingActions(
         };
         dispatch({ type: 'REPLACE_STATE', state: newState });
         if (user) {
-          await resetUserData(user.uid).catch(e => console.error("Reset sync failed:", e));
+          await resetUserData(user.uid).catch(err => console.error("Reset sync failed:", err));
         }
         showToast("Plan restarted!", "success");
       }
@@ -237,7 +240,7 @@ export function useReadingActions(
       (() => {
         try {
           return isToday(parseISO(h.timestamp));
-        } catch (e) {
+        } catch {
           return false;
         }
       })()
@@ -259,7 +262,7 @@ export function useReadingActions(
     if (user) {
       writeActionBatch(user.uid, {
         history: [entry]
-      }).catch(e => console.error("Proverb sync failed:", e));
+      }).catch(err => console.error("Proverb sync failed:", err));
     }
     triggerHaptic('medium');
   }, [state.history, user, dispatch]);

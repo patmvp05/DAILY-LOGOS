@@ -21,13 +21,8 @@ import {
   getFirestore,
   doc, 
   collection, 
-  deleteDoc, 
-  writeBatch, 
-  onSnapshot,
   getDocFromCache,
-  getDocFromServer,
   getDocsFromCache,
-  getDocsFromServer,
   getDoc,
   getDocs,
   DocumentReference,
@@ -61,7 +56,7 @@ export async function getDocCacheFirst<T>(ref: DocumentReference<T>) {
   try {
     // Try cache first
     return await getDocFromCache(ref);
-  } catch (e) {
+  } catch {
     // Fallback to server if cache miss or error
     return await getDoc(ref);
   }
@@ -76,7 +71,7 @@ export async function getDocsCacheFirst<T>(colOrQuery: CollectionReference<T> | 
     // If we got metadata that says it's from cache and we have docs, we are good
     if (!snap.empty) return snap;
     throw new Error("Cache empty");
-  } catch (e) {
+  } catch {
     return await getDocs(colOrQuery);
   }
 }

@@ -37,7 +37,7 @@ const lazyPrune = () => {
           localStorage.removeItem(key);
         }
       }
-    } catch (e) {
+    } catch {
       console.warn("Background cache pruning failed");
     }
   }, 0);
@@ -54,7 +54,7 @@ export async function prefetchProverbs() {
   for (const d of days) {
     try {
       await getProverb(d);
-    } catch (e) {
+    } catch {
       // Ignore prefetch failures
     }
   }
@@ -78,7 +78,7 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
       lazyPrune();
       return cached;
     }
-  } catch (e) {
+  } catch {
     // Continue To Fetch
   }
   
@@ -87,7 +87,7 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
   const timeoutId = setTimeout(() => controller.abort(), 10000);
 
   try {
-    let data: any = null;
+    let data: { map: Record<string, string>; trans: string } | null = null;
     
     // 1. Try Bolls.life API as primary source (ESV then KJV)
     for (const trans of ['ESV', 'KJV']) {
@@ -102,12 +102,12 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
           const apiData = await fetchWithProxy(url, controller.signal);
           if (Array.isArray(apiData) && apiData.length > 0) {
             const map: Record<string, string> = {};
-            apiData.forEach((v: any) => { map[v.verse.toString()] = v.text; });
+            apiData.forEach((v: { verse: number; text: string }) => { map[v.verse.toString()] = v.text; });
             data = { map, trans };
             break; 
           }
-        } catch (e) {
-          console.warn(`Bolls.life fetch failed for ${url}`, e);
+        } catch (_e) {
+          console.warn(`Bolls.life fetch failed for ${url}`, _e);
         }
       }
     }
@@ -121,20 +121,20 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
           const apiData = await response.json();
           if (apiData.verses && apiData.verses.length > 0) {
             const map: Record<string, string> = {};
-            apiData.verses.forEach((v: any) => { map[v.verse.toString()] = v.text; });
+            apiData.verses.forEach((v: { verse: number; text: string }) => { map[v.verse.toString()] = v.text; });
             data = { map, trans: 'KJV (Fallback)' };
           }
         }
-      } catch (e) {
-        console.error("Bible-api.com fallback failed", e);
+      } catch (_e) {
+        console.error("Bible-api.com fallback failed", _e);
       }
     }
 
     if (!data) throw new Error(`Proverbs chapter ${chapter} could not be loaded from any source.`);
 
     // Robust extraction of verses
-    const verses = Object.entries(data.map as Record<string, string>).map(([v, text]) => {
-      const textVal = typeof text === 'string' ? text : ((text as any).text || (text as any).content || "");
+    const verses = Object.entries(data.map).map(([v, text]) => {
+      const textVal = typeof text === 'string' ? text : (((text as unknown) as { text?: string; content?: string }).text || ((text as unknown) as { text?: string; content?: string }).content || "");
       return {
         verse: parseInt(v),
         text: textVal.replace(/<S>[^<]*<\/S>/gi, '').replace(/<[^>]*>/g, '').trim()
@@ -158,7 +158,7 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
       await set(cacheKey, result);
       // Trigger lazy pruning after a successful write
       lazyPrune();
-    } catch (e) {
+    } catch {
       console.warn("Failed to cache proverb likely due to storage limits or private mode");
     }
     
