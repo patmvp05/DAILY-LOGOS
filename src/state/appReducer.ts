@@ -224,7 +224,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       
       const nextSettings = { ...state.settings };
       // Only default if truly missing AND we've loaded cloud data (to avoid race conditions)
-      if (!nextSettings.startDate && state.isCloudHydrated) {
+      // AND we are strictly on the very first chapter of the very first book.
+      // This prevents resetting the start date for people who are mid-plan but somehow lost their startDate field.
+      if (!nextSettings.startDate && state.isCloudHydrated && action.bookIndex === 0 && action.chapter === 1) {
         nextSettings.startDate = now;
       }
 

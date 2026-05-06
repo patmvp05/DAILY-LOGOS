@@ -89,7 +89,19 @@ interface SettingsModalProps {
           />
         )}
         <div className={cn("flex justify-between items-center mb-8 shrink-0", state.settings.theme === 'xp' && "p-6")}>
-          <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[var(--audible-text-primary)]">Configuration</h3>
+          <div>
+            <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[var(--audible-text-primary)]">Configuration</h3>
+            {showSyncCheck && lastSyncTime && (
+              <p className="text-[9px] font-black uppercase text-evernote animate-in fade-in transition-all">
+                Cloud Synced at {format(lastSyncTime, 'h:mm:ss a')}
+              </p>
+            )}
+            {syncStatus === 'syncing' && (
+              <p className="text-[9px] font-black uppercase text-amber-500 animate-pulse">
+                Syncing changes...
+              </p>
+            )}
+          </div>
           <button onClick={onClose} className="text-[var(--audible-text-secondary)] hover:text-evernote p-2 transition-colors">
             <Check size={28} strokeWidth={2.5} />
           </button>

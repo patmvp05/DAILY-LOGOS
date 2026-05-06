@@ -8,12 +8,8 @@ import {
   onSnapshot, 
   query, 
   orderBy, 
-  limit, 
   type QuerySnapshot, 
   type DocumentSnapshot,
-  type DocumentReference,
-  type CollectionReference,
-  type Query
 } from 'firebase/firestore';
 import { type User } from 'firebase/auth';
 import { 
@@ -24,8 +20,8 @@ import {
   getDevotionalsCollection, 
   getCompletedBooksCollection 
 } from '../lib/firebase';
-import { AppAction, HISTORY_CAP } from '../state/appReducer';
-import { Progress, HistoryEntry, ProverbJournal, Devotional, AppState } from '../types';
+import { AppAction } from '../state/appReducer';
+import { Progress, HistoryEntry, ProverbJournal, Devotional, AppState, UserSettings } from '../types';
 
 export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<AppAction>, setSyncStatus: (status: 'synced' | 'syncing' | 'error' | 'idle') => void) {
   const retryTimeouts = useRef<Record<string, number>>({});
@@ -105,26 +101,32 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     };
 
     // 1. User Settings
-    setupListener<DocumentSnapshot, any>('UserSettings', getUserRef(user.uid), 'settings', (doc) => {
+    setupListener<DocumentSnapshot, UserSettings>('UserSettings', getUserRef(user.uid), 'settings', (doc) => {
       if (!doc.exists()) {
         console.log("[Sync] UserSettings document does not exist on server/cache.");
-        return { theme: 'system' };
+        return { theme: 'system', startDate: '', userName: '' };
       }
       
       const data = doc.data() as any;
-      const settings: any = { ...data };
-      const fromCache = doc.metadata.fromCache;
+      const settings: UserSettings = { 
+        theme: data.theme || 'system',
+        startDate: '',
+        userName: data.userName || ''
+      };
       
       // Handle potential Timestamp or string for both startDate and planStartDate
       const rawStart = data.startDate || data.planStartDate;
       if (rawStart) {
-        settings.startDate = (typeof rawStart === 'string') 
-          ? rawStart 
-          : rawStart.toDate?.()?.toISOString() || new Date().toISOString();
+        if (typeof rawStart === 'string') {
+          settings.startDate = rawStart;
+        } else if (rawStart && typeof rawStart === 'object' && 'toMillis' in rawStart) {
+          settings.startDate = new Date((rawStart as any).toMillis()).toISOString();
+        } else if (rawStart && typeof rawStart === 'object' && 'seconds' in rawStart) {
+          settings.startDate = new Date((rawStart as any).seconds * 1000).toISOString();
+        }
       }
       
-      console.log(`[Sync] UserSettings loaded (fromCache: ${fromCache}):`, settings.startDate);
-      
+      console.log(`[Sync] UserSettings loaded:`, settings.startDate);
       return settings;
     }, 'CLOUD_SYNC_USER_DATA');
 

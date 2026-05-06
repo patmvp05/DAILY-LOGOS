@@ -5,9 +5,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sun, CloudSun, Cloud, CloudFog, CloudRain, CloudSnow, CloudLightning, Pencil } from 'lucide-react';
-import { fetchWeather, getCachedWeather, WeatherSnapshot, saveLocation } from '../lib/weather';
+import { fetchWeather, getCachedWeather, WeatherSnapshot } from '../lib/weather';
 import { useApp } from '../state/AppContextCore';
 import { cn } from '../lib/utils';
+import { get, set } from 'idb-keyval';
 
 const WeatherIcon = ({ code, className }: { code: number; className?: string }) => {
   if (code === 0 || code === 1) return <Sun className={cn("text-amber-500", className)} size={28} />;
@@ -34,11 +35,72 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
   const { state } = useApp();
   const theme = state.settings.theme;
 
-  const refresh = useCallback(async (lat?: number, lon?: number, name?: string) => {
+  const refresh = useCallback(async (manualLat?: number, manualLng?: number, manualName?: string) => {
     if (!navigator.onLine) return;
     setIsRefreshing(true);
+    
     try {
-      const fresh = await fetchWeather(lat, lon, name);
+      let lat: number;
+      let lng: number;
+      let city: string = '';
+      let source: 'geolocation' | 'cache' | 'fallback' = 'fallback';
+
+      // a) Load cached coords
+      const cached = await get<{ lat: number, lng: number, city: string, timestamp: number }>('weather-coords');
+      const oneHour = 3600000;
+
+      if (manualLat !== undefined && manualLng !== undefined) {
+        lat = manualLat;
+        lng = manualLng;
+        city = manualName || '';
+        source = 'cache';
+      } else if (cached && cached.timestamp && (Date.now() - cached.timestamp < oneHour)) {
+        // b) Use fresh cache
+        lat = cached.lat;
+        lng = cached.lng;
+        city = cached.city || '';
+        source = 'cache';
+      } else {
+        // c) Request geolocation
+        try {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { 
+              timeout: 5000, 
+              maximumAge: 3600000 
+            });
+          });
+          lat = pos.coords.latitude;
+          lng = pos.coords.longitude;
+          source = 'geolocation';
+        } catch (err) {
+          console.warn('[DL-DEBUG] Geolocation failed:', (err as Error).message);
+          // Fallback to cached coords if available, otherwise HCMC defaults
+          const fallback = cached || { lat: 10.8231, lng: 106.6297, city: 'Ho Chi Minh City' };
+          lat = fallback.lat;
+          lng = fallback.lng;
+          city = fallback.city || 'Ho Chi Minh City';
+          source = cached ? 'cache' : 'fallback';
+        }
+      }
+
+      // d) Reverse geocoding
+      if (!city || source === 'geolocation') {
+        try {
+          const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+          const geoData = await geoRes.json();
+          city = geoData.city || geoData.locality || 'Unknown';
+        } catch {
+          city = city || 'Unknown';
+        }
+      }
+
+      // Update cache with fresh timestamp and city
+      await set('weather-coords', { lat, lng, city, timestamp: Date.now() });
+
+      // e) Debug log
+      console.log('[DL-DEBUG] Weather coords:', { lat, lng, source });
+
+      const fresh = await fetchWeather(lat, lng, city);
       setWeather(fresh);
     } catch (e) {
       console.error('Weather refresh failed', e);
@@ -53,14 +115,6 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
     
     setIsRefreshing(true);
     try {
-      // Very basic "geocoding" check: if user typed "London", we'd ideally need a real geocoder.
-      // But per instructions to use current APIs, I'll use bigdatacloud to "search" or just use IP if they clear it.
-      // Instructions say: "Show a small 'Change location' pencil icon next to the city name so the user can manually override it if both methods are wrong."
-      
-      // Since I don't have a full search API easily at hand without keys, 
-      // I'll at least allow them to "Reset" or I'll use a public search endpoint.
-      // Actually, instructions just say "manually override it".
-      // I'll use Nominatim (OpenStreetMap) for a quick free geocode.
       const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(tempCity)}&limit=1`);
       const data = await res.json();
       if (data && data.length > 0) {
@@ -78,7 +132,7 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
   };
 
   useEffect(() => {
-    const mounted = true;
+    let mounted = true;
     const init = async () => {
       if (mounted) await refresh();
     };
@@ -92,6 +146,7 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
 
     document.addEventListener('visibilitychange', handleVisibility);
     return () => {
+      mounted = false;
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [refresh]);

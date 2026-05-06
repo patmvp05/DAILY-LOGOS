@@ -8,9 +8,22 @@ import {
   setDoc, 
   deleteDoc, 
   serverTimestamp,
-  writeBatch
+  writeBatch,
+  getDoc
 } from 'firebase/firestore';
-import { db, getUserRef, getProgressCollection, getHistoryCollection, getJournalsCollection, getDevotionalsCollection, getCompletedBooksCollection, bookKeyToDocId, getDocsCacheFirst, getDocCacheFirst } from './firebase';
+import { 
+  db, 
+  getUserRef, 
+  getProgressCollection, 
+  getHistoryCollection, 
+  getJournalsCollection, 
+  getDevotionalsCollection, 
+  getCompletedBooksCollection, 
+  bookKeyToDocId, 
+  getDocsCacheFirst, 
+  getDocCacheFirst 
+} from './firebase';
+import { type User } from 'firebase/auth';
 import { Progress, UserSettings, HistoryEntry, ProverbJournal } from '../types';
 import { addToSyncQueue, getSyncQueue, removeFromSyncQueue, type PendingAction } from './syncQueue';
 
@@ -140,11 +153,55 @@ const _writeActionBatch = async (uid: string, actions: {
 
 const _setUserSettings = async (uid: string, settings: Partial<UserSettings>) => {
   const ref = getUserRef(uid);
-  await setDoc(ref, {
+  
+  // Ensure we don't accidentally overwrite startDate with empty/invalid values
+  // unless explicitly requested (e.g. from the settings modal date picker)
+  const dataToUpdate: any = {
     ...settings,
     updatedAt: serverTimestamp()
-  }, { merge: true });
+  };
+
+  await setDoc(ref, dataToUpdate, { merge: true });
 };
+
+export async function initializeUser(user: User) {
+  const userRef = getUserRef(user.uid);
+  
+  try {
+    // Force a fresh fetch from server to be absolutely sure about existence
+    // avoid race conditions during rapid login/redirect triggers
+    const userSnap = await getDoc(userRef);
+    
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      // If the doc exists but is somehow missing a startDate, we still don't want 
+      // to blindly overwrite it here. We'll let the app reducer handle defaults 
+      // to avoid 'reset to today' bugs on every sign in.
+      console.log('[DL-DEBUG] initializeUser: Existing user document found.', { 
+        hasStartDate: !!userData.startDate,
+        uid: user.uid 
+      });
+      return userData;
+    } else {
+      // NEW USER ONLY — set startDate to today
+      const now = new Date().toISOString();
+      const newUser = {
+        startDate: now,
+        theme: 'system',
+        updatedAt: now,
+        createdAt: serverTimestamp()
+      };
+      
+      console.log('[DL-DEBUG] initializeUser: Creating NEW user document.', { uid: user.uid });
+      // Use merge: true just in case another login trigger created it 10ms ago
+      await setDoc(userRef, newUser, { merge: true });
+      return newUser;
+    }
+  } catch (error) {
+    console.error("[Sync] initializeUser failed:", error);
+    throw error;
+  }
+}
 
 const _resetUserData = async (uid: string) => {
   const collections = [

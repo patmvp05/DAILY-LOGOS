@@ -17,7 +17,7 @@ const DEFAULT_PROGRESS: Progress[] = CATEGORIES.map((cat) => ({
 }));
 
 const DEFAULT_SETTINGS: UserSettings = {
-  startDate: new Date().toISOString(),
+  startDate: '',
   theme: 'system',
 };
 

@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from 'react';
-import { format, differenceInDays, differenceInCalendarDays, parseISO, subDays } from 'date-fns';
+import { format, differenceInCalendarDays, parseISO, subDays } from 'date-fns';
 import { AppState } from '../types';
 import { computeProgressStats } from '../lib/utils';
 
