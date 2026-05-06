@@ -19,7 +19,7 @@ export type AppAction =
   | { type: 'JUMP_TO_BOOK', categoryId: string, bookIndex: number, key: string }
   | { type: 'UPSERT_JOURNAL', journal: ProverbJournal }
   | { type: 'DELETE_JOURNAL', id: string }
-  | { type: 'SET_THEME', theme: 'light' | 'dark' | 'system' | 'xp' | 'audible' }
+  | { type: 'SET_THEME', theme: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook' }
   | { type: 'ADD_DEVOTIONAL', devotional: Devotional }
   | { type: 'DELETE_DEVOTIONAL', id: string }
   | { type: 'LOG_HISTORY', entry: HistoryEntry }
@@ -106,9 +106,10 @@ function mergeAppState(current: AppState, incoming: Partial<AppState>): AppState
 
   // Settings
   if (incoming.settings) {
+    const inc = incoming.settings as any;
     next.settings = {
       ...current.settings,
-      startDate: incoming.settings.startDate || current.settings.startDate || '',
+      startDate: inc.startDate || inc.planStartDate || current.settings.startDate || '',
       theme: incoming.settings.theme || current.settings.theme,
       userName: incoming.settings.userName || current.settings.userName,
     };
@@ -138,7 +139,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, restoredFromSnapshot: false, isCloudHydrated: false };
     }
     case 'CLOUD_SYNC_USER_DATA': {
-      const newStartDate = action.data.startDate || state.settings.startDate;
+      const inc = action.data as any;
+      const newStartDate = inc.startDate || inc.planStartDate || state.settings.startDate;
       const newTheme = action.data.theme || state.settings.theme;
       if (state.settings.startDate === newStartDate && 
           state.settings.theme === newTheme) return state;
@@ -221,7 +223,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       );
       
       const nextSettings = { ...state.settings };
-      if (!nextSettings.startDate) {
+      // Only default if truly missing AND we've loaded cloud data (to avoid race conditions)
+      if (!nextSettings.startDate && state.isCloudHydrated) {
         nextSettings.startDate = now;
       }
 

@@ -50,11 +50,11 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
       }
     };
 
-    const setupListener = <T>(
+    const setupListener = <S extends DocumentSnapshot<any, any> | QuerySnapshot<any, any>, T>(
       name: string, 
-      ref: DocumentReference | CollectionReference | Query, 
+      ref: any, 
       stateKey: keyof AppState | null,
-      onUpdate: (snap: DocumentSnapshot | QuerySnapshot) => T,
+      onUpdate: (snap: S) => T,
       action: AppAction['type']
     ) => {
       let retryCount = 0;
@@ -63,28 +63,28 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
       const attach = () => {
         if (!isActive) return;
         
-        currentUnsub = onSnapshot(ref, { includeMetadataChanges: false }, (snap) => {
+        currentUnsub = onSnapshot(ref, { includeMetadataChanges: false }, (snap: any) => {
           if (!isActive) return;
           retryCount = 0; // Reset on successful hit
           
-          const processedData = onUpdate(snap);
+          const processedData = onUpdate(snap as S);
           
           if (!isInitialLoadComplete.current) {
             if (stateKey) {
-              (initialData.current as Record<string, unknown>)[stateKey] = processedData;
+              (initialData.current as any)[stateKey] = processedData;
             }
             initialLoadTracker.current.add(name);
             checkInitialSyncDone();
           } else {
             // After initial load, dispatch normally
-            if (action === 'CLOUD_SYNC_USER_DATA') dispatch({ type: action, data: processedData });
+            if (action === 'CLOUD_SYNC_USER_DATA') dispatch({ type: action, data: processedData as any });
             else if (action === 'CLOUD_SYNC_PROGRESS') dispatch({ type: action, progress: processedData as Progress[] });
             else if (action === 'CLOUD_SYNC_COMPLETED') dispatch({ type: action, completed: Array.from(processedData as Set<string>) });
             else if (action === 'CLOUD_SYNC_JOURNALS') dispatch({ type: action, journals: processedData as ProverbJournal[] });
             else if (action === 'CLOUD_SYNC_DEVOTIONALS') dispatch({ type: action, devotionals: processedData as Devotional[] });
             else if (action === 'CLOUD_SYNC_HISTORY') dispatch({ type: action, history: processedData as HistoryEntry[] });
           }
-        }, (err) => {
+        }, (err: Error) => {
           console.error(`${name} sync error:`, err);
           setSyncStatus('error');
           if (currentUnsub) currentUnsub();
@@ -105,12 +105,31 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     };
 
     // 1. User Settings
-    setupListener('UserSettings', getUserRef(user.uid), 'settings', (doc: DocumentSnapshot) => {
-      return doc.exists() ? doc.data() : { theme: 'system' }; // Don't default startDate to today if missing in cloud
+    setupListener<DocumentSnapshot, any>('UserSettings', getUserRef(user.uid), 'settings', (doc) => {
+      if (!doc.exists()) {
+        console.log("[Sync] UserSettings document does not exist on server/cache.");
+        return { theme: 'system' };
+      }
+      
+      const data = doc.data() as any;
+      const settings: any = { ...data };
+      const fromCache = doc.metadata.fromCache;
+      
+      // Handle potential Timestamp or string for both startDate and planStartDate
+      const rawStart = data.startDate || data.planStartDate;
+      if (rawStart) {
+        settings.startDate = (typeof rawStart === 'string') 
+          ? rawStart 
+          : rawStart.toDate?.()?.toISOString() || new Date().toISOString();
+      }
+      
+      console.log(`[Sync] UserSettings loaded (fromCache: ${fromCache}):`, settings.startDate);
+      
+      return settings;
     }, 'CLOUD_SYNC_USER_DATA');
 
     // 2. Progress
-    setupListener('Progress', getProgressCollection(user.uid), 'progress', (snap: QuerySnapshot) => {
+    setupListener<QuerySnapshot, Progress[]>('Progress', getProgressCollection(user.uid), 'progress', (snap) => {
       return snap.docs.map((doc) => {
         const data = doc.data();
         const updatedAtMillis = (data.updatedAt as { toMillis?: () => number })?.toMillis?.() || (data.lastReadAt ? new Date(data.lastReadAt as string).getTime() : 0);
@@ -119,7 +138,7 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     }, 'CLOUD_SYNC_PROGRESS');
 
     // 3. Completed Books
-    setupListener('CompletedBooks', getCompletedBooksCollection(user.uid), 'completedBooks', (snap: QuerySnapshot) => {
+    setupListener<QuerySnapshot, Set<string>>('CompletedBooks', getCompletedBooksCollection(user.uid), 'completedBooks', (snap) => {
       const completed = snap.docs.map((doc) => {
         const d = doc.data();
         if (d.categoryId && d.bookName) return `${d.categoryId}:${d.bookName}`;
@@ -129,12 +148,12 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     }, 'CLOUD_SYNC_COMPLETED');
 
     // 4. Journals
-    setupListener('Journals', getJournalsCollection(user.uid), 'proverbJournals', (snap: QuerySnapshot) => {
+    setupListener<QuerySnapshot, ProverbJournal[]>('Journals', getJournalsCollection(user.uid), 'proverbJournals', (snap) => {
       return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as ProverbJournal));
     }, 'CLOUD_SYNC_JOURNALS');
 
     // 5. Devotionals
-    setupListener('Devotionals', getDevotionalsCollection(user.uid), 'customDevotionals', (snap: QuerySnapshot) => {
+    setupListener<QuerySnapshot, Devotional[]>('Devotionals', getDevotionalsCollection(user.uid), 'customDevotionals', (snap) => {
       return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as Devotional));
     }, 'CLOUD_SYNC_DEVOTIONALS');
 
@@ -143,7 +162,7 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
       getHistoryCollection(user.uid), 
       orderBy('timestampMillis', 'desc')
     );
-    setupListener('History', historyQuery, 'history', (snap: QuerySnapshot) => {
+    setupListener<QuerySnapshot, HistoryEntry[]>('History', historyQuery, 'history', (snap) => {
       return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as HistoryEntry));
     }, 'CLOUD_SYNC_HISTORY');
 

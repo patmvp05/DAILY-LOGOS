@@ -27,7 +27,8 @@ import {
   getDocs,
   DocumentReference,
   CollectionReference,
-  Query
+  Query,
+  Firestore
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
@@ -38,7 +39,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 // Initialize Firestore with persistent local cache for offline-first behavior
-let db;
+let db: Firestore;
 if (isConfigValid) {
   try {
     // If we're using the placeholder, this might fail or be useless, but it prevents the build error

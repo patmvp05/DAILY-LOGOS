@@ -7,4 +7,4 @@
 ## Deployment & Syncing
 - The application fetches Bible text dynamically from the Bolls Life API.
 - **Offline Mode**: A local sync queue in IndexedDB caches reading progress when offline and automatically syncs to Firebase on reconnection.
-- **Proverbs Caching**: The app caches Proverbs chapters permanently in localStorage after the first fetch to ensure instant availability and offline resilience for future daily readings.
+- **Proverbs Caching**: The app caches Proverbs chapters permanently in IndexedDB (via idb-keyval) after the first fetch to ensure instant availability and offline resilience for future daily readings.

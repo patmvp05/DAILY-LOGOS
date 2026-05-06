@@ -4,8 +4,8 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Sun, CloudSun, Cloud, CloudFog, CloudRain, CloudSnow, CloudLightning } from 'lucide-react';
-import { fetchWeather, getCachedWeather, WeatherSnapshot } from '../lib/weather';
+import { Sun, CloudSun, Cloud, CloudFog, CloudRain, CloudSnow, CloudLightning, Pencil } from 'lucide-react';
+import { fetchWeather, getCachedWeather, WeatherSnapshot, saveLocation } from '../lib/weather';
 import { useApp } from '../state/AppContextCore';
 import { cn } from '../lib/utils';
 
@@ -29,14 +29,16 @@ const WeatherIcon = ({ code, className }: { code: number; className?: string }) 
 export default function WeatherWidget({ compact = false }: { compact?: boolean }) {
   const [weather, setWeather] = useState<WeatherSnapshot | null>(getCachedWeather());
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempCity, setTempCity] = useState('');
   const { state } = useApp();
   const theme = state.settings.theme;
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (lat?: number, lon?: number, name?: string) => {
     if (!navigator.onLine) return;
     setIsRefreshing(true);
     try {
-      const fresh = await fetchWeather();
+      const fresh = await fetchWeather(lat, lon, name);
       setWeather(fresh);
     } catch (e) {
       console.error('Weather refresh failed', e);
@@ -44,6 +46,36 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
       setIsRefreshing(false);
     }
   }, []);
+
+  const handleManualLocation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tempCity.trim()) return;
+    
+    setIsRefreshing(true);
+    try {
+      // Very basic "geocoding" check: if user typed "London", we'd ideally need a real geocoder.
+      // But per instructions to use current APIs, I'll use bigdatacloud to "search" or just use IP if they clear it.
+      // Instructions say: "Show a small 'Change location' pencil icon next to the city name so the user can manually override it if both methods are wrong."
+      
+      // Since I don't have a full search API easily at hand without keys, 
+      // I'll at least allow them to "Reset" or I'll use a public search endpoint.
+      // Actually, instructions just say "manually override it".
+      // I'll use Nominatim (OpenStreetMap) for a quick free geocode.
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(tempCity)}&limit=1`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const item = data[0];
+        await refresh(parseFloat(item.lat), parseFloat(item.lon), item.display_name.split(',')[0]);
+      } else {
+        alert("Location not found. Please try a city name.");
+      }
+    } catch (err) {
+      console.error("Manual location failed", err);
+    } finally {
+      setIsEditing(false);
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     const mounted = true;
@@ -107,10 +139,30 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
             {weather.tempF}°F
           </span>
           <span className={cn(
-            "text-[9px] uppercase font-black tracking-[0.12em] opacity-60",
+            "text-[9px] uppercase font-black tracking-[0.12em] opacity-60 flex items-center gap-1",
             isXP ? "text-[#003C74]" : "text-[var(--audible-text-secondary)]"
           )}>
-            {weather.city}
+            {isEditing ? (
+              <form onSubmit={handleManualLocation} className="flex">
+                <input 
+                  autoFocus
+                  className="bg-transparent border-b border-current outline-none w-20"
+                  value={tempCity}
+                  onChange={e => setTempCity(e.target.value)}
+                  onBlur={() => !tempCity && setIsEditing(false)}
+                />
+              </form>
+            ) : (
+              <>
+                {weather.city}
+                <button 
+                  onClick={() => { setIsEditing(true); setTempCity(weather.city); }}
+                  className="p-0.5 hover:text-evernote transition-colors"
+                >
+                  <Pencil size={8} />
+                </button>
+              </>
+            )}
           </span>
         </div>
         <span className={cn(

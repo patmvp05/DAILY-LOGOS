@@ -96,19 +96,20 @@ const _writeActionBatch = async (uid: string, actions: {
 }) => {
   const batch = writeBatch(db);
   
-  if (actions.progress) {
-    const ref = doc(getProgressCollection(uid), actions.progress.categoryId);
-    batch.set(ref, {
-      ...actions.progress,
-      updatedAt: serverTimestamp()
-    });
-  }
-  
+  // Write history BEFORE progress updates (as requested)
   if (actions.history) {
     const entries = Array.isArray(actions.history) ? actions.history : [actions.history];
     entries.forEach(h => {
       const ref = doc(getHistoryCollection(uid), h.id);
       batch.set(ref, h);
+    });
+  }
+
+  if (actions.progress) {
+    const ref = doc(getProgressCollection(uid), actions.progress.categoryId);
+    batch.set(ref, {
+      ...actions.progress,
+      updatedAt: serverTimestamp()
     });
   }
   
@@ -137,12 +138,12 @@ const _writeActionBatch = async (uid: string, actions: {
   await batch.commit();
 };
 
-const _setUserSettings = async (uid: string, settings: UserSettings) => {
+const _setUserSettings = async (uid: string, settings: Partial<UserSettings>) => {
   const ref = getUserRef(uid);
   await setDoc(ref, {
     ...settings,
     updatedAt: serverTimestamp()
-  });
+  }, { merge: true });
 };
 
 const _resetUserData = async (uid: string) => {
@@ -170,11 +171,21 @@ const _resetUserData = async (uid: string) => {
   });
 };
 
-const wrap = <T extends (...args: unknown[]) => Promise<unknown>>(type: string, fn: T): T => {
+const wrap = <T extends (...args: any[]) => Promise<any>>(
+  type: PendingAction['type'], 
+  fn: T,
+  getPath: (...args: Parameters<T>) => string
+): T => {
   return (async (...args: Parameters<T>) => {
+    const path = getPath(...args);
+    
     if (!navigator.onLine) {
-      console.log(`[Sync] Offline. Queuing ${type}`);
-      await addToSyncQueue({ type: type as PendingAction['type'], payload: args as unknown[] });
+      console.log(`[Sync] Offline. Queuing ${type} for ${path}`);
+      await addToSyncQueue({ 
+        type: type as PendingAction['type'], 
+        payload: args as unknown[],
+        path
+      });
       notify();
       return;
     }
@@ -186,19 +197,28 @@ const wrap = <T extends (...args: unknown[]) => Promise<unknown>>(type: string, 
       return result;
     } catch (_e) {
       console.warn(`[Sync] Action ${type} failed, queuing for retry:`, _e);
-      await addToSyncQueue({ type: type as PendingAction['type'], payload: args as unknown[] });
+      await addToSyncQueue({ 
+        type: type as PendingAction['type'], 
+        payload: args as unknown[],
+        path
+      });
       syncTracker.end(false);
     }
   }) as T;
 };
 
-export const writeCompletedBook = wrap('writeCompletedBook', _writeCompletedBook);
-export const deleteCompletedBook = wrap('deleteCompletedBook', _deleteCompletedBook);
-export const writeJournal = wrap('writeJournal', _writeJournal);
-export const deleteJournal = wrap('deleteJournal', _deleteJournal);
-export const writeActionBatch = wrap('writeActionBatch', _writeActionBatch);
-export const setUserSettings = wrap('setUserSettings', _setUserSettings);
-export const resetUserData = wrap('resetUserData', _resetUserData);
+export const writeCompletedBook = wrap('writeCompletedBook', _writeCompletedBook, (uid, cat, book) => `${uid}/books/${cat}:${book}`);
+export const deleteCompletedBook = wrap('deleteCompletedBook', _deleteCompletedBook, (uid, cat, book) => `${uid}/books/${cat}:${book}`);
+export const writeJournal = wrap('writeJournal', _writeJournal, (uid, journal) => `${uid}/journals/${(journal as ProverbJournal).id}`);
+export const deleteJournal = wrap('deleteJournal', _deleteJournal, (uid, id) => `${uid}/journals/${id}`);
+export const writeActionBatch = wrap('writeActionBatch', _writeActionBatch, (uid, actions) => {
+  const a = actions as any;
+  if (a.progress) return `${uid}/progress/${a.progress.categoryId}`;
+  if (a.history) return `${uid}/history/${Array.isArray(a.history) ? a.history[0].id : a.history.id}`;
+  return `${uid}/batch/${Date.now()}`;
+});
+export const setUserSettings = wrap('setUserSettings', _setUserSettings, (uid) => `${uid}/settings`);
+export const resetUserData = wrap('resetUserData', _resetUserData, (uid) => `${uid}/reset`);
 
 /**
  * Processes all pending actions in the queue.
@@ -228,17 +248,33 @@ export async function processSyncQueue() {
       const handler = handlers[action.type];
       if (handler) {
         await handler(...action.payload);
+      }
+      // Always remove if handler processed (success) or handler missing
+      await removeFromSyncQueue(action.id);
+    } catch (e) {
+      const error = e as any;
+      console.error(`[Sync] Failed to process queued action ${action.type}:`, e);
+      
+      // If it's a permission/validation error (terminal), remove it from queue
+      const isTerminal = error?.code === 'permission-denied' || error?.name === 'FirebaseError';
+      if (isTerminal) {
+        console.warn(`[Sync] Terminal error for ${action.type}, removing from queue.`);
         await removeFromSyncQueue(action.id);
       } else {
-        console.warn(`[Sync] No handler for action type: ${action.type}`);
-        await removeFromSyncQueue(action.id); // Remove unknown actions
+        // Network error or something transient, stop and retry later to preserve order
+        break;
       }
-    } catch (e) {
-      console.error(`[Sync] Failed to process queued action ${action.type}:`, e);
-      break; // Stop to preserve order
     }
   }
 
   syncTracker.end(true);
+}
+
+// Reconnection trigger
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    console.log('[Sync] Back online, triggering queue process...');
+    processSyncQueue();
+  });
 }
 

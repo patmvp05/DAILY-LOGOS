@@ -142,7 +142,7 @@ export const saveState = async (state: AppState) => {
 
 export const loadHistorySnapshot = async (): Promise<{ data: HistoryEntry[], timestamp: number } | null> => {
   try {
-    return await get(SNAPSHOT_KEY);
+    return (await get(SNAPSHOT_KEY)) || null;
   } catch {
     return null;
   }

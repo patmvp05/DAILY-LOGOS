@@ -17,7 +17,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = React.useReducer(appReducer, {
     progress: [],
     history: [],
-    completedBooks: new Set(),
+    completedBooks: new Set<string>(),
     proverbJournals: [],
     customDevotionals: [],
     settings: {

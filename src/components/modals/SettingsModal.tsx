@@ -29,6 +29,7 @@ import { setUserSettings } from '../../lib/sync';
 import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 import { useAuth } from '../../hooks/useAuth';
+import { AppState } from '../../types';
 
 interface SettingsModalProps {
   onLogout: () => void;
@@ -36,6 +37,8 @@ interface SettingsModalProps {
   onExportJournals: () => void;
   onResetProgress: () => void;
   syncStatus: string;
+  lastSyncTime: Date | null;
+  showSyncCheck: boolean;
   isAuthLoading: boolean;
   isSigningIn: boolean;
 }
@@ -46,6 +49,8 @@ interface SettingsModalProps {
    onExportJournals,
    onResetProgress,
    syncStatus,
+   lastSyncTime,
+   showSyncCheck,
    isAuthLoading,
    isSigningIn
  }) => {
@@ -186,7 +191,7 @@ interface SettingsModalProps {
                         const themeId = id as AppState['settings']['theme'];
                         dispatch({ type: 'SET_THEME', theme: themeId });
                         if (user) {
-                          setUserSettings(user.uid, { theme: themeId, startDate: state.settings.startDate });
+                          setUserSettings(user.uid, { theme: themeId });
                         }
                       }}
                       className={cn(
@@ -228,7 +233,7 @@ interface SettingsModalProps {
                       
                       dispatch({ type: 'SET_START_DATE', date: isoDate });
                       if (user) {
-                        setUserSettings(user.uid, { theme: state.settings.theme, startDate: isoDate });
+                        setUserSettings(user.uid, { startDate: isoDate });
                       }
                     }}
                     className="bg-transparent border-none outline-none font-bold flex-1 text-sm appearance-none"

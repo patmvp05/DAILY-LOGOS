@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { get, set } from 'idb-keyval';
 import { fetchWithProxy } from './api';
 
 export interface WeatherSnapshot {
@@ -15,9 +16,17 @@ export interface WeatherSnapshot {
   fetchedAt: number;
 }
 
-const CACHE_KEY = 'dl_weather_v1';
-const DEFAULT_LAT = 31.7683; // Jerusalem
-const DEFAULT_LON = 35.2137;
+export interface UserLocation {
+  lat: number;
+  lon: number;
+  city: string;
+  isManual?: boolean;
+}
+
+const CACHE_KEY = 'dl_weather_v2'; 
+const LOCATION_CACHE_KEY = 'userLocation';
+const DEFAULT_LAT = 10.8231; // Ho Chi Minh City
+const DEFAULT_LON = 106.6297;
 
 const WEATHER_CODE_MAP: Record<number, string> = {
   0: 'Clear',
@@ -58,8 +67,8 @@ export function getCachedWeather(): WeatherSnapshot | null {
     const { snapshot, ts } = JSON.parse(raw);
     const ageMs = Date.now() - ts;
     
-    // Older than 6 hours? Discard.
-    if (ageMs > 1000 * 60 * 60 * 6) return null;
+    // Older than 1 hour? Discard.
+    if (ageMs > 1000 * 60 * 60 * 1) return null;
     
     return snapshot;
   } catch {
@@ -67,37 +76,71 @@ export function getCachedWeather(): WeatherSnapshot | null {
   }
 }
 
-export async function fetchWeather(): Promise<WeatherSnapshot> {
-  let lat = DEFAULT_LAT;
-  let lon = DEFAULT_LON;
-  let city = 'Jerusalem';
-
+export async function getCachedLocation(): Promise<UserLocation | null> {
   try {
-    const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
-    });
-    lat = pos.coords.latitude;
-    lon = pos.coords.longitude;
-    city = 'Current Location';
-    
-    // Try to get city name
-    try {
-      const geoUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
-      const res = await fetch(geoUrl);
-      const geoData = await res.json();
-      if (geoData) {
-        // More robust city selection
-        city = geoData.city || 
-               geoData.locality || 
-               geoData.principalSubdivision || 
-               geoData.countryName ||
-               'My Location';
-      }
-    } catch {
-      city = 'My Location';
-    }
+    const loc = await get<UserLocation>(LOCATION_CACHE_KEY);
+    return loc || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveLocation(loc: UserLocation) {
+  try {
+    await set(LOCATION_CACHE_KEY, loc);
   } catch (err) {
-    console.warn('Geolocation failed, using default', err);
+    console.error('Failed to save location', err);
+  }
+}
+
+async function getReverseGeocode(lat: number, lon: number): Promise<string> {
+  try {
+    const geoUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
+    const res = await fetch(geoUrl);
+    const geoData = await res.json();
+    return geoData.city || geoData.locality || geoData.principalSubdivision || 'My Location';
+  } catch {
+    return 'My Location';
+  }
+}
+
+export async function fetchWeather(manualLat?: number, manualLon?: number, manualCity?: string): Promise<WeatherSnapshot> {
+  let lat: number;
+  let lon: number;
+  let city: string;
+
+  // 1. Manual Override
+  if (manualLat !== undefined && manualLon !== undefined) {
+    lat = manualLat;
+    lon = manualLon;
+    city = manualCity || await getReverseGeocode(lat, lon);
+    await saveLocation({ lat, lon, city, isManual: true });
+  } else {
+    // 2. Cache Check (IndexedDB)
+    const cachedLoc = await getCachedLocation();
+    if (cachedLoc) {
+      lat = cachedLoc.lat;
+      lon = cachedLoc.lon;
+      city = cachedLoc.city;
+    } else {
+      // 3. Geolocation attempt
+      try {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 8000 });
+        });
+        lat = pos.coords.latitude;
+        lon = pos.coords.longitude;
+        city = await getReverseGeocode(lat, lon);
+        await saveLocation({ lat, lon, city });
+      } catch (err) {
+        // 4. Fallback: Ho Chi Minh City
+        console.warn('Geolocation failed, falling back to HCMC', err);
+        lat = DEFAULT_LAT;
+        lon = DEFAULT_LON;
+        city = 'Ho Chi Minh City';
+        // Note: We don't save the fallback to cache so we try geoloc again next session
+      }
+    }
   }
 
   const controller = new AbortController();
@@ -110,25 +153,17 @@ export async function fetchWeather(): Promise<WeatherSnapshot> {
 
     if (!data || !data.current || !data.daily) throw new Error('Weather data invalid');
 
-    const current = data.current;
-    const daily = data.daily;
-
     const snapshot: WeatherSnapshot = {
-      tempF: Math.round(current.temperature_2m),
-      highF: Math.round(daily.temperature_2m_max[0]),
-      lowF: Math.round(daily.temperature_2m_min[0]),
-      conditionCode: current.weather_code,
-      conditionLabel: WEATHER_CODE_MAP[current.weather_code] || 'Clear',
+      tempF: Math.round(data.current.temperature_2m),
+      highF: Math.round(data.daily.temperature_2m_max[0]),
+      lowF: Math.round(data.daily.temperature_2m_min[0]),
+      conditionCode: data.current.weather_code,
+      conditionLabel: WEATHER_CODE_MAP[data.current.weather_code] || 'Clear',
       city,
       fetchedAt: Date.now()
     };
 
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ snapshot, ts: Date.now() }));
-    } catch {
-      // Ignore quota errors
-    }
-
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ snapshot, ts: Date.now() }));
     return snapshot;
   } catch (e) {
     clearTimeout(timeoutId);

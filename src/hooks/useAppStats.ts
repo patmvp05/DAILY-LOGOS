@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from 'react';
-import { format, differenceInDays, parseISO, subDays } from 'date-fns';
+import { format, differenceInDays, differenceInCalendarDays, parseISO, subDays } from 'date-fns';
 import { AppState } from '../types';
 import { computeProgressStats } from '../lib/utils';
 
@@ -58,8 +58,21 @@ export function useAppStats(state: AppState) {
   const dayNumber = useMemo(() => {
     if (!state.settings.startDate) return 0;
     try {
-      return differenceInDays(new Date(), parseISO(state.settings.startDate)) + 1;
-    } catch {
+      // Normalize today and start to the same time of day (noon) to avoid timezone-edge switches
+      const startRaw = parseISO(state.settings.startDate);
+      const start = new Date(startRaw.getFullYear(), startRaw.getMonth(), startRaw.getDate(), 12, 0, 0);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+      
+      const num = differenceInCalendarDays(today, start) + 1;
+      
+      // Console log for verification as requested
+      console.log(`startDate loaded: ${state.settings.startDate}, calculated day: ${num}`);
+      console.log(`Normalization detail - Start: ${format(start, 'yyyy-MM-dd HH:mm')}, Today: ${format(today, 'yyyy-MM-dd HH:mm')}`);
+      
+      return num;
+    } catch (e) {
+      console.error("Day calculation error", e);
       return 1;
     }
   }, [state.settings.startDate]);

@@ -100,17 +100,17 @@ export default function App() {
     const currentIndex = themes.indexOf(state.settings.theme);
     const newTheme = themes[(currentIndex + 1) % themes.length];
     dispatch({ type: 'SET_THEME', theme: newTheme });
-    if (user) {
-      setUserSettings(user.uid, { theme: newTheme, startDate: state.settings.startDate });
+    if (user && state.isCloudHydrated) {
+      setUserSettings(user.uid, { theme: newTheme });
     }
-  }, [state.settings.theme, state.settings.startDate, user, dispatch]);
+  }, [state.settings.theme, state.isCloudHydrated, user, dispatch]);
 
   return (
     <div className={cn("min-h-[100dvh] transition-colors duration-300", state.settings.theme === 'xp' ? "theme-xp" : state.settings.theme === 'textbook' ? "theme-textbook" : "bg-[var(--audible-bg)] text-[var(--audible-text-primary)]", state.settings.theme === 'dark' && "dark", state.settings.theme === 'audible' && "audible", (state.settings.theme === 'audible' || state.settings.theme === 'system') && prefersDark && "dark")}>
       <Navbar user={user} syncStatus={syncStatus} lastSyncTime={lastSyncTime} showSyncCheck={showSyncCheck} handleLogin={handleLoginLocal} logout={logout} toggleTheme={toggleTheme} theme={state.settings.theme} setShowHistory={setShowHistory} setShowSettings={setShowSettings} startDate={state.settings.startDate} isSigningIn={isSigningIn} isAuthLoading={isAuthLoading} />
       <main className="pt-20 pb-20">
         <React.Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><div className="w-8 h-8 border-4 border-evernote border-t-transparent rounded-full animate-spin" /></div>}>
-          <Dashboard handleLogin={handleLoginLocal} isSigningIn={isSigningIn} />
+          <Dashboard handleLogin={handleLoginLocal} isSigningIn={isSigningIn} user={user} isAuthLoading={isAuthLoading} />
         </React.Suspense>
       </main>
       <React.Suspense fallback={null}>

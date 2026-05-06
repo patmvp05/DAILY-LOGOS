@@ -6,7 +6,7 @@
 import { fetchWithProxy } from './api';
 import { get, set } from 'idb-keyval';
 
-interface ProverbResponse {
+export interface ProverbResponse {
   reference: string;
   verses: { verse: number; text: string }[];
   text: string;

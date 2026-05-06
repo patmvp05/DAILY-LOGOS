@@ -11,19 +11,25 @@ export interface PendingAction {
   id: string;
   type: 'writeActionBatch' | 'writeCompletedBook' | 'deleteCompletedBook' | 'writeJournal' | 'deleteJournal' | 'setUserSettings' | 'resetUserData';
   payload: unknown[];
+  path: string; // Used for deduplication
   timestamp: number;
 }
 
 export async function addToSyncQueue(action: Omit<PendingAction, 'id' | 'timestamp'>) {
   const queue = await getSyncQueue();
+  
+  // Deduplication: Remove older actions targeting the same entity
+  const filtered = queue.filter(a => a.path !== action.path);
+  
   const newAction: PendingAction = {
     ...action,
     id: Math.random().toString(36).substring(2, 11),
     timestamp: Date.now(),
   };
-  queue.push(newAction);
-  await set(QUEUE_KEY, queue);
-  console.log(`[SyncQueue] Added action: ${action.type}`);
+  
+  filtered.push(newAction);
+  await set(QUEUE_KEY, filtered);
+  console.log(`[SyncQueue] Added action: ${action.type} for path: ${action.path}`);
 }
 
 export async function getSyncQueue(): Promise<PendingAction[]> {

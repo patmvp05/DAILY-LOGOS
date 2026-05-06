@@ -35,11 +35,15 @@ import { useProverb } from '../hooks/useProverb';
 interface DashboardProps {
   handleLogin: (redirect?: boolean) => void;
   isSigningIn: boolean;
+  user: any;
+  isAuthLoading: boolean;
 }
 
 function DashboardComponent({
   handleLogin,
-  isSigningIn
+  isSigningIn,
+  user,
+  isAuthLoading
 }: DashboardProps) {
   const { state, dispatch } = useApp();
   const { streak, dayNumber, overallProgress, totalRead, totalChaptersCount, lastReadProgress } = useAppStats(state);

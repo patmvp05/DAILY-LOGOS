@@ -27,30 +27,11 @@ export default defineConfig(() => {
           start_url: './',
           scope: '/',
           icons: [
-            {
-              src: '/icons/logo.svg',
-              sizes: '192x192',
-              type: 'image/svg+xml',
-              purpose: 'any'
-            },
-            {
-              src: '/icons/logo.svg',
-              sizes: '512x512',
-              type: 'image/svg+xml',
-              purpose: 'any'
-            },
-            {
-              src: '/icons/logo.svg',
-              sizes: '192x192',
-              type: 'image/svg+xml',
-              purpose: 'maskable'
-            },
-            {
-              src: '/icons/logo.svg',
-              sizes: '512x512',
-              type: 'image/svg+xml',
-              purpose: 'maskable'
-            }
+            { src: '/icons/logo.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+            { src: '/icons/logo-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: '/icons/logo-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+            { src: '/icons/logo-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+            { src: '/icons/logo-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           ]
         },
         workbox: {
