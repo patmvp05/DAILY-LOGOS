@@ -16,6 +16,7 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         injectRegister: 'script',
         includeAssets: ['icons/logo.svg'],
+        filename: 'manifest.json',
         manifest: {
           name: 'The Daily Logos',
           short_name: 'Logos',
@@ -23,7 +24,8 @@ export default defineConfig(() => {
           theme_color: '#FAFAFA',
           background_color: '#FAFAFA',
           display: 'standalone',
-          start_url: '/',
+          start_url: './',
+          scope: '/',
           icons: [
             {
               src: '/icons/logo.svg',

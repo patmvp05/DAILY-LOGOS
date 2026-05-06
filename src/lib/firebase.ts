@@ -31,21 +31,30 @@ import {
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
+// Simple check to see if we have valid config
+const isConfigValid = firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey !== 'placeholder';
+
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 // Initialize Firestore with persistent local cache for offline-first behavior
 let db;
-try {
-  // If we're using the placeholder, this might fail or be useless, but it prevents the build error
-  db = initializeFirestore(app, {
-    localCache: persistentLocalCache({ 
-      tabManager: persistentMultipleTabManager() 
-    })
-  }, (firebaseConfig as any).firestoreDatabaseId || '(default)');
-} catch (e) {
-  console.warn("Firestore persistent cache failed, falling back to basic init:", e);
-  db = getFirestore(app, (firebaseConfig as any).firestoreDatabaseId || '(default)');
+if (isConfigValid) {
+  try {
+    // If we're using the placeholder, this might fail or be useless, but it prevents the build error
+    db = initializeFirestore(app, {
+      localCache: persistentLocalCache({ 
+        tabManager: persistentMultipleTabManager() 
+      })
+    }, (firebaseConfig as any).firestoreDatabaseId || '(default)');
+  } catch (e) {
+    console.warn("Firestore persistent cache failed, falling back to basic init:", e);
+    db = getFirestore(app, (firebaseConfig as any).firestoreDatabaseId || '(default)');
+  }
+} else {
+  // Graceful fallback for demo/no-config mode
+  console.warn("Firebase config is placeholder or missing. Firestore features disabled.");
+  db = getFirestore(app);
 }
 export { db };
 

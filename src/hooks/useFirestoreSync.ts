@@ -106,7 +106,7 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
 
     // 1. User Settings
     setupListener('UserSettings', getUserRef(user.uid), 'settings', (doc: DocumentSnapshot) => {
-      return doc.exists() ? doc.data() : { startDate: new Date().toISOString(), theme: 'system' };
+      return doc.exists() ? doc.data() : { theme: 'system' }; // Don't default startDate to today if missing in cloud
     }, 'CLOUD_SYNC_USER_DATA');
 
     // 2. Progress

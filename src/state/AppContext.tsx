@@ -27,20 +27,25 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     }
   });
   const [debouncedState, setDebouncedState] = React.useState(state);
+  const [hasHydrated, setHasHydrated] = React.useState(false);
 
   const hydrated = React.useRef(false);
 
+  // Buffer state changes for storage
   useEffect(() => {
+    if (!hasHydrated) return; // Prevent initial 'Today' state from overwriting saved state before it loads
     const handler = setTimeout(() => {
       setDebouncedState(state);
     }, 500);
     return () => clearTimeout(handler);
-  }, [state]);
+  }, [state, hasHydrated]);
 
   // Sync state to local storage
   useEffect(() => {
-    saveState(debouncedState);
-  }, [debouncedState]);
+    if (hasHydrated) {
+      saveState(debouncedState);
+    }
+  }, [debouncedState, hasHydrated]);
 
   // Network listener for sync
   useEffect(() => {
@@ -72,8 +77,9 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
         }
 
         // Snapshot safety net check
-        // We only restore from snapshot if the current state is empty
-        if (state.history.length === 0) {
+        // We only restore from snapshot if the current history is empty
+        // We check against the LATEST state by looking at what was loaded or initial
+        if (!idbState || !idbState.history || idbState.history.length === 0) {
           const snapshot = await loadHistorySnapshot();
           if (snapshot && snapshot.data.length > 0) {
             const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
@@ -88,10 +94,12 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
         }
       } catch (e) {
         console.warn("Hydration failed:", e);
+      } finally {
+        setHasHydrated(true);
       }
     }
     hydrate();
-  }, [dispatch, state.history.length]);
+  }, [dispatch]);
 
   const value = useMemo(() => ({ state, dispatch }), [state]);
 
