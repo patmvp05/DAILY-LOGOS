@@ -138,11 +138,10 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
       return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as Devotional));
     }, 'CLOUD_SYNC_DEVOTIONALS');
 
-    // 6. History
+    // 6. History - No limit for accurate streak calculation
     const historyQuery = query(
       getHistoryCollection(user.uid), 
-      orderBy('timestampMillis', 'desc'), 
-      limit(HISTORY_CAP)
+      orderBy('timestampMillis', 'desc')
     );
     setupListener('History', historyQuery, 'history', (snap: QuerySnapshot) => {
       return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as HistoryEntry));

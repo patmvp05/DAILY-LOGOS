@@ -20,14 +20,19 @@ export function useAppStats(state: AppState) {
     const uniqueDays = new Set<string>();
     
     for (const h of state.history) {
-      try {
-        // Convert ISO timestamp to local YYYY-MM-DD string
-        const dateStr = format(parseISO(h.timestamp), 'yyyy-MM-dd');
-        uniqueDays.add(dateStr);
-      } catch {
-        // Fallback for potentially malformed data
-        const date = h.timestamp.split('T')[0];
-        if (date) uniqueDays.add(date);
+      // Prefer localDate (pre-computed local string) if available
+      if (h.localDate) {
+        uniqueDays.add(h.localDate);
+      } else {
+        try {
+          // Convert ISO timestamp to local YYYY-MM-DD string
+          const dateStr = format(parseISO(h.timestamp), 'yyyy-MM-dd');
+          uniqueDays.add(dateStr);
+        } catch {
+          // Fallback for potentially malformed data
+          const date = h.timestamp.split('T')[0];
+          if (date) uniqueDays.add(date);
+        }
       }
     }
 
@@ -50,9 +55,14 @@ export function useAppStats(state: AppState) {
     return currentStreak;
   }, [state.history]);
 
-  const dayNumber = useMemo(() => 
-    differenceInDays(new Date(), parseISO(state.settings.startDate)) + 1,
-  [state.settings.startDate]);
+  const dayNumber = useMemo(() => {
+    if (!state.settings.startDate) return 0;
+    try {
+      return differenceInDays(new Date(), parseISO(state.settings.startDate)) + 1;
+    } catch {
+      return 1;
+    }
+  }, [state.settings.startDate]);
 
   const { overallProgress, totalRead, totalChaptersCount } = useMemo(() => 
     computeProgressStats(state.progress, state.completedBooks),

@@ -21,7 +21,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     proverbJournals: [],
     customDevotionals: [],
     settings: {
-      startDate: new Date().toISOString(),
+      startDate: '',
       theme: 'system',
       userName: ''
     }

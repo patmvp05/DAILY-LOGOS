@@ -27,7 +27,7 @@ export type AppAction =
   | { type: 'SET_START_DATE', date: string }
   | { type: 'CLEAR_SYNC_FLAGS' };
 
-export const HISTORY_CAP = 50; // User requested cap at 50 during cleanup
+export const HISTORY_CAP = 2000; // Increased from 50 to ensure year-long streak accuracy
 
 /**
  * Checks if two lists of objects are likely identical using a fast fingerprint.
@@ -55,10 +55,9 @@ function mergeAppState(current: AppState, incoming: Partial<AppState>): AppState
       current.history.forEach(h => historyMap.set(h.id, h));
       incoming.history.forEach(h => historyMap.set(h.id, h));
       next.history = Array.from(historyMap.values())
-        .sort((a, b) => (b.timestampMillis || 0) - (a.timestampMillis || 0))
-        .slice(0, HISTORY_CAP);
+        .sort((a, b) => (b.timestampMillis || 0) - (a.timestampMillis || 0));
     }
-  }
+}
 
   // Progress: newer wins per category
   if (incoming.progress && Array.isArray(incoming.progress)) {
@@ -109,11 +108,15 @@ function mergeAppState(current: AppState, incoming: Partial<AppState>): AppState
   if (incoming.settings) {
     next.settings = {
       ...current.settings,
-      startDate: incoming.settings.startDate || current.settings.startDate,
+      startDate: incoming.settings.startDate || current.settings.startDate || '',
       theme: incoming.settings.theme || current.settings.theme,
       userName: incoming.settings.userName || current.settings.userName,
     };
   }
+  
+  // If we still have no start date after merging, but we HAVE hydrated (incoming is part of cloud/local load)
+  // then we might need to set a default, but ONLY if we are sure it's not still loading.
+  // Actually, let's leave it empty and let the UI/Reducer handle the 'first write' logic.
 
   return next;
 }
@@ -199,15 +202,14 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       
       const merged = Array.from(mergedMap.values());
       merged.sort((a, b) => (b.timestampMillis || 0) - (a.timestampMillis || 0));
-      const sliced = merged.slice(0, HISTORY_CAP);
       
       // Precise check to avoid unnecessary re-renders
-      if (state.history.length === sliced.length && 
-          state.history.every((h, i) => h.id === sliced[i].id)) {
+      if (state.history.length === merged.length && 
+          state.history.every((h, i) => h.id === merged[i].id)) {
         return state;
       }
       
-      return { ...state, history: sliced };
+      return { ...state, history: merged };
     }
     case 'UPDATE_PROGRESS': {
       const now = new Date().toISOString();
@@ -217,9 +219,16 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           ? { ...p, bookIndex: action.bookIndex, chapter: action.chapter, lastReadAt: now, updatedAtMillis: nowMillis } 
           : p
       );
+      
+      const nextSettings = { ...state.settings };
+      if (!nextSettings.startDate) {
+        nextSettings.startDate = now;
+      }
+
       return {
         ...state,
-        progress: updatedProgress
+        progress: updatedProgress,
+        settings: nextSettings
       };
     }
     case 'TOGGLE_BOOK': {
@@ -274,9 +283,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, customDevotionals: state.customDevotionals.filter(d => d.id !== action.id) };
     }
     case 'LOG_HISTORY': {
-      // History is usually chronological, so we can unshift and slice most of the time
-      // Only sort if we detect out-of-order insertion
-      const updatedHistory = [action.entry, ...state.history].slice(0, HISTORY_CAP);
+      // History is keep chronological
+      const updatedHistory = [action.entry, ...state.history];
       
       const isOutOfOrder = updatedHistory.length > 1 && 
         (updatedHistory[0].timestampMillis || 0) < (updatedHistory[1].timestampMillis || 0);

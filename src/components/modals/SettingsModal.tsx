@@ -210,10 +210,26 @@ interface SettingsModalProps {
                   <Calendar size={20} className="text-zinc-400 dark:text-zinc-600" />
                   <input 
                     type="date"
-                    value={format(parseISO(state.settings.startDate), 'yyyy-MM-dd')}
+                    value={(() => {
+                      if (!state.settings.startDate) return format(new Date(), 'yyyy-MM-dd');
+                      try {
+                        return format(parseISO(state.settings.startDate), 'yyyy-MM-dd');
+                      } catch {
+                        return format(new Date(), 'yyyy-MM-dd');
+                      }
+                    })()}
                     onChange={(e) => {
-                      const newDate = new Date(e.target.value).toISOString();
-                      dispatch({ type: 'SET_START_DATE', date: newDate });
+                      if (!e.target.value) return;
+                      // Parse YYYY-MM-DD manually to create a local-time Date object at noon
+                      // This avoids common issues with midnight conversions shifting days due to timezone
+                      const [year, month, day] = e.target.value.split('-').map(Number);
+                      const localDate = new Date(year, month - 1, day, 12, 0, 0);
+                      const isoDate = localDate.toISOString();
+                      
+                      dispatch({ type: 'SET_START_DATE', date: isoDate });
+                      if (user) {
+                        setUserSettings(user.uid, { theme: state.settings.theme, startDate: isoDate });
+                      }
                     }}
                     className="bg-transparent border-none outline-none font-bold flex-1 text-sm appearance-none"
                   />

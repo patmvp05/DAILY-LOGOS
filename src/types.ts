@@ -19,8 +19,9 @@ export interface UserSettings {
 
 export interface HistoryEntry {
   id: string;
-  timestamp: string; // ISO string for display/streak
+  timestamp: string; // ISO string for display
   timestampMillis: number; // For precision sorting
+  localDate: string; // YYYY-MM-DD in local time for streak
   categoryId: string;
   categoryName: string;
   bookName: string;

@@ -246,7 +246,7 @@ const NavbarComponent = memo(({
 
         <div className="hidden sm:block text-right pr-2">
           <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--audible-text-secondary)] font-bold mb-0.5 whitespace-nowrap">Plan Start</p>
-          <p className="text-sm font-black uppercase tabular-nums">{startDate ? format(parseISO(startDate), 'MMM dd, yyyy') : 'Loading...'}</p>
+          <p className="text-sm font-black uppercase tabular-nums">{startDate ? format(parseISO(startDate), 'MMM dd, yyyy') : (user ? 'Select start date' : 'Log in to sync')}</p>
         </div>
 
         <motion.button 

@@ -84,12 +84,14 @@ function DashboardComponent({
   const readDatesSet = useMemo(() => {
     const dates = new Set<string>();
     state.history.forEach(entry => {
-      try {
-        if (entry.timestamp) {
+      if (entry.localDate) {
+        dates.add(entry.localDate);
+      } else if (entry.timestamp) {
+        try {
           const dateStr = format(parseISO(entry.timestamp), 'yyyy-MM-dd');
           dates.add(dateStr);
-        }
-      } catch { /* ignored */ }
+        } catch { /* ignored */ }
+      }
     });
     return dates;
   }, [state.history]);
