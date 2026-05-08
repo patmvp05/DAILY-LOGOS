@@ -12,24 +12,17 @@ export function useAppStats(state: AppState) {
   const streak = useMemo(() => {
     if (state.history.length === 0) return 0;
     
-    const now = new Date();
-    const todayStr = format(now, 'yyyy-MM-dd');
-    const yesterdayStr = format(subDays(now, 1), 'yyyy-MM-dd');
-
     // We use a Set of local YYYY-MM-DD strings for O(1) daily lookup
     const uniqueDays = new Set<string>();
     
     for (const h of state.history) {
-      // Prefer localDate (pre-computed local string) if available
       if (h.localDate) {
         uniqueDays.add(h.localDate);
-      } else {
+      } else if (h.timestamp) {
         try {
-          // Convert ISO timestamp to local YYYY-MM-DD string
           const dateStr = format(parseISO(h.timestamp), 'yyyy-MM-dd');
           uniqueDays.add(dateStr);
         } catch {
-          // Fallback for potentially malformed data
           const date = h.timestamp.split('T')[0];
           if (date) uniqueDays.add(date);
         }
@@ -37,18 +30,25 @@ export function useAppStats(state: AppState) {
     }
 
     if (uniqueDays.size === 0) return 0;
-    
-    // Streak is active only if they read today or yesterday (local time)
-    if (!uniqueDays.has(todayStr) && !uniqueDays.has(yesterdayStr)) return 0;
 
-    let currentStreak = 0;
-    let checkDate = uniqueDays.has(todayStr) ? now : subDays(now, 1);
+    const now = new Date();
+    const yesterdayStr = format(subDays(now, 1), 'yyyy-MM-dd');
+
+    // A streak is active if the newest reading is today or later, OR yesterday.
+    // We sort the unique dates descending to find the most recent reading day.
+    const sortedDays = Array.from(uniqueDays).sort((a, b) => b.localeCompare(a));
+    const newestDay = sortedDays[0];
     
-    // Iteratively count backwards from the most recent reading day
+    // If the newest reading is older than yesterday, the streak is officially broken.
+    if (newestDay < yesterdayStr) return 0;
+
+    // Walk back from newestDay as long as there is a reading for each consecutive day.
+    let currentStreak = 0;
+    let checkDate = parseISO(newestDay);
+    
     while (uniqueDays.has(format(checkDate, 'yyyy-MM-dd'))) {
       currentStreak++;
       checkDate = subDays(checkDate, 1);
-      // Safety break to prevent infinite loops with system clock edge cases
       if (currentStreak > 10000) break;
     }
     
