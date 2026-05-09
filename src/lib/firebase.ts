@@ -47,10 +47,10 @@ if (isConfigValid) {
       localCache: persistentLocalCache({ 
         tabManager: persistentMultipleTabManager() 
       })
-    }, (firebaseConfig as any).firestoreDatabaseId || '(default)');
+    }, (firebaseConfig as { firestoreDatabaseId?: string }).firestoreDatabaseId || '(default)');
   } catch (e) {
     console.warn("Firestore persistent cache failed, falling back to basic init:", e);
-    db = getFirestore(app, (firebaseConfig as any).firestoreDatabaseId || '(default)');
+    db = getFirestore(app, (firebaseConfig as { firestoreDatabaseId?: string }).firestoreDatabaseId || '(default)');
   }
 } else {
   // Graceful fallback for demo/no-config mode

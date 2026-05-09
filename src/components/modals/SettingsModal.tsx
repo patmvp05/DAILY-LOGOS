@@ -55,7 +55,7 @@ interface SettingsModalProps {
    isSigningIn
  }) => {
   const { state, dispatch } = useApp();
-  const { setShowSettings, setShowProverbModal } = useUi();
+  const { setShowSettings, setShowProverbModal, showToast } = useUi();
   const { user } = useAuth();
   const [settingsTab, setSettingsTab] = React.useState<'general' | 'journals' | 'devotionals'>('general');
   const [newDevotional, setNewDevotional] = React.useState({ name: '', description: '', url: '' });
@@ -203,7 +203,12 @@ interface SettingsModalProps {
                         const themeId = id as AppState['settings']['theme'];
                         dispatch({ type: 'SET_THEME', theme: themeId });
                         if (user) {
-                          setUserSettings(user.uid, { theme: themeId });
+                          setUserSettings(user.uid, { theme: themeId, updatedAt: state.settings.updatedAt })
+                            .catch(err => {
+                              if (err.message === 'STALE_DATA_CONFLICT') {
+                                showToast("Settings updated from another device. Reloading...", "info");
+                              }
+                            });
                         }
                       }}
                       className={cn(
@@ -245,7 +250,12 @@ interface SettingsModalProps {
                       
                       dispatch({ type: 'SET_START_DATE', date: isoDate });
                       if (user) {
-                        setUserSettings(user.uid, { startDate: isoDate });
+                        setUserSettings(user.uid, { startDate: isoDate, updatedAt: state.settings.updatedAt })
+                          .catch(err => {
+                            if (err.message === 'STALE_DATA_CONFLICT') {
+                              showToast("Settings updated from another device. Reloading...", "info");
+                            }
+                          });
                       }
                     }}
                     className="bg-transparent border-none outline-none font-bold flex-1 text-sm appearance-none"

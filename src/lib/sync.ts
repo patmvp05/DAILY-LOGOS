@@ -154,9 +154,37 @@ const _writeActionBatch = async (uid: string, actions: {
 const _setUserSettings = async (uid: string, settings: Partial<UserSettings>) => {
   const ref = getUserRef(uid);
   
-  // Ensure we don't accidentally overwrite startDate with empty/invalid values
-  // unless explicitly requested (e.g. from the settings modal date picker)
-  const dataToUpdate: any = {
+  // Last-write-wins guard: Check cloud's updatedAt before writing.
+  // Note: We avoid doing this for 'updatedAt' itself to prevent circular logic.
+  try {
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const cloudData = snap.data();
+      const cloudUpdated = cloudData.updatedAt;
+      
+      // If the incoming request has an explicit, older updatedAt, we might want to skip.
+      // However, most calls to setUserSettings (theme, startDate) are current-user intent.
+      // The instruction specifically asks to compare incoming.updatedAt to existing.updatedAt.
+      if (settings.updatedAt && cloudUpdated) {
+        const incomingTime = new Date(settings.updatedAt as string).getTime();
+        const cloudTime = cloudUpdated.toMillis ? cloudUpdated.toMillis() : new Date(cloudUpdated as string).getTime();
+        
+        if (incomingTime < cloudTime) {
+          const cloudISO = cloudUpdated.toMillis ? new Date(cloudUpdated.toMillis()).toISOString() : cloudUpdated;
+          console.warn("[startDate write] conflict refused", { 
+            localUpdatedAt: settings.updatedAt, 
+            cloudUpdatedAt: cloudISO, 
+            stack: new Error().stack 
+          });
+          throw new Error('STALE_DATA_CONFLICT');
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[Sync] Last-write-wins check failed, proceeding anyway:", e);
+  }
+
+  const dataToUpdate: Partial<UserSettings> & { updatedAt: ReturnType<typeof serverTimestamp> } = {
     ...settings,
     updatedAt: serverTimestamp()
   };
@@ -168,34 +196,17 @@ export async function initializeUser(user: User) {
   const userRef = getUserRef(user.uid);
   
   try {
-    // Force a fresh fetch from server to be absolutely sure about existence
-    // avoid race conditions during rapid login/redirect triggers
     const userSnap = await getDoc(userRef);
     
     if (userSnap.exists()) {
       const userData = userSnap.data();
-      // If the doc exists but is somehow missing a startDate, we still don't want 
-      // to blindly overwrite it here. We'll let the app reducer handle defaults 
-      // to avoid 'reset to today' bugs on every sign in.
-      console.log('[DL-DEBUG] initializeUser: Existing user document found.', { 
-        hasStartDate: !!userData.startDate,
+      console.log('[Sync] initializeUser: Existing user found.', { 
         uid: user.uid 
       });
       return userData;
     } else {
-      // NEW USER ONLY — set startDate to today
-      const now = new Date().toISOString();
-      const newUser = {
-        startDate: now,
-        theme: 'system',
-        updatedAt: now,
-        createdAt: serverTimestamp()
-      };
-      
-      console.log('[DL-DEBUG] initializeUser: Creating NEW user document.', { uid: user.uid });
-      // Use merge: true just in case another login trigger created it 10ms ago
-      await setDoc(userRef, newUser, { merge: true });
-      return newUser;
+      console.log('[Sync] initializeUser: Profile missing, onboarding required.', { uid: user.uid });
+      return null;
     }
   } catch (error) {
     console.error("[Sync] initializeUser failed:", error);
@@ -228,7 +239,7 @@ const _resetUserData = async (uid: string) => {
   });
 };
 
-const wrap = <T extends (...args: any[]) => Promise<any>>(
+const wrap = <T extends (...args: string[]) => Promise<unknown>>(
   type: PendingAction['type'], 
   fn: T,
   getPath: (...args: Parameters<T>) => string
@@ -253,6 +264,10 @@ const wrap = <T extends (...args: any[]) => Promise<any>>(
       syncTracker.end(true);
       return result;
     } catch (_e) {
+      if ((_e as Error)?.message === 'STALE_DATA_CONFLICT') {
+        syncTracker.end(false);
+        throw _e; // Re-throw to UI
+      }
       console.warn(`[Sync] Action ${type} failed, queuing for retry:`, _e);
       await addToSyncQueue({ 
         type: type as PendingAction['type'], 
@@ -269,11 +284,11 @@ export const deleteCompletedBook = wrap('deleteCompletedBook', _deleteCompletedB
 export const writeJournal = wrap('writeJournal', _writeJournal, (uid, journal) => `${uid}/journals/${(journal as ProverbJournal).id}`);
 export const deleteJournal = wrap('deleteJournal', _deleteJournal, (uid, id) => `${uid}/journals/${id}`);
 export const writeActionBatch = wrap('writeActionBatch', _writeActionBatch, (uid, actions) => {
-  const a = actions as any;
-  if (a.progress) return `${uid}/progress/${a.progress.categoryId}`;
-  if (a.history) return `${uid}/history/${Array.isArray(a.history) ? a.history[0].id : a.history.id}`;
-  return `${uid}/batch/${Date.now()}`;
-});
+    const a = actions as { progress?: Progress; history?: HistoryEntry | HistoryEntry[] };
+    if (a.progress) return `${uid}/progress/${a.progress.categoryId}`;
+    if (a.history) return `${uid}/history/${Array.isArray(a.history) ? a.history[0].id : a.history.id}`;
+    return `${uid}/batch/${Date.now()}`;
+  });
 export const setUserSettings = wrap('setUserSettings', _setUserSettings, (uid) => `${uid}/settings`);
 export const resetUserData = wrap('resetUserData', _resetUserData, (uid) => `${uid}/reset`);
 
@@ -309,7 +324,7 @@ export async function processSyncQueue() {
       // Always remove if handler processed (success) or handler missing
       await removeFromSyncQueue(action.id);
     } catch (e) {
-      const error = e as any;
+      const error = e as { code?: string; name?: string };
       console.error(`[Sync] Failed to process queued action ${action.type}:`, e);
       
       // If it's a permission/validation error (terminal), remove it from queue

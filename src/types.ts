@@ -15,6 +15,7 @@ export interface UserSettings {
   startDate: string; // ISO string
   userName?: string;
   theme: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook';
+  updatedAt?: string; // ISO string or similar for LWW guard
 }
 
 export interface HistoryEntry {

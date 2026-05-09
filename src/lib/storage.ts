@@ -86,6 +86,14 @@ export const loadStateAsync = async (): Promise<Partial<AppState> | null> => {
   try {
     const idbState = await get(STORAGE_KEY);
     if (idbState) {
+      // Migration for planStartDate -> startDate
+      if (idbState.settings && idbState.settings.planStartDate && !idbState.settings.startDate) {
+        idbState.settings.startDate = idbState.settings.planStartDate;
+        delete idbState.settings.planStartDate;
+        // Trigger a save to persist the migration
+        console.log("[Migration] Migrated planStartDate to startDate in IndexedDB.");
+      }
+
       if (idbState.completedBooks && Array.isArray(idbState.completedBooks)) {
         idbState.completedBooks = new Set(idbState.completedBooks);
       }

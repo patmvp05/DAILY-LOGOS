@@ -27,6 +27,7 @@ import { usePrefersDark } from './hooks/usePrefersDark';
 import { Navbar } from './components/Navbar';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { Toast } from './components/Toast';
+import { Onboarding } from './components/Onboarding';
 
 const Dashboard = React.lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
 const AppModals = React.lazy(() => import('./components/AppModals').then(m => ({ default: m.AppModals })));
@@ -49,6 +50,8 @@ export default function App() {
   const [isSigningIn, setIsSigningIn] = React.useState(false);
 
   const sync = useSyncState(user, dispatch);
+  const isHydrated = state.isCloudHydrated || (!user && !isAuthLoading);
+
   const prefersDark = usePrefersDark();
   
   useTheme(state.settings.theme);
@@ -58,6 +61,23 @@ export default function App() {
     setLastSyncTime(sync.lastSyncTime);
     setShowSyncCheck(sync.showSyncCheck);
   }, [sync.syncStatus, sync.lastSyncTime, sync.showSyncCheck, setSyncStatus, setLastSyncTime, setShowSyncCheck]);
+
+  // Handle lack of startDate (Onboarding)
+  const needsOnboarding = user && isHydrated && !state.settings.startDate;
+
+  const handleSetInitialDate = useCallback((date: string) => {
+    dispatch({ type: 'SET_START_DATE', date });
+    if (user) {
+      // CRITICAL: We must send a complete UserSettings object (theme + startDate) 
+      // for the initial document creation to pass Firestore rules.
+      setUserSettings(user.uid, { 
+        startDate: date,
+        theme: state.settings.theme || 'system'
+      });
+    }
+  }, [user, dispatch, state.settings.theme]);
+
+  const isLoadingCloud = isAuthLoading || (user && syncStatus === 'syncing' && !state.isCloudHydrated);
 
   const handleLoginLocal = useCallback(async function loginFn(useRedirect = false) {
     setIsSigningIn(true);
@@ -105,13 +125,42 @@ export default function App() {
     }
   }, [state.settings.theme, state.isCloudHydrated, user, dispatch]);
 
+  if (isLoadingCloud) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--audible-bg)]">
+        <div className="w-12 h-12 border-4 border-evernote border-t-transparent rounded-full animate-spin mb-4" />
+        {syncStatus === 'error' ? (
+          <div className="text-center animate-in fade-in duration-500">
+            <p className="text-sm font-black uppercase tracking-widest text-red-500 mb-4">
+              Connection timeout
+            </p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="bg-evernote text-white px-6 py-2 rounded-lg font-bold uppercase text-xs hover:scale-105 transition-transform"
+            >
+              Retry Connection
+            </button>
+          </div>
+        ) : (
+          <p className="text-sm font-black uppercase tracking-widest text-[var(--audible-text-secondary)] animate-pulse">
+            Connecting to Cloud...
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={cn("min-h-[100dvh] transition-colors duration-300", state.settings.theme === 'xp' ? "theme-xp" : state.settings.theme === 'textbook' ? "theme-textbook" : "bg-[var(--audible-bg)] text-[var(--audible-text-primary)]", state.settings.theme === 'dark' && "dark", state.settings.theme === 'audible' && "audible", (state.settings.theme === 'audible' || state.settings.theme === 'system') && prefersDark && "dark")}>
       <Navbar user={user} syncStatus={syncStatus} lastSyncTime={lastSyncTime} showSyncCheck={showSyncCheck} handleLogin={handleLoginLocal} logout={logout} toggleTheme={toggleTheme} theme={state.settings.theme} setShowHistory={setShowHistory} setShowSettings={setShowSettings} startDate={state.settings.startDate} isSigningIn={isSigningIn} isAuthLoading={isAuthLoading} />
       <main className="pt-20 pb-20">
-        <React.Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><div className="w-8 h-8 border-4 border-evernote border-t-transparent rounded-full animate-spin" /></div>}>
-          <Dashboard handleLogin={handleLoginLocal} isSigningIn={isSigningIn} user={user} isAuthLoading={isAuthLoading} />
-        </React.Suspense>
+        {needsOnboarding ? (
+          <Onboarding onComplete={handleSetInitialDate} />
+        ) : (
+          <React.Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><div className="w-8 h-8 border-4 border-evernote border-t-transparent rounded-full animate-spin" /></div>}>
+            <Dashboard handleLogin={handleLoginLocal} isSigningIn={isSigningIn} user={user} isAuthLoading={isAuthLoading} />
+          </React.Suspense>
+        )}
       </main>
       <React.Suspense fallback={null}>
         <AppModals isSigningIn={isSigningIn} />

@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo, useEffect, memo } from 'react';
+import { type User } from 'firebase/auth';
 import { 
   Layers, 
   Play, 
@@ -35,7 +36,7 @@ import { useProverb } from '../hooks/useProverb';
 interface DashboardProps {
   handleLogin: (redirect?: boolean) => void;
   isSigningIn: boolean;
-  user: any;
+  user: User | null;
   isAuthLoading: boolean;
 }
 

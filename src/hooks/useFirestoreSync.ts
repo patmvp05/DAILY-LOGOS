@@ -10,6 +10,9 @@ import {
   orderBy, 
   type QuerySnapshot, 
   type DocumentSnapshot,
+  type DocumentReference,
+  type CollectionReference,
+  type Query
 } from 'firebase/firestore';
 import { type User } from 'firebase/auth';
 import { 
@@ -38,17 +41,26 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     
     setSyncStatus('syncing');
 
+    // 10-second timeout for initial cloud sync
+    const connectionTimeout = window.setTimeout(() => {
+      if (!isInitialLoadComplete.current) {
+        console.error("[Sync] Initial cloud sync timed out.");
+        setSyncStatus('error');
+      }
+    }, 10000);
+
     const checkInitialSyncDone = () => {
       if (!isInitialLoadComplete.current && initialLoadTracker.current.size >= collectionsToSync.length) {
         isInitialLoadComplete.current = true;
+        window.clearTimeout(connectionTimeout);
         dispatch({ type: 'HYDRATE_STATE', state: initialData.current, isCloudData: true });
         setSyncStatus('synced');
       }
     };
 
-    const setupListener = <S extends DocumentSnapshot<any, any> | QuerySnapshot<any, any>, T>(
+    const setupListener = <S extends DocumentSnapshot | QuerySnapshot, T>(
       name: string, 
-      ref: any, 
+      ref: DocumentReference | CollectionReference | Query, 
       stateKey: keyof AppState | null,
       onUpdate: (snap: S) => T,
       action: AppAction['type']
@@ -59,7 +71,7 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
       const attach = () => {
         if (!isActive) return;
         
-        currentUnsub = onSnapshot(ref, { includeMetadataChanges: false }, (snap: any) => {
+        currentUnsub = onSnapshot(ref as Query, { includeMetadataChanges: false }, (snap) => {
           if (!isActive) return;
           retryCount = 0; // Reset on successful hit
           
@@ -67,13 +79,13 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
           
           if (!isInitialLoadComplete.current) {
             if (stateKey) {
-              (initialData.current as any)[stateKey] = processedData;
+              (initialData.current as Record<string, unknown>)[stateKey] = processedData;
             }
             initialLoadTracker.current.add(name);
             checkInitialSyncDone();
           } else {
             // After initial load, dispatch normally
-            if (action === 'CLOUD_SYNC_USER_DATA') dispatch({ type: action, data: processedData as any });
+            if (action === 'CLOUD_SYNC_USER_DATA') dispatch({ type: action, data: processedData as UserSettings });
             else if (action === 'CLOUD_SYNC_PROGRESS') dispatch({ type: action, progress: processedData as Progress[] });
             else if (action === 'CLOUD_SYNC_COMPLETED') dispatch({ type: action, completed: Array.from(processedData as Set<string>) });
             else if (action === 'CLOUD_SYNC_JOURNALS') dispatch({ type: action, journals: processedData as ProverbJournal[] });
@@ -107,22 +119,25 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
         return { theme: 'system', startDate: '', userName: '' };
       }
       
-      const data = doc.data() as any;
+      const data = doc.data() as Record<string, unknown>;
       const settings: UserSettings = { 
-        theme: data.theme || 'system',
+        theme: (data.theme as AppState['settings']['theme']) || 'system',
         startDate: '',
-        userName: data.userName || ''
+        userName: (data.userName as string) || '',
+        updatedAt: data.updatedAt && 'toMillis' in (data.updatedAt as object) 
+          ? new Date((data.updatedAt as { toMillis: () => number }).toMillis()).toISOString()
+          : data.updatedAt as string
       };
       
-      // Handle potential Timestamp or string for both startDate and planStartDate
-      const rawStart = data.startDate || data.planStartDate;
+      // Handle potential Timestamp or string for startDate
+      const rawStart = data.startDate;
       if (rawStart) {
         if (typeof rawStart === 'string') {
           settings.startDate = rawStart;
         } else if (rawStart && typeof rawStart === 'object' && 'toMillis' in rawStart) {
-          settings.startDate = new Date((rawStart as any).toMillis()).toISOString();
+          settings.startDate = new Date((rawStart as { toMillis: () => number }).toMillis()).toISOString();
         } else if (rawStart && typeof rawStart === 'object' && 'seconds' in rawStart) {
-          settings.startDate = new Date((rawStart as any).seconds * 1000).toISOString();
+          settings.startDate = new Date((rawStart as { seconds: number }).seconds * 1000).toISOString();
         }
       }
       
@@ -133,7 +148,7 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     // 2. Progress
     setupListener<QuerySnapshot, Progress[]>('Progress', getProgressCollection(user.uid), 'progress', (snap) => {
       return snap.docs.map((doc) => {
-        const data = doc.data();
+        const data = doc.data() as Record<string, unknown>;
         const updatedAtMillis = (data.updatedAt as { toMillis?: () => number })?.toMillis?.() || (data.lastReadAt ? new Date(data.lastReadAt as string).getTime() : 0);
         return { ...data, updatedAtMillis } as unknown as Progress;
       });

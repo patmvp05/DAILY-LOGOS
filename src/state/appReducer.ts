@@ -13,7 +13,7 @@ export type AppAction =
   | { type: 'CLOUD_SYNC_JOURNALS', journals: ProverbJournal[] }
   | { type: 'CLOUD_SYNC_DEVOTIONALS', devotionals: Devotional[] }
   | { type: 'CLOUD_SYNC_HISTORY', history: HistoryEntry[] }
-  | { type: 'CLOUD_SYNC_USER_DATA', data: { startDate?: string; theme?: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook' } }
+  | { type: 'CLOUD_SYNC_USER_DATA', data: { startDate?: string; theme?: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook'; updatedAt?: string } }
   | { type: 'UPDATE_PROGRESS', categoryId: string, bookIndex: number, chapter: number }
   | { type: 'TOGGLE_BOOK', key: string }
   | { type: 'JUMP_TO_BOOK', categoryId: string, bookIndex: number, key: string }
@@ -43,7 +43,7 @@ function isFingerprintMatch<T extends { id: string }>(a: T[], b: T[]): boolean {
  * Merges state non-destructively.
  * Ensures cloud-empty never overwrites local-non-empty.
  */
-function mergeAppState(current: AppState, incoming: Partial<AppState>): AppState {
+function mergeAppState(current: AppState, incoming: Partial<AppState>, isCloud: boolean = false): AppState {
   const next = { ...current };
 
   // History: merge unique, sort, slice
@@ -106,19 +106,34 @@ function mergeAppState(current: AppState, incoming: Partial<AppState>): AppState
 
   // Settings
   if (incoming.settings) {
-    const inc = incoming.settings as any;
-    next.settings = {
-      ...current.settings,
-      startDate: inc.startDate || inc.planStartDate || current.settings.startDate || '',
-      theme: incoming.settings.theme || current.settings.theme,
-      userName: incoming.settings.userName || current.settings.userName,
-    };
+    const inc = incoming.settings as Partial<UserSettings> & { planStartDate?: string };
+    
+    // CRITICAL: If we already have cloud data in current state, local hydration should NOT overwrite it
+    // if the incoming data is not explicitly from cloud.
+    const skipSettingOverwrite = !isCloud && current.isCloudHydrated;
+
+    if (!skipSettingOverwrite) {
+      const newStartDate = inc.startDate || current.settings.startDate || '';
+      
+      if (newStartDate !== current.settings.startDate) {
+        console.warn("[startDate write] Mutation detected in mergeAppState.", {
+          from: current.settings.startDate,
+          to: newStartDate,
+          isCloud,
+          stack: new Error().stack
+        });
+      }
+
+      next.settings = {
+        ...current.settings,
+        startDate: newStartDate,
+        theme: incoming.settings.theme || current.settings.theme,
+        userName: incoming.settings.userName || current.settings.userName,
+        updatedAt: incoming.settings.updatedAt || current.settings.updatedAt
+      };
+    }
   }
   
-  // If we still have no start date after merging, but we HAVE hydrated (incoming is part of cloud/local load)
-  // then we might need to set a default, but ONLY if we are sure it's not still loading.
-  // Actually, let's leave it empty and let the UI/Reducer handle the 'first write' logic.
-
   return next;
 }
 
@@ -128,7 +143,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return mergeAppState(state, action.state);
     }
     case 'HYDRATE_STATE': {
-      const merged = mergeAppState(state, action.state);
+      const merged = mergeAppState(state, action.state, action.isCloudData);
       return { 
         ...merged, 
         restoredFromSnapshot: action.restoredFromSnapshot || merged.restoredFromSnapshot,
@@ -139,18 +154,31 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, restoredFromSnapshot: false, isCloudHydrated: false };
     }
     case 'CLOUD_SYNC_USER_DATA': {
-      const inc = action.data as any;
-      const newStartDate = inc.startDate || inc.planStartDate || state.settings.startDate;
+      const inc = action.data as Partial<UserSettings> & { planStartDate?: string };
+      const newStartDate = inc.startDate || state.settings.startDate;
       const newTheme = action.data.theme || state.settings.theme;
+      const newUpdatedAt = inc.updatedAt || state.settings.updatedAt;
+
+      if (newStartDate !== state.settings.startDate) {
+        console.warn("[startDate write] Mutation detected via CLOUD_SYNC_USER_DATA.", {
+          from: state.settings.startDate,
+          to: newStartDate,
+          stack: new Error().stack
+        });
+      }
+
       if (state.settings.startDate === newStartDate && 
-          state.settings.theme === newTheme) return state;
+          state.settings.theme === newTheme &&
+          state.settings.updatedAt === newUpdatedAt) return state;
       return {
         ...state,
         settings: {
           ...state.settings,
           startDate: newStartDate,
           theme: newTheme,
-        }
+          updatedAt: newUpdatedAt
+        },
+        isCloudHydrated: true
       };
     }
     case 'CLOUD_SYNC_PROGRESS': {
@@ -222,18 +250,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           : p
       );
       
-      const nextSettings = { ...state.settings };
-      // Only default if truly missing AND we've loaded cloud data (to avoid race conditions)
-      // AND we are strictly on the very first chapter of the very first book.
-      // This prevents resetting the start date for people who are mid-plan but somehow lost their startDate field.
-      if (!nextSettings.startDate && state.isCloudHydrated && action.bookIndex === 0 && action.chapter === 1) {
-        nextSettings.startDate = now;
-      }
-
       return {
         ...state,
         progress: updatedProgress,
-        settings: nextSettings
       };
     }
     case 'TOGGLE_BOOK': {
@@ -279,6 +298,11 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'SET_START_DATE': {
       if (state.settings.startDate === action.date) return state;
+      console.warn("[startDate write] Mutation detected via SET_START_DATE.", {
+        from: state.settings.startDate,
+        to: action.date,
+        stack: new Error().stack
+      });
       return { ...state, settings: { ...state.settings, startDate: action.date } };
     }
     case 'ADD_DEVOTIONAL': {

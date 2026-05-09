@@ -73,21 +73,6 @@ export default defineConfig(() => {
                   statuses: [0, 200]
                 }
               }
-            },
-            {
-              urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*/,
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'firestore-cache',
-                networkTimeoutSeconds: 5,
-                expiration: {
-                  maxEntries: 50,
-                  maxAgeSeconds: 60 * 60 * 24 // 1 day
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
             }
           ]
         }
