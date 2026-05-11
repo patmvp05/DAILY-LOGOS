@@ -71,7 +71,16 @@ export function useReadingActions(
       currentState.completedBooks
     );
 
-    currentDispatch({ type: 'UPDATE_PROGRESS', categoryId, bookIndex: progress.bookIndex, chapter: progress.chapter });
+    const now = new Date();
+    const localDate = format(now, 'yyyy-MM-dd');
+    
+    currentDispatch({ 
+      type: 'UPDATE_PROGRESS', 
+      categoryId, 
+      bookIndex: progress.bookIndex, 
+      chapter: progress.chapter,
+      localDate
+    });
     newlyCompletedKeys.forEach(key => currentDispatch({ type: 'TOGGLE_BOOK', key }));
     
     const category = CATEGORIES_BY_ID.get(categoryId)!;
@@ -132,7 +141,8 @@ export function useReadingActions(
             categoryId,
             bookIndex,
             chapter: 1,
-            lastReadAt: new Date().toISOString()
+            lastReadAt: new Date().toISOString(),
+            localDate: format(new Date(), 'yyyy-MM-dd')
           },
           deletedBooks: [{ categoryId, bookName: book.name }]
         }).catch(e => console.error("Jump sync failed:", e));
@@ -218,10 +228,21 @@ export function useReadingActions(
       message: "This will reset all chapter markers to the beginning. Your journal history will be kept. Continue?",
       onConfirm: async () => {
         const resetDate = new Date().toISOString();
+        const localDate = format(new Date(), 'yyyy-MM-dd');
         const newState: AppState = {
           ...state,
-          progress: CATEGORIES.map(cat => ({ categoryId: cat.id, bookIndex: 0, chapter: 1, lastReadAt: resetDate })),
-          settings: { ...state.settings, startDate: resetDate },
+          progress: CATEGORIES.map(cat => ({ 
+            categoryId: cat.id, 
+            bookIndex: 0, 
+            chapter: 1, 
+            lastReadAt: resetDate,
+            localDate: localDate
+          })),
+          settings: { 
+            ...state.settings, 
+            startDate: resetDate,
+            updatedAt: new Date().toISOString()
+          },
           completedBooks: new Set<string>()
         };
         dispatch({ type: 'REPLACE_STATE', state: newState });

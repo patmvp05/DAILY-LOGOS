@@ -20,7 +20,10 @@ export function useAppStats(state: AppState) {
         uniqueDays.add(h.localDate);
       } else if (h.timestamp) {
         try {
-          const dateStr = format(parseISO(h.timestamp), 'yyyy-MM-dd');
+          // If localDate is missing (old entries), we try to derive it.
+          // IMPORTANT: we must parse and then format to local string to match new entries
+          const d = parseISO(h.timestamp);
+          const dateStr = format(d, 'yyyy-MM-dd');
           uniqueDays.add(dateStr);
         } catch {
           const date = h.timestamp.split('T')[0];
@@ -28,21 +31,22 @@ export function useAppStats(state: AppState) {
         }
       }
     }
-
+    
     if (uniqueDays.size === 0) return 0;
-
-    const now = new Date();
-    const yesterdayStr = format(subDays(now, 1), 'yyyy-MM-dd');
-
-    // A streak is active if the newest reading is today or later, OR yesterday.
-    // We sort the unique dates descending to find the most recent reading day.
+    
     const sortedDays = Array.from(uniqueDays).sort((a, b) => b.localeCompare(a));
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const yesterdayStr = format(subDays(new Date(), 1), 'yyyy-MM-dd');
+
     const newestDay = sortedDays[0];
     
-    // If the newest reading is older than yesterday, the streak is officially broken.
-    if (newestDay < yesterdayStr) return 0;
+    // A streak is active if the newest reading is TODAY or YESTERDAY.
+    if (newestDay !== todayStr && newestDay !== yesterdayStr) {
+      console.log("[Streak] Broken. Newest reading was:", newestDay, "Today is:", todayStr);
+      return 0;
+    }
 
-    // Walk back from newestDay as long as there is a reading for each consecutive day.
+    // Walk back from newestDay
     let currentStreak = 0;
     let checkDate = parseISO(newestDay);
     

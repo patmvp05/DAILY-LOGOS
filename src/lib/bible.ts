@@ -94,7 +94,8 @@ export function calculateNextProgress(
       categoryId,
       bookIndex: currentBookIndex,
       chapter: currentChapter,
-      lastReadAt: new Date().toISOString()
+      lastReadAt: new Date().toISOString(),
+      localDate: new Date().toLocaleDateString('en-CA') // YYYY-MM-DD
     },
     newlyCompletedKeys,
     historySteps

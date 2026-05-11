@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { format } from 'date-fns';
 import { AppState, Progress as ProgressType, HistoryEntry, ProverbJournal, Devotional } from '../types';
 
 export type AppAction = 
@@ -14,7 +15,7 @@ export type AppAction =
   | { type: 'CLOUD_SYNC_DEVOTIONALS', devotionals: Devotional[] }
   | { type: 'CLOUD_SYNC_HISTORY', history: HistoryEntry[] }
   | { type: 'CLOUD_SYNC_USER_DATA', data: { startDate?: string; theme?: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook'; updatedAt?: string } }
-  | { type: 'UPDATE_PROGRESS', categoryId: string, bookIndex: number, chapter: number }
+  | { type: 'UPDATE_PROGRESS', categoryId: string, bookIndex: number, chapter: number, localDate?: string }
   | { type: 'TOGGLE_BOOK', key: string }
   | { type: 'JUMP_TO_BOOK', categoryId: string, bookIndex: number, key: string }
   | { type: 'UPSERT_JOURNAL', journal: ProverbJournal }
@@ -43,7 +44,7 @@ function isFingerprintMatch<T extends { id: string }>(a: T[], b: T[]): boolean {
  * Merges state non-destructively.
  * Ensures cloud-empty never overwrites local-non-empty.
  */
-function mergeAppState(current: AppState, incoming: Partial<AppState>, isCloud: boolean = false): AppState {
+function mergeAppState(current: AppState, incoming: Partial<AppState>, _isCloud: boolean = false): AppState {
   const next = { ...current };
 
   // History: merge unique, sort, slice
@@ -108,28 +109,30 @@ function mergeAppState(current: AppState, incoming: Partial<AppState>, isCloud: 
   if (incoming.settings) {
     const inc = incoming.settings as Partial<UserSettings> & { planStartDate?: string };
     
-    // CRITICAL: If we already have cloud data in current state, local hydration should NOT overwrite it
-    // if the incoming data is not explicitly from cloud.
-    const skipSettingOverwrite = !isCloud && current.isCloudHydrated;
-
-    if (!skipSettingOverwrite) {
-      const newStartDate = inc.startDate || current.settings.startDate || '';
-      
-      if (newStartDate !== current.settings.startDate) {
-        console.warn("[startDate write] Mutation detected in mergeAppState.", {
-          from: current.settings.startDate,
-          to: newStartDate,
-          isCloud,
-          stack: new Error().stack
+    // Check if cloud data is actually newer than our local state.
+    // If we have a local 'updatedAt', we compare it.
+    let shouldUpdate = true;
+    if (current.settings.updatedAt && inc.updatedAt) {
+      const curTime = new Date(current.settings.updatedAt).getTime();
+      const incTime = new Date(inc.updatedAt).getTime();
+      if (incTime < curTime) {
+        shouldUpdate = false;
+        console.log("[Sync] Ignoring older cloud settings to prevent revert.", { 
+          cloud: inc.updatedAt, 
+          local: current.settings.updatedAt 
         });
       }
+    }
 
+    if (shouldUpdate) {
+      const newStartDate = inc.startDate || current.settings.startDate || '';
+      
       next.settings = {
         ...current.settings,
         startDate: newStartDate,
-        theme: incoming.settings.theme || current.settings.theme,
-        userName: incoming.settings.userName || current.settings.userName,
-        updatedAt: incoming.settings.updatedAt || current.settings.updatedAt
+        theme: inc.theme || current.settings.theme,
+        userName: inc.userName || current.settings.userName,
+        updatedAt: inc.updatedAt || current.settings.updatedAt
       };
     }
   }
@@ -154,22 +157,24 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, restoredFromSnapshot: false, isCloudHydrated: false };
     }
     case 'CLOUD_SYNC_USER_DATA': {
-      const inc = action.data as Partial<UserSettings> & { planStartDate?: string };
-      const newStartDate = inc.startDate || state.settings.startDate;
-      const newTheme = action.data.theme || state.settings.theme;
-      const newUpdatedAt = inc.updatedAt || state.settings.updatedAt;
-
-      if (newStartDate !== state.settings.startDate) {
-        console.warn("[startDate write] Mutation detected via CLOUD_SYNC_USER_DATA.", {
-          from: state.settings.startDate,
-          to: newStartDate,
-          stack: new Error().stack
-        });
+      const inc = action.data as Partial<UserSettings>;
+      const newUpdatedAt = inc.updatedAt || '';
+      
+      // If we have a local update that is newer than this cloud snapshot, ignore it.
+      if (state.settings.updatedAt && newUpdatedAt) {
+        if (new Date(newUpdatedAt).getTime() < new Date(state.settings.updatedAt).getTime()) {
+          console.log("[Sync] Ignoring stale user-data from cloud to protect local mutation.");
+          return state;
+        }
       }
+
+      const newStartDate = inc.startDate || state.settings.startDate;
+      const newTheme = inc.theme || state.settings.theme;
 
       if (state.settings.startDate === newStartDate && 
           state.settings.theme === newTheme &&
           state.settings.updatedAt === newUpdatedAt) return state;
+
       return {
         ...state,
         settings: {
@@ -244,9 +249,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'UPDATE_PROGRESS': {
       const now = new Date().toISOString();
       const nowMillis = Date.now();
+      const localDate = action.localDate || format(new Date(), 'yyyy-MM-dd');
       const updatedProgress = state.progress.map(p => 
         p.categoryId === action.categoryId 
-          ? { ...p, bookIndex: action.bookIndex, chapter: action.chapter, lastReadAt: now, updatedAtMillis: nowMillis } 
+          ? { ...p, bookIndex: action.bookIndex, chapter: action.chapter, lastReadAt: now, localDate, updatedAtMillis: nowMillis } 
           : p
       );
       
@@ -270,13 +276,14 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'JUMP_TO_BOOK': {
       const now = new Date().toISOString();
       const nowMillis = Date.now();
+      const localDate = format(new Date(), 'yyyy-MM-dd');
       const newCompleted = new Set(state.completedBooks);
       newCompleted.delete(action.key);
       return {
         ...state,
         completedBooks: newCompleted,
         progress: state.progress.map(p => 
-          p.categoryId === action.categoryId ? { ...p, bookIndex: action.bookIndex, chapter: 1, lastReadAt: now, updatedAtMillis: nowMillis } : p
+          p.categoryId === action.categoryId ? { ...p, bookIndex: action.bookIndex, chapter: 1, lastReadAt: now, localDate, updatedAtMillis: nowMillis } : p
         )
       };
     }
@@ -294,16 +301,29 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'SET_THEME': {
       if (state.settings.theme === action.theme) return state;
-      return { ...state, settings: { ...state.settings, theme: action.theme } };
+      return { 
+        ...state, 
+        settings: { 
+          ...state.settings, 
+          theme: action.theme,
+          updatedAt: new Date().toISOString() // Local stamp to prevent cloud-revert
+        } 
+      };
     }
     case 'SET_START_DATE': {
       if (state.settings.startDate === action.date) return state;
-      console.warn("[startDate write] Mutation detected via SET_START_DATE.", {
+      console.warn("[startDate write] Local update triggered.", {
         from: state.settings.startDate,
-        to: action.date,
-        stack: new Error().stack
+        to: action.date
       });
-      return { ...state, settings: { ...state.settings, startDate: action.date } };
+      return { 
+        ...state, 
+        settings: { 
+          ...state.settings, 
+          startDate: action.date,
+          updatedAt: new Date().toISOString() // Local stamp to prevent cloud-revert
+        } 
+      };
     }
     case 'ADD_DEVOTIONAL': {
       return { ...state, customDevotionals: [...state.customDevotionals, action.devotional] };

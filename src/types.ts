@@ -8,6 +8,7 @@ export interface Progress {
   bookIndex: number;
   chapter: number;
   lastReadAt?: string; // ISO string
+  localDate?: string; // YYYY-MM-DD in local time
   updatedAtMillis?: number; // Server-side or precise local timestamp
 }
 

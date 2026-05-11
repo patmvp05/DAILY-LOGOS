@@ -20,7 +20,7 @@ import {
   Plus,
   Bookmark
 } from 'lucide-react';
-import { format, parseISO, isToday, subDays } from 'date-fns';
+import { format, parseISO, subDays } from 'date-fns';
 import { CATEGORIES, CATEGORIES_BY_ID, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
 import { Progress } from '../types';
 import { cn, computeProgressStats } from '../lib/utils';
@@ -65,14 +65,9 @@ function DashboardComponent({
   };
 
   const todayReadingStats = useMemo(() => {
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
     const todayEntries = state.history.filter(
-      h => {
-        try {
-          return isToday(parseISO(h.timestamp));
-        } catch {
-          return false;
-        }
-      }
+      h => h.localDate === todayStr
     );
     const minutes = todayEntries.reduce((sum, h) => {
       const perCh = BOOK_READ_MINUTES[h.bookName] ?? DEFAULT_BOOK_MINUTES;
@@ -475,7 +470,8 @@ function DashboardComponent({
             if (!prog) return null;
             
             const book = cat.books[prog.bookIndex];
-            const isDone = prog.lastReadAt && isToday(parseISO(prog.lastReadAt));
+            const todayStr = format(new Date(), 'yyyy-MM-dd');
+            const isDone = prog.localDate === todayStr;
             const bookIsCompleted = state.completedBooks.has(`${cat.id}:${book.name}`);
             const infoKey = `${cat.id}:${prog.bookIndex}:${prog.chapter}`;
             const info = chapterInfos[infoKey];
