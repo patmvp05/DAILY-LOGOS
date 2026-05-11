@@ -181,6 +181,9 @@ const _setUserSettings = async (uid: string, settings: Partial<UserSettings>) =>
       }
     }
   } catch (e) {
+    if ((e as Error)?.message === 'STALE_DATA_CONFLICT') {
+      throw e; // Re-throw — don't write stale data over a newer value
+    }
     console.warn("[Sync] Last-write-wins check failed, proceeding anyway:", e);
   }
 
@@ -328,7 +331,7 @@ export async function processSyncQueue() {
       console.error(`[Sync] Failed to process queued action ${action.type}:`, e);
       
       // If it's a permission/validation error (terminal), remove it from queue
-      const isTerminal = error?.code === 'permission-denied' || error?.name === 'FirebaseError';
+      const isTerminal = error?.code === 'permission-denied' || error?.name === 'FirebaseError' || (error as Error)?.message === 'STALE_DATA_CONFLICT';
       if (isTerminal) {
         console.warn(`[Sync] Terminal error for ${action.type}, removing from queue.`);
         await removeFromSyncQueue(action.id);
@@ -349,4 +352,3 @@ if (typeof window !== 'undefined') {
     processSyncQueue();
   });
 }
-
