@@ -28,6 +28,7 @@ export interface HistoryEntry {
   categoryName: string;
   bookName: string;
   chapter: number;
+  readTime?: number;
 }
 
 export interface ProverbJournal {

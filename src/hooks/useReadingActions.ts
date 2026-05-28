@@ -7,9 +7,10 @@ import { useCallback, useRef, Dispatch, useEffect } from 'react';
 import { format, isToday, parseISO } from 'date-fns';
 import { AppState, HistoryEntry, ProverbJournal } from '../types';
 import { AppAction } from '../state/appReducer';
-import { CATEGORIES_BY_ID, CATEGORIES } from '../constants';
+import { CATEGORIES_BY_ID, CATEGORIES, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
 import { triggerHaptic } from '../lib/haptic';
 import { calculateNextProgress } from '../lib/bible';
+import { getCachedReadTime } from '../lib/bibleCache';
 import { 
   writeActionBatch, 
   deleteCompletedBook, 
@@ -42,14 +43,6 @@ export function useReadingActions(
 
   const pendingTaps = useRef<Record<string, number>>({});
   const flushTimeouts = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
-
-  // Cleanup pending flushes on unmount
-  useEffect(() => {
-    const currentTimeouts = flushTimeouts.current;
-    return () => {
-      Object.values(currentTimeouts).forEach(clearTimeout);
-    };
-  }, []);
 
   const flush = useCallback(async (categoryId: string) => {
     const amount = pendingTaps.current[categoryId] || 0;
@@ -84,16 +77,20 @@ export function useReadingActions(
     newlyCompletedKeys.forEach(key => currentDispatch({ type: 'TOGGLE_BOOK', key }));
     
     const category = CATEGORIES_BY_ID.get(categoryId)!;
-    const historyEntries: HistoryEntry[] = historySteps.map((step, index) => ({
-      id: `${Date.now()}_${index}_${Math.random().toString(36).substring(7)}`,
-      timestamp: new Date().toISOString(),
-      timestampMillis: Date.now() + index,
-      localDate: format(new Date(), 'yyyy-MM-dd'),
-      categoryId,
-      categoryName: category.name,
-      bookName: step.bookName,
-      chapter: step.chapter,
-    }));
+    const historyEntries: HistoryEntry[] = historySteps.map((step, index) => {
+      const cached = getCachedReadTime(step.bookName, step.chapter);
+      return {
+        id: `${Date.now()}_${index}_${Math.random().toString(36).substring(7)}`,
+        timestamp: new Date().toISOString(),
+        timestampMillis: Date.now() + index,
+        localDate: format(new Date(), 'yyyy-MM-dd'),
+        categoryId,
+        categoryName: category.name,
+        bookName: step.bookName,
+        chapter: step.chapter,
+        readTime: cached || BOOK_READ_MINUTES[step.bookName] || DEFAULT_BOOK_MINUTES,
+      };
+    });
 
     historyEntries.forEach(entry => currentDispatch({ type: 'LOG_HISTORY', entry }));
     
@@ -108,6 +105,53 @@ export function useReadingActions(
       }).catch(err => console.error("Sync failed:", err));
     }
   }, []);
+
+  // Cleanup pending flushes on unmount & flush immediately if needed
+  useEffect(() => {
+    const currentTimeouts = flushTimeouts.current;
+    return () => {
+      Object.keys(currentTimeouts).forEach((catId) => {
+        if (currentTimeouts[catId]) {
+          clearTimeout(currentTimeouts[catId]);
+        }
+        if (pendingTaps.current[catId] && pendingTaps.current[catId] !== 0) {
+          console.log(`[Unmount Flush] Flushing pending taps for ${catId}:`, pendingTaps.current[catId]);
+          flush(catId);
+        }
+      });
+    };
+  }, [flush]);
+
+  // Robust Safari/iOS background-freeze guards
+  useEffect(() => {
+    const forceFlushAll = () => {
+      Object.keys(pendingTaps.current).forEach((catId) => {
+        if (pendingTaps.current[catId] && pendingTaps.current[catId] !== 0) {
+          console.log(`[Visibility/PageHide Flush] Flushing pending taps for ${catId}:`, pendingTaps.current[catId]);
+          if (flushTimeouts.current[catId]) {
+            clearTimeout(flushTimeouts.current[catId]);
+          }
+          flush(catId);
+        }
+      });
+    };
+
+    window.addEventListener('pagehide', forceFlushAll);
+    window.addEventListener('beforeunload', forceFlushAll);
+    
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        forceFlushAll();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      window.removeEventListener('pagehide', forceFlushAll);
+      window.removeEventListener('beforeunload', forceFlushAll);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [flush]);
 
   const advanceChapter = useCallback((categoryId: string, amount: number) => {
     // Immediate haptic feedback for every tap per requirements

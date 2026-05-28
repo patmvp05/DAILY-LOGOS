@@ -33,7 +33,17 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
   const isInitialLoadComplete = useRef(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      isInitialLoadComplete.current = false;
+      initialLoadTracker.current.clear();
+      initialData.current = {};
+      return;
+    }
+
+    // Reset initial sync state flags on every new user session
+    isInitialLoadComplete.current = false;
+    initialLoadTracker.current.clear();
+    initialData.current = {};
 
     let isActive = true;
     const currentUnsubs: (() => void)[] = [];

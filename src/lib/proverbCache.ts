@@ -15,7 +15,7 @@ export interface ProverbResponse {
   _cachedAt?: number;
 }
 
-const CACHE_PREFIX = 'proverb_cache_v11_';
+const CACHE_PREFIX = 'proverb_cache_v12_';
 
 // L1 Cache (In-Memory) to avoid repeated localStorage hits and re-parsing
 const memoryCache = new Map<number, ProverbResponse>();
@@ -101,10 +101,32 @@ export async function getProverb(chapter: number): Promise<ProverbResponse> {
         try {
           const apiData = await fetchWithProxy(url, controller.signal);
           if (Array.isArray(apiData) && apiData.length > 0) {
-            const map: Record<string, string> = {};
-            apiData.forEach((v: { verse: number; text: string }) => { map[v.verse.toString()] = v.text; });
-            data = { map, trans };
-            break; 
+            // Validate: Is it a list of cross-references instead of actual scripture?
+            const sampleVerses = apiData.slice(0, 5);
+            let totalWords = 0;
+            let referenceLikeCount = 0;
+            
+            sampleVerses.forEach((v: unknown) => {
+              const item = v as Record<string, string> | null;
+              const txt = (item && typeof item === 'object') ? (item.text || item.content || "") : String(v);
+              const cleantxt = txt.replace(/<[^>]*>/g, '').trim();
+              const words = cleantxt.split(/\s+/).filter((w: string) => w.length > 0);
+              totalWords += words.length;
+              
+              if (/^[1-2]?\s*[A-Za-z.]+\s*\d+:\d+/.test(cleantxt) || /^[0-9]+:[0-9]+/.test(cleantxt) || txt.includes('bolls.life') || txt.includes('http')) {
+                referenceLikeCount++;
+              }
+            });
+            
+            const avgWords = totalWords / sampleVerses.length;
+            if (avgWords < 5 || referenceLikeCount > sampleVerses.length / 2) {
+              console.warn(`Bolls.life returned references instead of text for ${url} in ${trans}. Skipping.`);
+            } else {
+              const map: Record<string, string> = {};
+              apiData.forEach((v: { verse: number; text: string }) => { map[v.verse.toString()] = v.text; });
+              data = { map, trans };
+              break; 
+            }
           }
         } catch (_e) {
           console.warn(`Bolls.life fetch failed for ${url}`, _e);

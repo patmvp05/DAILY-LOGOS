@@ -108,6 +108,37 @@ export const loadStateAsync = async (): Promise<Partial<AppState> | null> => {
 let lastSavedJson = '';
 let lastSnapshotLength = 0;
 
+export const saveStateSync = (state: AppState) => {
+  try {
+    const toSave = {
+      ...state,
+      completedBooks: Array.from(state.completedBooks)
+    };
+    const json = JSON.stringify(toSave);
+    
+    if (json === lastSavedJson) {
+      return;
+    }
+    lastSavedJson = json;
+
+    localStorage.setItem(STORAGE_KEY, json);
+    
+    // Run IndexedDB writes in a non-blocking background task
+    set(STORAGE_KEY, toSave).catch(e => console.warn("IDB write failed sync:", e));
+
+    if (state.history && state.history.length > 0 && state.history.length !== lastSnapshotLength) {
+      lastSnapshotLength = state.history.length;
+      const snapshot = {
+        data: state.history,
+        timestamp: Date.now()
+      };
+      set(SNAPSHOT_KEY, snapshot).catch(() => {});
+    }
+  } catch (error) {
+    console.warn("Storage saveStateSync failed:", error);
+  }
+};
+
 export const saveState = async (state: AppState) => {
   // Move processing off the immediate render cycle to avoid blocking the main thread
   return new Promise<void>((resolve) => {

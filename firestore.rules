@@ -100,7 +100,7 @@ service cloud.firestore {
 
       match /history/{historyId} {
         allow list, get: if isOwner(userId);
-        allow create: if isOwner(userId) && isValidHistory(incoming()) && isValidId(historyId);
+        allow create, update: if isOwner(userId) && isValidHistory(incoming()) && isValidId(historyId);
         allow delete: if isOwner(userId);
       }
 
@@ -118,7 +118,7 @@ service cloud.firestore {
 
       match /completedBooks/{bookKey} {
         allow list, get: if isOwner(userId);
-        allow create: if isOwner(userId) && isValidCompletedBook(incoming()) && isValidId(bookKey);
+        allow create, update: if isOwner(userId) && isValidCompletedBook(incoming()) && isValidId(bookKey);
         allow delete: if isOwner(userId);
       }
     }

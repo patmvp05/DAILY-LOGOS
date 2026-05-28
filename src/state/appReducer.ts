@@ -41,10 +41,46 @@ function isFingerprintMatch<T extends { id: string }>(a: T[], b: T[]): boolean {
 }
 
 /**
+ * Robust conflict resolver for linear reading plan progress.
+ * Self-heals clock drifts by prioritizing actual forward progress in readings.
+ */
+function resolveProgressConflict(localp: ProgressType, cloudp: ProgressType): ProgressType {
+  const localTime = localp.updatedAtMillis || (localp.lastReadAt ? new Date(localp.lastReadAt).getTime() : 0);
+  const cloudTime = cloudp.updatedAtMillis || (cloudp.lastReadAt ? new Date(cloudp.lastReadAt).getTime() : 0);
+
+  // 1. Same stage: align timestamps/metadata
+  if (localp.bookIndex === cloudp.bookIndex && localp.chapter === cloudp.chapter) {
+    return cloudTime > localTime ? cloudp : localp;
+  }
+
+  // 2. Linear progression check: further reading progress in the Bible plan wins
+  const isCloudFurther = (cloudp.bookIndex > localp.bookIndex) || 
+                         (cloudp.bookIndex === localp.bookIndex && cloudp.chapter > localp.chapter);
+
+  if (isCloudFurther) {
+    return cloudp;
+  }
+
+  const isLocalFurther = (localp.bookIndex > cloudp.bookIndex) || 
+                         (localp.bookIndex === cloudp.bookIndex && localp.chapter > cloudp.chapter);
+
+  if (isLocalFurther) {
+    return localp;
+  }
+
+  // 3. Fallback: If cloud differs and is significantly newer (e.g. they reset/jumped backwards manually)
+  if (cloudTime > localTime + 120000) {
+    return cloudp;
+  }
+
+  return cloudTime > localTime ? cloudp : localp;
+}
+
+/**
  * Merges state non-destructively.
  * Ensures cloud-empty never overwrites local-non-empty.
  */
-function mergeAppState(current: AppState, incoming: Partial<AppState>, _isCloud: boolean = false): AppState {
+function mergeAppState(current: AppState, incoming: Partial<AppState>): AppState {
   const next = { ...current };
 
   // History: merge unique, sort, slice
@@ -58,9 +94,9 @@ function mergeAppState(current: AppState, incoming: Partial<AppState>, _isCloud:
       next.history = Array.from(historyMap.values())
         .sort((a, b) => (b.timestampMillis || 0) - (a.timestampMillis || 0));
     }
-}
+  }
 
-  // Progress: newer wins per category
+  // Progress: linear resolution per category
   if (incoming.progress && Array.isArray(incoming.progress)) {
     if (incoming.progress.length === 0 && current.progress.length > 0) {
       // Don't overwrite with empty
@@ -69,9 +105,7 @@ function mergeAppState(current: AppState, incoming: Partial<AppState>, _isCloud:
       next.progress = current.progress.map(localp => {
         const cloudp = cloudMap.get(localp.categoryId);
         if (!cloudp) return localp;
-        const localTime = localp.updatedAtMillis || (localp.lastReadAt ? new Date(localp.lastReadAt).getTime() : 0);
-        const cloudTime = cloudp.updatedAtMillis || (cloudp.lastReadAt ? new Date(cloudp.lastReadAt).getTime() : 0);
-        return cloudTime > localTime ? cloudp : localp;
+        return resolveProgressConflict(localp, cloudp);
       });
       
       // Add any category IDs that exist in cloud but not locally
@@ -143,10 +177,10 @@ function mergeAppState(current: AppState, incoming: Partial<AppState>, _isCloud:
 export function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'REPLACE_STATE': {
-      return mergeAppState(state, action.state);
+      return action.state;
     }
     case 'HYDRATE_STATE': {
-      const merged = mergeAppState(state, action.state, action.isCloudData);
+      const merged = mergeAppState(state, action.state);
       return { 
         ...merged, 
         restoredFromSnapshot: action.restoredFromSnapshot || merged.restoredFromSnapshot,
@@ -193,20 +227,29 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const updatedProgress = state.progress.map(localProg => {
         const cloudProg = cloudMap.get(localProg.categoryId);
         if (cloudProg) {
-          const cloudTime = cloudProg.updatedAtMillis || (cloudProg.lastReadAt ? new Date(cloudProg.lastReadAt).getTime() : 0);
-          const localTime = localProg.updatedAtMillis || (localProg.lastReadAt ? new Date(localProg.lastReadAt).getTime() : 0);
-          
-          // Prefer Cloud ONLY if it's strictly newer
-          if (cloudTime > localTime) {
-            if (cloudProg.bookIndex !== localProg.bookIndex || cloudProg.chapter !== localProg.chapter) {
-              changed = true;
-              return cloudProg;
-            }
+          const resolved = resolveProgressConflict(localProg, cloudProg);
+          if (resolved.bookIndex !== localProg.bookIndex || 
+              resolved.chapter !== localProg.chapter || 
+              resolved.updatedAtMillis !== localProg.updatedAtMillis) {
+            changed = true;
+            return resolved;
           }
         }
         return localProg;
       });
-      return changed ? { ...state, progress: updatedProgress } : state;
+
+      // Look for any categories in the cloud that don't exist locally
+      const localCatIds = new Set(state.progress.map(p => p.categoryId));
+      const newFromCloud: ProgressType[] = [];
+      action.progress.forEach(cloudProg => {
+        if (!localCatIds.has(cloudProg.categoryId)) {
+          newFromCloud.push(cloudProg);
+          changed = true;
+        }
+      });
+
+      const finalProgress = newFromCloud.length > 0 ? [...updatedProgress, ...newFromCloud] : updatedProgress;
+      return changed ? { ...state, progress: finalProgress } : state;
     }
     case 'CLOUD_SYNC_COMPLETED': {
       if (state.completedBooks.size === action.completed.length && 

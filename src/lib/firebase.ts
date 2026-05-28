@@ -12,7 +12,9 @@ import {
   getRedirectResult, 
   signOut,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
 } from 'firebase/auth';
 import { 
   initializeFirestore, 
@@ -117,6 +119,26 @@ export const handleRedirectResult = async () => {
     return result?.user || null;
   } catch (error) {
     console.error('Error getting redirect result:', error);
+    throw error;
+  }
+};
+
+export const signInWithEmail = async (email: string, password: string) => {
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    return result.user;
+  } catch (error) {
+    console.error('Error signing in with email/password:', error);
+    throw error;
+  }
+};
+
+export const signUpWithEmail = async (email: string, password: string) => {
+  try {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+    return result.user;
+  } catch (error) {
+    console.error('Error signing up with email/password:', error);
     throw error;
   }
 };

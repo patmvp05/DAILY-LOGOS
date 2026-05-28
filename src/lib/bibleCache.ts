@@ -6,7 +6,7 @@
 import { BOLLS_BIBLE_BOOK_IDS } from '../constants';
 import { fetchWithProxy } from './api';
 
-const CACHE_PREFIX = 'bible_chapter_cache_v7_';
+const CACHE_PREFIX = 'bible_chapter_cache_v8_';
 
 interface ChapterInfo {
   firstVerse: string;
@@ -15,6 +15,28 @@ interface ChapterInfo {
 
 // L1 Cache (In-Memory) to avoid repeated localStorage hits and JSON parsing
 const memoryCache = new Map<string, ChapterInfo>();
+
+export function getCachedReadTime(bookName: string, chapter: number): number | null {
+  const translation = 'KJV';
+  const cacheKey = `${CACHE_PREFIX}${translation}_${bookName}_${chapter}`;
+  
+  const memCached = memoryCache.get(cacheKey);
+  if (memCached) return memCached.readTime;
+  
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const parsed = JSON.parse(cached) as ChapterInfo;
+      if (parsed && typeof parsed.readTime === 'number') {
+        memoryCache.set(cacheKey, parsed);
+        return parsed.readTime;
+      }
+    }
+  } catch {
+    // ignored
+  }
+  return null;
+}
 
 export async function getChapterInfo(bookName: string, chapter: number): Promise<ChapterInfo> {
   const translation = 'KJV';
@@ -55,9 +77,31 @@ export async function getChapterInfo(bookName: string, chapter: number): Promise
       for (const trans of ['ESV', 'KJV']) {
         try {
           const apiData = await fetchWithProxy(`https://bolls.life/get-chapter/${trans}/20/${chapter}/`, controller.signal);
-          if (Array.isArray(apiData)) {
-            data = apiData as { text?: string; content?: string }[];
-            break;
+          if (Array.isArray(apiData) && apiData.length > 0) {
+            // Validate: Is it a list of cross-references instead of actual scripture?
+            const sampleVerses = apiData.slice(0, 5);
+            let totalWords = 0;
+            let referenceLikeCount = 0;
+            
+            sampleVerses.forEach((v: unknown) => {
+              const item = v as Record<string, string> | null;
+              const txt = (item && typeof item === 'object') ? (item.text || item.content || "") : String(v);
+              const cleantxt = txt.replace(/<[^>]*>/g, '').trim();
+              const words = cleantxt.split(/\s+/).filter((w: string) => w.length > 0);
+              totalWords += words.length;
+              
+              if (/^[1-2]?\s*[A-Za-z.]+\s*\d+:\d+/.test(cleantxt) || /^[0-9]+:[0-9]+/.test(cleantxt) || txt.includes('bolls.life') || txt.includes('http')) {
+                referenceLikeCount++;
+              }
+            });
+            
+            const avgWords = totalWords / sampleVerses.length;
+            if (avgWords < 5 || referenceLikeCount > sampleVerses.length / 2) {
+              console.warn(`Bolls.life bibleCache returned references instead of text for Proverbs ${chapter} in ${trans}. Skipping.`);
+            } else {
+              data = apiData as { text?: string; content?: string }[];
+              break;
+            }
           }
         } catch { /* ignored */ }
       }

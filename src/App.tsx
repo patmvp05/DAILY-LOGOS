@@ -48,6 +48,8 @@ export default function App() {
 
   const { user, loading: isAuthLoading, login, logout } = useAuth();
   const [isSigningIn, setIsSigningIn] = React.useState(false);
+  const [bypassCloudSync, setBypassCloudSync] = React.useState(false);
+  const [showOfflineBypassOption, setShowOfflineBypassOption] = React.useState(false);
 
   const sync = useSyncState(user, dispatch);
   const isHydrated = state.isCloudHydrated || (!user && !isAuthLoading);
@@ -55,6 +57,24 @@ export default function App() {
   const prefersDark = usePrefersDark();
   
   useTheme(state.settings.theme);
+
+  useEffect(() => {
+    if (user && sync.syncStatus === 'synced') {
+      setBypassCloudSync(false);
+    }
+  }, [user, sync.syncStatus]);
+
+  useEffect(() => {
+    const isActuallyLoading = isAuthLoading || (user && sync.syncStatus === 'syncing' && !state.isCloudHydrated);
+    if (isActuallyLoading && !bypassCloudSync) {
+      const timer = setTimeout(() => {
+        setShowOfflineBypassOption(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowOfflineBypassOption(false);
+    }
+  }, [isAuthLoading, user, sync.syncStatus, state.isCloudHydrated, bypassCloudSync]);
 
   useEffect(() => {
     setSyncStatus(sync.syncStatus);
@@ -77,20 +97,48 @@ export default function App() {
     }
   }, [user, dispatch, state.settings.theme]);
 
-  const isLoadingCloud = isAuthLoading || (user && syncStatus === 'syncing' && !state.isCloudHydrated);
+  const isLoadingCloud = !bypassCloudSync && (isAuthLoading || (user && syncStatus === 'syncing' && !state.isCloudHydrated));
 
   const handleLoginLocal = useCallback(async function loginFn(useRedirect = false) {
     setIsSigningIn(true);
     try { await login(useRedirect); } 
     catch (err) {
       const error = err as { code?: string; message?: string };
-      if (error.code === 'auth/popup-blocked') {
-        showToast("Popup blocked! Try alternative login.", "error");
+      const errStr = JSON.stringify(error).toLowerCase() + ' ' + String(error.message).toLowerCase() + ' ' + String(error.code).toLowerCase();
+      
+      const isPopupOrIFrameIssue = 
+        error.code === 'auth/popup-blocked' || 
+        error.code === 'auth/internal-error' || 
+        error.code === 'auth/iframe-start-failed' || 
+        error.code === 'auth/cancelled-popup-request' ||
+        errStr.includes('popup') || 
+        errStr.includes('internal-error') || 
+        errStr.includes('iframe');
+
+      if (isPopupOrIFrameIssue && !useRedirect) {
+        showToast("Popup blocked or failed! Try redirect.", "info");
         setConfirmDialog({
-          isOpen: true, title: "Alternative Login", message: "The sign-in window was blocked. Try redirect mode?",
-          onConfirm: () => loginFn(true)
+          isOpen: true,
+          title: "Alternative Sign-In Required",
+          message: "iPad and Safari block popups & third-party state by default. To log in successfully:\n\n1. Make sure you opened the app in its own tab (use the Shared or Dev link).\n2. Select YES to use standard Redirect Sign-in.",
+          onConfirm: () => {
+            // Delay slightly to let dialog close, then run redirect auth
+            setTimeout(() => {
+              loginFn(true);
+            }, 300);
+          }
         });
-      } else showToast(`Login failed: ${error.message || 'Check your connection'}`, "error");
+      } else {
+        showToast(`Login failed: ${error.message || 'Check your connection'}`, "error");
+        if (isPopupOrIFrameIssue) {
+          setConfirmDialog({
+            isOpen: true,
+            title: "Sign-In Troubleshooting",
+            message: "Authentication is failing. Due to iPad security guidelines, please open this app in an independent tab (not in an iframe), and ensure Safari's 'Prevent Cross-Site Tracking' under iPad Settings -> Safari is toggled off if problems persist.",
+            onConfirm: () => {}
+          });
+        }
+      }
     } finally { setIsSigningIn(false); }
   }, [login, showToast, setConfirmDialog]);
 
@@ -127,24 +175,50 @@ export default function App() {
 
   if (isLoadingCloud) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--audible-bg)]">
-        <div className="w-12 h-12 border-4 border-evernote border-t-transparent rounded-full animate-spin mb-4" />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--audible-bg)] p-6 text-center">
+        <div className="w-12 h-12 border-4 border-evernote border-t-transparent rounded-full animate-spin mb-4 animate-in duration-300" />
         {syncStatus === 'error' ? (
-          <div className="text-center animate-in fade-in duration-500">
-            <p className="text-sm font-black uppercase tracking-widest text-red-500 mb-4">
+          <div className="text-center animate-in fade-in duration-500 max-w-sm">
+            <p className="text-sm font-black uppercase tracking-widest text-red-500 mb-2 font-sans md:text-base">
               Connection timeout
             </p>
-            <button 
-              onClick={() => window.location.reload()}
-              className="bg-evernote text-white px-6 py-2 rounded-lg font-bold uppercase text-xs hover:scale-105 transition-transform"
-            >
-              Retry Connection
-            </button>
+            <p className="text-xs text-[var(--audible-text-secondary)] font-bold mb-6 leading-relaxed tracking-tight">
+              Due to iPad/Safari restrictions or offline network conditions, cloud sync could not be completed immediately. You can retry, or continue offline using your local cached data.
+            </p>
+            <div className="flex flex-col gap-3 justify-center items-center w-full px-4">
+              <button 
+                onClick={() => window.location.reload()}
+                className="w-full bg-evernote text-white px-6 py-2.5 rounded-lg font-black uppercase tracking-wider text-[10px] hover:scale-105 active:scale-95 transition-transform shadow-md cursor-pointer outline-none"
+              >
+                Retry Connection
+              </button>
+              <button 
+                onClick={() => setBypassCloudSync(true)}
+                className="w-full border border-[var(--audible-border)] bg-[var(--audible-card)] text-[var(--audible-text-primary)] px-6 py-2.5 rounded-lg font-black uppercase tracking-wider text-[10px] hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer outline-none"
+              >
+                Continue Offline
+              </button>
+            </div>
           </div>
         ) : (
-          <p className="text-sm font-black uppercase tracking-widest text-[var(--audible-text-secondary)] animate-pulse">
-            Connecting to Cloud...
-          </p>
+          <div className="text-center animate-in fade-in duration-500 max-w-sm flex flex-col items-center px-4">
+            <p className="text-[10px] uppercase tracking-[0.25em] font-black text-[var(--audible-text-secondary)] animate-pulse mb-2">
+              Connecting to Cloud...
+            </p>
+            {showOfflineBypassOption && (
+              <div className="mt-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <button 
+                  onClick={() => setBypassCloudSync(true)}
+                  className="border border-[var(--audible-border)] bg-[var(--audible-card)] text-[var(--audible-text-primary)] px-5 py-2.5 rounded-lg font-black uppercase tracking-wider text-[10px] hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors shadow-sm cursor-pointer outline-none"
+                >
+                  Continue Offline
+                </button>
+                <p className="text-[9px] text-[var(--audible-text-secondary)] mt-2 font-bold max-w-xs leading-relaxed mx-auto">
+                  Take too long? Sync will continue safely in the background while you read.
+                </p>
+              </div>
+            )}
+          </div>
         )}
       </div>
     );

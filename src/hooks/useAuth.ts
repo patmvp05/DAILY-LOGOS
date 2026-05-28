@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, signInWithGoogle, handleRedirectResult, logout as firebaseLogout } from '../lib/firebase';
+import { auth, signInWithGoogle, handleRedirectResult, logout as firebaseLogout, signInWithEmail, signUpWithEmail } from '../lib/firebase';
 import { initializeUser } from '../lib/sync';
 
 export function useAuth() {
@@ -14,6 +14,15 @@ export function useAuth() {
 
   useEffect(() => {
     let unsubscribed = false;
+
+    // Safety timeout: If Firebase Auth takes longer than 2500ms to resolve (typical on iPad Safari or standalone PWAs with restricted ITP),
+    // trigger a fallback to the non-blocking local state so the user is not locked out of the application.
+    const safetyTimeout = setTimeout(() => {
+      if (!unsubscribed) {
+        console.warn("[useAuth] Firebase Auth initialization timed out. Defaulting to local/guest state.");
+        setLoading(false);
+      }
+    }, 2500);
 
     const initAuth = async () => {
       try {
@@ -34,6 +43,7 @@ export function useAuth() {
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       if (!unsubscribed) {
+        clearTimeout(safetyTimeout);
         if (currentUser) {
           try {
             await initializeUser(currentUser);
@@ -48,6 +58,7 @@ export function useAuth() {
 
     return () => {
       unsubscribed = true;
+      clearTimeout(safetyTimeout);
       unsubscribeAuth();
     };
   }, []);
@@ -61,6 +72,26 @@ export function useAuth() {
     }
   };
 
+  const loginWithEmail = async (email: string, password: string) => {
+    try {
+      const u = await signInWithEmail(email, password);
+      return u;
+    } catch (error) {
+      console.error("Login with email failed:", error);
+      throw error;
+    }
+  };
+
+  const registerWithEmail = async (email: string, password: string) => {
+    try {
+      const u = await signUpWithEmail(email, password);
+      return u;
+    } catch (error) {
+      console.error("Registration failed:", error);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
       await firebaseLogout();
@@ -70,5 +101,5 @@ export function useAuth() {
     }
   };
 
-  return { user, loading, login, logout };
+  return { user, loading, login, logout, loginWithEmail, registerWithEmail };
 }

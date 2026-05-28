@@ -120,8 +120,12 @@ const _writeActionBatch = async (uid: string, actions: {
 
   if (actions.progress) {
     const ref = doc(getProgressCollection(uid), actions.progress.categoryId);
-    batch.set(ref, {
+    const updatedProgressWithTimestamp = {
       ...actions.progress,
+      updatedAtMillis: actions.progress.updatedAtMillis || Date.now()
+    };
+    batch.set(ref, {
+      ...updatedProgressWithTimestamp,
       updatedAt: serverTimestamp()
     });
   }
@@ -348,5 +352,25 @@ if (typeof window !== 'undefined') {
     console.log('[Sync] Back online, triggering queue process...');
     processSyncQueue();
   });
+
+  // Safari PWA resume / focus synchronization trigger
+  window.addEventListener('focus', () => {
+    console.log('[Sync] Window focused, triggering queue process...');
+    processSyncQueue();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      console.log('[Sync] App became visible, triggering queue process...');
+      processSyncQueue();
+    }
+  });
+
+  // Periodic fallback check (every 30 seconds) to auto-heal if events were missed
+  setInterval(() => {
+    if (navigator.onLine) {
+      processSyncQueue();
+    }
+  }, 30000);
 }
 

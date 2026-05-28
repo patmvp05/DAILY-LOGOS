@@ -56,6 +56,18 @@ const NavbarComponent = memo(({
   isAuthLoading
 }: NavbarProps) => {
   const isStandalone = useStandaloneDetection();
+  const [imgError, setImgError] = React.useState(false);
+
+  React.useEffect(() => {
+    setImgError(false);
+  }, [user?.photoURL, user?.uid]);
+
+  const userInitial = React.useMemo(() => {
+    if (!user) return '';
+    const name = user.displayName || user.email || '';
+    const clean = name.trim().replace(/^mailto:/i, '');
+    return clean ? clean[0].toUpperCase() : '';
+  }, [user]);
 
   return (
     <nav className={cn(
@@ -258,10 +270,20 @@ const NavbarComponent = memo(({
           )}
           title="Account Settings"
         >
-          {user?.photoURL ? (
-            <img src={user.photoURL} alt="User" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+          {user && user.photoURL && !imgError ? (
+            <img 
+              src={user.photoURL} 
+              alt="User" 
+              className="w-full h-full object-cover" 
+              referrerPolicy="no-referrer" 
+              onError={() => setImgError(true)}
+            />
+          ) : user && userInitial ? (
+            <div className="w-full h-full flex items-center justify-center bg-evernote text-white font-black text-sm uppercase tracking-tight select-none">
+              {userInitial}
+            </div>
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-evernote text-white">
+            <div className="w-full h-full flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600">
               <UserIcon size={20} />
             </div>
           )}

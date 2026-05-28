@@ -25,13 +25,14 @@ import { CATEGORIES, CATEGORIES_BY_ID, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES }
 import { Progress } from '../types';
 import { cn, computeProgressStats } from '../lib/utils';
 import { XpWindowHeader } from './XpWindowHeader';
-import { getChapterInfo } from '../lib/bibleCache';
+import { getChapterInfo, getCachedReadTime } from '../lib/bibleCache';
 
 import { useApp } from '../state/AppContextCore';
 import { useUi } from '../state/UiContextCore';
 import { useAppStats } from '../hooks/useAppStats';
 import { useReadingActions } from '../hooks/useReadingActions';
 import { useProverb } from '../hooks/useProverb';
+import { EmailAuthForm } from './EmailAuthForm';
 
 interface DashboardProps {
   handleLogin: (redirect?: boolean) => void;
@@ -70,6 +71,13 @@ function DashboardComponent({
       h => h.localDate === todayStr
     );
     const minutes = todayEntries.reduce((sum, h) => {
+      if (h.readTime && h.readTime > 0) {
+        return sum + h.readTime;
+      }
+      const cached = getCachedReadTime(h.bookName, h.chapter);
+      if (cached && cached > 0) {
+        return sum + cached;
+      }
       const perCh = BOOK_READ_MINUTES[h.bookName] ?? DEFAULT_BOOK_MINUTES;
       return sum + perCh;
     }, 0);
@@ -415,21 +423,20 @@ function DashboardComponent({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {!user && !isAuthLoading && (
             <div 
-              onClick={() => !isSigningIn && handleLogin(false)}
               className={cn(
-                "relative p-6 h-56 border border-evernote bg-evernote/[0.03] flex flex-col justify-between group transition-all duration-300 rounded-xl overflow-hidden cursor-pointer text-left focus:outline-none shadow-sm hover:shadow-md",
-                isSigningIn && "opacity-60 cursor-wait"
+                "relative p-6 h-auto border border-evernote bg-evernote/[0.03] flex flex-col justify-between group transition-all duration-300 rounded-xl overflow-hidden text-left focus:outline-none shadow-sm hover:shadow-md",
+                isSigningIn && "opacity-60"
               )}
             >
               <div className="absolute top-0 left-0 w-full h-1.5 bg-evernote" />
               <div className="absolute -right-8 -top-8 w-32 h-32 bg-evernote/5 rounded-full blur-3xl group-hover:bg-evernote/10 transition-all" />
               
-              <div>
+              <div className="mb-4">
                 <span className="text-[10px] uppercase tracking-[0.12em] font-black text-evernote flex items-center gap-2">
                   <Cloud size={12} className="animate-pulse" />
                   Cloud Backup
                 </span>
-                <h3 className="text-2xl font-black tracking-tight mt-2 uppercase text-[var(--audible-text-primary)] group-hover:text-evernote transition-colors">
+                <h3 className="text-2xl font-black tracking-tight mt-2 uppercase text-[var(--audible-text-primary)]">
                   Sync Your Progress
                 </h3>
                 <p className="text-xs text-[var(--audible-text-secondary)] font-bold mt-2 leading-relaxed tracking-tight">
@@ -437,30 +444,30 @@ function DashboardComponent({
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] bg-evernote text-white px-5 py-3 rounded-md self-start group-hover:scale-[1.02] shadow-sm transition-transform active:scale-95">
+              <div className="space-y-4">
+                <button 
+                  onClick={() => !isSigningIn && handleLogin(false)}
+                  disabled={isSigningIn}
+                  className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] bg-evernote hover:bg-evernote/90 text-white px-5 py-3 rounded-md self-start group-hover:scale-[1.02] shadow-sm transition-transform active:scale-95 disabled:opacity-50 cursor-pointer outline-none select-none"
+                >
                   {(isSigningIn || isAuthLoading) ? <RefreshCw size={14} className="animate-spin" /> : <LogIn size={14} />}
                   {(isSigningIn || isAuthLoading) ? 'Connecting...' : 'Enable Sync Now'}
-                </div>
+                </button>
                 <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleLogin(true);
-                  }}
-                  className="text-[9px] text-[var(--audible-text-secondary)] font-black uppercase tracking-[0.2em] hover:text-evernote transition-colors focus:outline-none"
-                  disabled={isAuthLoading || isSigningIn}
+                  onClick={() => !isSigningIn && handleLogin(true)}
+                  className="block text-[9px] text-[var(--audible-text-secondary)] font-black uppercase tracking-[0.2em] hover:text-evernote transition-colors focus:outline-none cursor-pointer"
+                  disabled={isSigningIn}
                 >
                   Safari User? Try Alternative mode
                 </button>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.location.reload();
-                  }}
-                  className="block text-[8px] text-zinc-400 font-bold uppercase tracking-tight mt-1 hover:text-black dark:hover:text-white"
-                >
-                  Force Refresh / Reload
-                </button>
+                
+                <div className="relative flex py-2 items-center">
+                  <div className="flex-grow border-t border-[var(--audible-border)]/40"></div>
+                  <span className="flex-shrink mx-4 text-[8px] uppercase font-black tracking-widest text-zinc-400">OR</span>
+                  <div className="flex-grow border-t border-[var(--audible-border)]/40"></div>
+                </div>
+
+                <EmailAuthForm />
               </div>
             </div>
           )}

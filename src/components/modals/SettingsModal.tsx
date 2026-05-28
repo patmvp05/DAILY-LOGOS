@@ -25,6 +25,7 @@ import {
 import { format, parseISO } from 'date-fns';
 import { cn } from '../../lib/utils';
 import { XpWindowHeader } from '../XpWindowHeader';
+import { EmailAuthForm } from '../EmailAuthForm';
 import { setUserSettings } from '../../lib/sync';
 import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
@@ -143,48 +144,59 @@ interface SettingsModalProps {
           </button>
         </div>
 
-        {/* Mobile Cloud Access */}
-        <div className="md:hidden mb-10">
-          <h4 className="text-[10px] uppercase font-black tracking-[0.12em] text-[var(--audible-text-secondary)] mb-3">Sync Status</h4>
-          {user ? (
-            <div className="p-4 bg-[var(--audible-card)] rounded-xl flex items-center justify-between border border-[var(--audible-border)] shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-evernote/10 flex items-center justify-center text-evernote">
-                  <UserIcon size={20} />
-                </div>
-                <div>
-                  <p className="text-xs font-black uppercase text-[var(--audible-text-primary)]">{user.displayName || 'Authenticated User'}</p>
-                  <p className="text-[10px] text-[var(--audible-text-secondary)] font-bold tracking-tight">{user.email}</p>
-                </div>
-              </div>
-              <button onClick={onLogout} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full transition-colors">
-                <LogOut size={18} />
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <button 
-                onClick={() => !isAuthLoading && !isSigningIn && handleLogin(false)}
-                disabled={syncStatus === 'syncing' || isAuthLoading || isSigningIn}
-                className="w-full p-4 bg-evernote text-white rounded-xl flex items-center justify-center gap-3 font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-evernote/20 disabled:opacity-50"
-              >
-                {(isSigningIn || isAuthLoading) ? <RefreshCw size={16} className="animate-spin" /> : <LogIn size={16} />}
-                {(isSigningIn || isAuthLoading) ? 'Connecting...' : 'Sign In with Google'}
-              </button>
-              <button 
-                onClick={() => !isAuthLoading && !isSigningIn && handleLogin(true)}
-                className="w-full p-2 text-[var(--audible-text-secondary)] font-bold uppercase text-[8px] tracking-[0.12em] hover:text-evernote transition-colors"
-                disabled={isAuthLoading || isSigningIn}
-              >
-                Safari User? Try Alternative Mode
-              </button>
-            </div>
-          )}
-        </div>
-
         <div className={cn("flex-1 overflow-y-auto space-y-10 pr-2", state.settings.theme === 'xp' && "p-6")}>
           {settingsTab === 'general' ? (
             <>
+              {/* Cloud Sync Account Setup */}
+              <div id="settings-sync-section" className="border-b border-[var(--audible-border)] pb-8">
+                <label className="text-[10px] uppercase font-black tracking-[0.12em] text-[var(--audible-text-secondary)] block mb-3">Cloud Sync Status</label>
+                {user ? (
+                  <div className="p-4 bg-[var(--audible-card)] rounded-xl flex items-center justify-between border border-[var(--audible-border)] shadow-sm">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-evernote/10 flex items-center justify-center text-evernote shrink-0">
+                        <UserIcon size={20} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase text-[var(--audible-text-primary)] truncate">{user.displayName || 'Authenticated User'}</p>
+                        <p className="text-[10px] text-[var(--audible-text-secondary)] font-bold tracking-tight truncate">{user.email}</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={onLogout} 
+                      className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full transition-colors shrink-0 cursor-pointer"
+                    >
+                      <LogOut size={18} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <button 
+                      onClick={() => !isAuthLoading && !isSigningIn && handleLogin(false)}
+                      disabled={syncStatus === 'syncing' || isAuthLoading || isSigningIn}
+                      className="w-full p-4 bg-evernote text-white rounded-xl flex items-center justify-center gap-3 font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-evernote/20 disabled:opacity-50 cursor-pointer"
+                    >
+                      {(isSigningIn || isAuthLoading) ? <RefreshCw size={16} className="animate-spin" /> : <LogIn size={16} />}
+                      {(isSigningIn || isAuthLoading) ? 'Connecting...' : 'Sign In with Google'}
+                    </button>
+                    <button 
+                      onClick={() => !isAuthLoading && !isSigningIn && handleLogin(true)}
+                      className="w-full p-2 text-[var(--audible-text-secondary)] font-bold uppercase text-[8px] tracking-[0.12em] hover:text-evernote transition-colors focus:outline-none cursor-pointer text-center"
+                      disabled={isAuthLoading || isSigningIn}
+                    >
+                      Safari User? Click here to try Redirect Login
+                    </button>
+
+                    <div className="relative flex py-2 items-center">
+                      <div className="flex-grow border-t border-[var(--audible-border)]/40"></div>
+                      <span className="flex-shrink mx-4 text-[8px] uppercase font-black tracking-widest text-zinc-400">OR</span>
+                      <div className="flex-grow border-t border-[var(--audible-border)]/40"></div>
+                    </div>
+
+                    <EmailAuthForm />
+                  </div>
+                )}
+              </div>
+
               <div>
                 <label className="text-[10px] uppercase font-black tracking-[0.12em] text-[var(--audible-text-secondary)] block mb-3">App Theme</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
