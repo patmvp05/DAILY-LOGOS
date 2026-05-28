@@ -13,7 +13,7 @@ export default defineConfig(() => {
       react(), 
       tailwindcss(),
       VitePWA({
-        registerType: 'autoUpdate',
+        registerType: 'prompt',
         injectRegister: 'script',
         includeAssets: ['icons/logo.svg'],
         filename: 'manifest.json',
@@ -24,7 +24,7 @@ export default defineConfig(() => {
           theme_color: '#FAFAFA',
           background_color: '#FAFAFA',
           display: 'standalone',
-          start_url: './',
+          start_url: '/',
           scope: '/',
           icons: [
             { src: '/icons/logo.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
@@ -35,11 +35,12 @@ export default defineConfig(() => {
           ]
         },
         workbox: {
+          skipWaiting: true,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/.*\.bolls\.life\/.*/,
-              handler: 'CacheFirst',
+              handler: 'StaleWhileRevalidate',
               options: {
                 cacheName: 'bolls-bible-cache',
                 expiration: {
