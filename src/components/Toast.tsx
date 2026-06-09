@@ -61,7 +61,7 @@ export const Toast: React.FC<ToastProps> = ({
           >
             <div className="flex items-center gap-3">
               <div className="shrink-0">
-                {type === 'success' && <Check className="w-5 h-5 text-evernote" />}
+                {type === 'success' && <Check className="w-5 h-5 text-brand" />}
                 {type === 'info' && <Info className="w-5 h-5" />}
                 {type === 'error' && <AlertCircle className="w-5 h-5" />}
               </div>

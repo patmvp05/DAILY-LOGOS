@@ -40,7 +40,7 @@ const DevotionalModal: React.FC = () => {
               href={activeDevotion.url} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="p-2 text-[var(--audible-text-secondary)] hover:text-evernote transition-all"
+              className="p-2 text-[var(--audible-text-secondary)] hover:text-brand transition-all"
               title="Open in new tab"
             >
               <ExternalLink size={20} />

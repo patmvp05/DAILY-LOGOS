@@ -45,7 +45,7 @@ export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({ status }) => {
             initial={{ opacity: 0, x: -4 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 4 }}
-            className="flex items-center gap-2 text-evernote"
+            className="flex items-center gap-2 text-brand"
           >
             <motion.div 
                animate={{ rotate: 360 }}
@@ -67,7 +67,7 @@ export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({ status }) => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}
-            className="flex items-center gap-2 text-evernote"
+            className="flex items-center gap-2 text-brand"
           >
             <motion.div
               initial={{ scale: 0 }}

@@ -26,6 +26,10 @@ export interface ConfirmDialogState {
   title: string;
   message: string;
   onConfirm: () => void;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  type?: 'danger' | 'info';
+  confirmHref?: string;
 }
 
 export interface UiContextType {

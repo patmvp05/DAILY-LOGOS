@@ -71,41 +71,25 @@ const NavbarComponent = memo(({
 
   return (
     <nav className={cn(
-      "fixed top-0 left-0 right-0 h-16 bg-[var(--audible-nav)] border-b border-[var(--audible-border)] z-50 flex items-center justify-between px-4 sm:px-10 transition-colors duration-300",
+      "fixed top-0 left-0 right-0 h-16 bg-[var(--nav-bg)] backdrop-blur-md border-b border-[var(--border-color)] z-50 flex items-center justify-between px-4 sm:px-10 transition-colors duration-300",
       isStandalone && "h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)]"
     )}>
       <div className="flex items-center gap-4 lg:gap-8">
         <div className="flex items-center gap-3">
           <div className="relative group">
-            {theme === 'xp' ? (
-              <svg 
-                width="32" height="32" viewBox="0 0 32 32" fill="none" 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="relative transition-all duration-300"
-              >
-                <rect x="2" y="2" width="13" height="13" fill="#F44336" rx="1" />
-                <rect x="17" y="2" width="13" height="13" fill="#4CAF50" rx="1" />
-                <rect x="2" y="17" width="13" height="13" fill="#0054E3" rx="1" />
-                <rect x="17" y="17" width="13" height="13" fill="#FFEB3B" rx="1" />
-              </svg>
-            ) : (
-              <img
-                src="/icons/logo.svg"
-                alt="The Daily Logos"
-                width={40}
-                height={40}
-                className="relative w-10 h-10 transition-all duration-300 group-hover:scale-105 active:scale-95"
-              />
-            )}
+            <img
+              src="/icons/logo.svg"
+              alt="The Daily Logos"
+              width={32}
+              height={32}
+              className="relative w-8 h-8 transition-transform duration-300 group-hover:scale-105 active:scale-95"
+            />
           </div>
-          <span className={cn(
-            "text-xl font-black tracking-tighter uppercase hidden sm:block",
-            theme === 'xp' && "font-serif normal-case italic text-white drop-shadow-md"
-          )}>
+          <span className="text-xl font-bold tracking-tighter hidden sm:block">
             The Daily Logos
           </span>
         </div>
-        <Suspense fallback={<div className="w-20 h-8 bg-zinc-100 dark:bg-zinc-800 animate-pulse rounded-full" />}>
+        <Suspense fallback={<div className="w-20 h-8 bg-[var(--bg-secondary)] animate-pulse rounded-full" />}>
           <WeatherWidget />
         </Suspense>
       </div>
@@ -114,14 +98,14 @@ const NavbarComponent = memo(({
           <motion.button 
             whileTap={{ scale: 0.95 }}
             onClick={() => handleLogin()}
-            className="flex items-center gap-2 px-4 h-10 bg-evernote/10 text-evernote rounded-full border border-evernote/20 md:hidden"
+            className="flex items-center gap-2 px-4 h-10 bg-brand/10 text-brand rounded-full border border-brand/20 md:hidden"
           >
             <LogIn size={16} />
-            <span className="text-[10px] font-black uppercase tracking-tight">Sync</span>
+            <span className="text-[11px] font-bold tracking-wide">Sync</span>
           </motion.button>
         )}
 
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-[#1A1A1A] rounded-full border border-[var(--audible-border)] shadow-sm">
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-secondary)] rounded-full border border-[var(--border-color)] shadow-sm">
           {user ? (
             <div className="flex items-center gap-3">
               <div className="flex flex-col items-end">
@@ -134,8 +118,8 @@ const NavbarComponent = memo(({
                       transition={{ duration: 1.5, repeat: Infinity }}
                       className="flex items-center gap-2"
                     >
-                      <div className="w-1.5 h-1.5 rounded-full bg-evernote" />
-                      <p className="text-[8px] font-black uppercase tracking-widest text-[var(--audible-text-secondary)]">
+                      <div className="w-1.5 h-1.5 rounded-full bg-brand" />
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
                         Syncing
                       </p>
                     </motion.div>
@@ -159,9 +143,9 @@ const NavbarComponent = memo(({
                       exit={{ opacity: 0 }}
                       className="flex items-center gap-2"
                     >
-                      <div className="w-1.5 h-1.5 rounded-full bg-evernote" />
-                      <Check className="text-evernote" size={8} strokeWidth={4} />
-                      <p className="text-[8px] font-black uppercase tracking-widest text-evernote">
+                      <div className="w-1.5 h-1.5 rounded-full bg-brand" />
+                      <Check className="text-brand" size={10} strokeWidth={4} />
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-brand">
                         Updated
                       </p>
                     </motion.div>
@@ -172,14 +156,14 @@ const NavbarComponent = memo(({
                       animate={{ opacity: 1 }}
                       className="flex items-center gap-2"
                     >
-                      <div className="w-1.5 h-1.5 rounded-full bg-evernote opacity-40" />
-                      <p className="text-[8px] font-black uppercase tracking-widest text-[var(--audible-text-secondary)]">
+                      <div className="w-1.5 h-1.5 rounded-full bg-brand opacity-40" />
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
                         {lastSyncTime ? `Synced` : 'Online'}
                       </p>
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <p className="text-[9px] font-bold text-[var(--audible-text-secondary)] max-w-[100px] truncate leading-tight tracking-tight">{user.displayName || user.email}</p>
+                <p className="text-[10px] font-bold text-[var(--text-secondary)] max-w-[100px] truncate leading-tight tracking-tight mt-0.5">{user.displayName || user.email}</p>
               </div>
               <motion.button 
                 whileTap={{ scale: 0.9 }}
@@ -195,7 +179,7 @@ const NavbarComponent = memo(({
               whileTap={{ scale: 0.98 }}
               onClick={() => handleLogin()}
               className={cn(
-                "text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-evernote transition-all px-2",
+                "text-[11px] font-bold tracking-wide flex items-center gap-2 text-brand transition-all px-2",
                 (isSigningIn || isAuthLoading) ? "opacity-50 cursor-not-allowed" : ""
               )}
               disabled={isSigningIn || isAuthLoading || syncStatus === 'syncing'}
@@ -213,61 +197,39 @@ const NavbarComponent = memo(({
         <motion.button 
           whileTap={{ scale: 0.9 }}
           onClick={toggleTheme}
-          className={cn(
-            "flex flex-col items-end group p-3 min-w-[44px] min-h-[44px]",
-            theme === 'xp' && "xp-button px-3 py-1 bg-[#ECE9D8] rounded-sm shadow-sm"
-          )}
+          className="flex flex-col items-end group p-3 min-w-[44px] min-h-[44px]"
           title={`Current: ${theme}. Click to cycle.`}
         >
-          <p className={cn(
-            "text-[10px] uppercase tracking-widest font-bold mb-0.5 transition-colors",
-            theme === 'xp' ? "text-blue-700 font-bold" : "text-gray-400 group-hover:text-black dark:group-hover:text-white"
-          )}>
-            {theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : theme === 'xp' ? 'XP Mode' : theme === 'textbook' ? 'Textbook' : 'Auto'}
+          <p className="text-[10px] uppercase tracking-widest font-bold mb-0.5 transition-colors text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
+            {theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : 'Auto'}
           </p>
           {theme === 'light' ? (
-            <Sun size={20} className="text-gray-300 group-hover:text-black transition-colors" />
+            <Sun size={20} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
           ) : theme === 'dark' ? (
-            <Moon size={20} className="text-gray-300 group-hover:text-white transition-colors" />
-          ) : theme === 'xp' ? (
-            <Monitor size={20} className="text-blue-600" />
-          ) : theme === 'textbook' ? (
-            <FileText size={20} className="text-[#6B665E]" />
+            <Moon size={20} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
           ) : (
-            <Monitor size={20} className="text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors" />
+            <Monitor size={20} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
           )}
         </motion.button>
 
         <motion.button 
           whileTap={{ scale: 0.9 }}
           onClick={() => setShowHistory(true)}
-          className={cn(
-            "flex flex-col items-end group p-3 min-w-[44px] min-h-[44px]",
-            theme === 'xp' && "xp-button px-3 py-1 bg-[#ECE9D8]"
-          )}
+          className="flex flex-col items-end group p-3 min-w-[44px] min-h-[44px]"
         >
-          <p className={cn(
-            "text-[10px] uppercase tracking-widest font-bold mb-0.5 transition-colors",
-            theme === 'xp' ? "text-blue-700" : "text-gray-400 group-hover:text-black transition-colors"
-          )}>Logs</p>
-          <History size={20} className={cn(
-            "transition-colors",
-            theme === 'xp' ? "text-blue-600" : "text-gray-300 group-hover:text-black"
-          )} />
+          <p className="text-[10px] uppercase tracking-widest font-bold mb-0.5 transition-colors text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">Logs</p>
+          <History size={20} className="transition-colors text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]" />
         </motion.button>
 
         <div className="hidden sm:block text-right pr-2">
-          <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--audible-text-secondary)] font-bold mb-0.5 whitespace-nowrap">Plan Start</p>
-          <p className="text-sm font-black uppercase tabular-nums">{startDate ? format(parseISO(startDate), 'MMM dd, yyyy') : (user ? 'Select start date' : 'Log in to sync')}</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] mb-0.5 whitespace-nowrap">Plan Start</p>
+          <p className="text-sm font-bold uppercase tabular-nums">{startDate ? format(parseISO(startDate), 'MMM dd, yyyy') : (user ? 'Select start date' : 'Log in to sync')}</p>
         </div>
 
         <motion.button 
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowSettings(true)}
-          className={cn(
-            "group relative w-11 h-11 transition-all flex items-center justify-center overflow-hidden shadow-sm aspect-square",
-            theme === 'xp' ? "xp-button bg-[#ECE9D8] !p-0" : "rounded-full bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800"
-          )}
+          className="group relative w-11 h-11 transition-all flex items-center justify-center overflow-hidden shadow-sm aspect-square rounded-full bg-[var(--bg-secondary)] border border-[var(--border-color)]"
           title="Account Settings"
         >
           {user && user.photoURL && !imgError ? (
@@ -279,11 +241,11 @@ const NavbarComponent = memo(({
               onError={() => setImgError(true)}
             />
           ) : user && userInitial ? (
-            <div className="w-full h-full flex items-center justify-center bg-evernote text-white font-black text-sm uppercase tracking-tight select-none">
+            <div className="w-full h-full flex items-center justify-center bg-brand text-white font-bold text-sm uppercase tracking-tight select-none">
               {userInitial}
             </div>
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600">
+            <div className="w-full h-full flex items-center justify-center bg-[var(--bg-tertiary)] text-[var(--text-secondary)]">
               <UserIcon size={20} />
             </div>
           )}

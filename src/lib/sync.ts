@@ -9,7 +9,8 @@ import {
   deleteDoc, 
   serverTimestamp,
   writeBatch,
-  getDoc
+  getDoc,
+  runTransaction
 } from 'firebase/firestore';
 import { 
   db, 
@@ -106,53 +107,91 @@ const _writeActionBatch = async (uid: string, actions: {
   history?: HistoryEntry | HistoryEntry[];
   completedBooks?: { categoryId: string; bookName: string }[];
   deletedBooks?: { categoryId: string; bookName: string }[];
+  forceProgressOverwrite?: boolean;
 }) => {
-  const batch = writeBatch(db);
-  
-  // Write history BEFORE progress updates (as requested)
-  if (actions.history) {
-    const entries = Array.isArray(actions.history) ? actions.history : [actions.history];
-    entries.forEach(h => {
-      const ref = doc(getHistoryCollection(uid), h.id);
-      batch.set(ref, h);
-    });
-  }
+  await runTransaction(db, async (t) => {
+    // 1. Read existing progress to avoid clobbering newer cloud progress 
+    let cloudProgress: Progress | null = null;
+    let progressRef: ReturnType<typeof doc> | null = null;
+    if (actions.progress) {
+      progressRef = doc(getProgressCollection(uid), actions.progress.categoryId);
+      const snap = await t.get(progressRef);
+      if (snap.exists()) {
+        cloudProgress = snap.data() as Progress;
+      }
+    }
 
-  if (actions.progress) {
-    const ref = doc(getProgressCollection(uid), actions.progress.categoryId);
-    const updatedProgressWithTimestamp = {
-      ...actions.progress,
-      updatedAtMillis: actions.progress.updatedAtMillis || Date.now()
-    };
-    batch.set(ref, {
-      ...updatedProgressWithTimestamp,
-      updatedAt: serverTimestamp()
-    });
-  }
-  
-  if (actions.completedBooks) {
-    actions.completedBooks.forEach(b => {
-      const key = `${b.categoryId}:${b.bookName}`;
-      const docId = bookKeyToDocId(key);
-      const ref = doc(getCompletedBooksCollection(uid), docId);
-      batch.set(ref, {
-        categoryId: b.categoryId,
-        bookName: b.bookName,
-        completedAt: new Date().toISOString()
+    // 2. Perform writes
+    // History is append-only
+    if (actions.history) {
+      const entries = Array.isArray(actions.history) ? actions.history : [actions.history];
+      entries.forEach(h => {
+        const ref = doc(getHistoryCollection(uid), h.id);
+        t.set(ref, h);
       });
-    });
-  }
+    }
 
-  if (actions.deletedBooks) {
-    actions.deletedBooks.forEach(b => {
-      const key = `${b.categoryId}:${b.bookName}`;
-      const docId = bookKeyToDocId(key);
-      const ref = doc(getCompletedBooksCollection(uid), docId);
-      batch.delete(ref);
-    });
-  }
-  
-  await batch.commit();
+    if (actions.progress && progressRef) {
+      const localp = actions.progress;
+      let shouldWriteProgress = true;
+      
+      if (cloudProgress && !actions.forceProgressOverwrite) {
+        const cloudp = cloudProgress as Progress;
+        const isCloudFurther = (cloudp.bookIndex > localp.bookIndex) || 
+                               (cloudp.bookIndex === localp.bookIndex && cloudp.chapter > localp.chapter);
+        
+        const localTime = localp.updatedAtMillis || Date.now();
+        const cloudTime = cloudp.updatedAtMillis || 0;
+
+        // Skip overwrite if cloud is logically further, UNLESS local explicitly jumped backwards very recently
+        // (If localTime is significantly newer than cloudTime by > 2 hours, we assume it's a deliberate reset/jump)
+        if (isCloudFurther) {
+          if (localTime > cloudTime + 7200000) {
+            shouldWriteProgress = true; // Deliberate jump backward
+          } else {
+            shouldWriteProgress = false;
+          }
+        } else if (cloudp.bookIndex === localp.bookIndex && cloudp.chapter === localp.chapter) {
+           if (cloudTime > localTime) {
+             shouldWriteProgress = false;
+           }
+        }
+      }
+
+      if (shouldWriteProgress) {
+        const updatedProgressWithTimestamp = {
+          ...actions.progress,
+          updatedAtMillis: actions.progress.updatedAtMillis || Date.now()
+        };
+        t.set(progressRef, {
+          ...updatedProgressWithTimestamp,
+          updatedAt: serverTimestamp()
+        });
+      }
+    }
+    
+    if (actions.completedBooks) {
+      actions.completedBooks.forEach(b => {
+        const key = `${b.categoryId}:${b.bookName}`;
+        const docId = bookKeyToDocId(key);
+        const ref = doc(getCompletedBooksCollection(uid), docId);
+        t.set(ref, {
+          categoryId: b.categoryId,
+          bookName: b.bookName,
+          completedAt: new Date().toISOString()
+        });
+      });
+    }
+
+    if (actions.deletedBooks) {
+      actions.deletedBooks.forEach(b => {
+        const key = `${b.categoryId}:${b.bookName}`;
+        const docId = bookKeyToDocId(key);
+        const ref = doc(getCompletedBooksCollection(uid), docId);
+        t.delete(ref);
+      });
+    }
+  });
 };
 
 const _setUserSettings = async (uid: string, settings: Partial<UserSettings>) => {
@@ -188,7 +227,7 @@ const _setUserSettings = async (uid: string, settings: Partial<UserSettings>) =>
     console.warn("[Sync] Last-write-wins check failed, proceeding anyway:", e);
   }
 
-  const dataToUpdate: Partial<UserSettings> & { updatedAt: ReturnType<typeof serverTimestamp> } = {
+  const dataToUpdate: any = {
     ...settings,
     updatedAt: serverTimestamp()
   };
@@ -243,7 +282,7 @@ const _resetUserData = async (uid: string) => {
   });
 };
 
-const wrap = <T extends (...args: string[]) => Promise<unknown>>(
+const wrap = <T extends (...args: any[]) => Promise<any>>(
   type: PendingAction['type'], 
   fn: T,
   getPath: (...args: Parameters<T>) => string
@@ -251,34 +290,22 @@ const wrap = <T extends (...args: string[]) => Promise<unknown>>(
   return (async (...args: Parameters<T>) => {
     const path = getPath(...args);
     
-    if (!navigator.onLine) {
-      console.log(`[Sync] Offline. Queuing ${type} for ${path}`);
-      await addToSyncQueue({ 
-        type: type as PendingAction['type'], 
-        payload: args as unknown[],
-        path
-      });
-      notify();
-      return;
-    }
+    // OFFLINE-FIRST Write-Through cache
+    // Always dispatch to IndexedDB sync queue first for 100% crash/interrupt durability (iOS Safari pagehide)
+    await addToSyncQueue({ 
+      type: type as PendingAction['type'], 
+      payload: args,
+      path
+    });
+    
+    // Notify local listeners that there's pending work
+    notify();
 
-    syncTracker.begin();
-    try {
-      const result = await fn(...args);
-      syncTracker.end(true);
-      return result;
-    } catch (_e) {
-      if ((_e as Error)?.message === 'STALE_DATA_CONFLICT') {
-        syncTracker.end(false);
-        throw _e; // Re-throw to UI
-      }
-      console.warn(`[Sync] Action ${type} failed, queuing for retry:`, _e);
-      await addToSyncQueue({ 
-        type: type as PendingAction['type'], 
-        payload: args as unknown[],
-        path
-      });
-      syncTracker.end(false);
+    // Fire and forget background sync if online.
+    // We let processSyncQueue execute the actual _fn so we benefit from its error handling,
+    // deduplication, and lock-mutex.
+    if (navigator.onLine) {
+      processSyncQueue().catch(e => console.error("Immediate background sync failed:", e));
     }
   }) as T;
 };
@@ -296,54 +323,74 @@ export const writeActionBatch = wrap('writeActionBatch', _writeActionBatch, (uid
 export const setUserSettings = wrap('setUserSettings', _setUserSettings, (uid) => `${uid}/settings`);
 export const resetUserData = wrap('resetUserData', _resetUserData, (uid) => `${uid}/reset`);
 
+let isProcessingQueue = false;
+
 /**
- * Processes all pending actions in the queue.
+ * Processes all pending actions in the queue sequentially.
  */
 export async function processSyncQueue() {
   if (!navigator.onLine) return;
+  if (isProcessingQueue) return;
   
-  const queue = await getSyncQueue();
-  if (queue.length === 0) return;
+  isProcessingQueue = true;
+  try {
+    let queue = await getSyncQueue();
+    while (queue.length > 0) {
+      console.log(`[Sync] Processing queue with ${queue.length} items`);
+      syncTracker.begin();
 
-  console.log(`[Sync] Processing queue with ${queue.length} items`);
-  syncTracker.begin();
+      // Mapping of action types to their internal implementations
+      const handlers: Record<string, (...args: unknown[]) => Promise<void>> = {
+        writeCompletedBook: _writeCompletedBook as (...args: unknown[]) => Promise<void>,
+        deleteCompletedBook: _deleteCompletedBook as (...args: unknown[]) => Promise<void>,
+        writeJournal: _writeJournal as (...args: unknown[]) => Promise<void>,
+        deleteJournal: _deleteJournal as (...args: unknown[]) => Promise<void>,
+        writeActionBatch: _writeActionBatch as (...args: unknown[]) => Promise<void>,
+        setUserSettings: _setUserSettings as (...args: unknown[]) => Promise<void>,
+        resetUserData: _resetUserData as (...args: unknown[]) => Promise<void>,
+      };
 
-  // Mapping of action types to their internal implementations
-  const handlers: Record<string, (...args: unknown[]) => Promise<void>> = {
-    writeCompletedBook: _writeCompletedBook as (...args: unknown[]) => Promise<void>,
-    deleteCompletedBook: _deleteCompletedBook as (...args: unknown[]) => Promise<void>,
-    writeJournal: _writeJournal as (...args: unknown[]) => Promise<void>,
-    deleteJournal: _deleteJournal as (...args: unknown[]) => Promise<void>,
-    writeActionBatch: _writeActionBatch as (...args: unknown[]) => Promise<void>,
-    setUserSettings: _setUserSettings as (...args: unknown[]) => Promise<void>,
-    resetUserData: _resetUserData as (...args: unknown[]) => Promise<void>,
-  };
-
-  for (const action of queue) {
-    try {
-      const handler = handlers[action.type];
-      if (handler) {
-        await handler(...action.payload);
+      for (const action of queue) {
+        try {
+          const handler = handlers[action.type];
+          if (handler) {
+            await handler(...action.payload);
+          }
+          // Always remove if handler processed (success) or handler missing
+          await removeFromSyncQueue(action.id);
+        } catch (err: unknown) {
+          const e = err as { code?: string; message?: string };
+          console.error(`[Sync] Failed to process queued action ${action.type}:`, e);
+          
+          // Terminal errors (like permission denied) mean it will never succeed, discard to prevent blocking
+          const isTerminal = e?.code === 'permission-denied' || (e?.code === 'not-found' && action.type !== 'setUserSettings');
+          if (isTerminal) {
+            console.warn(`[Sync] Terminal error for ${action.type}, removing from queue.`);
+            await removeFromSyncQueue(action.id);
+          } else if (e?.message === 'STALE_DATA_CONFLICT') {
+            console.warn(`[Sync] Stale data conflict, discarding stale action.`);
+            await removeFromSyncQueue(action.id);
+          } else {
+            // Transient/Network error, break loop and retain in queue for next run
+            break;
+          }
+        }
       }
-      // Always remove if handler processed (success) or handler missing
-      await removeFromSyncQueue(action.id);
-    } catch (e) {
-      const error = e as { code?: string; name?: string };
-      console.error(`[Sync] Failed to process queued action ${action.type}:`, e);
       
-      // If it's a permission/validation error (terminal), remove it from queue
-      const isTerminal = error?.code === 'permission-denied' || error?.name === 'FirebaseError';
-      if (isTerminal) {
-        console.warn(`[Sync] Terminal error for ${action.type}, removing from queue.`);
-        await removeFromSyncQueue(action.id);
-      } else {
-        // Network error or something transient, stop and retry later to preserve order
-        break;
+      syncTracker.end(true);
+      
+      // Re-fetch queue in case new items were added while we processed
+      const newQueue = await getSyncQueue();
+      // Only continue if the queue actually has DIFFERENT items than we just iterated over
+      // (to prevent infinite loops on un-removable transient network failures)
+      if (newQueue.length === queue.length && newQueue.every((item, i) => item.id === queue[i].id)) {
+        break; 
       }
-    }
+      queue = newQueue;
   }
-
-  syncTracker.end(true);
+  } finally {
+    isProcessingQueue = false;
+  }
 }
 
 // Reconnection trigger

@@ -50,6 +50,7 @@ export default function App() {
   const [isSigningIn, setIsSigningIn] = React.useState(false);
   const [bypassCloudSync, setBypassCloudSync] = React.useState(false);
   const [showOfflineBypassOption, setShowOfflineBypassOption] = React.useState(false);
+  const hasSyncToastShown = React.useRef(false);
 
   const sync = useSyncState(user, dispatch);
   const isHydrated = state.isCloudHydrated || (!user && !isAuthLoading);
@@ -64,8 +65,10 @@ export default function App() {
     }
   }, [user, sync.syncStatus]);
 
+  const isLoadingCloud = !bypassCloudSync && (isAuthLoading || (user && !state.isCloudHydrated));
+
   useEffect(() => {
-    const isActuallyLoading = isAuthLoading || (user && sync.syncStatus === 'syncing' && !state.isCloudHydrated);
+    const isActuallyLoading = isAuthLoading || (user && !state.isCloudHydrated);
     if (isActuallyLoading && !bypassCloudSync) {
       const timer = setTimeout(() => {
         setShowOfflineBypassOption(true);
@@ -74,7 +77,7 @@ export default function App() {
     } else {
       setShowOfflineBypassOption(false);
     }
-  }, [isAuthLoading, user, sync.syncStatus, state.isCloudHydrated, bypassCloudSync]);
+  }, [isAuthLoading, user, state.isCloudHydrated, bypassCloudSync]);
 
   useEffect(() => {
     setSyncStatus(sync.syncStatus);
@@ -97,16 +100,18 @@ export default function App() {
     }
   }, [user, dispatch, state.settings.theme]);
 
-  const isLoadingCloud = !bypassCloudSync && (isAuthLoading || (user && syncStatus === 'syncing' && !state.isCloudHydrated));
 
   const handleLoginLocal = useCallback(async function loginFn(useRedirect = false) {
     setIsSigningIn(true);
-    try { await login(useRedirect); } 
+    try { 
+      await login(useRedirect);
+    } 
     catch (err) {
       const error = err as { code?: string; message?: string };
       const errStr = JSON.stringify(error).toLowerCase() + ' ' + String(error.message).toLowerCase() + ' ' + String(error.code).toLowerCase();
       
       const isPopupOrIFrameIssue = 
+        window.self !== window.top || 
         error.code === 'auth/popup-blocked' || 
         error.code === 'auth/internal-error' || 
         error.code === 'auth/iframe-start-failed' || 
@@ -115,32 +120,55 @@ export default function App() {
         errStr.includes('internal-error') || 
         errStr.includes('iframe');
 
-      if (isPopupOrIFrameIssue && !useRedirect) {
-        showToast("Popup blocked or failed! Try redirect.", "info");
+      const isUnauthorizedDomain = error.code === 'auth/unauthorized-domain' || errStr.includes('unauthorized-domain');
+
+      if (isUnauthorizedDomain) {
         setConfirmDialog({
           isOpen: true,
-          title: "Alternative Sign-In Required",
-          message: "iPad and Safari block popups & third-party state by default. To log in successfully:\n\n1. Make sure you opened the app in its own tab (use the Shared or Dev link).\n2. Select YES to use standard Redirect Sign-in.",
-          onConfirm: () => {
-            // Delay slightly to let dialog close, then run redirect auth
-            setTimeout(() => {
-              loginFn(true);
-            }, 300);
-          }
+          title: "Unauthorized Domain",
+          message: `Your Firebase project needs to whitelist this app's URL. Please go to the Firebase Console -> Authentication -> Settings -> Authorized domains, and add: ${window.location.hostname}`,
+          confirmLabel: "Got it",
+          cancelLabel: "Close",
+          type: "info",
+          onConfirm: () => {}
         });
-      } else {
-        showToast(`Login failed: ${error.message || 'Check your connection'}`, "error");
-        if (isPopupOrIFrameIssue) {
+      }
+      else if (isPopupOrIFrameIssue) {
+        if (window.self !== window.top) {
+          // If in AI Studio iframe, strictly instruct them to open a new tab.
           setConfirmDialog({
             isOpen: true,
-            title: "Sign-In Troubleshooting",
-            message: "Authentication is failing. Due to iPad security guidelines, please open this app in an independent tab (not in an iframe), and ensure Safari's 'Prevent Cross-Site Tracking' under iPad Settings -> Safari is toggled off if problems persist.",
-            onConfirm: () => {}
+            title: "Sign-In Restricted",
+            message: "Due to browser security in this preview window, Google Sign-In is blocked. Please open this app in an independent tab to sign in successfully.",
+            confirmLabel: "Open New Tab",
+            cancelLabel: "Close",
+            type: "info",
+            onConfirm: () => {},
+            confirmHref: window.location.href
+          });
+        } else {
+          // Top-level tab, but popup was STILL blocked (Safari/Mobile)
+          setConfirmDialog({
+            isOpen: true,
+            title: "Popup Blocked",
+            message: "Your browser's strict settings prevented the Google sign-in popup. Would you like to sign in using a standard page redirect instead?",
+            confirmLabel: "Use Redirect Sign-In",
+            cancelLabel: "Cancel",
+            type: "info",
+            onConfirm: async () => {
+              try {
+                await loginFn(true); // useRedirect = true
+              } catch (redirectErr: any) {
+                showToast(`Redirect failed: ${redirectErr.message || redirectErr.code || 'Unknown error'}`, "error");
+              }
+            }
           });
         }
+      } else {
+        showToast(`Login failed: ${error.message || error.code || errStr}`, "error");
       }
     } finally { setIsSigningIn(false); }
-  }, [login, showToast, setConfirmDialog]);
+  }, [login, showToast, setConfirmDialog, closeConfirmDialog]);
 
   useKeyboardShortcuts({
     onSearch: () => {},
@@ -155,7 +183,10 @@ export default function App() {
   
   useEffect(() => {
     if (state.isCloudHydrated) {
-      showToast("Reading history synced from cloud.", "success");
+      if (!hasSyncToastShown.current) {
+        showToast("Reading history synced from cloud.", "success");
+        hasSyncToastShown.current = true;
+      }
       dispatch({ type: 'CLEAR_SYNC_FLAGS' });
     } else if (state.restoredFromSnapshot) {
       showToast("Restored your reading history from local backup.", "info");
@@ -225,7 +256,7 @@ export default function App() {
   }
 
   return (
-    <div className={cn("min-h-[100dvh] transition-colors duration-300", state.settings.theme === 'xp' ? "theme-xp" : state.settings.theme === 'textbook' ? "theme-textbook" : "bg-[var(--audible-bg)] text-[var(--audible-text-primary)]", state.settings.theme === 'dark' && "dark", state.settings.theme === 'audible' && "audible", (state.settings.theme === 'audible' || state.settings.theme === 'system') && prefersDark && "dark")}>
+    <div className={cn("min-h-[100dvh] transition-colors duration-300", "bg-[var(--bg-secondary)] text-[var(--text-primary)]", state.settings.theme === 'dark' && "dark", state.settings.theme === 'system' && prefersDark && "dark")}>
       <Navbar user={user} syncStatus={syncStatus} lastSyncTime={lastSyncTime} showSyncCheck={showSyncCheck} handleLogin={handleLoginLocal} logout={logout} toggleTheme={toggleTheme} theme={state.settings.theme} setShowHistory={setShowHistory} setShowSettings={setShowSettings} startDate={state.settings.startDate} isSigningIn={isSigningIn} isAuthLoading={isAuthLoading} />
       <main className="pt-20 pb-20">
         {needsOnboarding ? (
@@ -239,11 +270,8 @@ export default function App() {
       <React.Suspense fallback={null}>
         <AppModals isSigningIn={isSigningIn} />
       </React.Suspense>
-      <ConfirmDialog isOpen={confirmDialog.isOpen} title={confirmDialog.title} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onClose={closeConfirmDialog} />
+      <ConfirmDialog isOpen={confirmDialog.isOpen} title={confirmDialog.title} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onClose={closeConfirmDialog} confirmLabel={confirmDialog.confirmLabel} cancelLabel={confirmDialog.cancelLabel} type={confirmDialog.type} confirmHref={confirmDialog.confirmHref} />
       <Toast message={toast?.message || null} type={toast?.type} onClear={() => setToast(null)} />
-      {state.settings.theme === 'xp' && (
-        <div className="xp-taskbar"><button className="xp-start-button" onClick={() => setIsStartMenuOpen(!isStartMenuOpen)}><Monitor size={16} /> start</button><div className="ml-auto px-4 flex items-center gap-4 text-white text-[11px] font-bold"><div className="flex items-center gap-2"><Cloud size={12} className={syncStatus === 'synced' ? "text-green-400" : "text-amber-400"} />{syncStatus.toUpperCase()}</div><div className="border-l border-white/20 pl-4">{format(new Date(), 'h:mm a')}</div></div></div>
-      )}
     </div>
   );
 }

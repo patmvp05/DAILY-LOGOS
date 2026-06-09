@@ -14,7 +14,7 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'prompt',
-        injectRegister: 'script',
+        injectRegister: 'auto',
         includeAssets: ['icons/logo.svg'],
         filename: 'manifest.json',
         manifest: {
@@ -36,10 +36,11 @@ export default defineConfig(() => {
         },
         workbox: {
           skipWaiting: true,
+          clientsClaim: true,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
           runtimeCaching: [
             {
-              urlPattern: /^https:\/\/.*\.bolls\.life\/.*/,
+              urlPattern: /^https:\/\/.*(bolls\.life|bibleproxy.*\.run\.app)\/.*/,
               handler: 'StaleWhileRevalidate',
               options: {
                 cacheName: 'bolls-bible-cache',

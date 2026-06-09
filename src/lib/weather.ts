@@ -86,7 +86,11 @@ export async function fetchWeather(lat: number, lng: number, city: string): Prom
       fetchedAt: Date.now()
     };
 
-    localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({ snapshot, ts: Date.now() }));
+    try {
+      localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({ snapshot, ts: Date.now() }));
+    } catch {
+      console.warn("Weather cache write failed, possibly due to private mode limits.");
+    }
     return snapshot;
   } catch (e) {
     clearTimeout(timeoutId);

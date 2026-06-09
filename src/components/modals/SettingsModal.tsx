@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '../../lib/utils';
-import { XpWindowHeader } from '../XpWindowHeader';
+
 import { EmailAuthForm } from '../EmailAuthForm';
 import { setUserSettings } from '../../lib/sync';
 import { useApp } from '../../state/AppContextCore';
@@ -77,45 +77,33 @@ interface SettingsModalProps {
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        className={cn(
-          "fixed right-0 top-0 bottom-0 w-full max-w-md bg-[var(--audible-nav)] z-[210] p-6 sm:p-10 flex flex-col border-l border-[var(--audible-border)] shadow-2xl",
-          state.settings.theme === 'xp' && "xp-window border-0 p-0"
-        )}
+        className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[var(--bg-primary)] z-[210] p-6 sm:p-10 flex flex-col border-l border-[var(--border-color)] shadow-2xl"
       >
-        {state.settings.theme === 'xp' && (
-          <XpWindowHeader 
-            title="Configuration" 
-            onClose={onClose} 
-            icon={SettingsIcon} 
-          />
-        )}
-        <div className={cn("flex justify-between items-center mb-8 shrink-0", state.settings.theme === 'xp' && "p-6")}>
+        <div className="flex justify-between items-center mb-8 shrink-0">
           <div>
-            <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[var(--audible-text-primary)]">Configuration</h3>
+            <h3 className="text-2xl sm:text-3xl font-bold uppercase tracking-tight text-[var(--text-primary)]">Configuration</h3>
             {showSyncCheck && lastSyncTime && (
-              <p className="text-[9px] font-black uppercase text-evernote animate-in fade-in transition-all">
+              <p className="text-[11px] font-bold uppercase text-brand tracking-widest animate-in fade-in transition-all">
                 Cloud Synced at {format(lastSyncTime, 'h:mm:ss a')}
               </p>
             )}
             {syncStatus === 'syncing' && (
-              <p className="text-[9px] font-black uppercase text-amber-500 animate-pulse">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-brand animate-pulse">
                 Syncing changes...
               </p>
             )}
           </div>
-          <button onClick={onClose} className="text-[var(--audible-text-secondary)] hover:text-evernote p-2 transition-colors">
+          <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-brand p-2 transition-colors">
             <Check size={28} strokeWidth={2.5} />
           </button>
         </div>
 
-        <div className={cn("flex p-1 rounded-lg mb-10 shrink-0", state.settings.theme === 'xp' ? "bg-[#ECE9D8] gap-1" : "bg-zinc-100 dark:bg-[#1A1A1A] border border-[var(--audible-border)]")}>
+        <div className="flex p-1 rounded-lg mb-10 shrink-0 bg-[var(--bg-secondary)] border border-[var(--border-color)]">
           <button 
             onClick={() => setSettingsTab('general')}
             className={cn(
-              "flex-1 py-3 text-[10px] font-black uppercase tracking-[0.12em] rounded-md transition-all",
-              state.settings.theme === 'xp' 
-                ? (settingsTab === 'general' ? "xp-button bg-white text-blue-700 shadow-inner" : "text-gray-500 hover:text-black")
-                : (settingsTab === 'general' ? "bg-white dark:bg-zinc-700 shadow-sm text-evernote" : "text-[var(--audible-text-secondary)] hover:text-zinc-600 dark:hover:text-zinc-300")
+              "flex-1 py-3 text-[11px] font-bold uppercase tracking-widest rounded-md transition-all",
+              settingsTab === 'general' ? "bg-[var(--bg-primary)] shadow-sm text-brand" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             )}
           >
             General
@@ -123,10 +111,8 @@ interface SettingsModalProps {
           <button 
             onClick={() => setSettingsTab('journals')}
             className={cn(
-              "flex-1 py-3 text-[10px] font-black uppercase tracking-[0.12em] rounded-md transition-all",
-              state.settings.theme === 'xp' 
-                ? (settingsTab === 'journals' ? "xp-button bg-white text-blue-700 shadow-inner" : "text-gray-500 hover:text-black")
-                : (settingsTab === 'journals' ? "bg-white dark:bg-zinc-700 shadow-sm text-evernote" : "text-[var(--audible-text-secondary)] hover:text-zinc-600 dark:hover:text-zinc-300")
+              "flex-1 py-3 text-[11px] font-bold uppercase tracking-widest rounded-md transition-all",
+              settingsTab === 'journals' ? "bg-[var(--bg-primary)] shadow-sm text-brand" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             )}
           >
             Journals ({state.proverbJournals.length})
@@ -134,17 +120,15 @@ interface SettingsModalProps {
           <button 
             onClick={() => setSettingsTab('devotionals')}
             className={cn(
-              "flex-1 py-3 text-[10px] font-black uppercase tracking-[0.12em] rounded-md transition-all",
-              state.settings.theme === 'xp' 
-                ? (settingsTab === 'devotionals' ? "xp-button bg-white text-blue-700 shadow-inner" : "text-gray-500 hover:text-black")
-                : (settingsTab === 'devotionals' ? "bg-white dark:bg-zinc-700 shadow-sm text-evernote" : "text-[var(--audible-text-secondary)] hover:text-zinc-600 dark:hover:text-zinc-300")
+              "flex-1 py-3 text-[11px] font-bold uppercase tracking-widest rounded-md transition-all",
+              settingsTab === 'devotionals' ? "bg-[var(--bg-primary)] shadow-sm text-brand" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             )}
           >
             Devotions
           </button>
         </div>
 
-        <div className={cn("flex-1 overflow-y-auto space-y-10 pr-2", state.settings.theme === 'xp' && "p-6")}>
+        <div className="flex-1 overflow-y-auto space-y-10 pr-2">
           {settingsTab === 'general' ? (
             <>
               {/* Cloud Sync Account Setup */}
@@ -153,7 +137,7 @@ interface SettingsModalProps {
                 {user ? (
                   <div className="p-4 bg-[var(--audible-card)] rounded-xl flex items-center justify-between border border-[var(--audible-border)] shadow-sm">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-full bg-evernote/10 flex items-center justify-center text-evernote shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-brand shrink-0">
                         <UserIcon size={20} />
                       </div>
                       <div className="min-w-0">
@@ -173,14 +157,14 @@ interface SettingsModalProps {
                     <button 
                       onClick={() => !isAuthLoading && !isSigningIn && handleLogin(false)}
                       disabled={syncStatus === 'syncing' || isAuthLoading || isSigningIn}
-                      className="w-full p-4 bg-evernote text-white rounded-xl flex items-center justify-center gap-3 font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-evernote/20 disabled:opacity-50 cursor-pointer"
+                      className="w-full p-4 bg-brand text-white rounded-xl flex items-center justify-center gap-3 font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-evernote/20 disabled:opacity-50 cursor-pointer"
                     >
                       {(isSigningIn || isAuthLoading) ? <RefreshCw size={16} className="animate-spin" /> : <LogIn size={16} />}
                       {(isSigningIn || isAuthLoading) ? 'Connecting...' : 'Sign In with Google'}
                     </button>
                     <button 
                       onClick={() => !isAuthLoading && !isSigningIn && handleLogin(true)}
-                      className="w-full p-2 text-[var(--audible-text-secondary)] font-bold uppercase text-[8px] tracking-[0.12em] hover:text-evernote transition-colors focus:outline-none cursor-pointer text-center"
+                      className="w-full p-2 text-[var(--audible-text-secondary)] font-bold uppercase text-[8px] tracking-[0.12em] hover:text-brand transition-colors focus:outline-none cursor-pointer text-center"
                       disabled={isAuthLoading || isSigningIn}
                     >
                       Safari User? Click here to try Redirect Login
@@ -203,10 +187,7 @@ interface SettingsModalProps {
                   {[
                     { id: 'light', name: 'Light', Icon: Sun },
                     { id: 'dark', name: 'Dark', Icon: Moon },
-                    { id: 'system', name: 'System', Icon: Monitor },
-                    { id: 'audible', name: 'Audible', Icon: Headphones },
-                    { id: 'textbook', name: 'Textbook', Icon: FileText },
-                    { id: 'xp', name: 'XP', Icon: Monitor },
+                    { id: 'system', name: 'System', Icon: Monitor }
                   ].map(({ id, name, Icon }) => (
                     <button
                       key={id}
@@ -224,15 +205,14 @@ interface SettingsModalProps {
                         }
                       }}
                       className={cn(
-                        "flex flex-col items-center gap-2 p-4 border rounded-xl transition-all",
+                        "flex flex-col items-center gap-2 p-4 border rounded-[16px] transition-all",
                         state.settings.theme === id 
-                          ? "border-evernote bg-evernote/[0.03] text-evernote shadow-sm" 
-                          : "border-[var(--audible-border)] text-zinc-400 dark:text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700",
-                        id === 'xp' && state.settings.theme === 'xp' ? "border-[#0054E3] bg-[#ECE9D8] text-[#0054E3]" : ""
+                          ? "border-brand bg-brand/[0.03] text-brand shadow-sm" 
+                          : "border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]"
                       )}
                     >
                       <Icon size={18} />
-                      <span className="text-[10px] font-black uppercase tracking-[0.12em]">{name}</span>
+                      <span className="text-[11px] font-bold uppercase tracking-widest">{name}</span>
                     </button>
                   ))}
                 </div>
@@ -306,7 +286,7 @@ interface SettingsModalProps {
             <div className="space-y-6 pb-12">
               <button 
                 onClick={onExportJournals}
-                className="w-full p-6 bg-evernote text-white rounded-xl mb-8 flex items-center justify-between shadow-xl shadow-evernote/20 hover:translate-y-[-2px] transition-all"
+                className="w-full p-6 bg-brand text-white rounded-xl mb-8 flex items-center justify-between shadow-xl shadow-evernote/20 hover:translate-y-[-2px] transition-all"
               >
                 <div className="text-left">
                   <p className="text-[10px] font-black uppercase tracking-[0.12em] opacity-80">Archive Export</p>
@@ -320,7 +300,7 @@ interface SettingsModalProps {
                   <div key={entry.id} className="p-6 bg-[var(--audible-card)] border border-[var(--audible-border)] rounded-2xl group shadow-sm">
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-evernote">Proverbs {entry.chapter}</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-brand">Proverbs {entry.chapter}</p>
                         <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[var(--audible-text-secondary)]">{format(parseISO(entry.date), 'MMM dd, yyyy')}</p>
                       </div>
                       <button 
@@ -331,7 +311,7 @@ interface SettingsModalProps {
                       </button>
                     </div>
                     {entry.verse && (
-                      <div className="mb-4 pl-3 border-l-2 border-evernote/30 italic text-sm text-[var(--audible-text-secondary)] font-serif">
+                      <div className="mb-4 pl-3 border-l-2 border-brand/30 italic text-sm text-[var(--audible-text-secondary)] font-serif">
                         "{entry.verse}"
                       </div>
                     )}
@@ -343,7 +323,7 @@ interface SettingsModalProps {
                         onClose();
                         setShowProverbModal(true);
                       }}
-                      className="mt-4 text-[10px] font-black uppercase tracking-[0.12em] text-evernote hover:underline"
+                      className="mt-4 text-[10px] font-black uppercase tracking-[0.12em] text-brand hover:underline"
                     >
                       View / Edit
                     </button>
@@ -359,19 +339,19 @@ interface SettingsModalProps {
           ) : (
             <div className="space-y-10 pb-12">
               <div className="p-6 bg-[var(--audible-card)] border border-[var(--audible-border)] rounded-2xl shadow-sm">
-                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-evernote mb-4">Add New Devotional</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-brand mb-4">Add New Devotional</p>
                 <div className="space-y-4">
                   <input 
                     type="text" 
                     placeholder="Name (e.g. My Favorite Daily)"
-                    className="w-full p-4 bg-white dark:bg-[#1A1A1A] border border-[var(--audible-border)] rounded-xl outline-none text-sm font-bold text-[var(--audible-text-primary)] focus:border-evernote transition-all"
+                    className="w-full p-4 bg-white dark:bg-[#1A1A1A] border border-[var(--audible-border)] rounded-xl outline-none text-sm font-bold text-[var(--audible-text-primary)] focus:border-brand transition-all"
                     value={newDevotional.name}
                     onChange={(e) => setNewDevotional({...newDevotional, name: e.target.value})}
                   />
                   <input 
                     type="text" 
                     placeholder="Author/Description"
-                    className="w-full p-4 bg-white dark:bg-[#1A1A1A] border border-[var(--audible-border)] rounded-xl outline-none text-sm font-bold text-[var(--audible-text-primary)] focus:border-evernote transition-all"
+                    className="w-full p-4 bg-white dark:bg-[#1A1A1A] border border-[var(--audible-border)] rounded-xl outline-none text-sm font-bold text-[var(--audible-text-primary)] focus:border-brand transition-all"
                     value={newDevotional.description}
                     onChange={(e) => setNewDevotional({...newDevotional, description: e.target.value})}
                   />
@@ -379,7 +359,7 @@ interface SettingsModalProps {
                     <input 
                       type="text" 
                       placeholder="URL (Use {{date}} for dynamic dates)"
-                      className="w-full p-4 bg-white dark:bg-[#1A1A1A] border border-[var(--audible-border)] rounded-xl outline-none text-sm font-bold text-[var(--audible-text-primary)] focus:border-evernote transition-all"
+                      className="w-full p-4 bg-white dark:bg-[#1A1A1A] border border-[var(--audible-border)] rounded-xl outline-none text-sm font-bold text-[var(--audible-text-primary)] focus:border-brand transition-all"
                       value={newDevotional.url}
                       onChange={(e) => setNewDevotional({...newDevotional, url: e.target.value})}
                     />
@@ -400,10 +380,7 @@ interface SettingsModalProps {
                           setNewDevotional({ name: '', description: '', url: '' });
                         }
                       }}
-                      className={cn(
-                        "w-full py-5 text-[10px] font-black uppercase tracking-[0.2em] transition-all",
-                        state.settings.theme === 'xp' ? "xp-button bg-[#ECE9D8] text-black" : "bg-black dark:bg-white text-white dark:text-black rounded-xl shadow-lg shadow-black/5 hover:translate-y-[-1px] active:scale-95"
-                      )}
+                      className="w-full py-4 text-[11px] font-bold tracking-wide transition-all bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-[16px] shadow-sm hover:opacity-90 active:scale-95"
                     >
                       Add to Collection
                     </button>
@@ -432,10 +409,7 @@ interface SettingsModalProps {
 
         <button 
           onClick={onClose}
-          className={cn(
-            "w-full p-6 font-black uppercase tracking-[0.2em] text-[10px] transition-all",
-            state.settings.theme === 'xp' ? "xp-button bg-[#ECE9D8] text-black" : "bg-black dark:bg-white text-white dark:text-black rounded-xl hover:translate-y-[-2px] active:scale-95 shadow-xl shadow-black/10 active:shadow-none"
-          )}
+          className="w-full p-4 font-bold uppercase tracking-widest text-[11px] transition-all bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-[20px] active:scale-95 hover:opacity-90 mt-4"
         >
           Close Panel
         </button>

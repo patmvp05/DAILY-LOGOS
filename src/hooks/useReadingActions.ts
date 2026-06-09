@@ -109,13 +109,14 @@ export function useReadingActions(
   // Cleanup pending flushes on unmount & flush immediately if needed
   useEffect(() => {
     const currentTimeouts = flushTimeouts.current;
+    const currentTaps = pendingTaps.current;
     return () => {
       Object.keys(currentTimeouts).forEach((catId) => {
         if (currentTimeouts[catId]) {
           clearTimeout(currentTimeouts[catId]);
         }
-        if (pendingTaps.current[catId] && pendingTaps.current[catId] !== 0) {
-          console.log(`[Unmount Flush] Flushing pending taps for ${catId}:`, pendingTaps.current[catId]);
+        if (currentTaps[catId] && currentTaps[catId] !== 0) {
+          console.log(`[Unmount Flush] Flushing pending taps for ${catId}:`, currentTaps[catId]);
           flush(catId);
         }
       });
@@ -188,7 +189,8 @@ export function useReadingActions(
             lastReadAt: new Date().toISOString(),
             localDate: format(new Date(), 'yyyy-MM-dd')
           },
-          deletedBooks: [{ categoryId, bookName: book.name }]
+          deletedBooks: [{ categoryId, bookName: book.name }],
+          forceProgressOverwrite: true
         }).catch(e => console.error("Jump sync failed:", e));
       }
       setSelectingCategoryId(null);

@@ -81,7 +81,7 @@ export const EmailAuthForm: React.FC<EmailAuthFormProps> = ({ onSuccess }) => {
           id="toggle-signin"
           type="button"
           onClick={() => setIsSignUp(false)}
-          className={`flex-1 py-1.5 rounded-md transition-all ${!isSignUp ? 'bg-white dark:bg-zinc-700 text-evernote shadow-sm' : 'text-zinc-400 dark:text-zinc-500 hover:text-black dark:hover:text-white'}`}
+          className={`flex-1 py-1.5 rounded-md transition-all ${!isSignUp ? 'bg-white dark:bg-zinc-700 text-brand shadow-sm' : 'text-zinc-400 dark:text-zinc-500 hover:text-black dark:hover:text-white'}`}
         >
           Sign In
         </button>
@@ -89,7 +89,7 @@ export const EmailAuthForm: React.FC<EmailAuthFormProps> = ({ onSuccess }) => {
           id="toggle-signup"
           type="button"
           onClick={() => setIsSignUp(true)}
-          className={`flex-1 py-1.5 rounded-md transition-all ${isSignUp ? 'bg-white dark:bg-zinc-700 text-evernote shadow-sm' : 'text-zinc-400 dark:text-zinc-500 hover:text-black dark:hover:text-white'}`}
+          className={`flex-1 py-1.5 rounded-md transition-all ${isSignUp ? 'bg-white dark:bg-zinc-700 text-brand shadow-sm' : 'text-zinc-400 dark:text-zinc-500 hover:text-black dark:hover:text-white'}`}
         >
           Create Account
         </button>
@@ -109,7 +109,7 @@ export const EmailAuthForm: React.FC<EmailAuthFormProps> = ({ onSuccess }) => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               disabled={isLoading}
-              className="w-full pl-9 pr-3 py-2 text-xs border border-[var(--audible-border)] rounded-md focus:border-evernote focus:ring-1 focus:ring-evernote outline-none bg-white dark:bg-[#1A1A1A] text-[var(--audible-text-primary)]"
+              className="w-full pl-9 pr-3 py-2 text-xs border border-[var(--audible-border)] rounded-md focus:border-brand focus:ring-1 focus:ring-evernote outline-none bg-white dark:bg-[#1A1A1A] text-[var(--audible-text-primary)]"
               required
             />
           </div>
@@ -128,7 +128,7 @@ export const EmailAuthForm: React.FC<EmailAuthFormProps> = ({ onSuccess }) => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder={isSignUp ? "At least 6 characters" : "••••••••"}
               disabled={isLoading}
-              className="w-full pl-9 pr-10 py-2 text-xs border border-[var(--audible-border)] rounded-md focus:border-evernote focus:ring-1 focus:ring-evernote outline-none bg-white dark:bg-[#1A1A1A] text-[var(--audible-text-primary)]"
+              className="w-full pl-9 pr-10 py-2 text-xs border border-[var(--audible-border)] rounded-md focus:border-brand focus:ring-1 focus:ring-evernote outline-none bg-white dark:bg-[#1A1A1A] text-[var(--audible-text-primary)]"
               required
             />
             <button
@@ -146,7 +146,7 @@ export const EmailAuthForm: React.FC<EmailAuthFormProps> = ({ onSuccess }) => {
           id="email-auth-submit"
           type="submit"
           disabled={isLoading}
-          className="w-full py-2.5 bg-evernote hover:bg-evernote/90 text-white rounded-md flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider transition-colors disabled:opacity-50 font-sans shadow-md cursor-pointer"
+          className="w-full py-2.5 bg-brand hover:bg-brand/90 text-white rounded-md flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider transition-colors disabled:opacity-50 font-sans shadow-md cursor-pointer"
         >
           {isLoading ? (
             <RefreshCw size={14} className="animate-spin" />

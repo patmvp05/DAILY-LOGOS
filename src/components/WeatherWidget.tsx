@@ -153,16 +153,11 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
 
   if (!weather) return null;
 
-  const isXP = theme === 'xp';
-
   if (compact) {
     return (
       <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors overflow-hidden">
         <WeatherIcon code={weather.conditionCode} className="shrink-0 w-4 h-4" />
-        <span className={cn(
-          "text-xs font-black tracking-tighter whitespace-nowrap",
-          isXP ? "text-black" : "text-[var(--audible-text-primary)]"
-        )}>
+        <span className="text-xs font-bold tracking-tighter whitespace-nowrap text-[var(--text-primary)]">
           {weather.tempF}°F
         </span>
       </div>
@@ -170,33 +165,20 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
   }
 
   return (
-    <div 
-      className={cn(
-        "flex items-center gap-3 px-3 py-1.5 transition-all",
-        isXP 
-          ? "bg-[#ECE9D8] border border-[#003C74] rounded-[4px] shadow-sm ml-2" 
-          : "hover:bg-black/5 dark:hover:bg-white/5 rounded-xl ml-4"
-      )}
-    >
+    <div className="flex items-center gap-3 px-3 py-1.5 transition-all hover:bg-[var(--bg-secondary)] rounded-xl ml-4">
       <div className="relative">
         <WeatherIcon code={weather.conditionCode} className="shrink-0" />
         {isRefreshing && (
-          <div className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-evernote rounded-full dot-pulse" />
+          <div className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-brand rounded-full dot-pulse" />
         )}
       </div>
       
       <div className="hidden lg:flex flex-col leading-tight">
         <div className="flex items-baseline gap-2">
-          <span className={cn(
-            "text-base font-black tracking-tighter",
-            isXP ? "text-black" : "text-[var(--audible-text-primary)]"
-          )}>
+          <span className="text-base font-bold tracking-tighter text-[var(--text-primary)]">
             {weather.tempF}°F
           </span>
-          <span className={cn(
-            "text-[9px] uppercase font-black tracking-[0.12em] opacity-60 flex items-center gap-1",
-            isXP ? "text-[#003C74]" : "text-[var(--audible-text-secondary)]"
-          )}>
+          <span className="text-[11px] uppercase font-bold tracking-widest opacity-60 flex items-center gap-1 text-[var(--text-secondary)]">
             {isEditing ? (
               <form onSubmit={handleManualLocation} className="flex">
                 <input 
@@ -212,7 +194,7 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
                 {weather.city}
                 <button 
                   onClick={() => { setIsEditing(true); setTempCity(weather.city); }}
-                  className="p-0.5 hover:text-evernote transition-colors"
+                  className="p-0.5 hover:text-brand transition-colors"
                 >
                   <Pencil size={8} />
                 </button>
@@ -220,33 +202,21 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
             )}
           </span>
         </div>
-        <span className={cn(
-          "text-[9px] font-bold tracking-tight opacity-70",
-          isXP ? "text-[#003C74]" : "text-[var(--audible-text-secondary)]"
-        )}>
+        <span className="text-[11px] font-bold tracking-tight opacity-70 text-[var(--text-secondary)]">
           {weather.highF}°F / {weather.lowF}°F · {weather.conditionLabel}
         </span>
       </div>
 
       <div className="flex lg:hidden flex-col leading-tight">
         <div className="flex items-baseline gap-1">
-          <span className={cn(
-            "text-sm font-black tracking-tighter",
-            isXP ? "text-black" : "text-[var(--audible-text-primary)]"
-          )}>
+          <span className="text-sm font-bold tracking-tighter text-[var(--text-primary)]">
             {weather.tempF}°F
           </span>
-          <span className={cn(
-            "text-[7px] uppercase font-black tracking-tight opacity-60 truncate max-w-[50px]",
-            isXP ? "text-[#003C74]" : "text-[var(--audible-text-secondary)]"
-          )}>
+          <span className="text-[9px] uppercase font-bold tracking-tight opacity-60 truncate max-w-[50px] text-[var(--text-secondary)]">
             {weather.city}
           </span>
         </div>
-        <span className={cn(
-          "text-[8px] font-bold tracking-tight opacity-70",
-          isXP ? "text-[#003C74]" : "text-[var(--audible-text-secondary)]"
-        )}>
+        <span className="text-[11px] font-bold tracking-tight opacity-70 text-[var(--text-secondary)]">
           {weather.conditionLabel}
         </span>
       </div>

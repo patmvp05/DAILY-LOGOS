@@ -8,7 +8,7 @@ import { UiContextProvider } from './state/UiContext';
 import { registerSW } from 'virtual:pwa-register';
 
 // Register service worker
-registerSW({ immediate: true });
+registerSW({ immediate: false });
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -4,7 +4,7 @@
  */
 
 import { format } from 'date-fns';
-import { AppState, Progress as ProgressType, HistoryEntry, ProverbJournal, Devotional } from '../types';
+import { AppState, Progress as ProgressType, HistoryEntry, ProverbJournal, Devotional, UserSettings } from '../types';
 
 export type AppAction = 
   | { type: 'REPLACE_STATE', state: AppState }

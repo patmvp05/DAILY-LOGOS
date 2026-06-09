@@ -87,10 +87,10 @@ const BookSelectorModal: React.FC<BookSelectorModalProps> = ({
                   onClick={() => jumpToBook(selectingCategoryId!, idx)}
                   className={cn(
                     "w-full p-4 sm:p-5 border text-left transition-all flex flex-col justify-between h-28 sm:h-32 rounded-2xl shadow-sm",
-                    isCompleted ? "bg-evernote border-evernote text-white shadow-evernote/20" :
+                    isCompleted ? "bg-brand border-brand text-white shadow-evernote/20" :
                     isCurrent 
-                      ? "border-evernote bg-evernote/5 text-evernote font-black" 
-                      : "bg-white dark:bg-[#1A1A1A] border-[var(--audible-border)] hover:border-evernote text-[var(--audible-text-primary)]"
+                      ? "border-brand bg-brand/5 text-brand font-black" 
+                      : "bg-white dark:bg-[#1A1A1A] border-[var(--audible-border)] hover:border-brand text-[var(--audible-text-primary)]"
                   )}
                 >
                   <div className="space-y-1">
@@ -114,7 +114,7 @@ const BookSelectorModal: React.FC<BookSelectorModalProps> = ({
                   className={cn(
                     "absolute top-2 right-2 sm:top-3 sm:right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 border shadow-md z-10",
                     isCompleted 
-                      ? "bg-white text-evernote border-white" 
+                      ? "bg-white text-brand border-white" 
                       : "bg-[var(--audible-text-primary)] dark:bg-white text-white dark:text-black border-transparent"
                   )}
                   title={isCompleted ? "Mark as unread" : "Mark as completed"}

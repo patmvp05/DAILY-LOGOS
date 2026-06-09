@@ -24,7 +24,7 @@ import { format, parseISO, subDays } from 'date-fns';
 import { CATEGORIES, CATEGORIES_BY_ID, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
 import { Progress } from '../types';
 import { cn, computeProgressStats } from '../lib/utils';
-import { XpWindowHeader } from './XpWindowHeader';
+
 import { getChapterInfo, getCachedReadTime } from '../lib/bibleCache';
 
 import { useApp } from '../state/AppContextCore';
@@ -154,93 +154,71 @@ function DashboardComponent({
       <div className="lg:col-span-4 flex flex-col justify-between py-2 space-y-12">
         <section>
           <div className="mb-10 text-center lg:text-left">
-            <p className="text-[10px] uppercase tracking-[0.4em] font-black text-evernote mb-2">λóγος</p>
-            <h1 className="text-5xl sm:text-6xl font-black leading-none mb-4 tracking-tighter text-[var(--audible-text-primary)]">The Daily<br />Logos</h1>
+            <p className="text-[11px] uppercase tracking-widest font-bold text-brand mb-2">λóγος</p>
+            <h1 className="text-5xl sm:text-6xl font-black leading-none mb-4 tracking-tighter text-[var(--text-primary)]">The Daily<br />Logos</h1>
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-6">
-              <p className="text-[var(--audible-text-secondary)] font-medium text-lg">Day {dayNumber} of your journey.</p>
+              <p className="text-[var(--text-secondary)] font-medium text-lg">Day {dayNumber} of your journey.</p>
             </div>
             <button 
               onClick={() => setActivePlanCategory('_all')}
-              className="text-[10px] uppercase tracking-[0.12em] font-black border border-[var(--audible-text-primary)] px-4 py-2 hover:bg-[var(--audible-text-primary)] hover:text-white dark:hover:bg-white dark:hover:text-black transition-all flex items-center gap-2 mx-auto lg:mx-0 rounded-sm"
+              className="cb-button w-full sm:w-auto mx-auto lg:mx-0 flex items-center justify-center gap-2"
             >
-              <Layers size={12} />
-              View Full Plan Breakdown
+              <Layers size={14} />
+              View Full Plan
             </button>
           </div>
 
           {/* Resume Reading Card (Audible Mini-Player style) */}
           {lastReadProgress && (
             <div className={cn(
-              "mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700",
-              state.settings.theme === 'xp' && "uber-card"
+              "mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700"
             )}>
-              {state.settings.theme === 'xp' ? (
-                <XpWindowHeader title="Resume Reading" icon={Bookmark} />
-              ) : (
-                <div className="flex justify-between items-center mb-3">
-                  <p className="text-[10px] uppercase font-black tracking-[0.12em] text-[var(--audible-text-secondary)]">Resume Reading</p>
-                  {syncStatus === 'syncing' && (
-                    <span className="flex items-center gap-1 text-[9px] text-evernote font-black uppercase animate-pulse">
-                      <Cloud size={10} />
-                      Syncing...
-                    </span>
-                  )}
-                  {syncStatus === 'offline' && (
-                    <span className="flex items-center gap-1 text-[9px] text-zinc-400 font-black uppercase">
-                      <Cloud size={10} className="text-zinc-400" />
-                      Offline Mode
-                    </span>
-                  )}
-                  {syncStatus === 'error' && (
-                    <span className="flex items-center gap-1 text-[9px] text-red-500 font-black uppercase">
-                      <Cloud size={10} className="text-red-500" />
-                      Sync Error
-                    </span>
-                  )}
-                </div>
-              )}
+              <div className="flex justify-between items-center mb-3">
+                <p className="text-[11px] uppercase font-bold tracking-widest text-brand">Resume Reading</p>
+                {syncStatus === 'syncing' && (
+                  <span className="flex items-center gap-1 text-[10px] text-brand font-bold uppercase animate-pulse">
+                    <Cloud size={12} />
+                    Syncing...
+                  </span>
+                )}
+                {syncStatus === 'offline' && (
+                  <span className="flex items-center gap-1 text-[10px] text-zinc-400 font-bold uppercase">
+                    <Cloud size={12} className="text-zinc-400" />
+                    Offline Mode
+                  </span>
+                )}
+                {syncStatus === 'error' && (
+                  <span className="flex items-center gap-1 text-[10px] text-red-500 font-bold uppercase">
+                    <Cloud size={12} className="text-red-500" />
+                    Sync Error
+                  </span>
+                )}
+              </div>
               <button 
                 onClick={() => setActivePlanCategory(lastReadProgress.categoryId)}
-                className={cn(
-                  "w-full group relative flex items-center justify-between transition-all rounded-xl",
-                  state.settings.theme === 'xp' 
-                    ? "xp-content p-6" 
-                    : "p-6 bg-[#FAFAFA] dark:bg-[#1C1C1C] border border-[var(--audible-border)] shadow-sm hover:shadow-xl hover:translate-y-[-2px] overflow-hidden"
-                )}
+                className="w-full group relative flex items-center justify-between cb-card-interactive"
               >
                 <div className="flex items-center gap-5">
-                  <div className={cn(
-                    "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105 active:scale-95",
-                    state.settings.theme === 'xp' ? "bg-blue-600 text-white shadow-inner" : "bg-evernote text-white shadow-[0_0_8px_rgba(0,168,45,0.3)] dark:shadow-[0_0_12px_rgba(0,168,45,0.2)]"
-                  )}>
-                    <Play size={24} fill="currentColor" />
+                  <div className="w-14 h-14 rounded-full bg-brand text-white flex items-center justify-center transition-transform duration-300 group-hover:scale-105 active:scale-95 shadow-md shadow-brand/20">
+                    <Play size={24} fill="currentColor" className="ml-1" />
                   </div>
                   <div className="text-left">
-                    <p className={cn(
-                      "text-[10px] font-black uppercase tracking-[0.12em] mb-1",
-                      state.settings.theme === 'xp' ? "text-blue-700" : "text-evernote"
-                    )}>
+                    <p className="text-xs font-bold uppercase tracking-widest text-[#8B909A] mb-1">
                       {CATEGORIES_BY_ID.get(lastReadProgress.categoryId)?.name}
                     </p>
-                    <h4 className={cn(
-                      "text-xl font-black uppercase tracking-tight leading-none",
-                      state.settings.theme === 'xp' ? "text-black" : "text-[var(--audible-text-primary)]"
-                    )}>
+                    <h4 className="text-[22px] font-bold tracking-tighter leading-none text-[var(--text-primary)]">
                       {(() => {
                         const cat = CATEGORIES_BY_ID.get(lastReadProgress.categoryId);
                         const book = cat?.books[lastReadProgress.bookIndex];
                         return `${book?.name || 'Unknown'} ${lastReadProgress.chapter}`;
                       })()}
                     </h4>
-                    <p className="text-[9px] text-[var(--audible-text-secondary)] font-bold uppercase tracking-tighter mt-1.5 italic opacity-80">
+                    <p className="text-[11px] text-[var(--text-secondary)] font-medium mt-1">
                       Last read {format(new Date(lastReadProgress.lastReadAt!), 'h:mm a')}
                     </p>
                   </div>
                 </div>
-                <ArrowRight size={20} className={cn(
-                  "transition-all",
-                  state.settings.theme === 'xp' ? "text-blue-600" : "text-gray-300 dark:text-zinc-700 group-hover:text-evernote group-hover:translate-x-1"
-                )} />
+                <ArrowRight size={24} className="text-[#8B909A] transition-transform group-hover:translate-x-1" />
               </button>
             </div>
           )}
@@ -248,51 +226,38 @@ function DashboardComponent({
           {/* Proverb of the Day */}
           <button 
             onClick={() => handleShowProverbModal(true)}
-            className={cn(
-                "w-full p-8 mb-6 relative overflow-hidden group text-left block transition-all rounded-xl",
-                state.settings.theme === 'xp' ? "uber-card" : "bg-[var(--audible-card)] border border-[var(--audible-border)] shadow-sm hover:shadow-lg hover:translate-y-[-2px] hover:border-evernote/30"
-            )}
+            className="w-full mb-6 relative overflow-hidden group text-left block cb-card-interactive"
           >
-            {state.settings.theme === 'xp' && (
-              <XpWindowHeader title="Daily Wisdom" icon={Sparkles} />
-            )}
-            <div className={cn("relative", state.settings.theme === 'xp' && "xp-content")}>
-              <Sparkles className={cn("absolute top-4 right-4 group-hover:scale-110 transition-transform", state.settings.theme === 'xp' ? "text-blue-600/20" : "text-evernote/10 dark:text-evernote/20")} size={48} />
-              <p className={cn("text-[10px] uppercase tracking-[0.12em] font-black mb-4", state.settings.theme === 'xp' ? "text-blue-700" : "text-[var(--audible-text-secondary)]")}>Daily Proverb</p>
-              <h2 className={cn("text-3xl font-black mb-2 tracking-tight", state.settings.theme === 'xp' ? "text-black" : "text-[var(--audible-text-primary)] uppercase")}>Proverbs {dayOfMonth}</h2>
+            <div className="relative">
+              <Sparkles className="absolute top-0 right-0 group-hover:scale-110 transition-transform text-brand/20 dark:text-brand/40" size={48} />
+              <p className="text-[11px] uppercase tracking-widest font-bold mb-4 text-[var(--text-secondary)]">Daily Proverb</p>
+              <h2 className="text-3xl font-bold mb-3 tracking-tighter text-[var(--text-primary)]">Proverbs {dayOfMonth}</h2>
               {isFetchingProverb ? (
-                <div className="space-y-2 animate-pulse">
-                  <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-3/4" />
-                  <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2" />
+                <div className="space-y-2 animate-pulse mt-2">
+                  <div className="h-4 bg-[var(--border-color)] rounded w-3/4" />
+                  <div className="h-4 bg-[var(--border-color)] rounded w-1/2" />
                 </div>
               ) : proverbSnippet ? (
-                <div className="space-y-2">
-                  <p className="text-sm italic text-zinc-500 dark:text-zinc-500 leading-relaxed line-clamp-2 italic">
+                <div className="mt-2 text-[var(--text-secondary)]">
+                  <p className="text-[15px] leading-relaxed line-clamp-2">
                     "{proverbSnippet}"
                   </p>
-                  <p className={cn("text-[10px] uppercase font-black tracking-widest", state.settings.theme === 'xp' ? "text-blue-700 font-bold" : "text-evernote")}>Click to read more & journal</p>
+                  <p className="text-xs font-semibold text-brand mt-4">Read more & journal &rarr;</p>
                 </div>
               ) : (
-                <p className="text-sm text-[var(--audible-text-secondary)] font-medium leading-relaxed">It's the {format(new Date(), 'do')} of the month. Click to read today's wisdom and journal.</p>
+                <p className="text-[15px] text-[var(--text-secondary)] leading-relaxed mt-2">It's the {format(new Date(), 'do')} of the month. Click to read today's wisdom and journal.</p>
               )}
             </div>
           </button>
 
-          <div className={cn(
-            "p-8 rounded-xl mb-10 overflow-hidden relative group transition-all",
-            state.settings.theme === 'xp' ? "uber-card" : "bg-[var(--audible-card)] border border-[var(--audible-border)] shadow-sm"
-          )}>
-            {state.settings.theme === 'xp' && (
-              <XpWindowHeader title="Reading Statistics" icon={TrendingUp} />
-            )}
-            <div className={cn("relative", state.settings.theme === 'xp' && "xp-content")}>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-evernote/5 rounded-full -mr-16 -mt-16 blur-xl" />
-              <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--audible-text-secondary)] font-black mb-4">Plan Status</p>
-              <div className="flex items-baseline gap-2 mb-8 text-[var(--audible-text-primary)]">
-                <h2 className="text-5xl font-black tracking-tighter">{streak}</h2>
+          <div className="cb-card mb-10 overflow-hidden relative group">
+            <div className="relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16 blur-xl" />
+              <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-4">Plan Status</p>
+              <div className="flex items-baseline gap-3 mb-8 text-[var(--text-primary)]">
+                <h2 className="text-[40px] font-bold tracking-tighter">{streak}</h2>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-evernote animate-pulse">Day Streak</span>
-                  <span className="text-[9px] font-bold text-[var(--audible-text-secondary)] uppercase tracking-[0.12em] italic opacity-70 leading-none">Consistent Growth</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-brand">Day Streak</span>
                 </div>
               </div>
               
@@ -305,42 +270,39 @@ function DashboardComponent({
                   return (
                     <div key={i} className="flex flex-col items-center gap-1">
                       <div className={cn(
-                        "w-full aspect-square border transition-all duration-500 rounded-sm",
-                        hasReadOnDay ? "bg-evernote border-evernote" : "border-[var(--audible-border)] bg-zinc-100 dark:bg-zinc-800/30",
-                        isTodayVisit && !hasReadOnDay && "border-evernote/50 border-dashed"
+                        "w-full aspect-square transition-all duration-500 rounded-full",
+                        hasReadOnDay ? "bg-brand" : "bg-[var(--bg-tertiary)]",
+                        isTodayVisit && !hasReadOnDay && "bg-transparent border-2 border-brand/50 border-dashed"
                       )} />
-                      <span className="text-[7px] font-black uppercase opacity-60 text-[var(--audible-text-secondary)]">{format(checkDate, 'eee')[0]}</span>
+                      <span className="text-[9px] font-bold uppercase text-[var(--text-secondary)] mt-1">{format(checkDate, 'eee')[0]}</span>
                     </div>
                   );
                 })}
               </div>
               
-              <div className="pt-6 border-t border-[var(--audible-border)] mb-6">
+              <div className="pt-6 border-t border-[var(--border-color)] mb-6">
                 <div className="flex items-baseline justify-between mb-1">
-                  <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--audible-text-secondary)] font-black">
+                  <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold">
                     Today's Reading
                   </p>
-                  <span className="text-[9px] font-bold text-[var(--audible-text-secondary)] uppercase tracking-[0.12em] italic opacity-70">
+                  <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest italic opacity-70">
                     {format(new Date(), 'EEE, MMM d')}
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <h2 className={cn(
-                    "text-5xl font-black tracking-tighter",
+                    "text-[40px] font-bold tracking-tighter",
                     todayReadingStats.minutes === 0
-                      ? "text-[var(--audible-text-secondary)] opacity-50"
-                      : state.settings.theme === 'xp' ? "text-blue-700" : "text-[var(--audible-text-primary)]"
+                      ? "text-[var(--text-secondary)] opacity-50"
+                      : "text-[var(--text-primary)]"
                   )}>
                     {todayReadingStats.minutes}
                   </h2>
                   <div className="flex flex-col">
-                    <span className={cn(
-                      "text-[10px] font-black uppercase tracking-widest",
-                      state.settings.theme === 'xp' ? "text-blue-700" : "text-evernote"
-                    )}>
+                    <span className="text-xs font-bold uppercase tracking-widest text-brand">
                       {todayReadingStats.minutes === 1 ? 'Minute' : 'Minutes'}
                     </span>
-                    <span className="text-[9px] font-bold text-[var(--audible-text-secondary)] uppercase tracking-[0.12em] italic opacity-70 leading-none">
+                    <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest italic opacity-70 leading-none mt-1">
                       {todayReadingStats.chapterCount === 0
                         ? 'No chapters yet today'
                         : `${todayReadingStats.chapterCount} chapter${todayReadingStats.chapterCount === 1 ? '' : 's'} read`}
@@ -348,7 +310,7 @@ function DashboardComponent({
                   </div>
                 </div>
                 {todayReadingStats.entries.length > 0 && (
-                  <p className="text-[9px] text-[var(--audible-text-secondary)] font-bold uppercase tracking-tight mt-3 line-clamp-1 opacity-80">
+                  <p className="text-[11px] text-[var(--text-secondary)] font-medium mt-3 line-clamp-1 opacity-80">
                     {todayReadingStats.entries
                       .slice(0, 3)
                       .map(e => `${e.bookName} ${e.chapter}`)
@@ -360,20 +322,20 @@ function DashboardComponent({
 
               <div className="space-y-6">
                 {state.customDevotionals.length > 0 && (
-                  <div className="pt-6 border-t border-[var(--audible-border)]">
-                    <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--audible-text-secondary)] font-black mb-4">External Devotionals</p>
+                  <div className="pt-6 border-t border-[var(--border-color)]">
+                    <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-4">External Devotionals</p>
                     <div className="space-y-2">
                       {state.customDevotionals.map(dev => (
                         <button 
                           key={dev.id}
                           onClick={() => setActiveDevotion({ name: dev.name, url: dev.url })}
-                          className="w-full flex items-center justify-between p-3 border border-[var(--audible-border)] hover:border-evernote transition-all text-left bg-gray-50 dark:bg-[#1A1A1A] group rounded-lg"
+                          className="w-full flex items-center justify-between p-4 border border-[var(--border-color)] hover:border-brand transition-all text-left bg-[var(--bg-primary)] group rounded-2xl"
                         >
                           <div className="flex items-center gap-3">
-                            <ExternalLink size={12} className="text-zinc-400 group-hover:text-evernote" />
-                            <span className="text-[10px] font-black uppercase tracking-tight text-[var(--audible-text-primary)]">{dev.name}</span>
+                            <ExternalLink size={14} className="text-zinc-400 group-hover:text-brand" />
+                            <span className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">{dev.name}</span>
                           </div>
-                          <ChevronRight size={12} className="text-zinc-500 group-hover:text-evernote group-hover:translate-x-0.5 transition-all" />
+                          <ChevronRight size={16} className="text-zinc-400 group-hover:text-brand group-hover:translate-x-0.5 transition-all" />
                         </button>
                       ))}
                     </div>
@@ -381,19 +343,16 @@ function DashboardComponent({
                 )}
 
                 <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-black uppercase tracking-[0.12em] text-[var(--audible-text-secondary)]">Overall Progress</span>
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Overall Progress</span>
                   <div className="text-right">
-                    <span className="text-sm font-black text-[var(--audible-text-primary)] tabular-nums block leading-none">{overallProgress}%</span>
-                    <span className="text-[9px] font-bold text-[var(--audible-text-secondary)] uppercase tracking-tighter opacity-50 tabular-nums">
+                    <span className="text-sm font-bold text-[var(--text-primary)] tabular-nums block leading-none">{overallProgress}%</span>
+                    <span className="text-[10px] font-medium text-[var(--text-secondary)] mt-1 tracking-tight tabular-nums opacity-80 block">
                       {totalRead} / {totalChaptersCount} Chapters
                     </span>
                   </div>
                 </div>
                 <div 
-                  className={cn(
-                    "relative w-full h-[6px] rounded-full overflow-hidden",
-                    state.settings.theme === 'xp' ? "bg-[#D4D0C8] border border-[#919B9C] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.2)]" : "bg-zinc-200 dark:bg-zinc-800"
-                  )}
+                  className="relative w-full h-[8px] rounded-full overflow-hidden bg-[var(--bg-tertiary)]"
                   role="progressbar"
                   aria-valuenow={overallProgress}
                   aria-valuemin={0}
@@ -402,9 +361,8 @@ function DashboardComponent({
                   <div 
                     style={{ width: `${overallProgress}%` }}
                     className={cn(
-                      "h-full rounded-full transition-all duration-700 ease-out",
-                      state.settings.theme === 'xp' ? "bg-[#316AC5]" : "bg-evernote",
-                      overallProgress < 100 && state.settings.theme !== 'xp' && "shimmer-effect"
+                      "h-full rounded-full transition-all duration-700 ease-out bg-brand",
+                      overallProgress < 100 && "shimmer-effect"
                     )}
                   />
                 </div>
@@ -424,22 +382,22 @@ function DashboardComponent({
           {!user && !isAuthLoading && (
             <div 
               className={cn(
-                "relative p-6 h-auto border border-evernote bg-evernote/[0.03] flex flex-col justify-between group transition-all duration-300 rounded-xl overflow-hidden text-left focus:outline-none shadow-sm hover:shadow-md",
+                "relative p-8 h-auto border-2 border-brand bg-brand/[0.03] flex flex-col justify-between group transition-all duration-300 rounded-[24px] overflow-hidden text-left shadow-sm hover:shadow-md",
                 isSigningIn && "opacity-60"
               )}
             >
-              <div className="absolute top-0 left-0 w-full h-1.5 bg-evernote" />
-              <div className="absolute -right-8 -top-8 w-32 h-32 bg-evernote/5 rounded-full blur-3xl group-hover:bg-evernote/10 transition-all" />
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-brand" />
+              <div className="absolute -right-8 -top-8 w-32 h-32 bg-brand/5 rounded-full blur-3xl group-hover:bg-brand/10 transition-all" />
               
               <div className="mb-4">
-                <span className="text-[10px] uppercase tracking-[0.12em] font-black text-evernote flex items-center gap-2">
-                  <Cloud size={12} className="animate-pulse" />
+                <span className="text-[11px] uppercase tracking-widest font-bold text-brand flex items-center gap-2">
+                  <Cloud size={14} className="animate-pulse" />
                   Cloud Backup
                 </span>
-                <h3 className="text-2xl font-black tracking-tight mt-2 uppercase text-[var(--audible-text-primary)]">
+                <h3 className="text-[22px] font-bold tracking-tight mt-2 text-[var(--text-primary)]">
                   Sync Your Progress
                 </h3>
-                <p className="text-xs text-[var(--audible-text-secondary)] font-bold mt-2 leading-relaxed tracking-tight">
+                <p className="text-sm text-[var(--text-secondary)] mt-2 leading-relaxed tracking-tight">
                   Pick up where you left off on your phone, iPad, or computer.
                 </p>
               </div>
@@ -448,23 +406,23 @@ function DashboardComponent({
                 <button 
                   onClick={() => !isSigningIn && handleLogin(false)}
                   disabled={isSigningIn}
-                  className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] bg-evernote hover:bg-evernote/90 text-white px-5 py-3 rounded-md self-start group-hover:scale-[1.02] shadow-sm transition-transform active:scale-95 disabled:opacity-50 cursor-pointer outline-none select-none"
+                  className="cb-button-brand w-full sm:w-auto"
                 >
-                  {(isSigningIn || isAuthLoading) ? <RefreshCw size={14} className="animate-spin" /> : <LogIn size={14} />}
+                  {(isSigningIn || isAuthLoading) ? <RefreshCw size={18} className="animate-spin mr-2" /> : <LogIn size={18} className="mr-2" />}
                   {(isSigningIn || isAuthLoading) ? 'Connecting...' : 'Enable Sync Now'}
                 </button>
                 <button 
                   onClick={() => !isSigningIn && handleLogin(true)}
-                  className="block text-[9px] text-[var(--audible-text-secondary)] font-black uppercase tracking-[0.2em] hover:text-evernote transition-colors focus:outline-none cursor-pointer"
+                  className="block text-[11px] text-[var(--text-secondary)] font-bold tracking-wide hover:text-brand transition-colors focus:outline-none cursor-pointer mt-4"
                   disabled={isSigningIn}
                 >
                   Safari User? Try Alternative mode
                 </button>
                 
-                <div className="relative flex py-2 items-center">
-                  <div className="flex-grow border-t border-[var(--audible-border)]/40"></div>
-                  <span className="flex-shrink mx-4 text-[8px] uppercase font-black tracking-widest text-zinc-400">OR</span>
-                  <div className="flex-grow border-t border-[var(--audible-border)]/40"></div>
+                <div className="relative flex py-4 items-center">
+                  <div className="flex-grow border-t border-[var(--border-color)]"></div>
+                  <span className="flex-shrink mx-4 text-xs font-semibold text-[var(--text-secondary)]">OR</span>
+                  <div className="flex-grow border-t border-[var(--border-color)]"></div>
                 </div>
 
                 <EmailAuthForm />
@@ -536,63 +494,58 @@ const CategoryCard = memo(({
   return (
     <div
       className={cn(
-        "relative p-8 h-56 border flex flex-col justify-between group transition-all duration-300 rounded-xl overflow-hidden",
-        theme === 'xp' ? "uber-card" : (
-          bookIsCompleted 
-            ? "bg-evernote text-white border-evernote shadow-[0_0_20px_-10px_rgba(0,168,45,0.6)]" 
-            : "bg-[var(--audible-card)] border-[var(--audible-border)] hover:border-evernote hover:translate-y-[-2px] shadow-sm hover:shadow-md"
-        )
+        "relative p-8 h-60 flex flex-col justify-between group transition-all duration-300 overflow-hidden",
+        bookIsCompleted 
+          ? "bg-brand text-white rounded-[24px] shadow-md shadow-brand/30" 
+          : "cb-card border border-[var(--border-color)] hover:border-brand hover:translate-y-[-2px] shadow-sm hover:shadow-md"
       )}
     >
-      {theme === 'xp' && (
-        <XpWindowHeader title={`Section ${idx + 1}: ${cat.name}`} icon={Layers} />
-      )}
-      <div className={cn("flex flex-col h-full justify-between relative", theme === 'xp' && "xp-content")}>
-        {!bookIsCompleted && theme !== 'xp' && (
+      <div className="flex flex-col h-full justify-between relative">
+        {!bookIsCompleted && (
           <div className={cn(
-            "absolute top-0 -left-8 w-1 h-full transition-all",
-            (isDone || bookIsCompleted) ? "bg-evernote" : "bg-evernote opacity-0 group-hover:opacity-100"
+            "absolute top-0 -left-8 w-1 h-full transition-all rounded-full",
+            isDone || bookIsCompleted ? "bg-brand" : "bg-brand opacity-0 group-hover:opacity-100"
           )} />
         )}
 
-        <div className={cn(!bookIsCompleted && "border-l-4 border-evernote pl-4 -ml-8 flex flex-col gap-1")}>
+        <div className={cn(!bookIsCompleted && "border-l-4 border-brand pl-4 -ml-8 flex flex-col gap-1")}>
           <span className={cn(
-            "text-[10px] uppercase tracking-[0.12em] font-black block leading-none",
-            bookIsCompleted ? "text-white/60" : "text-[var(--audible-text-secondary)]"
+            "text-[11px] uppercase tracking-widest font-bold block leading-none",
+            bookIsCompleted ? "text-white/80" : "text-[var(--text-secondary)]"
           )}>
             PART 0{idx + 1} / {cat.name} {info && `· ~${info.readTime} MIN`}
           </span>
 
           {!isDone && !bookIsCompleted && (
-            <span className="text-[8px] font-black uppercase text-evernote animate-pulse tracking-[0.12em] block leading-none">
+            <span className="text-[9px] font-bold uppercase text-brand animate-pulse tracking-widest block leading-none mt-1">
               Next to Read
             </span>
           )}
 
           <button 
             onClick={() => setSelectingCategoryId(cat.id)}
-            className="group/btn flex items-center gap-2 mt-1 w-full text-left"
+            className="group/btn flex items-center gap-2 mt-2 w-full text-left"
           >
             <div className="relative">
               <h3 className={cn(
-                "text-2xl font-black tracking-tight transition-transform uppercase group-hover/btn:scale-[1.01]",
-                bookIsCompleted ? "text-white" : isDone ? "text-zinc-400 dark:text-zinc-600" : "text-[var(--audible-text-primary)]"
+                "text-3xl font-bold tracking-tighter transition-transform uppercase group-hover/btn:scale-[1.01]",
+                bookIsCompleted ? "text-white" : isDone ? "text-zinc-400 dark:text-zinc-600" : "text-[var(--text-primary)]"
               )}>
                 {book.name} {prog.chapter}
               </h3>
             </div>
-            <ChevronRight size={18} className={cn("transition-all opacity-0 group-hover/btn:opacity-100 group-hover/btn:translate-x-0.5", bookIsCompleted ? "text-white" : "text-evernote")} />
+            <ChevronRight size={20} className={cn("transition-all opacity-0 group-hover/btn:opacity-100 group-hover/btn:translate-x-1", bookIsCompleted ? "text-white" : "text-brand")} />
           </button>
 
           {info ? (
             <p className={cn(
-              "text-[10px] font-bold italic line-clamp-1 opacity-50",
-              bookIsCompleted ? "text-white" : "text-[var(--audible-text-secondary)]"
+              "text-xs font-medium italic line-clamp-1 opacity-70 mt-1",
+              bookIsCompleted ? "text-white" : "text-[var(--text-secondary)]"
             )}>
               {info.firstVerse}
             </p>
           ) : (
-            <div className="h-3 w-32 bg-zinc-100 dark:bg-zinc-800/50 rounded animate-pulse" />
+            <div className="h-4 w-32 bg-[var(--bg-tertiary)] mt-1 rounded animate-pulse" />
           )}
         </div>
 
@@ -602,31 +555,27 @@ const CategoryCard = memo(({
               <button 
                 onClick={(e) => { e.stopPropagation(); advanceChapter(cat.id, -1); }}
                 className={cn(
-                  "w-9 h-9 rounded-full border flex items-center justify-center transition-all duration-200",
-                  theme === 'xp' ? "xp-button bg-[#ECE9D8] text-black" : (
-                    bookIsCompleted 
-                      ? "border-white/20 hover:bg-white hover:text-evernote" 
-                      : "border-[var(--audible-border)] hover:bg-[var(--audible-text-primary)] hover:text-white dark:hover:bg-white dark:hover:text-black hover:border-transparent active:scale-90"
-                  )
+                  "w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-200 active:scale-95",
+                  bookIsCompleted 
+                    ? "border-white/20 hover:bg-white hover:text-brand" 
+                    : "border-[var(--border-color)] hover:bg-[var(--text-primary)] hover:text-white dark:hover:bg-white dark:hover:text-black hover:border-transparent"
                 )}
                 title="Go back one chapter"
               >
-                <Minus size={14} />
+                <Minus size={16} />
               </button>
               <div className="relative group/plus">
                 <button 
                   onClick={(e) => { e.stopPropagation(); advanceChapter(cat.id, 1); }}
                   className={cn(
-                    "w-11 h-11 rounded-full border-2 flex items-center justify-center transition-all duration-200 shadow-sm",
-                    theme === 'xp' ? "xp-button bg-[#ECE9D8] text-black border-2 border-blue-600/50" : (
-                      bookIsCompleted 
-                        ? "border-white text-white hover:bg-white hover:text-evernote shadow-[0_0_12px_rgba(255,255,255,0.2)]" 
-                        : "border-evernote text-evernote hover:bg-evernote hover:text-white dark:hover:bg-evernote active:scale-90"
-                    )
+                    "w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-200 shadow-sm active:scale-95",
+                    bookIsCompleted 
+                      ? "border-white text-white hover:bg-white hover:text-brand shadow-[0_0_12px_rgba(255,255,255,0.2)]" 
+                      : "border-brand text-brand hover:bg-brand hover:text-white dark:hover:bg-brand"
                   )}
                   title="Advance chapter"
                 >
-                  <Plus size={20} />
+                  <Plus size={24} />
                 </button>
               </div>
             </div>
@@ -635,17 +584,17 @@ const CategoryCard = memo(({
               const pct = progressStats.pct;
               const safePct = Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
               return (
-                <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                <div className="flex-1 min-w-0 flex flex-col gap-2">
                   <div className="flex justify-between items-center px-0.5">
                     <span className={cn(
-                      "text-[9px] font-black uppercase tracking-[0.12em]",
-                      theme === 'xp' ? "text-blue-700" : bookIsCompleted ? "text-white/80" : "text-[var(--audible-text-secondary)]"
+                      "text-[10px] font-bold uppercase tracking-widest",
+                      bookIsCompleted ? "text-white/90" : "text-[var(--text-secondary)]"
                     )}>
                       {safePct === 100 ? 'COMPLETE' : `${safePct}%`}
                     </span>
                     <span className={cn(
-                      "text-[9px] font-black uppercase tracking-[0.12em] hidden xs:inline opacity-60",
-                      theme === 'xp' ? "text-blue-700" : bookIsCompleted ? "text-white/60" : "text-[var(--audible-text-secondary)]"
+                      "text-[10px] font-bold uppercase tracking-widest hidden xs:inline opacity-60",
+                      bookIsCompleted ? "text-white/70" : "text-[var(--text-secondary)]"
                     )}>
                       OF {cat.name}
                     </span>
@@ -657,15 +606,15 @@ const CategoryCard = memo(({
                     aria-valuemax={100} 
                     aria-label={`${cat.name} reading progress`}
                     className={cn(
-                      "relative w-full h-[6px] rounded-full overflow-hidden",
-                      theme === 'xp' ? "bg-[#D4D0C8] border border-[#919B9C] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.2)]" : bookIsCompleted ? "bg-white/20" : "bg-zinc-200 dark:bg-zinc-800"
+                      "relative w-full h-[8px] rounded-full overflow-hidden",
+                      bookIsCompleted ? "bg-white/20" : "bg-[var(--bg-tertiary)]"
                     )}
                   >
                     <div 
                       className={cn(
                         "h-full rounded-full transition-all duration-500 ease-out",
-                        theme === 'xp' ? "bg-[#316AC5]" : bookIsCompleted ? "bg-white" : "bg-evernote",
-                        safePct < 100 && theme !== 'xp' && !bookIsCompleted && "shimmer-effect"
+                        bookIsCompleted ? "bg-white" : "bg-brand",
+                        safePct < 100 && !bookIsCompleted && "shimmer-effect"
                       )}
                       style={{ width: `${safePct}%` }}
                     />

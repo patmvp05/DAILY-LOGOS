@@ -2,5 +2,5 @@
   "name": "The Daily Logos",
   "description": "A minimalist Bible reading tracker focused on the 'Logos'. Inspired by Uber aesthetics.",
   "requestFramePermissions": ["geolocation"],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

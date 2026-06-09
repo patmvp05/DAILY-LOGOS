@@ -18,7 +18,7 @@ const ProverbModal = lazy(() => import('./modals/ProverbModal'));
 const CategoryPlanModal = lazy(() => import('./modals/CategoryPlanModal'));
 const BookSelectorModal = lazy(() => import('./modals/BookSelectorModal'));
 const DevotionalModal = lazy(() => import('./modals/DevotionalModal'));
-const StartMenu = lazy(() => import('./StartMenu'));
+
 
 import { useProverb } from '../hooks/useProverb';
 
@@ -72,9 +72,6 @@ export const AppModals = memo(({
       {activePlanCategory && <CategoryPlanModal toggleBookCompletion={toggleBookCompletion} />}
       {selectingCategoryId && <BookSelectorModal jumpToBook={jumpToBook} toggleBookCompletion={toggleBookCompletion} />}
       {activeDevotion && <DevotionalModal />}
-      {state.settings.theme === 'xp' && (
-        <StartMenu />
-      )}
     </Suspense>
   );
 });

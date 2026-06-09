@@ -8,7 +8,7 @@ import { motion } from 'motion/react';
 import { BookOpen, Check, Sparkles, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../../lib/utils';
-import { XpWindowHeader } from '../XpWindowHeader';
+
 import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 
@@ -68,38 +68,22 @@ function ProverbModal({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className={cn(
-          "fixed inset-4 md:inset-10 bg-[var(--audible-card)] z-[510] flex flex-col border border-[var(--audible-border)] shadow-2xl rounded-2xl overflow-hidden",
-          state.settings.theme === 'xp' && "xp-window border-0"
-        )}
+        className="fixed inset-4 md:inset-10 bg-[var(--bg-primary)] z-[510] flex flex-col border border-[var(--border-color)] shadow-2xl rounded-[24px] overflow-hidden"
       >
-        {state.settings.theme === 'xp' && (
-          <XpWindowHeader 
-            title={`Daily Wisdom - Proverbs ${dayOfMonth}`} 
-            onClose={onClose} 
-            icon={BookOpen} 
-          />
-        )}
-        <div className="flex justify-between items-center px-4 sm:px-8 py-6 bg-white dark:bg-[#1A1A1A] border-b border-[var(--audible-border)] shrink-0">
+        <div className="flex justify-between items-center px-4 sm:px-8 py-6 bg-[var(--bg-primary)] border-b border-[var(--border-color)] shrink-0">
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className={cn(
-              "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white",
-              state.settings.theme === 'xp' ? "bg-blue-600 shadow-inner" : "bg-evernote shadow-sm shadow-evernote/20"
-            )}>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white bg-brand shadow-sm">
               <BookOpen size={20} className="sm:hidden" />
               <BookOpen size={24} className="hidden sm:block" />
             </div>
             <div>
-              <h3 className={cn("text-xl sm:text-2xl font-black uppercase tracking-tighter", state.settings.theme === 'xp' ? "text-black" : "text-[var(--audible-text-primary)]")}>Proverbs {dayOfMonth}</h3>
-              <p className="text-[10px] text-[var(--audible-text-secondary)] font-bold uppercase tracking-[0.12em]">{format(new Date(), 'EEEE, MMMM do')}</p>
+              <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tighter text-[var(--text-primary)]">Proverbs {dayOfMonth}</h3>
+              <p className="text-[11px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">{format(new Date(), 'EEEE, MMMM do')}</p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className={cn(
-              "p-2 sm:p-3 rounded-full shadow-xl hover:scale-110 transition-transform",
-              state.settings.theme === 'xp' ? "xp-button bg-[#ECE9D8] text-black" : "bg-black dark:bg-white text-white dark:text-black"
-            )}
+            className="p-2 sm:p-3 rounded-full hover:scale-105 transition-transform bg-[var(--text-primary)] text-[var(--bg-primary)]"
           >
             <Check size={20} className="sm:hidden" />
             <Check size={24} className="hidden sm:block" />
@@ -108,22 +92,22 @@ function ProverbModal({
 
         <div 
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto flex flex-col lg:flex-row bg-white dark:bg-zinc-950"
+          className="flex-1 overflow-y-auto flex flex-col lg:flex-row bg-[var(--bg-primary)]"
         >
           {/* Bible Content */}
-          <div className="w-full lg:flex-1 p-6 sm:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-gray-100 dark:border-zinc-800">
+          <div className="w-full lg:flex-1 p-6 sm:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-[var(--border-color)]">
             {isFetchingProverb ? (
               <div className="py-24 flex flex-col items-center justify-center text-center">
                 <motion.div 
                    animate={{ rotate: 360 }}
                   transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                  className="w-12 h-12 border-4 border-evernote border-t-transparent rounded-full mb-4"
+                  className="w-12 h-12 border-4 border-brand border-t-transparent rounded-full mb-4"
                 />
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Opening the scroll...</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Opening the scroll...</p>
               </div>
             ) : (
               <div className="prose dark:prose-invert max-w-none">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-evernote mb-8 flex items-center gap-2">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-brand mb-8 flex items-center gap-2">
                   <Sparkles size={12} />
                   {proverbContent?.translation_name || "King James Version (KJV)"}
                 </p>
@@ -131,7 +115,7 @@ function ProverbModal({
                   {proverbContent?.verses ? (
                     proverbContent.verses.map((v, i) => (
                       <p key={i} className="mb-2">
-                        <span className="text-[10px] font-black align-top mr-2 text-evernote opacity-60">{v.verse}</span>
+                        <span className="text-[10px] font-black align-top mr-2 text-brand opacity-60">{v.verse}</span>
                         {v.text}
                       </p>
                     ))
@@ -141,7 +125,7 @@ function ProverbModal({
                       if (verseMatch) {
                         return (
                           <p key={i} className="mb-4">
-                            <span className="text-[10px] font-black align-top mr-2 text-evernote opacity-60">{verseMatch[1]}</span>
+                            <span className="text-[10px] font-black align-top mr-2 text-brand opacity-60">{verseMatch[1]}</span>
                             {verseMatch[2]}
                           </p>
                         );
@@ -159,53 +143,47 @@ function ProverbModal({
           </div>
 
           {/* Journaling Side */}
-          <div className="w-full lg:w-[450px] bg-zinc-50 dark:bg-[#1A1A1A] p-8 lg:p-10 shrink-0 border-l border-[var(--audible-border)] shadow-inner">
+          <div className="w-full lg:w-[450px] bg-[var(--bg-secondary)] p-8 lg:p-10 shrink-0 border-l border-[var(--border-color)]">
             <div className="space-y-8 lg:sticky lg:top-0">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-evernote mb-4 flex items-center gap-2">
-                  <FileText size={12} />
+                <p className="text-[11px] font-bold uppercase tracking-widest text-brand mb-4 flex items-center gap-2">
+                  <FileText size={14} />
                   Journal Your Reflection
                 </p>
-                <label className="block text-[10px] uppercase font-black tracking-[0.12em] text-[var(--audible-text-secondary)] mb-2">Key Verse</label>
+                <label className="block text-[11px] uppercase font-bold tracking-widest text-[var(--text-secondary)] mb-2">Key Verse</label>
                 <input 
                   type="text"
                   placeholder="Which verse spoke to you? (e.g. Verse 5)"
                   value={journalVerse}
                   onChange={(e) => setJournalVerse(e.target.value)}
-                  className="w-full p-4 bg-white dark:bg-zinc-800 border border-[var(--audible-border)] rounded-lg outline-none focus:border-evernote dark:focus:border-evernote transition-all mb-6 font-bold text-[var(--audible-text-primary)]"
+                  className="w-full p-4 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg outline-none focus:border-brand transition-all mb-6 font-bold text-[var(--text-primary)]"
                 />
                 
-                <label className="block text-[10px] uppercase font-black tracking-[0.12em] text-[var(--audible-text-secondary)] mb-2">Personal Reflection</label>
+                <label className="block text-[11px] uppercase font-bold tracking-widest text-[var(--text-secondary)] mb-2">Personal Reflection</label>
                 <textarea 
                   placeholder="Write down what you learned or how this chapter applies to your life today..."
                   value={journalContent}
                   onChange={(e) => setJournalContent(e.target.value)}
-                  className="w-full h-64 lg:h-96 p-4 bg-white dark:bg-zinc-800 border border-[var(--audible-border)] rounded-lg outline-none focus:border-evernote dark:focus:border-evernote transition-all resize-none font-medium leading-relaxed text-[var(--audible-text-primary)]"
+                  className="w-full h-64 lg:h-96 p-4 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg outline-none focus:border-brand transition-all resize-none font-medium leading-relaxed text-[var(--text-primary)]"
                 />
               </div>
 
               <button 
                 onClick={() => saveProverbJournal(journalContent, journalVerse, journalDraft.id)}
                 disabled={!journalContent.trim()}
-                className={cn(
-                  "w-full p-5 font-black uppercase tracking-[0.12em] text-[10px] transition-all flex items-center justify-center gap-2 disabled:opacity-50",
-                  state.settings.theme === 'xp' ? "xp-button bg-[#ECE9D8] text-black" : "bg-evernote text-white rounded-xl shadow-[0_10px_20px_-10px_rgba(0,168,45,0.4)] hover:translate-y-[-2px] hover:shadow-lg active:scale-95 transition-all"
-                )}
+                className="w-full p-4 font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 disabled:opacity-50 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-[16px] shadow-sm hover:opacity-90 active:scale-95"
               >
                 Save to My Journal
               </button>
 
               <button 
                 onClick={onClose}
-                className={cn(
-                  "w-full p-5 font-black uppercase tracking-[0.12em] text-[10px] transition-all flex items-center justify-center gap-2 rounded-xl",
-                  state.settings.theme === 'xp' ? "xp-button bg-[#ECE9D8] text-black" : "bg-[var(--audible-text-primary)] dark:bg-white text-white dark:text-black border border-transparent shadow-sm hover:translate-y-[-1px] active:scale-95"
-                )}
+                className="w-full p-4 font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 rounded-[16px] bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm hover:bg-[var(--bg-tertiary)] active:scale-95 text-center mt-4"
               >
                 Done Reading
               </button>
               
-              <p className="text-[10px] text-center text-[var(--audible-text-secondary)] font-bold uppercase tracking-[0.12em] opacity-60">
+              <p className="text-[11px] text-center text-[var(--text-secondary)] font-bold uppercase tracking-widest opacity-60">
                 Saved journals are synced to your account.
               </p>
             </div>
