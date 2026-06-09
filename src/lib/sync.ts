@@ -25,7 +25,7 @@ import {
   getDocCacheFirst 
 } from './firebase';
 import { type User } from 'firebase/auth';
-import { Progress, UserSettings, HistoryEntry, ProverbJournal } from '../types';
+import { Progress, UserSettings, HistoryEntry, ProverbJournal, Devotional } from '../types';
 import { addToSyncQueue, getSyncQueue, removeFromSyncQueue, type PendingAction } from './syncQueue';
 
 /**
@@ -99,6 +99,16 @@ const _writeJournal = async (uid: string, journal: ProverbJournal) => {
 
 const _deleteJournal = async (uid: string, id: string) => {
   const ref = doc(getJournalsCollection(uid), id);
+  await deleteDoc(ref);
+};
+
+const _writeDevotional = async (uid: string, devotional: Devotional) => {
+  const ref = doc(getDevotionalsCollection(uid), devotional.id);
+  await setDoc(ref, { name: devotional.name, description: devotional.description, url: devotional.url });
+};
+
+const _deleteDevotional = async (uid: string, id: string) => {
+  const ref = doc(getDevotionalsCollection(uid), id);
   await deleteDoc(ref);
 };
 
@@ -198,33 +208,30 @@ const _setUserSettings = async (uid: string, settings: Partial<UserSettings>) =>
   const ref = getUserRef(uid);
   
   // Last-write-wins guard: Check cloud's updatedAt before writing.
-  // Note: We avoid doing this for 'updatedAt' itself to prevent circular logic.
-  try {
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-      const cloudData = snap.data();
-      const cloudUpdated = cloudData.updatedAt;
-      
-      // If the incoming request has an explicit, older updatedAt, we might want to skip.
-      // However, most calls to setUserSettings (theme, startDate) are current-user intent.
-      // The instruction specifically asks to compare incoming.updatedAt to existing.updatedAt.
-      if (settings.updatedAt && cloudUpdated) {
-        const incomingTime = new Date(settings.updatedAt as string).getTime();
-        const cloudTime = cloudUpdated.toMillis ? cloudUpdated.toMillis() : new Date(cloudUpdated as string).getTime();
-        
-        if (incomingTime < cloudTime) {
-          const cloudISO = cloudUpdated.toMillis ? new Date(cloudUpdated.toMillis()).toISOString() : cloudUpdated;
-          console.warn("[startDate write] conflict refused", { 
-            localUpdatedAt: settings.updatedAt, 
-            cloudUpdatedAt: cloudISO, 
-            stack: new Error().stack 
-          });
-          throw new Error('STALE_DATA_CONFLICT');
+  if (settings.updatedAt) {
+    try {
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const cloudData = snap.data();
+        const cloudUpdated = cloudData.updatedAt;
+        if (cloudUpdated) {
+          const incomingTime = new Date(settings.updatedAt as string).getTime();
+          const cloudTime = cloudUpdated.toMillis ? cloudUpdated.toMillis() : new Date(cloudUpdated as string).getTime();
+          if (incomingTime < cloudTime) {
+            const cloudISO = cloudUpdated.toMillis ? new Date(cloudUpdated.toMillis()).toISOString() : cloudUpdated;
+            console.warn("[startDate write] conflict refused — local data is stale", { 
+              localUpdatedAt: settings.updatedAt, 
+              cloudUpdatedAt: cloudISO
+            });
+            throw new Error('STALE_DATA_CONFLICT');
+          }
         }
       }
+    } catch (e) {
+      // Re-throw STALE_DATA_CONFLICT — it must reach processSyncQueue for proper discard.
+      if (e instanceof Error && e.message === 'STALE_DATA_CONFLICT') throw e;
+      console.warn("[Sync] Last-write-wins check failed, proceeding anyway:", e);
     }
-  } catch (e) {
-    console.warn("[Sync] Last-write-wins check failed, proceeding anyway:", e);
   }
 
   const dataToUpdate: any = {
@@ -314,6 +321,8 @@ export const writeCompletedBook = wrap('writeCompletedBook', _writeCompletedBook
 export const deleteCompletedBook = wrap('deleteCompletedBook', _deleteCompletedBook, (uid, cat, book) => `${uid}/books/${cat}:${book}`);
 export const writeJournal = wrap('writeJournal', _writeJournal, (uid, journal) => `${uid}/journals/${(journal as ProverbJournal).id}`);
 export const deleteJournal = wrap('deleteJournal', _deleteJournal, (uid, id) => `${uid}/journals/${id}`);
+export const writeDevotional = wrap('writeDevotional', _writeDevotional, (uid, devotional) => `${uid}/devotionals/${(devotional as Devotional).id}`);
+export const deleteDevotional = wrap('deleteDevotional', _deleteDevotional, (uid, id) => `${uid}/devotionals/${id}`);
 export const writeActionBatch = wrap('writeActionBatch', _writeActionBatch, (uid, actions) => {
     const a = actions as { progress?: Progress; history?: HistoryEntry | HistoryEntry[] };
     if (a.progress) return `${uid}/progress/${a.progress.categoryId}`;
@@ -345,6 +354,8 @@ export async function processSyncQueue() {
         deleteCompletedBook: _deleteCompletedBook as (...args: unknown[]) => Promise<void>,
         writeJournal: _writeJournal as (...args: unknown[]) => Promise<void>,
         deleteJournal: _deleteJournal as (...args: unknown[]) => Promise<void>,
+        writeDevotional: _writeDevotional as (...args: unknown[]) => Promise<void>,
+        deleteDevotional: _deleteDevotional as (...args: unknown[]) => Promise<void>,
         writeActionBatch: _writeActionBatch as (...args: unknown[]) => Promise<void>,
         setUserSettings: _setUserSettings as (...args: unknown[]) => Promise<void>,
         resetUserData: _resetUserData as (...args: unknown[]) => Promise<void>,
@@ -420,4 +431,3 @@ if (typeof window !== 'undefined') {
     }
   }, 30000);
 }
-
