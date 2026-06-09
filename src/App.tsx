@@ -59,11 +59,9 @@ export default function App() {
   
   useTheme(state.settings.theme);
 
-  useEffect(() => {
-    if (user && sync.syncStatus === 'synced') {
-      setBypassCloudSync(false);
-    }
-  }, [user, sync.syncStatus]);
+  if (user && sync.syncStatus === 'synced' && bypassCloudSync) {
+    setBypassCloudSync(false);
+  }
 
   const isLoadingCloud = !bypassCloudSync && (isAuthLoading || (user && !state.isCloudHydrated));
 
@@ -74,10 +72,12 @@ export default function App() {
         setShowOfflineBypassOption(true);
       }, 3000);
       return () => clearTimeout(timer);
-    } else {
-      setShowOfflineBypassOption(false);
     }
   }, [isAuthLoading, user, state.isCloudHydrated, bypassCloudSync]);
+
+  if (!isAuthLoading && user && state.isCloudHydrated && showOfflineBypassOption) {
+    setShowOfflineBypassOption(false);
+  }
 
   useEffect(() => {
     setSyncStatus(sync.syncStatus);
@@ -110,62 +110,33 @@ export default function App() {
       const error = err as { code?: string; message?: string };
       const errStr = JSON.stringify(error).toLowerCase() + ' ' + String(error.message).toLowerCase() + ' ' + String(error.code).toLowerCase();
       
-      const isPopupOrIFrameIssue = 
-        window.self !== window.top || 
-        error.code === 'auth/popup-blocked' || 
-        error.code === 'auth/internal-error' || 
-        error.code === 'auth/iframe-start-failed' || 
-        error.code === 'auth/cancelled-popup-request' ||
-        errStr.includes('popup') || 
-        errStr.includes('internal-error') || 
-        errStr.includes('iframe');
-
       const isUnauthorizedDomain = error.code === 'auth/unauthorized-domain' || errStr.includes('unauthorized-domain');
+      const isPopupBlocked = error.code === 'auth/popup-blocked' || errStr.includes('popup');
 
       if (isUnauthorizedDomain) {
         setConfirmDialog({
           isOpen: true,
-          title: "Unauthorized Domain",
-          message: `Your Firebase project needs to whitelist this app's URL. Please go to the Firebase Console -> Authentication -> Settings -> Authorized domains, and add: ${window.location.hostname}`,
-          confirmLabel: "Got it",
+          title: "Firebase Domain Setup Required",
+          message: `Google Sign-In is blocked from this preview URL. To fix:\n1. Open Firebase Console\n2. Go to Authentication -> Settings -> Authorized domains\n3. Add: ${window.location.hostname}`,
+          confirmLabel: "Open Firebase Console",
           cancelLabel: "Close",
           type: "info",
+          confirmHref: "https://console.firebase.google.com/project/_/authentication/settings",
           onConfirm: () => {}
         });
-      }
-      else if (isPopupOrIFrameIssue) {
-        if (window.self !== window.top) {
-          // If in AI Studio iframe, strictly instruct them to open a new tab.
-          setConfirmDialog({
-            isOpen: true,
-            title: "Sign-In Restricted",
-            message: "Due to browser security in this preview window, Google Sign-In is blocked. Please open this app in an independent tab to sign in successfully.",
-            confirmLabel: "Open New Tab",
-            cancelLabel: "Close",
-            type: "info",
-            onConfirm: () => {},
-            confirmHref: window.location.href
-          });
-        } else {
-          // Top-level tab, but popup was STILL blocked (Safari/Mobile)
-          setConfirmDialog({
-            isOpen: true,
-            title: "Popup Blocked",
-            message: "Your browser's strict settings prevented the Google sign-in popup. Would you like to sign in using a standard page redirect instead?",
-            confirmLabel: "Use Redirect Sign-In",
-            cancelLabel: "Cancel",
-            type: "info",
-            onConfirm: async () => {
-              try {
-                await loginFn(true); // useRedirect = true
-              } catch (redirectErr: any) {
-                showToast(`Redirect failed: ${redirectErr.message || redirectErr.code || 'Unknown error'}`, "error");
-              }
-            }
-          });
-        }
+      } else if (isPopupBlocked || window.self !== window.top) {
+        setConfirmDialog({
+          isOpen: true,
+          title: "Login Restricted in Preview",
+          message: "Google login cannot open from inside this preview window. Please open the app in a completely new tab to login.",
+          confirmLabel: "Open New Tab",
+          cancelLabel: "Cancel",
+          type: "info",
+          confirmHref: window.location.href,
+          onConfirm: () => {}
+        });
       } else {
-        showToast(`Login failed: ${error.message || error.code || errStr}`, "error");
+        showToast(`Login failed: ${error.message || errStr}`, "error");
       }
     } finally { setIsSigningIn(false); }
   }, [login, showToast, setConfirmDialog, closeConfirmDialog]);
