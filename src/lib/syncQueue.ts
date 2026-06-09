@@ -10,7 +10,7 @@ const QUEUE_KEY = 'daily_logos_sync_queue';
 
 export interface PendingAction {
   id: string;
-  type: 'writeActionBatch' | 'writeCompletedBook' | 'deleteCompletedBook' | 'writeJournal' | 'deleteJournal' | 'setUserSettings' | 'resetUserData' | 'writeDevotional' | 'deleteDevotional';
+  type: 'writeActionBatch' | 'writeCompletedBook' | 'deleteCompletedBook' | 'writeJournal' | 'deleteJournal' | 'setUserSettings' | 'resetUserData';
   payload: unknown[];
   path: string; // Used for deduplication
   timestamp: number;
