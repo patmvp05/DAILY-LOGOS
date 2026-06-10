@@ -3,50 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { 
-  doc, 
-  setDoc, 
-  deleteDoc, 
+import {
+  doc,
+  setDoc,
+  deleteDoc,
   serverTimestamp,
   writeBatch,
-  getDoc,
-  runTransaction
+  getDoc
 } from 'firebase/firestore';
-import { 
-  db, 
-  getUserRef, 
-  getProgressCollection, 
-  getHistoryCollection, 
-  getJournalsCollection, 
-  getDevotionalsCollection, 
-  getCompletedBooksCollection, 
-  bookKeyToDocId, 
-  getDocsCacheFirst, 
-  getDocCacheFirst 
+import {
+  db,
+  getUserRef,
+  getProgressCollection,
+  getHistoryCollection,
+  getJournalsCollection,
+  getDevotionalsCollection,
+  getCompletedBooksCollection,
+  bookKeyToDocId,
+  getDocsCacheFirst
 } from './firebase';
 import { type User } from 'firebase/auth';
 import { Progress, UserSettings, HistoryEntry, ProverbJournal } from '../types';
-import { addToSyncQueue, getSyncQueue, removeFromSyncQueue, type PendingAction } from './syncQueue';
 
-/**
- * Example of a converted read function using cache-first pattern.
- * High-performance fetch for initial data load.
- */
-export async function fetchUserStatsCacheFirst(uid: string) {
-  try {
-    const userSnap = await getDocCacheFirst(getUserRef(uid));
-    const historySnap = await getDocsCacheFirst(getHistoryCollection(uid));
-    
-    return {
-      settings: userSnap.exists() ? userSnap.data() as UserSettings : null,
-      historyCount: historySnap.size
-    };
-  } catch (error) {
-    console.error("Cache-first fetch failed:", error);
-    return null;
-  }
-}
-
+// Lightweight write-status tracker driving the navbar sync badge.
+// Firestore itself handles offline queueing, durability, and retry —
+// this only reports whether writes are in flight.
 type Listener = (status: 'idle' | 'syncing' | 'synced' | 'error' | 'offline') => void;
 let inflight = 0;
 const listeners = new Set<Listener>();
@@ -59,11 +40,16 @@ const notify = () => {
   listeners.forEach(l => l(status));
 };
 
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', notify);
+  window.addEventListener('offline', notify);
+}
+
 export const syncTracker = {
-  subscribe(l: Listener) { 
-    listeners.add(l); 
+  subscribe(l: Listener) {
+    listeners.add(l);
     notify();
-    return () => { listeners.delete(l); }; 
+    return () => { listeners.delete(l); };
   },
   begin() { inflight++; notify(); },
   end(success: boolean) {
@@ -73,191 +59,112 @@ export const syncTracker = {
   }
 };
 
-// Internal implementation functions (unwrapped)
-const _writeCompletedBook = async (uid: string, categoryId: string, bookName: string) => {
-  const key = `${categoryId}:${bookName}`;
-  const docId = bookKeyToDocId(key);
-  const ref = doc(getCompletedBooksCollection(uid), docId);
-  await setDoc(ref, {
+// Wraps a write so the badge reflects in-flight state. Writes are durable
+// in Firestore's local cache immediately; the promise resolves on server ack.
+const track = <T extends unknown[]>(fn: (...args: T) => Promise<void>) => {
+  return async (...args: T) => {
+    syncTracker.begin();
+    try {
+      await fn(...args);
+      syncTracker.end(true);
+    } catch (e) {
+      console.error('[Sync] Write failed:', e);
+      syncTracker.end(false);
+      throw e;
+    }
+  };
+};
+
+export const writeCompletedBook = track(async (uid: string, categoryId: string, bookName: string) => {
+  const docId = bookKeyToDocId(`${categoryId}:${bookName}`);
+  await setDoc(doc(getCompletedBooksCollection(uid), docId), {
     categoryId,
     bookName,
     completedAt: new Date().toISOString()
   });
-};
+});
 
-const _deleteCompletedBook = async (uid: string, categoryId: string, bookName: string) => {
-  const key = `${categoryId}:${bookName}`;
-  const docId = bookKeyToDocId(key);
-  const ref = doc(getCompletedBooksCollection(uid), docId);
-  await deleteDoc(ref);
-};
+export const deleteCompletedBook = track(async (uid: string, categoryId: string, bookName: string) => {
+  const docId = bookKeyToDocId(`${categoryId}:${bookName}`);
+  await deleteDoc(doc(getCompletedBooksCollection(uid), docId));
+});
 
-const _writeJournal = async (uid: string, journal: ProverbJournal) => {
-  const ref = doc(getJournalsCollection(uid), journal.id);
-  await setDoc(ref, journal);
-};
+export const writeJournal = track(async (uid: string, journal: ProverbJournal) => {
+  await setDoc(doc(getJournalsCollection(uid), journal.id), journal);
+});
 
-const _deleteJournal = async (uid: string, id: string) => {
-  const ref = doc(getJournalsCollection(uid), id);
-  await deleteDoc(ref);
-};
+export const deleteJournal = track(async (uid: string, id: string) => {
+  await deleteDoc(doc(getJournalsCollection(uid), id));
+});
 
-const _writeActionBatch = async (uid: string, actions: {
+export const writeActionBatch = track(async (uid: string, actions: {
   progress?: Progress;
   history?: HistoryEntry | HistoryEntry[];
   completedBooks?: { categoryId: string; bookName: string }[];
   deletedBooks?: { categoryId: string; bookName: string }[];
   forceProgressOverwrite?: boolean;
 }) => {
-  await runTransaction(db, async (t) => {
-    // 1. Read existing progress to avoid clobbering newer cloud progress 
-    let cloudProgress: Progress | null = null;
-    let progressRef: ReturnType<typeof doc> | null = null;
-    if (actions.progress) {
-      progressRef = doc(getProgressCollection(uid), actions.progress.categoryId);
-      const snap = await t.get(progressRef);
-      if (snap.exists()) {
-        cloudProgress = snap.data() as Progress;
-      }
-    }
+  const batch = writeBatch(db);
 
-    // 2. Perform writes
-    // History is append-only
-    if (actions.history) {
-      const entries = Array.isArray(actions.history) ? actions.history : [actions.history];
-      entries.forEach(h => {
-        const ref = doc(getHistoryCollection(uid), h.id);
-        t.set(ref, h);
-      });
-    }
-
-    if (actions.progress && progressRef) {
-      const localp = actions.progress;
-      let shouldWriteProgress = true;
-      
-      if (cloudProgress && !actions.forceProgressOverwrite) {
-        const cloudp = cloudProgress as Progress;
-        const isCloudFurther = (cloudp.bookIndex > localp.bookIndex) || 
-                               (cloudp.bookIndex === localp.bookIndex && cloudp.chapter > localp.chapter);
-        
-        const localTime = localp.updatedAtMillis || Date.now();
-        const cloudTime = cloudp.updatedAtMillis || 0;
-
-        // Skip overwrite if cloud is logically further, UNLESS local explicitly jumped backwards very recently
-        // (If localTime is significantly newer than cloudTime by > 2 hours, we assume it's a deliberate reset/jump)
-        if (isCloudFurther) {
-          if (localTime > cloudTime + 7200000) {
-            shouldWriteProgress = true; // Deliberate jump backward
-          } else {
-            shouldWriteProgress = false;
-          }
-        } else if (cloudp.bookIndex === localp.bookIndex && cloudp.chapter === localp.chapter) {
-           if (cloudTime > localTime) {
-             shouldWriteProgress = false;
-           }
-        }
-      }
-
-      if (shouldWriteProgress) {
-        const updatedProgressWithTimestamp = {
-          ...actions.progress,
-          updatedAtMillis: actions.progress.updatedAtMillis || Date.now()
-        };
-        t.set(progressRef, {
-          ...updatedProgressWithTimestamp,
-          updatedAt: serverTimestamp()
-        });
-      }
-    }
-    
-    if (actions.completedBooks) {
-      actions.completedBooks.forEach(b => {
-        const key = `${b.categoryId}:${b.bookName}`;
-        const docId = bookKeyToDocId(key);
-        const ref = doc(getCompletedBooksCollection(uid), docId);
-        t.set(ref, {
-          categoryId: b.categoryId,
-          bookName: b.bookName,
-          completedAt: new Date().toISOString()
-        });
-      });
-    }
-
-    if (actions.deletedBooks) {
-      actions.deletedBooks.forEach(b => {
-        const key = `${b.categoryId}:${b.bookName}`;
-        const docId = bookKeyToDocId(key);
-        const ref = doc(getCompletedBooksCollection(uid), docId);
-        t.delete(ref);
-      });
-    }
-  });
-};
-
-const _setUserSettings = async (uid: string, settings: Partial<UserSettings>) => {
-  const ref = getUserRef(uid);
-  
-  // Last-write-wins guard: Check cloud's updatedAt before writing.
-  // Note: We avoid doing this for 'updatedAt' itself to prevent circular logic.
-  try {
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-      const cloudData = snap.data();
-      const cloudUpdated = cloudData.updatedAt;
-      
-      // If the incoming request has an explicit, older updatedAt, we might want to skip.
-      // However, most calls to setUserSettings (theme, startDate) are current-user intent.
-      // The instruction specifically asks to compare incoming.updatedAt to existing.updatedAt.
-      if (settings.updatedAt && cloudUpdated) {
-        const incomingTime = new Date(settings.updatedAt as string).getTime();
-        const cloudTime = cloudUpdated.toMillis ? cloudUpdated.toMillis() : new Date(cloudUpdated as string).getTime();
-        
-        if (incomingTime < cloudTime) {
-          const cloudISO = cloudUpdated.toMillis ? new Date(cloudUpdated.toMillis()).toISOString() : cloudUpdated;
-          console.warn("[startDate write] conflict refused", { 
-            localUpdatedAt: settings.updatedAt, 
-            cloudUpdatedAt: cloudISO, 
-            stack: new Error().stack 
-          });
-          throw new Error('STALE_DATA_CONFLICT');
-        }
-      }
-    }
-  } catch (e) {
-    console.warn("[Sync] Last-write-wins check failed, proceeding anyway:", e);
+  if (actions.history) {
+    const entries = Array.isArray(actions.history) ? actions.history : [actions.history];
+    entries.forEach(h => batch.set(doc(getHistoryCollection(uid), h.id), h));
   }
 
-  const dataToUpdate: any = {
+  if (actions.progress) {
+    const ref = doc(getProgressCollection(uid), actions.progress.categoryId);
+    batch.set(ref, {
+      ...actions.progress,
+      updatedAtMillis: actions.progress.updatedAtMillis || Date.now(),
+      updatedAt: serverTimestamp()
+    });
+  }
+
+  if (actions.completedBooks) {
+    actions.completedBooks.forEach(b => {
+      const docId = bookKeyToDocId(`${b.categoryId}:${b.bookName}`);
+      batch.set(doc(getCompletedBooksCollection(uid), docId), {
+        categoryId: b.categoryId,
+        bookName: b.bookName,
+        completedAt: new Date().toISOString()
+      });
+    });
+  }
+
+  if (actions.deletedBooks) {
+    actions.deletedBooks.forEach(b => {
+      const docId = bookKeyToDocId(`${b.categoryId}:${b.bookName}`);
+      batch.delete(doc(getCompletedBooksCollection(uid), docId));
+    });
+  }
+
+  await batch.commit();
+});
+
+export const setUserSettings = track(async (uid: string, settings: Partial<UserSettings>) => {
+  await setDoc(getUserRef(uid), {
     ...settings,
     updatedAt: serverTimestamp()
-  };
-
-  await setDoc(ref, dataToUpdate, { merge: true });
-};
+  }, { merge: true });
+});
 
 export async function initializeUser(user: User) {
   const userRef = getUserRef(user.uid);
-  
   try {
     const userSnap = await getDoc(userRef);
-    
     if (userSnap.exists()) {
-      const userData = userSnap.data();
-      console.log('[Sync] initializeUser: Existing user found.', { 
-        uid: user.uid 
-      });
-      return userData;
-    } else {
-      console.log('[Sync] initializeUser: Profile missing, onboarding required.', { uid: user.uid });
-      return null;
+      console.log('[Sync] initializeUser: Existing user found.', { uid: user.uid });
+      return userSnap.data();
     }
+    console.log('[Sync] initializeUser: Profile missing, onboarding required.', { uid: user.uid });
+    return null;
   } catch (error) {
-    console.error("[Sync] initializeUser failed:", error);
+    console.error('[Sync] initializeUser failed:', error);
     throw error;
   }
 }
 
-const _resetUserData = async (uid: string) => {
+export const resetUserData = track(async (uid: string) => {
   const collections = [
     getProgressCollection(uid),
     getHistoryCollection(uid),
@@ -265,7 +172,7 @@ const _resetUserData = async (uid: string) => {
     getCompletedBooksCollection(uid),
     getDevotionalsCollection(uid),
   ];
-  
+
   await Promise.all(collections.map(async (col) => {
     const snap = await getDocsCacheFirst(col);
     if (!snap.empty) {
@@ -280,144 +187,4 @@ const _resetUserData = async (uid: string) => {
     theme: 'system',
     updatedAt: serverTimestamp()
   });
-};
-
-const wrap = <T extends (...args: any[]) => Promise<any>>(
-  type: PendingAction['type'], 
-  fn: T,
-  getPath: (...args: Parameters<T>) => string
-): T => {
-  return (async (...args: Parameters<T>) => {
-    const path = getPath(...args);
-    
-    // OFFLINE-FIRST Write-Through cache
-    // Always dispatch to IndexedDB sync queue first for 100% crash/interrupt durability (iOS Safari pagehide)
-    await addToSyncQueue({ 
-      type: type as PendingAction['type'], 
-      payload: args,
-      path
-    });
-    
-    // Notify local listeners that there's pending work
-    notify();
-
-    // Fire and forget background sync if online.
-    // We let processSyncQueue execute the actual _fn so we benefit from its error handling,
-    // deduplication, and lock-mutex.
-    if (navigator.onLine) {
-      processSyncQueue().catch(e => console.error("Immediate background sync failed:", e));
-    }
-  }) as T;
-};
-
-export const writeCompletedBook = wrap('writeCompletedBook', _writeCompletedBook, (uid, cat, book) => `${uid}/books/${cat}:${book}`);
-export const deleteCompletedBook = wrap('deleteCompletedBook', _deleteCompletedBook, (uid, cat, book) => `${uid}/books/${cat}:${book}`);
-export const writeJournal = wrap('writeJournal', _writeJournal, (uid, journal) => `${uid}/journals/${(journal as ProverbJournal).id}`);
-export const deleteJournal = wrap('deleteJournal', _deleteJournal, (uid, id) => `${uid}/journals/${id}`);
-export const writeActionBatch = wrap('writeActionBatch', _writeActionBatch, (uid, actions) => {
-    const a = actions as { progress?: Progress; history?: HistoryEntry | HistoryEntry[] };
-    if (a.progress) return `${uid}/progress/${a.progress.categoryId}`;
-    if (a.history) return `${uid}/history/${Array.isArray(a.history) ? a.history[0].id : a.history.id}`;
-    return `${uid}/batch/${Date.now()}`;
-  });
-export const setUserSettings = wrap('setUserSettings', _setUserSettings, (uid) => `${uid}/settings`);
-export const resetUserData = wrap('resetUserData', _resetUserData, (uid) => `${uid}/reset`);
-
-let isProcessingQueue = false;
-
-/**
- * Processes all pending actions in the queue sequentially.
- */
-export async function processSyncQueue() {
-  if (!navigator.onLine) return;
-  if (isProcessingQueue) return;
-  
-  isProcessingQueue = true;
-  try {
-    let queue = await getSyncQueue();
-    while (queue.length > 0) {
-      console.log(`[Sync] Processing queue with ${queue.length} items`);
-      syncTracker.begin();
-
-      // Mapping of action types to their internal implementations
-      const handlers: Record<string, (...args: unknown[]) => Promise<void>> = {
-        writeCompletedBook: _writeCompletedBook as (...args: unknown[]) => Promise<void>,
-        deleteCompletedBook: _deleteCompletedBook as (...args: unknown[]) => Promise<void>,
-        writeJournal: _writeJournal as (...args: unknown[]) => Promise<void>,
-        deleteJournal: _deleteJournal as (...args: unknown[]) => Promise<void>,
-        writeActionBatch: _writeActionBatch as (...args: unknown[]) => Promise<void>,
-        setUserSettings: _setUserSettings as (...args: unknown[]) => Promise<void>,
-        resetUserData: _resetUserData as (...args: unknown[]) => Promise<void>,
-      };
-
-      for (const action of queue) {
-        try {
-          const handler = handlers[action.type];
-          if (handler) {
-            await handler(...action.payload);
-          }
-          // Always remove if handler processed (success) or handler missing
-          await removeFromSyncQueue(action.id);
-        } catch (err: unknown) {
-          const e = err as { code?: string; message?: string };
-          console.error(`[Sync] Failed to process queued action ${action.type}:`, e);
-          
-          // Terminal errors (like permission denied) mean it will never succeed, discard to prevent blocking
-          const isTerminal = e?.code === 'permission-denied' || (e?.code === 'not-found' && action.type !== 'setUserSettings');
-          if (isTerminal) {
-            console.warn(`[Sync] Terminal error for ${action.type}, removing from queue.`);
-            await removeFromSyncQueue(action.id);
-          } else if (e?.message === 'STALE_DATA_CONFLICT') {
-            console.warn(`[Sync] Stale data conflict, discarding stale action.`);
-            await removeFromSyncQueue(action.id);
-          } else {
-            // Transient/Network error, break loop and retain in queue for next run
-            break;
-          }
-        }
-      }
-      
-      syncTracker.end(true);
-      
-      // Re-fetch queue in case new items were added while we processed
-      const newQueue = await getSyncQueue();
-      // Only continue if the queue actually has DIFFERENT items than we just iterated over
-      // (to prevent infinite loops on un-removable transient network failures)
-      if (newQueue.length === queue.length && newQueue.every((item, i) => item.id === queue[i].id)) {
-        break; 
-      }
-      queue = newQueue;
-  }
-  } finally {
-    isProcessingQueue = false;
-  }
-}
-
-// Reconnection trigger
-if (typeof window !== 'undefined') {
-  window.addEventListener('online', () => {
-    console.log('[Sync] Back online, triggering queue process...');
-    processSyncQueue();
-  });
-
-  // Safari PWA resume / focus synchronization trigger
-  window.addEventListener('focus', () => {
-    console.log('[Sync] Window focused, triggering queue process...');
-    processSyncQueue();
-  });
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      console.log('[Sync] App became visible, triggering queue process...');
-      processSyncQueue();
-    }
-  });
-
-  // Periodic fallback check (every 30 seconds) to auto-heal if events were missed
-  setInterval(() => {
-    if (navigator.onLine) {
-      processSyncQueue();
-    }
-  }, 30000);
-}
-
+});

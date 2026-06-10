@@ -8,7 +8,7 @@ import { AppState, Progress as ProgressType, HistoryEntry, ProverbJournal, Devot
 
 export type AppAction = 
   | { type: 'REPLACE_STATE', state: AppState }
-  | { type: 'HYDRATE_STATE', state: Partial<AppState>, restoredFromSnapshot?: boolean, isCloudData?: boolean }
+  | { type: 'HYDRATE_STATE', state: Partial<AppState> }
   | { type: 'CLOUD_SYNC_PROGRESS', progress: ProgressType[] }
   | { type: 'CLOUD_SYNC_COMPLETED', completed: string[] }
   | { type: 'CLOUD_SYNC_JOURNALS', journals: ProverbJournal[] }
@@ -25,8 +25,7 @@ export type AppAction =
   | { type: 'DELETE_DEVOTIONAL', id: string }
   | { type: 'LOG_HISTORY', entry: HistoryEntry }
   | { type: 'CLEAR_HISTORY' }
-  | { type: 'SET_START_DATE', date: string }
-  | { type: 'CLEAR_SYNC_FLAGS' };
+  | { type: 'SET_START_DATE', date: string };
 
 export const HISTORY_CAP = 2000; // Increased from 50 to ensure year-long streak accuracy
 
@@ -180,15 +179,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return action.state;
     }
     case 'HYDRATE_STATE': {
-      const merged = mergeAppState(state, action.state);
-      return { 
-        ...merged, 
-        restoredFromSnapshot: action.restoredFromSnapshot || merged.restoredFromSnapshot,
-        isCloudHydrated: action.isCloudData || merged.isCloudHydrated
-      };
-    }
-    case 'CLEAR_SYNC_FLAGS': {
-      return { ...state, restoredFromSnapshot: false, isCloudHydrated: false };
+      return mergeAppState(state, action.state);
     }
     case 'CLOUD_SYNC_USER_DATA': {
       const inc = action.data as Partial<UserSettings>;
@@ -198,16 +189,18 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       if (state.settings.updatedAt && newUpdatedAt) {
         if (new Date(newUpdatedAt).getTime() < new Date(state.settings.updatedAt).getTime()) {
           console.log("[Sync] Ignoring stale user-data from cloud to protect local mutation.");
-          return state;
+          return state.isCloudHydrated ? state : { ...state, isCloudHydrated: true };
         }
       }
 
       const newStartDate = inc.startDate || state.settings.startDate;
       const newTheme = inc.theme || state.settings.theme;
 
-      if (state.settings.startDate === newStartDate && 
+      if (state.settings.startDate === newStartDate &&
           state.settings.theme === newTheme &&
-          state.settings.updatedAt === newUpdatedAt) return state;
+          state.settings.updatedAt === newUpdatedAt) {
+        return state.isCloudHydrated ? state : { ...state, isCloudHydrated: true };
+      }
 
       return {
         ...state,
@@ -252,15 +245,19 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return changed ? { ...state, progress: finalProgress } : state;
     }
     case 'CLOUD_SYNC_COMPLETED': {
-      if (state.completedBooks.size === action.completed.length && 
+      // Never let an empty cloud cache wipe local non-empty data
+      if (action.completed.length === 0 && state.completedBooks.size > 0) return state;
+      if (state.completedBooks.size === action.completed.length &&
           action.completed.every(k => state.completedBooks.has(k))) return state;
       return { ...state, completedBooks: new Set(action.completed) };
     }
     case 'CLOUD_SYNC_JOURNALS': {
+      if (action.journals.length === 0 && state.proverbJournals.length > 0) return state;
       if (isFingerprintMatch(state.proverbJournals, action.journals)) return state;
       return { ...state, proverbJournals: action.journals };
     }
     case 'CLOUD_SYNC_DEVOTIONALS': {
+      if (action.devotionals.length === 0 && state.customDevotionals.length > 0) return state;
       if (isFingerprintMatch(state.customDevotionals, action.devotionals)) return state;
       return { ...state, customDevotionals: action.devotionals };
     }

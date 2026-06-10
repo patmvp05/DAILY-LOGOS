@@ -6,8 +6,7 @@
 import React, { useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { appReducer } from './appReducer';
-import { saveState, loadState, loadStateAsync, loadHistorySnapshot, saveStateSync } from '../lib/storage';
-import { processSyncQueue } from '../lib/sync';
+import { saveState, loadState, loadStateAsync, saveStateSync } from '../lib/storage';
 import { prefetchProverbs } from '../lib/proverbCache';
 import { AppContext } from './AppContextCore';
 
@@ -69,37 +68,17 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     };
   }, [hasHydrated]);
 
-  // Network and Wake/Resume listener for sync
+  // Prefetch proverb content when online
   useEffect(() => {
-    const triggerSync = () => {
-      if (navigator.onLine) {
-        console.log("[AppContext] Resume or online trigger: processing sync...");
-        processSyncQueue();
-        prefetchProverbs();
-      }
+    const triggerPrefetch = () => {
+      if (navigator.onLine) prefetchProverbs();
     };
-
-    window.addEventListener('online', triggerSync);
-    window.addEventListener('focus', triggerSync);
-    
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        triggerSync();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibility);
-
-    // Initial check
-    triggerSync();
-
-    return () => {
-      window.removeEventListener('online', triggerSync);
-      window.removeEventListener('focus', triggerSync);
-      document.removeEventListener('visibilitychange', handleVisibility);
-    };
+    window.addEventListener('online', triggerPrefetch);
+    triggerPrefetch();
+    return () => window.removeEventListener('online', triggerPrefetch);
   }, []);
 
-  // Async Hydration from IndexedDB + Snapshot check
+  // Async hydration from IndexedDB
   useEffect(() => {
     if (hydrated.current) return;
     hydrated.current = true;
@@ -109,23 +88,6 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
         const idbState = await loadStateAsync();
         if (idbState) {
           dispatch({ type: 'HYDRATE_STATE', state: idbState });
-        }
-
-        // Snapshot safety net check
-        // We only restore from snapshot if the current history is empty
-        // We check against the LATEST state by looking at what was loaded or initial
-        if (!idbState || !idbState.history || idbState.history.length === 0) {
-          const snapshot = await loadHistorySnapshot();
-          if (snapshot && snapshot.data.length > 0) {
-            const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-            if (snapshot.timestamp > thirtyDaysAgo) {
-              dispatch({ 
-                type: 'HYDRATE_STATE', 
-                state: { history: snapshot.data },
-                restoredFromSnapshot: true 
-              });
-            }
-          }
         }
       } catch (e) {
         console.warn("Hydration failed:", e);

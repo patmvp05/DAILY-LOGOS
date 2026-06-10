@@ -3,206 +3,124 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef } from 'react';
-import { 
-  onSnapshot, 
-  query, 
-  orderBy, 
-  type QuerySnapshot, 
+import React, { useEffect } from 'react';
+import {
+  onSnapshot,
+  query,
+  orderBy,
+  type QuerySnapshot,
   type DocumentSnapshot,
   type DocumentReference,
   type CollectionReference,
   type Query
 } from 'firebase/firestore';
 import { type User } from 'firebase/auth';
-import { 
-  getUserRef, 
-  getProgressCollection, 
-  getHistoryCollection, 
-  getJournalsCollection, 
-  getDevotionalsCollection, 
-  getCompletedBooksCollection 
+import {
+  getUserRef,
+  getProgressCollection,
+  getHistoryCollection,
+  getJournalsCollection,
+  getDevotionalsCollection,
+  getCompletedBooksCollection
 } from '../lib/firebase';
 import { AppAction } from '../state/appReducer';
 import { Progress, HistoryEntry, ProverbJournal, Devotional, AppState, UserSettings } from '../types';
 
+const COLLECTION_COUNT = 6;
+
+/**
+ * Attaches realtime listeners for the signed-in user's data.
+ * Firestore's SDK handles caching, offline behavior, and reconnection;
+ * each snapshot is dispatched straight into the reducer, which owns
+ * merge/conflict logic.
+ */
 export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<AppAction>, setSyncStatus: (status: 'synced' | 'syncing' | 'error' | 'idle') => void) {
-  const retryTimeouts = useRef<Record<string, number>>({});
-  const initialLoadTracker = useRef<Set<string>>(new Set());
-  const initialData = useRef<Partial<AppState>>({});
-  const isInitialLoadComplete = useRef(false);
-
   useEffect(() => {
-    if (!user) {
-      isInitialLoadComplete.current = false;
-      initialLoadTracker.current.clear();
-      initialData.current = {};
-      return;
-    }
-
-    // Reset initial sync state flags on every new user session
-    isInitialLoadComplete.current = false;
-    initialLoadTracker.current.clear();
-    initialData.current = {};
+    if (!user) return;
 
     let isActive = true;
-    const currentUnsubs: (() => void)[] = [];
-    const collectionsToSync = ['UserSettings', 'Progress', 'CompletedBooks', 'Journals', 'Devotionals', 'History'];
-    
+    const unsubs: (() => void)[] = [];
+    const firstFire = new Set<string>();
+
     setSyncStatus('syncing');
 
-    // 10-second timeout for initial cloud sync
-    const connectionTimeout = window.setTimeout(() => {
-      if (!isInitialLoadComplete.current) {
-        console.error("[Sync] Initial cloud sync timed out.");
-        setSyncStatus('error');
-      }
-    }, 10000);
-
-    const checkInitialSyncDone = () => {
-      if (!isInitialLoadComplete.current && initialLoadTracker.current.size >= collectionsToSync.length) {
-        isInitialLoadComplete.current = true;
-        window.clearTimeout(connectionTimeout);
-        dispatch({ type: 'HYDRATE_STATE', state: initialData.current, isCloudData: true });
-        setSyncStatus('synced');
-      }
-    };
-
-    const setupListener = <S extends DocumentSnapshot | QuerySnapshot, T>(
-      name: string, 
-      ref: DocumentReference | CollectionReference | Query, 
-      stateKey: keyof AppState | null,
-      onUpdate: (snap: S) => T,
-      action: AppAction['type']
+    const listen = <S extends DocumentSnapshot | QuerySnapshot>(
+      name: string,
+      ref: DocumentReference | CollectionReference | Query,
+      onSnap: (snap: S) => void
     ) => {
-      let retryCount = 0;
-      let currentUnsub: (() => void) | null = null;
-      
-      const attach = () => {
+      unsubs.push(onSnapshot(ref as Query, (snap) => {
         if (!isActive) return;
-        
-        currentUnsub = onSnapshot(ref as Query, { includeMetadataChanges: false }, (snap) => {
-          if (!isActive) return;
-          retryCount = 0; // Reset on successful hit
-          
-          const processedData = onUpdate(snap as S);
-          
-          if (!isInitialLoadComplete.current) {
-            if (stateKey) {
-              (initialData.current as Record<string, unknown>)[stateKey] = processedData;
-            }
-            initialLoadTracker.current.add(name);
-            checkInitialSyncDone();
-          } else {
-            // After initial load, dispatch normally
-            if (action === 'CLOUD_SYNC_USER_DATA') dispatch({ type: action, data: processedData as UserSettings });
-            else if (action === 'CLOUD_SYNC_PROGRESS') dispatch({ type: action, progress: processedData as Progress[] });
-            else if (action === 'CLOUD_SYNC_COMPLETED') dispatch({ type: action, completed: Array.from(processedData as Set<string>) });
-            else if (action === 'CLOUD_SYNC_JOURNALS') dispatch({ type: action, journals: processedData as ProverbJournal[] });
-            else if (action === 'CLOUD_SYNC_DEVOTIONALS') dispatch({ type: action, devotionals: processedData as Devotional[] });
-            else if (action === 'CLOUD_SYNC_HISTORY') dispatch({ type: action, history: processedData as HistoryEntry[] });
-          }
-        }, (err: Error) => {
-          console.error(`${name} sync error:`, err);
-          setSyncStatus('error');
-          if (currentUnsub) currentUnsub();
-          
-          // Exponential backoff for reconnection
-          const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
-          retryCount++;
-          
-          retryTimeouts.current[name] = window.setTimeout(attach, delay);
-        });
-        
-        currentUnsubs.push(() => {
-          if (currentUnsub) currentUnsub();
-        });
-      };
-      
-      attach();
+        onSnap(snap as S);
+        firstFire.add(name);
+        if (firstFire.size >= COLLECTION_COUNT) setSyncStatus('synced');
+      }, (err: Error) => {
+        if (!isActive) return;
+        console.error(`${name} sync error:`, err);
+        setSyncStatus('error');
+      }));
     };
 
-    // 1. User Settings
-    setupListener<DocumentSnapshot, UserSettings>('UserSettings', getUserRef(user.uid), 'settings', (doc) => {
-      if (!doc.exists()) {
-        console.log("[Sync] UserSettings document does not exist on server/cache.");
-        return { theme: 'system', startDate: '', userName: '' };
+    // 1. User settings document
+    listen<DocumentSnapshot>('UserSettings', getUserRef(user.uid), (doc) => {
+      let settings: UserSettings = { theme: 'system', startDate: '', userName: '' };
+      if (doc.exists()) {
+        const data = doc.data() as Record<string, unknown>;
+        const toISO = (v: unknown): string => {
+          if (typeof v === 'string') return v;
+          if (v && typeof v === 'object' && 'toMillis' in v) return new Date((v as { toMillis: () => number }).toMillis()).toISOString();
+          if (v && typeof v === 'object' && 'seconds' in v) return new Date((v as { seconds: number }).seconds * 1000).toISOString();
+          return '';
+        };
+        settings = {
+          theme: (data.theme as AppState['settings']['theme']) || 'system',
+          startDate: toISO(data.startDate),
+          userName: (data.userName as string) || '',
+          updatedAt: toISO(data.updatedAt)
+        };
       }
-      
-      const data = doc.data() as Record<string, unknown>;
-      const settings: UserSettings = { 
-        theme: (data.theme as AppState['settings']['theme']) || 'system',
-        startDate: '',
-        userName: (data.userName as string) || '',
-        updatedAt: data.updatedAt && 'toMillis' in (data.updatedAt as object) 
-          ? new Date((data.updatedAt as { toMillis: () => number }).toMillis()).toISOString()
-          : data.updatedAt as string
-      };
-      
-      // Handle potential Timestamp or string for startDate
-      const rawStart = data.startDate;
-      if (rawStart) {
-        if (typeof rawStart === 'string') {
-          settings.startDate = rawStart;
-        } else if (rawStart && typeof rawStart === 'object' && 'toMillis' in rawStart) {
-          settings.startDate = new Date((rawStart as { toMillis: () => number }).toMillis()).toISOString();
-        } else if (rawStart && typeof rawStart === 'object' && 'seconds' in rawStart) {
-          settings.startDate = new Date((rawStart as { seconds: number }).seconds * 1000).toISOString();
-        }
-      }
-      
-      console.log(`[Sync] UserSettings loaded:`, settings.startDate);
-      return settings;
-    }, 'CLOUD_SYNC_USER_DATA');
+      dispatch({ type: 'CLOUD_SYNC_USER_DATA', data: settings });
+    });
 
     // 2. Progress
-    setupListener<QuerySnapshot, Progress[]>('Progress', getProgressCollection(user.uid), 'progress', (snap) => {
-      return snap.docs.map((doc) => {
+    listen<QuerySnapshot>('Progress', getProgressCollection(user.uid), (snap) => {
+      const progress = snap.docs.map((doc) => {
         const data = doc.data() as Record<string, unknown>;
         const updatedAtMillis = (data.updatedAt as { toMillis?: () => number })?.toMillis?.() || (data.lastReadAt ? new Date(data.lastReadAt as string).getTime() : 0);
         return { ...data, updatedAtMillis } as unknown as Progress;
       });
-    }, 'CLOUD_SYNC_PROGRESS');
+      dispatch({ type: 'CLOUD_SYNC_PROGRESS', progress });
+    });
 
-    // 3. Completed Books
-    setupListener<QuerySnapshot, Set<string>>('CompletedBooks', getCompletedBooksCollection(user.uid), 'completedBooks', (snap) => {
+    // 3. Completed books
+    listen<QuerySnapshot>('CompletedBooks', getCompletedBooksCollection(user.uid), (snap) => {
       const completed = snap.docs.map((doc) => {
         const d = doc.data();
         if (d.categoryId && d.bookName) return `${d.categoryId}:${d.bookName}`;
         return d.key as string;
       }).filter((k: string): k is string => !!k);
-      return new Set(completed);
-    }, 'CLOUD_SYNC_COMPLETED');
+      dispatch({ type: 'CLOUD_SYNC_COMPLETED', completed });
+    });
 
     // 4. Journals
-    setupListener<QuerySnapshot, ProverbJournal[]>('Journals', getJournalsCollection(user.uid), 'proverbJournals', (snap) => {
-      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as ProverbJournal));
-    }, 'CLOUD_SYNC_JOURNALS');
+    listen<QuerySnapshot>('Journals', getJournalsCollection(user.uid), (snap) => {
+      dispatch({ type: 'CLOUD_SYNC_JOURNALS', journals: snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as ProverbJournal)) });
+    });
 
     // 5. Devotionals
-    setupListener<QuerySnapshot, Devotional[]>('Devotionals', getDevotionalsCollection(user.uid), 'customDevotionals', (snap) => {
-      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as Devotional));
-    }, 'CLOUD_SYNC_DEVOTIONALS');
+    listen<QuerySnapshot>('Devotionals', getDevotionalsCollection(user.uid), (snap) => {
+      dispatch({ type: 'CLOUD_SYNC_DEVOTIONALS', devotionals: snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as Devotional)) });
+    });
 
-    // 6. History - No limit for accurate streak calculation
-    const historyQuery = query(
-      getHistoryCollection(user.uid), 
-      orderBy('timestampMillis', 'desc')
-    );
-    setupListener<QuerySnapshot, HistoryEntry[]>('History', historyQuery, 'history', (snap) => {
-      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as HistoryEntry));
-    }, 'CLOUD_SYNC_HISTORY');
-
-    const timeoutsForCleanup = retryTimeouts.current;
-    const trackerForCleanup = initialLoadTracker.current;
+    // 6. History — unbounded for accurate streak calculation
+    const historyQuery = query(getHistoryCollection(user.uid), orderBy('timestampMillis', 'desc'));
+    listen<QuerySnapshot>('History', historyQuery, (snap) => {
+      dispatch({ type: 'CLOUD_SYNC_HISTORY', history: snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as HistoryEntry)) });
+    });
 
     return () => {
       isActive = false;
-      currentUnsubs.forEach(u => u());
-      Object.keys(timeoutsForCleanup).forEach(k => {
-        if (timeoutsForCleanup[k]) window.clearTimeout(timeoutsForCleanup[k]);
-      });
-      trackerForCleanup.clear();
+      unsubs.forEach(u => u());
     };
   }, [user, dispatch, setSyncStatus]);
 }

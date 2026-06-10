@@ -45,7 +45,6 @@ export default function App() {
 
   const { user, loading: isAuthLoading, login, logout } = useAuth();
   const [isSigningIn, setIsSigningIn] = React.useState(false);
-  const hasSyncToastShown = React.useRef(false);
 
   const sync = useSyncState(user, dispatch);
   const isHydrated = state.isCloudHydrated || (!user && !isAuthLoading);
@@ -114,7 +113,7 @@ export default function App() {
         showToast(`Login failed: ${error.message || errStr}`, "error");
       }
     } finally { setIsSigningIn(false); }
-  }, [login, showToast, setConfirmDialog, closeConfirmDialog]);
+  }, [login, showToast, setConfirmDialog]);
 
   useKeyboardShortcuts({
     onSearch: () => {},
@@ -127,28 +126,15 @@ export default function App() {
 
   useScrollLock(showSettings || showHistory || !!activePlanCategory || !!selectingCategoryId || !!activeDevotion || showProverbModal || isStartMenuOpen);
   
-  useEffect(() => {
-    if (state.isCloudHydrated) {
-      if (!hasSyncToastShown.current) {
-        showToast("Reading history synced from cloud.", "success");
-        hasSyncToastShown.current = true;
-      }
-      dispatch({ type: 'CLEAR_SYNC_FLAGS' });
-    } else if (state.restoredFromSnapshot) {
-      showToast("Restored your reading history from local backup.", "info");
-      dispatch({ type: 'CLEAR_SYNC_FLAGS' });
-    }
-  }, [state.isCloudHydrated, state.restoredFromSnapshot, showToast, dispatch]);
-
   const toggleTheme = useCallback(() => {
     const themes: ('light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook')[] = ['light', 'dark', 'system', 'xp', 'audible', 'textbook'];
     const currentIndex = themes.indexOf(state.settings.theme);
     const newTheme = themes[(currentIndex + 1) % themes.length];
     dispatch({ type: 'SET_THEME', theme: newTheme });
-    if (user && state.isCloudHydrated) {
+    if (user) {
       setUserSettings(user.uid, { theme: newTheme });
     }
-  }, [state.settings.theme, state.isCloudHydrated, user, dispatch]);
+  }, [state.settings.theme, user, dispatch]);
 
   return (
     <div className={cn("min-h-[100dvh] transition-colors duration-300", "bg-[var(--bg-secondary)] text-[var(--text-primary)]", state.settings.theme === 'dark' && "dark", state.settings.theme === 'system' && prefersDark && "dark")}>

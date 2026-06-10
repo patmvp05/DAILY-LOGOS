@@ -3,12 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppState, Progress, UserSettings, HistoryEntry } from '../types';
+import { AppState, Progress, UserSettings } from '../types';
 import { CATEGORIES } from '../constants';
 import { get, set } from 'idb-keyval';
 
 const STORAGE_KEY = 'seven_seals_bible_progress';
-const SNAPSHOT_KEY = 'daily_logos_history_snapshot';
 
 const DEFAULT_PROGRESS: Progress[] = CATEGORIES.map((cat) => ({
   categoryId: cat.id,
@@ -106,7 +105,6 @@ export const loadStateAsync = async (): Promise<Partial<AppState> | null> => {
 };
 
 let lastSavedJson = '';
-let lastSnapshotLength = 0;
 
 export const saveStateSync = (state: AppState) => {
   try {
@@ -115,25 +113,16 @@ export const saveStateSync = (state: AppState) => {
       completedBooks: Array.from(state.completedBooks)
     };
     const json = JSON.stringify(toSave);
-    
+
     if (json === lastSavedJson) {
       return;
     }
     lastSavedJson = json;
 
     localStorage.setItem(STORAGE_KEY, json);
-    
+
     // Run IndexedDB writes in a non-blocking background task
     set(STORAGE_KEY, toSave).catch(e => console.warn("IDB write failed sync:", e));
-
-    if (state.history && state.history.length > 0 && state.history.length !== lastSnapshotLength) {
-      lastSnapshotLength = state.history.length;
-      const snapshot = {
-        data: state.history,
-        timestamp: Date.now()
-      };
-      set(SNAPSHOT_KEY, snapshot).catch(() => {});
-    }
   } catch (error) {
     console.warn("Storage saveStateSync failed:", error);
   }
@@ -160,16 +149,6 @@ export const saveState = async (state: AppState) => {
         // Write to both
         localStorage.setItem(STORAGE_KEY, json);
         await set(STORAGE_KEY, toSave).catch(e => console.warn("IDB write failed:", e));
-
-        // History snapshot safety net - skip if length hasn't changed
-        if (state.history && state.history.length > 0 && state.history.length !== lastSnapshotLength) {
-          lastSnapshotLength = state.history.length;
-          const snapshot = {
-            data: state.history,
-            timestamp: Date.now()
-          };
-          await set(SNAPSHOT_KEY, snapshot).catch(() => {});
-        }
         resolve();
       } catch (error) {
         console.error("Storage save failed:", error);
@@ -177,12 +156,4 @@ export const saveState = async (state: AppState) => {
       }
     }, 0);
   });
-};
-
-export const loadHistorySnapshot = async (): Promise<{ data: HistoryEntry[], timestamp: number } | null> => {
-  try {
-    return (await get(SNAPSHOT_KEY)) || null;
-  } catch {
-    return null;
-  }
 };
