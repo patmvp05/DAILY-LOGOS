@@ -16,7 +16,7 @@ export default defineConfig(() => {
         registerType: 'prompt',
         injectRegister: 'auto',
         includeAssets: ['icons/logo.svg'],
-        filename: 'manifest.json',
+        manifestFilename: 'manifest.json',
         manifest: {
           name: 'The Daily Logos',
           short_name: 'Logos',
