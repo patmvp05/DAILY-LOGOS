@@ -19,6 +19,14 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Canonical domain: Safari's tracking prevention breaks Google sign-in
+      // when the app and the Firebase auth helpers live on different origins.
+      // firebaseapp.com hosts the auth helpers, so the app lives there too.
+      if (location.hostname === 'gen-lang-client-0538747272.web.app') {
+        location.replace('https://gen-lang-client-0538747272.firebaseapp.com' + location.pathname + location.search + location.hash);
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
