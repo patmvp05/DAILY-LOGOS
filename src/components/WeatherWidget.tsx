@@ -6,7 +6,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sun, CloudSun, Cloud, CloudFog, CloudRain, CloudSnow, CloudLightning, Pencil } from 'lucide-react';
 import { fetchWeather, getCachedWeather, WeatherSnapshot } from '../lib/weather';
-import { useApp } from '../state/AppContextCore';
 import { cn } from '../lib/utils';
 import { get, set } from 'idb-keyval';
 
@@ -32,8 +31,6 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [tempCity, setTempCity] = useState('');
-  const { state } = useApp();
-  const theme = state.settings.theme;
 
   const refresh = useCallback(async (manualLat?: number, manualLng?: number, manualName?: string) => {
     if (!navigator.onLine) return;

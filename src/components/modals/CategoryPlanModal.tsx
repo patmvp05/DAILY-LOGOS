@@ -5,8 +5,8 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { Layers, Check } from 'lucide-react';
-import { CATEGORIES_BY_ID, CATEGORIES } from '../../constants';
+import { Check } from 'lucide-react';
+import { CATEGORIES } from '../../constants';
 import { cn } from '../../lib/utils';
 
 import { useApp } from '../../state/AppContextCore';
@@ -22,12 +22,11 @@ const CategoryPlanModal: React.FC<CategoryPlanModalProps> = ({
   toggleBookCompletion
 }) => {
   const { state } = useApp();
-  const { setActivePlanCategory, activePlanCategory } = useUi();
+  const { setActivePlanCategory } = useUi();
   const isStandalone = useStandaloneDetection();
   const prefersReducedMotion = usePrefersReducedMotion();
 
   const onClose = () => setActivePlanCategory(null);
-  const activeCategory = activePlanCategory ? CATEGORIES_BY_ID.get(activePlanCategory) : null;
   const springConfig = { stiffness: 380, damping: 30, mass: 0.8 };
 
   return (

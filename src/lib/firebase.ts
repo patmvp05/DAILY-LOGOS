@@ -21,11 +21,8 @@ import {
   getFirestore,
   doc, 
   collection, 
-  getDocFromCache,
   getDocsFromCache,
-  getDoc,
   getDocs,
-  DocumentReference,
   CollectionReference,
   Query,
   Firestore
@@ -58,20 +55,6 @@ if (isConfigValid) {
   db = getFirestore(app);
 }
 export { db };
-
-/**
- * Cache-first document fetcher. 
- * Tries local IndexedDB cache first for speed, falls back to network if not found or offline.
- */
-export async function getDocCacheFirst<T>(ref: DocumentReference<T>) {
-  try {
-    // Try cache first
-    return await getDocFromCache(ref);
-  } catch {
-    // Fallback to server if cache miss or error
-    return await getDoc(ref);
-  }
-}
 
 /**
  * Cache-first collection/query fetcher.
@@ -129,53 +112,6 @@ export const logout = async () => {
     throw error;
   }
 };
-
-export enum OperationType {
-  CREATE = 'create',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  LIST = 'list',
-  GET = 'get',
-  WRITE = 'write',
-}
-
-interface FirestoreErrorInfo {
-  error: string;
-  operationType: OperationType;
-  path: string | null;
-  authInfo: {
-    userId?: string | null;
-    email?: string | null;
-    emailVerified?: boolean | null;
-    isAnonymous?: boolean | null;
-    tenantId?: string | null;
-    providerInfo?: {
-      providerId?: string | null;
-      email?: string | null;
-    }[];
-  }
-}
-
-export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData?.map(provider => ({
-        providerId: provider.providerId,
-        email: provider.email,
-      })) || []
-    },
-    operationType,
-    path
-  }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
-}
 
 // Global helpers for Firestore structure based on firebase-blueprint.json
 export const getUserRef = (userId: string) => doc(db, 'users', userId);

@@ -14,7 +14,6 @@ import {
   Moon, 
   Monitor, 
   History, 
-  FileText,
   User as UserIcon 
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';

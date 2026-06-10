@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { History, Check, Trash2, Ghost } from 'lucide-react';
+import { Check, Trash2, Ghost } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '../../lib/utils';
 

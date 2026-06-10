@@ -7,9 +7,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { BookOpen, Check, Sparkles, FileText } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn } from '../../lib/utils';
 
-import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 
 interface ProverbContent {
@@ -33,7 +31,6 @@ function ProverbModal({
   saveProverbJournal,
   logProverbRead,
 }: ProverbModalProps) {
-  const { state } = useApp();
   const { setShowProverbModal, journalDraft, setJournalDraft } = useUi();
   const [journalVerse, setJournalVerse] = useState(journalDraft.verse);
   const [journalContent, setJournalContent] = useState(journalDraft.content);

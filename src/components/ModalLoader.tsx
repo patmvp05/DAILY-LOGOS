@@ -4,13 +4,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useApp } from '../state/AppContextCore';
-import { cn } from '../lib/utils';
 
 export default function ModalLoader() {
   const [show, setShow] = useState(false);
-  const { state } = useApp();
-  const theme = state.settings.theme;
 
   useEffect(() => {
     const timer = setTimeout(() => setShow(true), 200);

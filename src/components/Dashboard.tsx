@@ -10,15 +10,13 @@ import {
   Play, 
   ArrowRight, 
   Sparkles, 
-  TrendingUp, 
   ChevronRight, 
   ExternalLink, 
   Cloud, 
   LogIn, 
   RefreshCw,
   Minus,
-  Plus,
-  Bookmark
+  Plus
 } from 'lucide-react';
 import { format, parseISO, subDays } from 'date-fns';
 import { CATEGORIES, CATEGORIES_BY_ID, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
@@ -477,7 +475,6 @@ const CategoryCard = memo(({
   isDone,
   bookIsCompleted,
   info,
-  theme,
   progressStats,
   advanceChapter,
   setSelectingCategoryId

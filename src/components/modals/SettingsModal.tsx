@@ -19,8 +19,7 @@ import {
   FileText, 
   LogOut, 
   User as UserIcon,
-  LogIn,
-  Headphones
+  LogIn
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '../../lib/utils';
@@ -55,7 +54,7 @@ interface SettingsModalProps {
    isSigningIn
  }) => {
   const { state, dispatch } = useApp();
-  const { setShowSettings, setShowProverbModal, showToast } = useUi();
+  const { setShowSettings, setShowProverbModal } = useUi();
   const { user } = useAuth();
   const [settingsTab, setSettingsTab] = React.useState<'general' | 'journals' | 'devotionals'>('general');
   const [newDevotional, setNewDevotional] = React.useState({ name: '', description: '', url: '' });
@@ -187,12 +186,8 @@ interface SettingsModalProps {
                         const themeId = id as AppState['settings']['theme'];
                         dispatch({ type: 'SET_THEME', theme: themeId });
                         if (user) {
-                          setUserSettings(user.uid, { theme: themeId, updatedAt: state.settings.updatedAt })
-                            .catch(err => {
-                              if (err.message === 'STALE_DATA_CONFLICT') {
-                                showToast("Settings updated from another device. Reloading...", "info");
-                              }
-                            });
+                          setUserSettings(user.uid, { theme: themeId })
+                            .catch(err => console.error("Theme sync failed:", err));
                         }
                       }}
                       className={cn(
@@ -233,12 +228,8 @@ interface SettingsModalProps {
                       
                       dispatch({ type: 'SET_START_DATE', date: isoDate });
                       if (user) {
-                        setUserSettings(user.uid, { startDate: isoDate, updatedAt: state.settings.updatedAt })
-                          .catch(err => {
-                            if (err.message === 'STALE_DATA_CONFLICT') {
-                              showToast("Settings updated from another device. Reloading...", "info");
-                            }
-                          });
+                        setUserSettings(user.uid, { startDate: isoDate })
+                          .catch(err => console.error("Start date sync failed:", err));
                       }
                     }}
                     className="bg-transparent border-none outline-none font-bold flex-1 text-sm appearance-none"
