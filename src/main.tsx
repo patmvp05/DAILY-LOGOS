@@ -7,8 +7,9 @@ import { AppContextProvider } from './state/AppContext';
 import { UiContextProvider } from './state/UiContext';
 import { registerSW } from 'virtual:pwa-register';
 
-// Register service worker
-registerSW({ immediate: false });
+// Register service worker. immediate:true + autoUpdate means new deploys
+// activate on the next visit instead of waiting for a prompt that never shows.
+registerSW({ immediate: true });
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
