@@ -82,13 +82,22 @@ export const bookKeyToDocId = (key: string): string => {
 };
 
 export const signInWithGoogle = async (useRedirect = false) => {
+  // Installed (Home Screen) PWAs can't host popups reliably; use redirect there.
+  const isStandalonePWA = window.matchMedia?.('(display-mode: standalone)')?.matches
+    || (navigator as unknown as { standalone?: boolean }).standalone === true;
+  if (useRedirect || isStandalonePWA) {
+    return await signInWithRedirect(auth, googleProvider);
+  }
   try {
-    if (useRedirect) {
-      return await signInWithRedirect(auth, googleProvider);
-    }
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
   } catch (error) {
+    const code = (error as { code?: string })?.code;
+    // Safari and in-app browsers often block the popup; redirect is reliable
+    // because authDomain matches the hosting origin.
+    if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
+      return await signInWithRedirect(auth, googleProvider);
+    }
     console.error('Error signing in with Google:', error);
     throw error;
   }
