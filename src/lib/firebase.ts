@@ -32,7 +32,7 @@ import {
   Query,
   Firestore
 } from 'firebase/firestore';
-import firebaseConfig from './firebaseConfig';
+import firebaseConfig from '../../firebase-applet-config.json';
 
 // Simple check to see if we have valid config
 const isConfigValid = firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey !== 'placeholder';
