@@ -32,7 +32,6 @@ import { useUi } from '../state/UiContextCore';
 import { useAppStats } from '../hooks/useAppStats';
 import { useReadingActions } from '../hooks/useReadingActions';
 import { useProverb } from '../hooks/useProverb';
-import { EmailAuthForm } from './EmailAuthForm';
 
 interface DashboardProps {
   handleLogin: (redirect?: boolean) => void;
@@ -411,21 +410,13 @@ function DashboardComponent({
                   {(isSigningIn || isAuthLoading) ? <RefreshCw size={18} className="animate-spin mr-2" /> : <LogIn size={18} className="mr-2" />}
                   {(isSigningIn || isAuthLoading) ? 'Connecting...' : 'Enable Sync Now'}
                 </button>
-                <button 
+                <button
                   onClick={() => !isSigningIn && handleLogin(true)}
                   className="block text-[11px] text-[var(--text-secondary)] font-bold tracking-wide hover:text-brand transition-colors focus:outline-none cursor-pointer mt-4"
                   disabled={isSigningIn}
                 >
                   Safari User? Try Alternative mode
                 </button>
-                
-                <div className="relative flex py-4 items-center">
-                  <div className="flex-grow border-t border-[var(--border-color)]"></div>
-                  <span className="flex-shrink mx-4 text-xs font-semibold text-[var(--text-secondary)]">OR</span>
-                  <div className="flex-grow border-t border-[var(--border-color)]"></div>
-                </div>
-
-                <EmailAuthForm />
               </div>
             </div>
           )}

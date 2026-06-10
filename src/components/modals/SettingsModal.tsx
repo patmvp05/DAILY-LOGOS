@@ -25,7 +25,6 @@ import {
 import { format, parseISO } from 'date-fns';
 import { cn } from '../../lib/utils';
 
-import { EmailAuthForm } from '../EmailAuthForm';
 import { setUserSettings } from '../../lib/sync';
 import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
@@ -162,21 +161,13 @@ interface SettingsModalProps {
                       {(isSigningIn || isAuthLoading) ? <RefreshCw size={16} className="animate-spin" /> : <LogIn size={16} />}
                       {(isSigningIn || isAuthLoading) ? 'Connecting...' : 'Sign In with Google'}
                     </button>
-                    <button 
+                    <button
                       onClick={() => !isAuthLoading && !isSigningIn && handleLogin(true)}
                       className="w-full p-2 text-[var(--audible-text-secondary)] font-bold uppercase text-[8px] tracking-[0.12em] hover:text-brand transition-colors focus:outline-none cursor-pointer text-center"
                       disabled={isAuthLoading || isSigningIn}
                     >
                       Safari User? Click here to try Redirect Login
                     </button>
-
-                    <div className="relative flex py-2 items-center">
-                      <div className="flex-grow border-t border-[var(--audible-border)]/40"></div>
-                      <span className="flex-shrink mx-4 text-[8px] uppercase font-black tracking-widest text-zinc-400">OR</span>
-                      <div className="flex-grow border-t border-[var(--audible-border)]/40"></div>
-                    </div>
-
-                    <EmailAuthForm />
                   </div>
                 )}
               </div>

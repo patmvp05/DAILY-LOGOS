@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, signInWithGoogle, handleRedirectResult, logout as firebaseLogout, signInWithEmail, signUpWithEmail } from '../lib/firebase';
+import { auth, signInWithGoogle, handleRedirectResult, logout as firebaseLogout } from '../lib/firebase';
 import { initializeUser } from '../lib/sync';
 
 export function useAuth() {
@@ -72,26 +72,6 @@ export function useAuth() {
     }
   };
 
-  const loginWithEmail = async (email: string, password: string) => {
-    try {
-      const u = await signInWithEmail(email, password);
-      return u;
-    } catch (error) {
-      console.error("Login with email failed:", error);
-      throw error;
-    }
-  };
-
-  const registerWithEmail = async (email: string, password: string) => {
-    try {
-      const u = await signUpWithEmail(email, password);
-      return u;
-    } catch (error) {
-      console.error("Registration failed:", error);
-      throw error;
-    }
-  };
-
   const logout = async () => {
     try {
       await firebaseLogout();
@@ -101,5 +81,5 @@ export function useAuth() {
     }
   };
 
-  return { user, loading, login, logout, loginWithEmail, registerWithEmail };
+  return { user, loading, login, logout };
 }
