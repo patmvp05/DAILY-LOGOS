@@ -93,13 +93,16 @@ export const signInWithGoogle = async (useRedirect = false) => {
     return result.user;
   } catch (error) {
     const code = (error as { code?: string })?.code;
-    // Safari and in-app browsers often block the popup; redirect is reliable
-    // because authDomain matches the hosting origin.
-    if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
-      return await signInWithRedirect(auth, googleProvider);
+    // The user deliberately closed the popup or it never opened due to a duplicate
+    // request - don't mask that with a redirect, just surface it.
+    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+      throw error;
     }
-    console.error('Error signing in with Google:', error);
-    throw error;
+    // Safari (especially iOS) frequently fails popup-based auth with errors like
+    // auth/popup-blocked or auth/internal-error due to storage partitioning.
+    // Redirect is reliable because authDomain matches the hosting origin.
+    console.warn('Popup sign-in failed, falling back to redirect:', error);
+    return await signInWithRedirect(auth, googleProvider);
   }
 };
 

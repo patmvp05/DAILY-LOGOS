@@ -24,30 +24,32 @@ import { useProverb } from '../hooks/useProverb';
 
 interface AppModalsProps {
   isSigningIn: boolean;
+  handleLogin: (useRedirect?: boolean) => void;
 }
- 
+
 export const AppModals = memo(({
-   isSigningIn
+   isSigningIn,
+   handleLogin
  }: AppModalsProps) => {
    const { state, dispatch } = useApp();
-   const { 
+   const {
      showSettings, showHistory, activePlanCategory, selectingCategoryId,
      activeDevotion, showProverbModal,
      syncStatus, lastSyncTime, showSyncCheck
    } = useUi();
- 
-   const { user, loading: isAuthLoading, logout, login } = useAuth();
+
+   const { user, loading: isAuthLoading, logout } = useAuth();
    const { toggleBookCompletion, jumpToBook, saveProverbJournal, resetProgress, logProverbRead } = useReadingActions(state, dispatch, user);
-   
+
    const dayOfMonth = new Date().getDate();
    const { proverbContent, isFetchingProverb } = useProverb(dayOfMonth);
- 
+
    return (
      <Suspense fallback={<ModalLoader />}>
        {showSettings && (
-         <SettingsModal 
+         <SettingsModal
            onLogout={logout}
-           handleLogin={login}
+           handleLogin={handleLogin}
            onExportJournals={() => exportJournalsAsMarkdown(state.proverbJournals)}
            onResetProgress={resetProgress}
            syncStatus={syncStatus}

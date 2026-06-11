@@ -149,7 +149,7 @@ export default function App() {
         )}
       </main>
       <React.Suspense fallback={null}>
-        <AppModals isSigningIn={isSigningIn} />
+        <AppModals isSigningIn={isSigningIn} handleLogin={handleLoginLocal} />
       </React.Suspense>
       <ConfirmDialog isOpen={confirmDialog.isOpen} title={confirmDialog.title} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onClose={closeConfirmDialog} confirmLabel={confirmDialog.confirmLabel} cancelLabel={confirmDialog.cancelLabel} type={confirmDialog.type} confirmHref={confirmDialog.confirmHref} />
       <Toast message={toast?.message || null} type={toast?.type} onClear={() => setToast(null)} />
