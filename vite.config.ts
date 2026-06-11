@@ -37,6 +37,11 @@ export default defineConfig(() => {
         workbox: {
           skipWaiting: true,
           clientsClaim: true,
+          // Firebase Auth's sign-in pages (/__/auth/handler, /__/auth/iframe) are
+          // served by Firebase Hosting on this same origin. Without this denylist
+          // the service worker answers those navigations with the cached app shell,
+          // which breaks Google sign-in (auth/internal-error / silent no-op).
+          navigateFallbackDenylist: [/^\/__\//],
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
           runtimeCaching: [
             {
