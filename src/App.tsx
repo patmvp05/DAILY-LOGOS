@@ -30,7 +30,6 @@ const Dashboard = React.lazy(() => import('./components/Dashboard').then(m => ({
 const AppModals = React.lazy(() => import('./components/AppModals').then(m => ({ default: m.AppModals })));
 
 export default function App() {
-  console.log("[App] Rendering...");
   const { state, dispatch } = useApp();
   const { 
     showSettings, setShowSettings, showHistory, setShowHistory, 

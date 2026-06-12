@@ -14,7 +14,6 @@ import {
 } from './UiContextCore';
 
 export function UiContextProvider({ children }: { children: ReactNode }) {
-  console.log("[UiContextProvider] Rendering...");
   const [showSettings, setShowSettings] = React.useState(false);
   const [showHistory, setShowHistory] = React.useState(false);
   const [activePlanCategory, setActivePlanCategory] = React.useState<string | null>(null);

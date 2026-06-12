@@ -11,7 +11,6 @@ import { prefetchProverbs } from '../lib/proverbCache';
 import { AppContext } from './AppContextCore';
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
-  console.log("[AppContextProvider] Rendering...");
   // Initialize state synchronously with loadState() to provide robust defaults prior to IndexedDB/Cloud hydration
   const [state, dispatch] = React.useReducer(appReducer, loadState());
   const [debouncedState, setDebouncedState] = React.useState(state);
