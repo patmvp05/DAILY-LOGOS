@@ -41,8 +41,11 @@ export default defineConfig(() => {
           // served by Firebase Hosting on this same origin. Without this denylist
           // the service worker answers those navigations with the cached app shell,
           // which breaks Google sign-in (auth/internal-error / silent no-op).
-          navigateFallbackDenylist: [/^\/__\//],
+          // /reset.html is the cache-repair escape hatch and must always hit the
+          // network, never the cached shell.
+          navigateFallbackDenylist: [/^\/__\//, /^\/reset\.html/],
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          globIgnores: ['**/reset.html'],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/.*(bolls\.life|bibleproxy.*\.run\.app)\/.*/,

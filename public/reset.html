@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Reset — The Daily Logos</title>
+    <style>
+      body { font-family: -apple-system, system-ui, sans-serif; background: #09090b; color: #fafafa;
+             display: flex; align-items: center; justify-content: center; min-height: 100dvh; margin: 0; }
+      .card { text-align: center; padding: 2rem; max-width: 22rem; }
+      .spin { width: 2rem; height: 2rem; border: 3px solid #333; border-top-color: #22c55e;
+              border-radius: 50%; margin: 0 auto 1rem; animation: s 0.8s linear infinite; }
+      @keyframes s { to { transform: rotate(360deg); } }
+      h1 { font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; }
+      p { color: #a1a1aa; font-size: 0.85rem; line-height: 1.5; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="spin"></div>
+      <h1 id="status">Repairing app…</h1>
+      <p>Removing old offline data so the latest version can load. You'll be sent back automatically.</p>
+    </div>
+    <script>
+      // Escape hatch for devices stuck on a stale service worker / cache.
+      // Unregisters every service worker, wipes CacheStorage, then returns to the app.
+      (async () => {
+        try {
+          if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(r => r.unregister()));
+          }
+          if ('caches' in window) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+          }
+          document.getElementById('status').textContent = 'Done! Reloading…';
+        } catch (e) {
+          document.getElementById('status').textContent = 'Cleanup hit a snag — reloading anyway';
+        } finally {
+          setTimeout(() => location.replace('/?fresh=' + Date.now()), 800);
+        }
+      })();
+    </script>
+  </body>
+</html>
