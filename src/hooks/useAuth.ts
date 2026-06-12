@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth, signInWithGoogle, handleRedirectResult, logout as firebaseLogout } from '../lib/firebase';
 import { initializeUser } from '../lib/sync';
+import { logDiagnostic } from '../lib/diagnostics';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -20,6 +21,7 @@ export function useAuth() {
     const safetyTimeout = setTimeout(() => {
       if (!unsubscribed) {
         console.warn("[useAuth] Firebase Auth initialization timed out. Defaulting to local/guest state.");
+        logDiagnostic('auth', 'warn', 'Auth init timed out after 2500ms, falling back to guest state');
         setLoading(false);
       }
     }, 2500);
@@ -29,11 +31,13 @@ export function useAuth() {
         // Check redirect result on mount
         const result = await handleRedirectResult();
         if (result && !unsubscribed) {
+          logDiagnostic('auth', 'info', 'Redirect sign-in completed', { uid: result.uid.slice(0, 6) });
           await initializeUser(result);
           setUser(result);
         }
       } catch (err) {
         console.error("Redirect error during init:", err);
+        logDiagnostic('auth', 'error', 'Redirect sign-in failed', err);
       } finally {
         // Stop loading handled by onAuthStateChanged
       }
@@ -49,8 +53,10 @@ export function useAuth() {
             await initializeUser(currentUser);
           } catch (e) {
             console.error("Failed to initialize user document:", e);
+            logDiagnostic('auth', 'error', 'initializeUser failed', e);
           }
         }
+        logDiagnostic('auth', 'info', currentUser ? 'Auth state: signed in' : 'Auth state: signed out');
         setUser(currentUser);
         setLoading(false);
       }
@@ -64,10 +70,12 @@ export function useAuth() {
   }, []);
 
   const login = async (useRedirect = false) => {
+    logDiagnostic('auth', 'info', `Sign-in attempt (${useRedirect ? 'redirect' : 'popup'})`);
     try {
       await signInWithGoogle(useRedirect);
     } catch (error) {
       console.error("Login failed:", error);
+      logDiagnostic('auth', 'error', 'Sign-in failed', error);
       throw error;
     }
   };

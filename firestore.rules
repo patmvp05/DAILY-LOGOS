@@ -79,10 +79,30 @@ service cloud.firestore {
              data.completedAt is string;
     }
 
+    function isValidClientLog(data) {
+      return data.keys().hasAll(['ts', 'clientTs', 'level', 'category', 'message', 'appVersion', 'device']) &&
+             data.level in ['info', 'warn', 'error'] &&
+             data.clientTs is string &&
+             data.category is string && data.category.size() <= 50 &&
+             data.message is string && data.message.size() <= 500 &&
+             data.appVersion is string && data.appVersion.size() <= 50 &&
+             data.device is map && data.device.size() <= 10 &&
+             (data.keys().hasAny(['detail']) ? (data.detail is string && data.detail.size() <= 1000) : true) &&
+             (data.keys().hasAny(['uid']) ? (data.uid == null || (data.uid is string && data.uid.size() <= 128)) : true);
+    }
+
     // Collection Rules
     match /diag/{userId} {
       allow write: if isOwner(userId) && incoming().keys().hasOnly(['heartBeat']) && incoming().heartBeat != null;
       allow read: if isOwner(userId);
+    }
+
+    // Write-only client diagnostics. Lets us debug device/browser-specific
+    // issues (e.g. sign-in failures, before a user is authenticated) without
+    // physical access to the device. No client can read, update, or delete.
+    match /clientLogs/{logId} {
+      allow create: if isValidClientLog(incoming());
+      allow read, update, delete: if false;
     }
 
     match /users/{userId} {

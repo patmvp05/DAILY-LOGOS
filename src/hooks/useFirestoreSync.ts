@@ -25,6 +25,7 @@ import {
 } from '../lib/firebase';
 import { AppAction } from '../state/appReducer';
 import { Progress, HistoryEntry, ProverbJournal, Devotional, AppState, UserSettings } from '../types';
+import { logDiagnostic } from '../lib/diagnostics';
 
 const COLLECTION_COUNT = 6;
 
@@ -43,6 +44,7 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     const firstFire = new Set<string>();
 
     setSyncStatus('syncing');
+    logDiagnostic('sync', 'info', 'Starting cloud sync', { uid: user.uid.slice(0, 6) });
 
     const listen = <S extends DocumentSnapshot | QuerySnapshot>(
       name: string,
@@ -53,10 +55,14 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
         if (!isActive) return;
         onSnap(snap as S);
         firstFire.add(name);
-        if (firstFire.size >= COLLECTION_COUNT) setSyncStatus('synced');
+        if (firstFire.size >= COLLECTION_COUNT) {
+          setSyncStatus('synced');
+          logDiagnostic('sync', 'info', 'Cloud sync established');
+        }
       }, (err: Error) => {
         if (!isActive) return;
         console.error(`${name} sync error:`, err);
+        logDiagnostic('sync', 'error', `${name} listener error`, err);
         setSyncStatus('error');
       }));
     };

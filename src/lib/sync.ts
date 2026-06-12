@@ -24,6 +24,7 @@ import {
 } from './firebase';
 import { type User } from 'firebase/auth';
 import { Progress, UserSettings, HistoryEntry, ProverbJournal } from '../types';
+import { logDiagnostic } from './diagnostics';
 
 // Lightweight write-status tracker driving the navbar sync badge.
 // Firestore itself handles offline queueing, durability, and retry —
@@ -69,6 +70,7 @@ const track = <T extends unknown[]>(fn: (...args: T) => Promise<void>) => {
       syncTracker.end(true);
     } catch (e) {
       console.error('[Sync] Write failed:', e);
+      logDiagnostic('sync', 'error', 'Write failed', e);
       syncTracker.end(false);
       throw e;
     }

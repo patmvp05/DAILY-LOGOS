@@ -6,6 +6,16 @@ import './index.css';
 import { AppContextProvider } from './state/AppContext';
 import { UiContextProvider } from './state/UiContext';
 import { registerSW } from 'virtual:pwa-register';
+import { logDiagnostic, getDeviceInfo } from './lib/diagnostics';
+
+logDiagnostic('lifecycle', 'info', 'App boot', getDeviceInfo());
+
+window.addEventListener('error', (e) => {
+  logDiagnostic('window-error', 'error', e.message, { filename: e.filename, lineno: e.lineno });
+});
+window.addEventListener('unhandledrejection', (e) => {
+  logDiagnostic('unhandled-rejection', 'error', String(e.reason?.message || e.reason), e.reason);
+});
 
 // Register service worker. immediate:true + autoUpdate means new deploys
 // activate on the next visit instead of waiting for a prompt that never shows.
@@ -15,12 +25,22 @@ import { registerSW } from 'virtual:pwa-register';
 registerSW({
   immediate: true,
   onRegisteredSW(_swUrl, registration) {
+    logDiagnostic('service-worker', 'info', 'Registered');
     if (!registration) return;
     const checkForUpdate = () => registration.update().catch(() => {});
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') checkForUpdate();
     });
     setInterval(checkForUpdate, 60 * 60 * 1000);
+  },
+  onRegisterError(error) {
+    logDiagnostic('service-worker', 'error', 'Registration failed', error);
+  },
+  onNeedRefresh() {
+    logDiagnostic('service-worker', 'info', 'New version activated');
+  },
+  onOfflineReady() {
+    logDiagnostic('service-worker', 'info', 'Offline ready');
   }
 });
 

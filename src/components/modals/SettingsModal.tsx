@@ -15,16 +15,18 @@ import {
   RefreshCw, 
   RotateCcw, 
   Download, 
-  Trash2, 
-  FileText, 
-  LogOut, 
+  Trash2,
+  FileText,
+  LogOut,
   User as UserIcon,
-  LogIn
+  LogIn,
+  Bug
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '../../lib/utils';
 
 import { setUserSettings } from '../../lib/sync';
+import { getDiagnosticReport } from '../../lib/diagnostics';
 import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 import { useAuth } from '../../hooks/useAuth';
@@ -54,7 +56,7 @@ interface SettingsModalProps {
    isSigningIn
  }) => {
   const { state, dispatch } = useApp();
-  const { setShowSettings, setShowProverbModal } = useUi();
+  const { setShowSettings, setShowProverbModal, showToast } = useUi();
   const { user } = useAuth();
   const [settingsTab, setSettingsTab] = React.useState<'general' | 'journals' | 'devotionals'>('general');
   const [newDevotional, setNewDevotional] = React.useState({ name: '', description: '', url: '' });
@@ -254,7 +256,28 @@ interface SettingsModalProps {
                     <RefreshCw size={18} />
                   </button>
 
-                  <button 
+                  <button
+                    onClick={async () => {
+                      const report = getDiagnosticReport();
+                      try {
+                        await navigator.clipboard.writeText(report);
+                        showToast('Diagnostic report copied — paste it to support', 'success');
+                      } catch {
+                        if (navigator.share) {
+                          navigator.share({ text: report }).catch(() => {});
+                        } else {
+                          showToast('Could not copy automatically. Check the browser console for the report.', 'error');
+                          console.log(report);
+                        }
+                      }
+                    }}
+                    className="w-full p-5 flex items-center justify-between border border-[var(--audible-border)] text-[var(--audible-text-primary)] hover:bg-zinc-50 dark:hover:bg-white/5 rounded-xl transition-colors font-black uppercase text-[10px] tracking-[0.12em]"
+                  >
+                    <span>Copy Diagnostic Report</span>
+                    <Bug size={18} />
+                  </button>
+
+                  <button
                     onClick={onResetProgress}
                     className="w-full p-5 flex items-center justify-between border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors font-black uppercase text-[10px] tracking-[0.12em]"
                   >
