@@ -35,7 +35,14 @@ const COLLECTION_COUNT = 6;
  * each snapshot is dispatched straight into the reducer, which owns
  * merge/conflict logic.
  */
+// Listeners that error out (e.g. transient permission-denied during a rules
+// rollout) don't auto-retry in the Firestore SDK, so without a manual
+// re-subscribe the user would be stuck showing a sync error indefinitely.
+const RETRY_DELAY_MS = 15000;
+
 export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<AppAction>, setSyncStatus: (status: 'synced' | 'syncing' | 'error' | 'idle') => void) {
+  const [retryCount, setRetryCount] = React.useState(0);
+
   useEffect(() => {
     if (!user) return;
 
@@ -44,7 +51,16 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     const firstFire = new Set<string>();
 
     setSyncStatus('syncing');
-    logDiagnostic('sync', 'info', 'Starting cloud sync', { uid: user.uid.slice(0, 6) });
+    logDiagnostic('sync', 'info', 'Starting cloud sync', { uid: user.uid.slice(0, 6), attempt: retryCount + 1 });
+
+    let retryScheduled = false;
+    const scheduleRetry = () => {
+      if (retryScheduled) return;
+      retryScheduled = true;
+      setTimeout(() => {
+        if (isActive) setRetryCount((c) => c + 1);
+      }, RETRY_DELAY_MS);
+    };
 
     const listen = <S extends DocumentSnapshot | QuerySnapshot>(
       name: string,
@@ -64,6 +80,7 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
         console.error(`${name} sync error:`, err);
         logDiagnostic('sync', 'error', `${name} listener error`, err);
         setSyncStatus('error');
+        scheduleRetry();
       }));
     };
 
@@ -128,5 +145,5 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
       isActive = false;
       unsubs.forEach(u => u());
     };
-  }, [user, dispatch, setSyncStatus]);
+  }, [user, dispatch, setSyncStatus, retryCount]);
 }
