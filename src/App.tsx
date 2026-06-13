@@ -45,7 +45,7 @@ export default function App() {
   const { user, loading: isAuthLoading, login, logout } = useAuth();
   const [isSigningIn, setIsSigningIn] = React.useState(false);
 
-  const sync = useSyncState(user, dispatch);
+  const sync = useSyncState(user, dispatch, state);
   const isHydrated = state.isCloudHydrated || (!user && !isAuthLoading);
 
   const prefersDark = usePrefersDark();

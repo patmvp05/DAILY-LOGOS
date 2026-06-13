@@ -9,8 +9,9 @@ import { useFirestoreSync } from './useFirestoreSync';
 
 import { type User } from 'firebase/auth';
 import { type AppAction } from '../state/appReducer';
+import { type AppState } from '../types';
 
-export function useSyncState(user: User | null, dispatch: React.Dispatch<AppAction>) {
+export function useSyncState(user: User | null, dispatch: React.Dispatch<AppAction>, state: AppState) {
   const [writeSyncStatus, setWriteSyncStatus] = useState<'synced' | 'syncing' | 'error' | 'idle' | 'offline'>('idle');
   const [cloudSyncStatus, setCloudSyncStatus] = useState<'idle' | 'syncing' | 'synced' | 'error'>('idle');
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
@@ -43,7 +44,7 @@ export function useSyncState(user: User | null, dispatch: React.Dispatch<AppActi
     }
   }, []);
 
-  useFirestoreSync(user, dispatch, onFirestoreSyncStatusChange);
+  useFirestoreSync(user, dispatch, onFirestoreSyncStatusChange, state);
 
   return {
     syncStatus,

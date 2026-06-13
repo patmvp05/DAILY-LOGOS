@@ -26,6 +26,7 @@ import {
 import { AppAction } from '../state/appReducer';
 import { Progress, HistoryEntry, ProverbJournal, Devotional, AppState, UserSettings } from '../types';
 import { logDiagnostic } from '../lib/diagnostics';
+import { writeActionBatch } from '../lib/sync';
 
 const COLLECTION_COUNT = 6;
 
@@ -40,8 +41,15 @@ const COLLECTION_COUNT = 6;
 // re-subscribe the user would be stuck showing a sync error indefinitely.
 const RETRY_DELAY_MS = 15000;
 
-export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<AppAction>, setSyncStatus: (status: 'synced' | 'syncing' | 'error' | 'idle') => void) {
+export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<AppAction>, setSyncStatus: (status: 'synced' | 'syncing' | 'error' | 'idle') => void, state: AppState) {
   const [retryCount, setRetryCount] = React.useState(0);
+
+  // Mirrors the latest local state so listener callbacks (set up once per
+  // sign-in/retry) can compare against it without re-subscribing.
+  const stateRef = React.useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   useEffect(() => {
     if (!user) return;
@@ -113,6 +121,26 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
         return { ...data, updatedAtMillis } as unknown as Progress;
       });
       dispatch({ type: 'CLOUD_SYNC_PROGRESS', progress });
+
+      // A local write can silently fail to reach Firestore (e.g. a transient
+      // permission/network error that the SDK doesn't retry). If this device's
+      // progress is further along than the cloud's for a category, push it back
+      // up so other devices catch up too.
+      const cloudMap = new Map(progress.map(p => [p.categoryId, p]));
+      stateRef.current.progress.forEach((localProg) => {
+        const cloudProg = cloudMap.get(localProg.categoryId);
+        const isLocalFurther = !cloudProg ||
+          (localProg.bookIndex > cloudProg.bookIndex) ||
+          (localProg.bookIndex === cloudProg.bookIndex && localProg.chapter > cloudProg.chapter);
+        const samePosition = cloudProg && localProg.bookIndex === cloudProg.bookIndex && localProg.chapter === cloudProg.chapter;
+        const localNewer = samePosition && (localProg.updatedAtMillis || 0) > (cloudProg!.updatedAtMillis || 0);
+
+        if (isLocalFurther || localNewer) {
+          writeActionBatch(user.uid, { progress: localProg }).catch((err) => {
+            logDiagnostic('sync', 'error', 'Progress reconciliation write failed', err);
+          });
+        }
+      });
     });
 
     // 3. Completed books
@@ -138,7 +166,18 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     // 6. History — unbounded for accurate streak calculation
     const historyQuery = query(getHistoryCollection(user.uid), orderBy('timestampMillis', 'desc'));
     listen<QuerySnapshot>('History', historyQuery, (snap) => {
-      dispatch({ type: 'CLOUD_SYNC_HISTORY', history: snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as HistoryEntry)) });
+      const history = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as HistoryEntry));
+      dispatch({ type: 'CLOUD_SYNC_HISTORY', history });
+
+      // Same recovery as Progress: push any local entries that never made it
+      // to Firestore (e.g. a write that silently failed) back up.
+      const cloudIds = new Set(history.map(h => h.id));
+      const missing = stateRef.current.history.filter(h => !cloudIds.has(h.id));
+      if (missing.length > 0) {
+        writeActionBatch(user.uid, { history: missing }).catch((err) => {
+          logDiagnostic('sync', 'error', 'History reconciliation write failed', err);
+        });
+      }
     });
 
     return () => {
