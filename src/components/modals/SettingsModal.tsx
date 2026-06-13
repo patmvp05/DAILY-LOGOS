@@ -56,7 +56,7 @@ interface SettingsModalProps {
    isSigningIn
  }) => {
   const { state, dispatch } = useApp();
-  const { setShowSettings, setShowProverbModal, showToast } = useUi();
+  const { setShowSettings, setShowProverbModal, setJournalDraft, showToast } = useUi();
   const { user } = useAuth();
   const [settingsTab, setSettingsTab] = React.useState<'general' | 'journals' | 'devotionals'>('general');
   const [newDevotional, setNewDevotional] = React.useState({ name: '', description: '', url: '' });
@@ -323,8 +323,9 @@ interface SettingsModalProps {
                     <p className="text-sm font-medium leading-relaxed text-[var(--audible-text-primary)] line-clamp-3">
                       {entry.content}
                     </p>
-                    <button 
+                    <button
                       onClick={() => {
+                        setJournalDraft({ id: entry.id, content: entry.content, verse: entry.verse || '' });
                         onClose();
                         setShowProverbModal(true);
                       }}
