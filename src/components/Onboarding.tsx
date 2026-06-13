@@ -37,8 +37,14 @@ export function Onboarding({ onComplete }: { onComplete: (date: string) => void 
           className="w-full bg-white dark:bg-zinc-900 border-2 border-[var(--audible-border)] rounded-xl p-4 text-xl font-bold focus:border-brand focus:outline-none transition-colors mb-8"
         />
 
-        <button 
-          onClick={() => onComplete(new Date(date).toISOString())}
+        <button
+          onClick={() => {
+            // Parse YYYY-MM-DD into a local-noon Date (matching SettingsModal)
+            // so the plan start date doesn't shift a day earlier in timezones
+            // west of UTC, where new Date("YYYY-MM-DD") is UTC midnight.
+            const [year, month, day] = date.split('-').map(Number);
+            onComplete(new Date(year, month - 1, day, 12, 0, 0).toISOString());
+          }}
           className="w-full bg-brand text-white font-black uppercase py-4 rounded-xl flex items-center justify-center gap-3 hover:bg-brand/90 transition-all group active:scale-[0.98]"
         >
           Begin My Journey

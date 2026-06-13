@@ -78,8 +78,10 @@ const CategoryPlanModal: React.FC<CategoryPlanModalProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
                   {cat.books.map(book => {
                     const isCompleted = state.completedBooks.has(`${cat.id}:${book.name}`);
-                    const prog = state.progress.find(p => p.categoryId === cat.id)!;
-                    const isCurrent = cat.books[prog.bookIndex].name === book.name;
+                    // Progress may be absent during cloud hydration or for a
+                    // newly added category — guard rather than crash the modal.
+                    const prog = state.progress.find(p => p.categoryId === cat.id);
+                    const isCurrent = !!prog && cat.books[prog.bookIndex]?.name === book.name;
                     
                     return (
                       <motion.button 
