@@ -57,24 +57,25 @@ export function useReadingActions(
     const currentProgress = currentState.progress.find(p => p.categoryId === categoryId);
     if (!currentProgress) return;
 
-    const { progress, newlyCompletedKeys, historySteps } = calculateNextProgress(
-      categoryId, 
-      amount, 
-      currentProgress, 
+    const { progress, newlyCompletedKeys, revertedCompletedKeys, historySteps } = calculateNextProgress(
+      categoryId,
+      amount,
+      currentProgress,
       currentState.completedBooks
     );
 
     const now = new Date();
     const localDate = format(now, 'yyyy-MM-dd');
-    
-    currentDispatch({ 
-      type: 'UPDATE_PROGRESS', 
-      categoryId, 
-      bookIndex: progress.bookIndex, 
+
+    currentDispatch({
+      type: 'UPDATE_PROGRESS',
+      categoryId,
+      bookIndex: progress.bookIndex,
       chapter: progress.chapter,
       localDate
     });
     newlyCompletedKeys.forEach(key => currentDispatch({ type: 'TOGGLE_BOOK', key }));
+    revertedCompletedKeys.forEach(key => currentDispatch({ type: 'TOGGLE_BOOK', key }));
     
     const category = CATEGORIES_BY_ID.get(categoryId)!;
     const historyEntries: HistoryEntry[] = historySteps.map((step, index) => {
@@ -99,6 +100,10 @@ export function useReadingActions(
         progress,
         history: historyEntries,
         completedBooks: newlyCompletedKeys.map(k => {
+          const [catId, bookName] = k.split(':');
+          return { categoryId: catId, bookName };
+        }),
+        deletedBooks: revertedCompletedKeys.map(k => {
           const [catId, bookName] = k.split(':');
           return { categoryId: catId, bookName };
         })

@@ -238,6 +238,30 @@ function expect(name: string, cond: boolean) {
   expect('overshoot: completes Song once', r.newlyCompletedKeys.filter(k => k === 'wisdom:Song of Solomon').length === 1);
 }
 
+// ── Round 5b: stepping back across a book boundary un-completes it ─────
+// Forward across Job→Proverbs marks Job complete; stepping back into Job
+// (chapter 42) must revert that completion so completedBooks stays
+// consistent with the "current chapter" position, and re-advancing from
+// there behaves exactly like the original forward cross (no stale "already
+// completed" skip).
+{
+  const fwd = calculateNextProgress('wisdom', 1, { categoryId: 'wisdom', bookIndex: 0, chapter: 42 }, new Set());
+  expect('back-nav setup: Job completed on forward cross', fwd.newlyCompletedKeys.includes('wisdom:Job'));
+
+  const completedAfterFwd = new Set(fwd.newlyCompletedKeys);
+  const back = calculateNextProgress('wisdom', -1, fwd.progress, completedAfterFwd);
+  expect('back-nav: returns to Job ch42', back.progress.bookIndex === 0 && back.progress.chapter === 42);
+  expect('back-nav: no history logged', back.historySteps.length === 0);
+  expect('back-nav: Job reverted from completed', back.revertedCompletedKeys.includes('wisdom:Job'));
+
+  const completedAfterBack = new Set([...completedAfterFwd].filter(k => !back.revertedCompletedKeys.includes(k)));
+  expect('back-nav: completedBooks no longer has Job', !completedAfterBack.has('wisdom:Job'));
+
+  const fwdAgain = calculateNextProgress('wisdom', 1, back.progress, completedAfterBack);
+  expect('back-nav: re-advance logs Job 42', fwdAgain.historySteps.length === 1 && fwdAgain.historySteps[0].chapter === 42);
+  expect('back-nav: re-advance re-completes Job', fwdAgain.newlyCompletedKeys.includes('wisdom:Job'));
+}
+
 // ── Round 6: HISTORY_CAP enforcement ──────────────────────────────────
 function hist(id: string, ms: number): HistoryEntry {
   return { id, timestamp: new Date(ms).toISOString(), timestampMillis: ms, localDate: '2026-01-01', categoryId: 'wisdom', categoryName: 'Wisdom', bookName: 'Job', chapter: 1, readTime: 1 };

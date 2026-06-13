@@ -15,6 +15,7 @@ export interface HistoryStep {
 export interface CalculatedProgress {
   progress: ProgressType;
   newlyCompletedKeys: string[];
+  revertedCompletedKeys: string[];
   historySteps: HistoryStep[];
 }
 
@@ -33,6 +34,7 @@ export function calculateNextProgress(
   let currentBookIndex = currentProgress.bookIndex;
   let currentChapter = currentProgress.chapter;
   const newlyCompletedKeys: string[] = [];
+  const revertedCompletedKeys: string[] = [];
   const historySteps: HistoryStep[] = [];
 
   if (chaptersToMove > 0) {
@@ -80,13 +82,13 @@ export function calculateNextProgress(
       } else if (currentBookIndex > 0) {
         currentBookIndex--;
         currentChapter = category.books[currentBookIndex].chapters;
-        
-        // Remove book from completed if we move back into it
-        // const bookKey = `${categoryId}:${category.books[currentBookIndex].name}`;
-        // if (completedBooks.has(bookKey)) {
-          // Note: newlyCompletedKeys doesn't track removals usually, 
-          // but we can't easily undo in this pure function without changing signature.
-        // }
+
+        // Moving back into a previously-completed book un-completes it, so
+        // re-advancing past it doesn't log its last chapter a second time.
+        const bookKey = `${categoryId}:${category.books[currentBookIndex].name}`;
+        if (completedBooks.has(bookKey) && !revertedCompletedKeys.includes(bookKey)) {
+          revertedCompletedKeys.push(bookKey);
+        }
       } else {
         currentChapter = 1;
         break;
@@ -104,6 +106,7 @@ export function calculateNextProgress(
       localDate: new Date().toLocaleDateString('en-CA') // YYYY-MM-DD
     },
     newlyCompletedKeys,
+    revertedCompletedKeys,
     historySteps
   };
 }
