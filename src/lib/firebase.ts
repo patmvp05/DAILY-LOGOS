@@ -4,23 +4,25 @@
  */
 
 import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  signInWithRedirect, 
-  getRedirectResult, 
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  connectAuthEmulator
 } from 'firebase/auth';
-import { 
-  initializeFirestore, 
-  persistentLocalCache, 
+import {
+  initializeFirestore,
+  persistentLocalCache,
   persistentMultipleTabManager,
   getFirestore,
-  doc, 
-  collection, 
+  connectFirestoreEmulator,
+  doc,
+  collection,
   getDocsFromCache,
   getDocs,
   CollectionReference,
@@ -35,14 +37,22 @@ const isConfigValid = firebaseConfig && firebaseConfig.apiKey && firebaseConfig.
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-// Initialize Firestore with persistent local cache for offline-first behavior
+// Local dev/testing against the Firebase emulator suite (see firebase.json).
+// Enable with VITE_USE_FIREBASE_EMULATOR=true (e.g. in .env.local).
+const useEmulator = import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true';
+
+// Initialize Firestore with persistent local cache for offline-first behavior.
+// The emulator skips the persistent cache (it conflicts with connectFirestoreEmulator,
+// which must run before any other Firestore call) and uses a plain in-memory instance.
 let db: Firestore;
-if (isConfigValid) {
+if (useEmulator) {
+  db = getFirestore(app);
+} else if (isConfigValid) {
   try {
     // If we're using the placeholder, this might fail or be useless, but it prevents the build error
     db = initializeFirestore(app, {
-      localCache: persistentLocalCache({ 
-        tabManager: persistentMultipleTabManager() 
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
       })
     }, (firebaseConfig as { firestoreDatabaseId?: string }).firestoreDatabaseId || '(default)');
   } catch (e) {
@@ -55,6 +65,12 @@ if (isConfigValid) {
   db = getFirestore(app);
 }
 export { db };
+
+if (useEmulator) {
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+  connectFirestoreEmulator(db, '127.0.0.1', 8080);
+  console.info('[firebase] Connected to local emulator suite (auth:9099, firestore:8080)');
+}
 
 /**
  * Cache-first collection/query fetcher.
