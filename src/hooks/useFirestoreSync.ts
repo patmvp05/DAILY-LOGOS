@@ -23,7 +23,7 @@ import {
   getDevotionalsCollection,
   getCompletedBooksCollection
 } from '../lib/firebase';
-import { AppAction } from '../state/appReducer';
+import { AppAction, resolveProgressConflict } from '../state/appReducer';
 import { Progress, HistoryEntry, ProverbJournal, Devotional, AppState, UserSettings } from '../types';
 import { logDiagnostic } from '../lib/diagnostics';
 import { writeActionBatch } from '../lib/sync';
@@ -123,20 +123,20 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
       dispatch({ type: 'CLOUD_SYNC_PROGRESS', progress });
 
       // A local write can silently fail to reach Firestore (e.g. a transient
-      // permission/network error that the SDK doesn't retry). If this device's
-      // progress is further along than the cloud's for a category, push it back
-      // up so other devices catch up too.
+      // permission/network error that the SDK doesn't retry). Re-run the same
+      // conflict resolution used by the reducer; if it picks the local side
+      // over what's in this cloud snapshot, the cloud is missing that write
+      // and other devices won't catch up — push it back up.
       const cloudMap = new Map(progress.map(p => [p.categoryId, p]));
       stateRef.current.progress.forEach((localProg) => {
         const cloudProg = cloudMap.get(localProg.categoryId);
-        const isLocalFurther = !cloudProg ||
-          (localProg.bookIndex > cloudProg.bookIndex) ||
-          (localProg.bookIndex === cloudProg.bookIndex && localProg.chapter > cloudProg.chapter);
-        const samePosition = cloudProg && localProg.bookIndex === cloudProg.bookIndex && localProg.chapter === cloudProg.chapter;
-        const localNewer = samePosition && (localProg.updatedAtMillis || 0) > (cloudProg!.updatedAtMillis || 0);
+        const winner = cloudProg ? resolveProgressConflict(localProg, cloudProg) : localProg;
+        const cloudReflectsWinner = cloudProg &&
+          winner.bookIndex === cloudProg.bookIndex &&
+          winner.chapter === cloudProg.chapter;
 
-        if (isLocalFurther || localNewer) {
-          writeActionBatch(user.uid, { progress: localProg }).catch((err) => {
+        if (!cloudReflectsWinner) {
+          writeActionBatch(user.uid, { progress: winner }).catch((err) => {
             logDiagnostic('sync', 'error', 'Progress reconciliation write failed', err);
           });
         }

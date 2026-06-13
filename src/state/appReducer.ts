@@ -41,9 +41,14 @@ function isFingerprintMatch<T extends { id: string }>(a: T[], b: T[]): boolean {
 
 /**
  * Robust conflict resolver for linear reading plan progress.
- * Self-heals clock drifts by prioritizing actual forward progress in readings.
+ * Self-heals clock drifts by prioritizing actual forward progress in readings,
+ * but defers to a clearly newer write (e.g. a manual reset or jump-to-book,
+ * which intentionally move progress backward) once the gap is large enough
+ * to rule out clock drift / near-simultaneous edits.
  */
-function resolveProgressConflict(localp: ProgressType, cloudp: ProgressType): ProgressType {
+const CONFLICT_TIMESTAMP_GAP_MS = 5 * 60 * 1000; // 5 minutes
+
+export function resolveProgressConflict(localp: ProgressType, cloudp: ProgressType): ProgressType {
   const localTime = localp.updatedAtMillis || (localp.lastReadAt ? new Date(localp.lastReadAt).getTime() : 0);
   const cloudTime = cloudp.updatedAtMillis || (cloudp.lastReadAt ? new Date(cloudp.lastReadAt).getTime() : 0);
 
@@ -52,25 +57,21 @@ function resolveProgressConflict(localp: ProgressType, cloudp: ProgressType): Pr
     return cloudTime > localTime ? cloudp : localp;
   }
 
-  // 2. Linear progression check: further reading progress in the Bible plan wins
-  const isCloudFurther = (cloudp.bookIndex > localp.bookIndex) || 
+  // 2. If one side is clearly newer, trust it even if it moves progress
+  // backward (a deliberate reset/jump should win over a stale device).
+  if (Math.abs(cloudTime - localTime) > CONFLICT_TIMESTAMP_GAP_MS) {
+    return cloudTime > localTime ? cloudp : localp;
+  }
+
+  // 3. Near-simultaneous edits on two devices: self-heal by keeping
+  // whichever device progressed furthest in the reading plan.
+  const isCloudFurther = (cloudp.bookIndex > localp.bookIndex) ||
                          (cloudp.bookIndex === localp.bookIndex && cloudp.chapter > localp.chapter);
+  if (isCloudFurther) return cloudp;
 
-  if (isCloudFurther) {
-    return cloudp;
-  }
-
-  const isLocalFurther = (localp.bookIndex > cloudp.bookIndex) || 
+  const isLocalFurther = (localp.bookIndex > cloudp.bookIndex) ||
                          (localp.bookIndex === cloudp.bookIndex && localp.chapter > cloudp.chapter);
-
-  if (isLocalFurther) {
-    return localp;
-  }
-
-  // 3. Fallback: If cloud differs and is significantly newer (e.g. they reset/jumped backwards manually)
-  if (cloudTime > localTime + 120000) {
-    return cloudp;
-  }
+  if (isLocalFurther) return localp;
 
   return cloudTime > localTime ? cloudp : localp;
 }
