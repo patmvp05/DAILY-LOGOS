@@ -30,13 +30,21 @@ export type AppAction =
 export const HISTORY_CAP = 2000; // Increased from 50 to ensure year-long streak accuracy
 
 /**
- * Checks if two lists of objects are likely identical using a fast fingerprint.
- * (Same length + same first/last IDs)
+ * Order-insensitive deep equality for id-keyed lists. Unlike a length +
+ * first/last-id fingerprint, this detects edits to an *existing* item
+ * (same id, same count) so e.g. a journal whose text changed on another
+ * device actually propagates instead of being silently discarded.
  */
-function isFingerprintMatch<T extends { id: string }>(a: T[], b: T[]): boolean {
+function listContentEqual<T extends { id: string }>(a: T[], b: T[]): boolean {
   if (a.length !== b.length) return false;
-  if (a.length === 0) return true;
-  return a[0].id === b[0].id && a[a.length - 1].id === b[b.length - 1].id;
+  // JSON with sorted top-level keys canonicalizes field order so that two
+  // equivalent flat objects compare equal regardless of key ordering.
+  const norm = (o: T) => JSON.stringify(o, Object.keys(o as object).sort());
+  const byId = new Map(a.map((x) => [x.id, norm(x)]));
+  for (const item of b) {
+    if (byId.get(item.id) !== norm(item)) return false;
+  }
+  return true;
 }
 
 /**
@@ -254,12 +262,12 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'CLOUD_SYNC_JOURNALS': {
       if (action.journals.length === 0 && state.proverbJournals.length > 0) return state;
-      if (isFingerprintMatch(state.proverbJournals, action.journals)) return state;
+      if (listContentEqual(state.proverbJournals, action.journals)) return state;
       return { ...state, proverbJournals: action.journals };
     }
     case 'CLOUD_SYNC_DEVOTIONALS': {
       if (action.devotionals.length === 0 && state.customDevotionals.length > 0) return state;
-      if (isFingerprintMatch(state.customDevotionals, action.devotionals)) return state;
+      if (listContentEqual(state.customDevotionals, action.devotionals)) return state;
       return { ...state, customDevotionals: action.devotionals };
     }
     case 'CLOUD_SYNC_HISTORY': {
@@ -278,13 +286,15 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       
       const merged = Array.from(mergedMap.values());
       merged.sort((a, b) => (b.timestampMillis || 0) - (a.timestampMillis || 0));
-      
+      // Bound growth so memory/storage stays sane over years of reading.
+      if (merged.length > HISTORY_CAP) merged.length = HISTORY_CAP;
+
       // Precise check to avoid unnecessary re-renders
-      if (state.history.length === merged.length && 
+      if (state.history.length === merged.length &&
           state.history.every((h, i) => h.id === merged[i].id)) {
         return state;
       }
-      
+
       return { ...state, history: merged };
     }
     case 'UPDATE_PROGRESS': {
@@ -382,7 +392,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       if (isOutOfOrder) {
         updatedHistory.sort((a, b) => (b.timestampMillis || 0) - (a.timestampMillis || 0));
       }
-      
+      if (updatedHistory.length > HISTORY_CAP) updatedHistory.length = HISTORY_CAP;
+
       return { ...state, history: updatedHistory };
     }
     case 'CLEAR_HISTORY': {

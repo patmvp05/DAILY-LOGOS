@@ -38,32 +38,38 @@ export function calculateNextProgress(
   if (chaptersToMove > 0) {
     while (chaptersToMove > 0) {
       const book = category.books[currentBookIndex];
-      // Record current state before advancing
+      const bookKey = `${categoryId}:${book.name}`;
+      const atLastBook = currentBookIndex >= category.books.length - 1;
+
+      // Terminal position (last chapter of the final book): there's nowhere
+      // further to advance. Log the final chapter and complete the book exactly
+      // once; any further taps here must NOT re-log the same chapter.
+      if (currentChapter >= book.chapters && atLastBook) {
+        if (!completedBooks.has(bookKey) && !newlyCompletedKeys.includes(bookKey)) {
+          historySteps.push({ bookIndex: currentBookIndex, chapter: currentChapter, bookName: book.name });
+          newlyCompletedKeys.push(bookKey);
+        }
+        break;
+      }
+
+      // Record the chapter we're reading now, then advance.
       historySteps.push({
         bookIndex: currentBookIndex,
         chapter: currentChapter,
         bookName: book.name
       });
 
-      // We are moving one chapter forward.
-      // If we are at the last chapter of the book, we move to the next book.
       if (currentChapter < book.chapters) {
         currentChapter++;
       } else {
-        const bookKey = `${categoryId}:${book.name}`;
+        // Last chapter of a non-final book → mark complete and roll forward.
         if (!completedBooks.has(bookKey)) {
           newlyCompletedKeys.push(bookKey);
         }
-        if (currentBookIndex < category.books.length - 1) {
-          currentBookIndex++;
-          currentChapter = 1;
-        } else {
-          // Stay at last chapter of last book
-          // We already recorded the last chapter as read
-          break;
-        }
+        currentBookIndex++;
+        currentChapter = 1;
       }
-      
+
       chaptersToMove--;
     }
   } else if (chaptersToMove < 0) {

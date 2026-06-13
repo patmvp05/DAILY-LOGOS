@@ -5,8 +5,9 @@
  * Standalone scenario harness for progress conflict resolution + the sync
  * reconciliation decision. Run with: npx tsx scripts/test-conflict.mts
  */
-import { resolveProgressConflict, appReducer } from '../src/state/appReducer';
-import type { Progress, AppState } from '../src/types';
+import { resolveProgressConflict, appReducer, HISTORY_CAP } from '../src/state/appReducer';
+import { calculateNextProgress } from '../src/lib/bible';
+import type { Progress, AppState, HistoryEntry, ProverbJournal } from '../src/types';
 
 let pass = 0;
 let fail = 0;
@@ -196,6 +197,85 @@ for (let i = 0; i < 20000; i++) {
   fuzzRuns++;
 }
 if (!failures.length) { pass++; console.log(`fuzz: ${fuzzRuns} random pairs upheld all invariants`); }
+
+// ── Round 5: reading-plan advancement (terminal log dedup) ────────────
+// 'wisdom' = [Job(42), Proverbs(31), Ecclesiastes(12), Song of Solomon(8)].
+function expect(name: string, cond: boolean) {
+  if (cond) { pass++; } else { fail++; failures.push(`✗ ${name}`); }
+}
+// Normal advance: log exactly the chapter being read, move forward one.
+{
+  const r = calculateNextProgress('wisdom', 1, { categoryId: 'wisdom', bookIndex: 0, chapter: 1 }, new Set());
+  expect('advance: 1 step logged', r.historySteps.length === 1 && r.historySteps[0].chapter === 1);
+  expect('advance: progress → ch2', r.progress.bookIndex === 0 && r.progress.chapter === 2);
+  expect('advance: nothing completed', r.newlyCompletedKeys.length === 0);
+}
+// Cross a book boundary: log Job 42, complete Job, roll to Proverbs 1.
+{
+  const r = calculateNextProgress('wisdom', 1, { categoryId: 'wisdom', bookIndex: 0, chapter: 42 }, new Set());
+  expect('boundary: logs Job 42', r.historySteps.length === 1 && r.historySteps[0].chapter === 42);
+  expect('boundary: Job completed', r.newlyCompletedKeys.includes('wisdom:Job'));
+  expect('boundary: → Proverbs 1', r.progress.bookIndex === 1 && r.progress.chapter === 1);
+}
+// Terminal first tap: at Song of Solomon (idx3) ch8 → log once, complete once.
+{
+  const r = calculateNextProgress('wisdom', 1, { categoryId: 'wisdom', bookIndex: 3, chapter: 8 }, new Set());
+  expect('terminal first: logs ch8 once', r.historySteps.length === 1 && r.historySteps[0].chapter === 8);
+  expect('terminal first: completes Song', r.newlyCompletedKeys.includes('wisdom:Song of Solomon'));
+  expect('terminal first: stays at ch8', r.progress.bookIndex === 3 && r.progress.chapter === 8);
+}
+// Terminal repeat tap (book already complete): NO new history, NO re-complete.
+{
+  const done = new Set(['wisdom:Song of Solomon']);
+  const r = calculateNextProgress('wisdom', 1, { categoryId: 'wisdom', bookIndex: 3, chapter: 8 }, done);
+  expect('terminal repeat: no re-log', r.historySteps.length === 0);
+  expect('terminal repeat: no re-complete', r.newlyCompletedKeys.length === 0);
+}
+// Multi-tap overshoot at terminal: amount=5 from Song ch6 logs 6,7,8 then stops.
+{
+  const r = calculateNextProgress('wisdom', 5, { categoryId: 'wisdom', bookIndex: 3, chapter: 6 }, new Set());
+  expect('overshoot: logs 6,7,8 only', r.historySteps.map(s => s.chapter).join(',') === '6,7,8');
+  expect('overshoot: completes Song once', r.newlyCompletedKeys.filter(k => k === 'wisdom:Song of Solomon').length === 1);
+}
+
+// ── Round 6: HISTORY_CAP enforcement ──────────────────────────────────
+function hist(id: string, ms: number): HistoryEntry {
+  return { id, timestamp: new Date(ms).toISOString(), timestampMillis: ms, localDate: '2026-01-01', categoryId: 'wisdom', categoryName: 'Wisdom', bookName: 'Job', chapter: 1, readTime: 1 };
+}
+{
+  const full: HistoryEntry[] = Array.from({ length: HISTORY_CAP }, (_, i) => hist('h' + i, 1_000_000 - i));
+  const s = baseState([]); s.history = full;
+  const next = appReducer(s, { type: 'LOG_HISTORY', entry: hist('newest', 2_000_000) });
+  expect('cap: LOG_HISTORY stays at cap', next.history.length === HISTORY_CAP);
+  expect('cap: newest kept at head', next.history[0].id === 'newest');
+  expect('cap: oldest dropped', !next.history.some(h => h.id === 'h' + (HISTORY_CAP - 1)));
+}
+{
+  const cloud: HistoryEntry[] = Array.from({ length: HISTORY_CAP + 50 }, (_, i) => hist('c' + i, 5_000_000 - i));
+  const next = appReducer(baseState([]), { type: 'CLOUD_SYNC_HISTORY', history: cloud });
+  expect('cap: CLOUD_SYNC truncates', next.history.length === HISTORY_CAP);
+}
+
+// ── Round 7: journal/devotional edit sync (content-aware compare) ──────
+function jr(id: string, content: string): ProverbJournal {
+  return { id, date: '2026-01-01', chapter: 1, content, verse: 'v' };
+}
+{
+  const local = [jr('j1', 'original'), jr('j2', 'two')];
+  const s = baseState([]); s.proverbJournals = local;
+  // Edit j1's content on another device (same id, same count).
+  const edited = [jr('j1', 'EDITED'), jr('j2', 'two')];
+  const next = appReducer(s, { type: 'CLOUD_SYNC_JOURNALS', journals: edited });
+  expect('journal edit: propagates', next.proverbJournals.find(j => j.id === 'j1')!.content === 'EDITED');
+}
+{
+  const local = [jr('j1', 'same'), jr('j2', 'two')];
+  const s = baseState([]); s.proverbJournals = local;
+  // Identical content (different array order) → no change, same reference.
+  const same = [jr('j2', 'two'), jr('j1', 'same')];
+  const next = appReducer(s, { type: 'CLOUD_SYNC_JOURNALS', journals: same });
+  expect('journal identical: no re-render', next === s);
+}
 
 console.log(`\nPASS ${pass} / ${pass + fail}`);
 if (failures.length) {
