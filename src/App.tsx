@@ -58,8 +58,9 @@ export default function App() {
     setShowSyncCheck(sync.showSyncCheck);
   }, [sync.syncStatus, sync.lastSyncTime, sync.showSyncCheck, setSyncStatus, setLastSyncTime, setShowSyncCheck]);
 
-  // Handle lack of startDate (Onboarding)
-  const needsOnboarding = user && isHydrated && !state.settings.startDate;
+  // Handle lack of startDate (Onboarding) — applies to guests too, since
+  // dayNumber/"Day N" tracking needs a startDate regardless of sign-in state.
+  const needsOnboarding = isHydrated && !state.settings.startDate;
 
   const handleSetInitialDate = useCallback((date: string) => {
     dispatch({ type: 'SET_START_DATE', date });
