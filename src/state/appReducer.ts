@@ -54,7 +54,7 @@ function listContentEqual<T extends { id: string }>(a: T[], b: T[]): boolean {
  * which intentionally move progress backward) once the gap is large enough
  * to rule out clock drift / near-simultaneous edits.
  */
-const CONFLICT_TIMESTAMP_GAP_MS = 5 * 60 * 1000; // 5 minutes
+const CONFLICT_TIMESTAMP_GAP_MS = 4 * 60 * 60 * 1000; // 4 hours
 
 export function resolveProgressConflict(localp: ProgressType, cloudp: ProgressType): ProgressType {
   const localTime = localp.updatedAtMillis || (localp.lastReadAt ? new Date(localp.lastReadAt).getTime() : 0);
