@@ -43,61 +43,73 @@ function expectRepush(name: string, local: Progress, cloud: Progress | undefined
 const T = 1_700_000_000_000; // arbitrary base time
 const MIN = 60_000;
 
-// ── Conflict resolution ────────────────────────────────────────────────
-// 1. Same position, cloud newer → cloud (metadata alignment)
+// ── Conflict resolution (monotonic: furthest position wins, clock-free) ─
+// 1. Same position, cloud newer → cloud (metadata alignment only)
 expectWinner('same-pos cloud newer', p('a', 2, 5, T), p('a', 2, 5, T + 1000), 'cloud');
 // 2. Same position, local newer → local
 expectWinner('same-pos local newer', p('a', 2, 5, T + 1000), p('a', 2, 5, T), 'local');
-// 3. Local further, near-simultaneous (offline conflict) → local (forward wins)
-expectWinner('local further, recent', p('a', 3, 1, T + 1000), p('a', 2, 8, T), 'local');
-// 4. Cloud further, near-simultaneous → cloud
-expectWinner('cloud further, recent', p('a', 2, 8, T), p('a', 3, 1, T + 1000), 'cloud');
-// 5. RESET: local is far ahead but cloud is a deliberate reset 10min later → cloud wins
-expectWinner('reset: cloud newer & behind', p('a', 30, 12, T), p('a', 0, 1, T + 10 * MIN), 'cloud');
-// 6. JUMP BACKWARD on this device: local newer & behind → local wins
-expectWinner('jump back: local newer & behind', p('a', 0, 1, T + 10 * MIN), p('a', 30, 12, T), 'local');
-// 7. Stale device ahead, cloud only slightly newer (within 5min, drift) → furthest (local)
+// 3. Local further → local (forward wins, regardless of clock)
+expectWinner('local further', p('a', 3, 1, T + 1000), p('a', 2, 8, T), 'local');
+// 4. Cloud further → cloud
+expectWinner('cloud further', p('a', 2, 8, T), p('a', 3, 1, T + 1000), 'cloud');
+// 5. Backward move loses to a further position even when its clock is newer.
+//    (A reset/backward-jump on a stale device does NOT clobber real progress.
+//    Reset propagation is handled separately by clearing the cloud collections.)
+expectWinner('further beats newer-but-behind cloud', p('a', 30, 12, T), p('a', 0, 1, T + 10 * MIN), 'local');
+// 6. Symmetric: newer-but-behind local loses to a further cloud.
+expectWinner('further beats newer-but-behind local', p('a', 0, 1, T + 10 * MIN), p('a', 30, 12, T), 'cloud');
+// 7. Furthest wins regardless of small clock drift.
 expectWinner('drift: local ahead, cloud +2min', p('a', 5, 3, T), p('a', 5, 1, T + 2 * MIN), 'local');
-// 8. Reset boundary: gap exactly 5min is NOT > 5min → falls to furthest (local stays)
-expectWinner('boundary: exactly 5min gap', p('a', 9, 9, T), p('a', 0, 1, T + 5 * MIN), 'local');
-// 9. Reset boundary: gap 5min+1ms → cloud (reset) wins
-expectWinner('boundary: 5min+1ms gap', p('a', 9, 9, T), p('a', 0, 1, T + 5 * MIN + 1), 'cloud');
+// 8. Large clock gap is irrelevant now — position is all that matters.
+expectWinner('big gap, local further still wins', p('a', 9, 9, T), p('a', 0, 1, T + 5 * MIN), 'local');
+// 9. Even an hour-newer behind cloud loses to a further local.
+expectWinner('hour-newer behind cloud still loses', p('a', 9, 9, T), p('a', 0, 1, T + 60 * MIN), 'local');
 // 10. Identical everything → local (no change)
 expectWinner('identical', p('a', 4, 4, T), p('a', 4, 4, T), 'local');
 // 11. Both zero timestamps, local further → local
 expectWinner('no timestamps, local further', p('a', 6, 1, 0), p('a', 5, 9, 0), 'local');
-// 12. Forward progress hours later (normal reading next day) local ahead+newer → local
+// 12. Forward progress hours later (normal reading next day) local ahead → local
 expectWinner('next-day forward', p('a', 6, 1, T + 24 * 60 * MIN), p('a', 5, 9, T), 'local');
+
+// ── THE REPORTED BUG: iPad reads forward, phone is behind ─────────────
+// Phone clock runs AHEAD of the iPad's server-stamped write (the exact skew
+// that used to flip the winner and revert the read). Furthest must still win.
+expectWinner('iPad-advance propagates despite phone clock ahead',
+  /* phone local */ p('law', 1, 5, T + 60 * MIN),
+  /* iPad cloud  */ p('law', 1, 6, T), 'cloud');
+// The phone must NOT re-push its stale position back up (no revert loop).
+expectRepush('phone behind does not clobber further cloud',
+  p('law', 1, 5, T + 60 * MIN), p('law', 1, 6, T), false);
+// The genuinely-ahead device DOES re-push (recovers a silently-lost write).
+expectRepush('phone ahead re-pushes its real progress',
+  p('law', 1, 7, T), p('law', 1, 6, T + 60 * MIN), true);
 
 // ── Reconciliation (silent-write-loss recovery) ───────────────────────
 // 13. Cloud missing this category entirely → push local
 expectRepush('cloud missing category', p('a', 2, 5, T), undefined, true);
-// 14. Local further & recent, cloud behind → push (silent write lost)
-expectRepush('local further recent → push', p('a', 3, 1, T + 1000), p('a', 2, 8, T), true);
+// 14. Local further, cloud behind → push (silent write lost)
+expectRepush('local further → push', p('a', 3, 1, T + 1000), p('a', 2, 8, T), true);
 // 15. Cloud already reflects local exactly → no push
 expectRepush('cloud == local → no push', p('a', 3, 1, T), p('a', 3, 1, T), false);
 // 16. Cloud is further (other device synced ahead) → no push
 expectRepush('cloud further → no push', p('a', 2, 8, T), p('a', 3, 1, T + 1000), false);
-// 17. RESET propagated: cloud reset is newer; local stale ahead → NO push (don't undo reset!)
-expectRepush('reset wins → no push of stale local', p('a', 30, 12, T), p('a', 0, 1, T + 10 * MIN), false);
-// 18. Local jump-back is newer → cloud stale ahead → push our jump
-expectRepush('local jump newer → push', p('a', 0, 1, T + 10 * MIN), p('a', 30, 12, T), true);
+// 17. Local is further than cloud → push (furthest is authoritative).
+expectRepush('local further than behind cloud → push', p('a', 30, 12, T), p('a', 0, 1, T + 10 * MIN), true);
+// 18. Local is behind a further cloud → no push (cloud already authoritative).
+expectRepush('local behind further cloud → no push', p('a', 0, 1, T + 10 * MIN), p('a', 30, 12, T), false);
 
-// ── Round 2: stress the silent-loss vs genuine-reset distinction ──────
-// 19. Long-offline silent loss: device read forward 30min ago, write never
-//     landed; cloud still holds the older synced position. local ahead & newer
-//     by >5min → local wins & we re-push (recovery), reset is NOT mistaken.
-expectWinner('long-offline ahead+newer', p('a', 7, 2, T + 30 * MIN), p('a', 5, 4, T), 'local');
-expectRepush('long-offline → push recovery', p('a', 7, 2, T + 30 * MIN), p('a', 5, 4, T), true);
-// 20. Genuine reset from another device, propagated long ago: cloud behind &
-//     newer by >5min → cloud wins, local stale-ahead must NOT be re-pushed.
-expectWinner('genuine reset wins over stale', p('a', 40, 3, T), p('a', 0, 1, T + 30 * MIN), 'cloud');
-expectRepush('genuine reset → no stale push', p('a', 40, 3, T), p('a', 0, 1, T + 30 * MIN), false);
+// ── Round 2: silent-loss recovery, now purely position-based ──────────
+// 19. Device read forward, write never landed; cloud still holds the older
+//     synced position. Local ahead → local wins & we re-push (recovery).
+expectWinner('offline ahead recovers', p('a', 7, 2, T + 30 * MIN), p('a', 5, 4, T), 'local');
+expectRepush('offline ahead → push recovery', p('a', 7, 2, T + 30 * MIN), p('a', 5, 4, T), true);
+// 20. Furthest wins regardless of which side carries the newer timestamp.
+expectWinner('furthest wins over newer-behind', p('a', 40, 3, T), p('a', 0, 1, T + 30 * MIN), 'local');
+expectRepush('furthest local → push', p('a', 40, 3, T), p('a', 0, 1, T + 30 * MIN), true);
 // 21. Same-position-but-local-newer should NOT churn a redundant write.
 expectRepush('same pos, local newer → no churn', p('a', 5, 5, T + 1000), p('a', 5, 5, T), false);
-// 22. Zero-timestamp local ahead vs cloud reset with real timestamp:
-//     gap = (T+10min) - 0 is huge → cloud (the timestamped reset) wins.
-expectWinner('no-ts local vs timestamped reset', p('a', 12, 1, 0), p('a', 0, 1, T), 'cloud');
+// 22. Zero-timestamp local far ahead vs timestamped behind cloud → local (further).
+expectWinner('no-ts local further beats timestamped behind', p('a', 12, 1, 0), p('a', 0, 1, T), 'local');
 
 // ── History reconciliation: push only ids the cloud is missing ────────
 function historyMissing(localIds: string[], cloudIds: string[]): string[] {
@@ -154,12 +166,12 @@ function expectAgreement(name: string, local: Progress, cloud: Progress) {
 }
 // 27. Normal forward read on this device, cloud behind.
 expectAgreement('agree: local forward', p('a', 6, 2, T + 1000), p('a', 5, 9, T));
-// 28. Reset propagated from cloud (newer, behind).
-expectAgreement('agree: cloud reset', p('a', 30, 1, T), p('a', 0, 1, T + 10 * MIN));
-// 29. Other device further (newer).
+// 28. Local far ahead, cloud behind with a newer clock → local (further) wins.
+expectAgreement('agree: local further beats newer cloud', p('a', 30, 1, T), p('a', 0, 1, T + 10 * MIN));
+// 29. Other device further.
 expectAgreement('agree: cloud further', p('a', 2, 3, T), p('a', 4, 1, T + 1000));
-// 30. Local jump-back newer.
-expectAgreement('agree: local jump back', p('a', 0, 1, T + 10 * MIN), p('a', 20, 5, T));
+// 30. Local behind a further cloud → cloud wins.
+expectAgreement('agree: local behind further cloud', p('a', 0, 1, T + 10 * MIN), p('a', 20, 5, T));
 // 31. Identical state.
 expectAgreement('agree: identical', p('a', 3, 3, T), p('a', 3, 3, T));
 
@@ -183,9 +195,21 @@ for (let i = 0; i < 20000; i++) {
     fail++; failures.push(`fuzz INV-2: reduced≠winner`); break;
   }
 
-  // INV-3: a clearly-newer write (>5min) always wins outright (reset respect).
-  if (ct - lt > 5 * MIN && winner !== cloud) { fail++; failures.push(`fuzz INV-3: stale cloud-newer not honored`); break; }
-  if (lt - ct > 5 * MIN && winner !== local) { fail++; failures.push(`fuzz INV-3: stale local-newer not honored`); break; }
+  // INV-3: the furthest position ALWAYS wins, independent of any clock.
+  // This is the no-revert guarantee: a chapter read on any device can never
+  // be undone by a stale device with a faster clock.
+  const localFurther = local.bookIndex > cloud.bookIndex ||
+    (local.bookIndex === cloud.bookIndex && local.chapter > cloud.chapter);
+  const cloudFurther = cloud.bookIndex > local.bookIndex ||
+    (cloud.bookIndex === local.bookIndex && cloud.chapter > local.chapter);
+  if (localFurther && winner !== local) { fail++; failures.push(`fuzz INV-3: local further not honored`); break; }
+  if (cloudFurther && winner !== cloud) { fail++; failures.push(`fuzz INV-3: cloud further not honored`); break; }
+  // INV-3b: the resolved position is never behind either input (monotonic).
+  const winFurtherOrEqLocal = winner.bookIndex > local.bookIndex ||
+    (winner.bookIndex === local.bookIndex && winner.chapter >= local.chapter);
+  const winFurtherOrEqCloud = winner.bookIndex > cloud.bookIndex ||
+    (winner.bookIndex === cloud.bookIndex && winner.chapter >= cloud.chapter);
+  if (!(winFurtherOrEqLocal && winFurtherOrEqCloud)) { fail++; failures.push(`fuzz INV-3b: winner regressed below an input`); break; }
 
   // INV-4: convergence — re-push winner ⇒ cloud==reduced; else cloud already==reduced.
   const repush = shouldRepush(local, cloud);

@@ -48,39 +48,41 @@ function listContentEqual<T extends { id: string }>(a: T[], b: T[]): boolean {
 }
 
 /**
- * Robust conflict resolver for linear reading plan progress.
- * Self-heals clock drifts by prioritizing actual forward progress in readings,
- * but defers to a clearly newer write (e.g. a manual reset or jump-to-book,
- * which intentionally move progress backward) once the gap is large enough
- * to rule out clock drift / near-simultaneous edits.
+ * Conflict resolver for linear reading-plan progress.
+ *
+ * Reading a plan only ever moves forward through an ordered sequence of
+ * (bookIndex, chapter) positions, so the FURTHEST position is the truth.
+ * This is deliberately clock-free. Comparing wall-clock timestamps across
+ * devices was the root cause of cross-device reverts: a device's local
+ * `updatedAtMillis` (Date.now()) and the value the sync layer reads back
+ * from Firestore's `serverTimestamp()` live in two different clock domains,
+ * so any skew between a phone, iPad, or Mac and Google's servers could flip
+ * the winner — and the reconciliation push-back would then re-upload the
+ * stale "winner" with a fresh server timestamp, making the revert sticky and
+ * propagating it to every device. Position ordering cannot be corrupted by
+ * clock skew, so it removes that entire failure class.
+ *
+ * Tradeoff (intentional, documented): an explicit *backward* move on one
+ * device — a backward jump-to-book, or a reset — does not win over another
+ * device that is further ahead and online. Reset is handled on its own path
+ * (it clears the cloud collections), and cross-device backward-jump is a
+ * rare, separately-tracked case. We never trade away a chapter the user
+ * actually read in order to support it.
  */
-const CONFLICT_TIMESTAMP_GAP_MS = 5 * 60 * 1000; // 5 minutes
-
 export function resolveProgressConflict(localp: ProgressType, cloudp: ProgressType): ProgressType {
+  // Different book → the later book wins.
+  if (localp.bookIndex !== cloudp.bookIndex) {
+    return cloudp.bookIndex > localp.bookIndex ? cloudp : localp;
+  }
+  // Same book, different chapter → the later chapter wins.
+  if (localp.chapter !== cloudp.chapter) {
+    return cloudp.chapter > localp.chapter ? cloudp : localp;
+  }
+  // Identical position → keep whichever carries the fresher read metadata
+  // (lastReadAt / localDate) so the displayed "last read" stays accurate.
+  // The position is identical either way, so this branch can never revert.
   const localTime = localp.updatedAtMillis || (localp.lastReadAt ? new Date(localp.lastReadAt).getTime() : 0);
   const cloudTime = cloudp.updatedAtMillis || (cloudp.lastReadAt ? new Date(cloudp.lastReadAt).getTime() : 0);
-
-  // 1. Same stage: align timestamps/metadata
-  if (localp.bookIndex === cloudp.bookIndex && localp.chapter === cloudp.chapter) {
-    return cloudTime > localTime ? cloudp : localp;
-  }
-
-  // 2. If one side is clearly newer, trust it even if it moves progress
-  // backward (a deliberate reset/jump should win over a stale device).
-  if (Math.abs(cloudTime - localTime) > CONFLICT_TIMESTAMP_GAP_MS) {
-    return cloudTime > localTime ? cloudp : localp;
-  }
-
-  // 3. Near-simultaneous edits on two devices: self-heal by keeping
-  // whichever device progressed furthest in the reading plan.
-  const isCloudFurther = (cloudp.bookIndex > localp.bookIndex) ||
-                         (cloudp.bookIndex === localp.bookIndex && cloudp.chapter > localp.chapter);
-  if (isCloudFurther) return cloudp;
-
-  const isLocalFurther = (localp.bookIndex > cloudp.bookIndex) ||
-                         (localp.bookIndex === cloudp.bookIndex && localp.chapter > cloudp.chapter);
-  if (isLocalFurther) return localp;
-
   return cloudTime > localTime ? cloudp : localp;
 }
 
