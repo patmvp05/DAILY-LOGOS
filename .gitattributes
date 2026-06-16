@@ -1,0 +1,11 @@
+# Treat binary assets as binary so they are never run through text/EOL
+# normalization (which previously mangled the PNG signature byte 0x89 into the
+# UTF-8 replacement character and broke the home-screen icons).
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
