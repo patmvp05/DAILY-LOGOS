@@ -62,6 +62,23 @@ interface SettingsModalProps {
   const [newDevotional, setNewDevotional] = React.useState({ name: '', description: '', url: '' });
 
   const onClose = () => setShowSettings(false);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
+
+  const handleForceRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(r => r.unregister()));
+      }
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+    } finally {
+      window.location.reload();
+    }
+  };
 
   return (
     <>
@@ -248,12 +265,13 @@ interface SettingsModalProps {
                 <h4 className="text-[10px] uppercase font-black tracking-[0.12em] text-[var(--audible-text-secondary)] mb-4">Management</h4>
                 
                 <div className="space-y-3">
-                  <button 
-                    onClick={() => window.location.reload()}
-                    className="w-full p-5 flex items-center justify-between border border-[var(--audible-border)] text-[var(--audible-text-primary)] hover:bg-zinc-50 dark:hover:bg-white/5 rounded-xl transition-colors font-black uppercase text-[10px] tracking-[0.12em]"
+                  <button
+                    onClick={handleForceRefresh}
+                    disabled={isRefreshing}
+                    className="w-full p-5 flex items-center justify-between border border-[var(--audible-border)] text-[var(--audible-text-primary)] hover:bg-zinc-50 dark:hover:bg-white/5 rounded-xl transition-colors font-black uppercase text-[10px] tracking-[0.12em] disabled:opacity-60"
                   >
-                    <span>Force App Refresh</span>
-                    <RefreshCw size={18} />
+                    <span>{isRefreshing ? 'Clearing Cache...' : 'Force App Refresh'}</span>
+                    <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
                   </button>
 
                   <button
