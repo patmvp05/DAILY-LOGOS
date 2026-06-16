@@ -9,7 +9,7 @@ import { AppState, HistoryEntry, ProverbJournal } from '../types';
 import { AppAction } from '../state/appReducer';
 import { CATEGORIES_BY_ID, CATEGORIES, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
 import { triggerHaptic } from '../lib/haptic';
-import { calculateNextProgress } from '../lib/bible';
+import { calculateNextProgress, isBackwardJump } from '../lib/bible';
 import { getCachedReadTime } from '../lib/bibleCache';
 import { 
   writeActionBatch, 
@@ -201,11 +201,11 @@ export function useReadingActions(
       setSelectingCategoryId(null);
     };
 
-    if (currentProgress && currentProgress.bookIndex !== bookIndex) {
+    if (isBackwardJump(currentProgress, bookIndex)) {
       setConfirmDialog({
         isOpen: true,
         title: "Change Progress",
-        message: `This will move your reading progress to the start of ${book.name}. Are you sure?`,
+        message: `This will move your reading progress back to the start of ${book.name}. Are you sure?`,
         onConfirm: performJump
       });
     } else {

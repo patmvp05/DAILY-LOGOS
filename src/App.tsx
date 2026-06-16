@@ -127,8 +127,14 @@ export default function App() {
   useScrollLock(showSettings || showHistory || !!activePlanCategory || !!selectingCategoryId || !!activeDevotion || showProverbModal || isStartMenuOpen);
   
   const toggleTheme = useCallback(() => {
-    const themes: ('light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook')[] = ['light', 'dark', 'system', 'xp', 'audible', 'textbook'];
-    const currentIndex = themes.indexOf(state.settings.theme);
+    // Only the three themes that produce a distinct, defined appearance are in
+    // the cycle. The legacy 'xp'/'audible'/'textbook' values all resolve to the
+    // same OS-driven look as 'system' (see useTheme), so cycling through them
+    // looked broken (four clicks with no visible change). The type still allows
+    // them so any previously stored/synced value renders fine; a toggle just
+    // moves the user into this 3-state cycle (indexOf === -1 → 'light').
+    const themes: ('light' | 'dark' | 'system')[] = ['light', 'dark', 'system'];
+    const currentIndex = themes.indexOf(state.settings.theme as 'light' | 'dark' | 'system');
     const newTheme = themes[(currentIndex + 1) % themes.length];
     dispatch({ type: 'SET_THEME', theme: newTheme });
     if (user) {

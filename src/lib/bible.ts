@@ -20,6 +20,23 @@ export interface CalculatedProgress {
 }
 
 /**
+ * Whether jumping a category to chapter 1 of `targetBookIndex` moves progress
+ * BACKWARD from where it currently is. Jump-to-book always lands on chapter 1
+ * of the target, so it's backward if the target book is earlier, or it's the
+ * same book but we're already past chapter 1. Only backward jumps warrant a
+ * confirmation prompt (PRD 2.3); forward skips apply immediately.
+ */
+export function isBackwardJump(
+  currentProgress: ProgressType | undefined,
+  targetBookIndex: number
+): boolean {
+  if (!currentProgress) return false;
+  if (targetBookIndex < currentProgress.bookIndex) return true;
+  if (targetBookIndex === currentProgress.bookIndex && currentProgress.chapter > 1) return true;
+  return false;
+}
+
+/**
  * Pure function to calculate Bible reading progress advancement.
  * Optimized to run without side effects.
  */
