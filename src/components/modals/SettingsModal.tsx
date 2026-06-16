@@ -281,7 +281,7 @@ interface SettingsModalProps {
                     onClick={onResetProgress}
                     className="w-full p-5 flex items-center justify-between border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors font-black uppercase text-[10px] tracking-[0.12em]"
                   >
-                    <span>Wipe All Data</span>
+                    <span>Reset Progress</span>
                     <RotateCcw size={18} />
                   </button>
                 </div>

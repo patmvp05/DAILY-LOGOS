@@ -19,6 +19,18 @@
     --border-color: #EAECEF;
     --nav-bg: rgba(255, 255, 255, 0.85);
 
+    /* Legacy "audible"-palette aliases. These tokens are referenced ~37 times
+       across the modals/onboarding but were never defined, so those card
+       backgrounds, borders and text colors silently fell back to
+       transparent/inherited. Alias them onto the active theme tokens; because
+       var() resolves lazily at use time, a single definition here adapts to
+       dark mode automatically (the referenced tokens are overridden in .dark). */
+    --audible-card: var(--bg-primary);
+    --audible-nav: var(--bg-primary);
+    --audible-text-primary: var(--text-primary);
+    --audible-text-secondary: var(--text-secondary);
+    --audible-border: var(--border-color);
+
     --sat: env(safe-area-inset-top, 0px);
     --sar: env(safe-area-inset-right, 0px);
     --sab: env(safe-area-inset-bottom, 0px);
