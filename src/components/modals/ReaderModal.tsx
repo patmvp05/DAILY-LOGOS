@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, X, ArrowRight, Check, RefreshCw, Sparkles } from 'lucide-react';
 
 import { useApp } from '../../state/AppContextCore';
@@ -122,8 +122,14 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
         exit={{ scale: 0.95, opacity: 0 }}
         className="fixed inset-0 sm:inset-4 md:inset-x-auto md:inset-y-8 md:left-1/2 md:-translate-x-1/2 md:w-[760px] md:max-w-[calc(100vw-4rem)] bg-[var(--bg-primary)] z-[510] flex flex-col border border-[var(--border-color)] shadow-2xl sm:rounded-[24px] overflow-hidden"
       >
-        {/* Header */}
-        <div className="flex justify-between items-center px-5 sm:px-8 py-5 bg-[var(--bg-primary)] border-b border-[var(--border-color)] shrink-0">
+        {/* Header — padded for iPhone notch/Dynamic Island */}
+        <div
+          className="flex justify-between items-center px-5 sm:px-8 bg-[var(--bg-primary)] border-b border-[var(--border-color)] shrink-0"
+          style={{
+            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.25rem)',
+            paddingBottom: '1.25rem',
+          }}
+        >
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white bg-brand shadow-sm shrink-0">
               <BookOpen size={22} />
@@ -137,12 +143,13 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
               </p>
             </div>
           </div>
+          {/* 44×44 minimum tap target for iPhone accessibility */}
           <button
             onClick={onClose}
             aria-label="Close reader"
-            className="p-2 sm:p-3 rounded-full hover:scale-105 transition-transform bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] shrink-0"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:scale-105 transition-transform bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] shrink-0"
           >
-            <X size={22} />
+            <X size={20} />
           </button>
         </div>
 
@@ -199,32 +206,46 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
           </div>
         </div>
 
-        {/* Bottom action bar — revealed only once the chapter has been read */}
-        {status === 'ready' && atEnd && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25 }}
-            className="px-5 sm:px-8 py-4 sm:py-5 border-t border-[var(--border-color)] bg-[var(--bg-primary)] shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]"
+        {/* Bottom bar — Close is always visible so users can exit at any time.
+            Next Chapter / Done slides in alongside it once the chapter is read. */}
+        <div
+          className="px-5 sm:px-8 py-4 sm:py-5 border-t border-[var(--border-color)] bg-[var(--bg-primary)] shrink-0 flex items-center gap-3"
+          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))' }}
+        >
+          <button
+            onClick={onClose}
+            aria-label="Close reader"
+            className="min-h-[52px] px-5 font-bold uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-[18px] active:scale-[0.98] shrink-0"
           >
-            <button
-              onClick={onPrimary}
-              className="w-full p-4 sm:p-5 font-bold uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-[18px] shadow-sm hover:opacity-90 active:scale-[0.98]"
-            >
-              {hasNext ? (
-                <>
-                  Next Chapter
-                  <ArrowRight size={18} />
-                </>
-              ) : (
-                <>
-                  Done
-                  <Check size={18} />
-                </>
-              )}
-            </button>
-          </motion.div>
-        )}
+            <X size={15} />
+            Close
+          </button>
+          <AnimatePresence>
+            {status === 'ready' && atEnd && (
+              <motion.button
+                key="primary-action"
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 16 }}
+                transition={{ duration: 0.22 }}
+                onClick={onPrimary}
+                className="flex-1 min-h-[52px] font-bold uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-[18px] shadow-sm hover:opacity-90 active:scale-[0.98]"
+              >
+                {hasNext ? (
+                  <>
+                    Next Chapter
+                    <ArrowRight size={16} />
+                  </>
+                ) : (
+                  <>
+                    Done
+                    <Check size={16} />
+                  </>
+                )}
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </div>
       </motion.div>
     </>
   );

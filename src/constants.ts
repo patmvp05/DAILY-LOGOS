@@ -158,10 +158,12 @@ export interface BibleVersion {
  * proxy — tracked as a separate follow-up.
  */
 export const BIBLE_VERSIONS: BibleVersion[] = [
-  { id: 'kjv', name: 'King James Version' },
-  { id: 'web', name: 'World English Bible (Modern)' },
-  { id: 'webbe', name: 'World English Bible (British)' },
-  { id: 'bbe', name: 'Bible in Basic English' },
+  { id: 'kjv',   name: 'King James Version (1769)' },
+  { id: 'web',   name: 'World English Bible — Modern' },
+  { id: 'webbe', name: 'World English Bible — British' },
+  { id: 'bbe',   name: 'Bible in Basic English' },
+  { id: 'ylt',   name: "Young's Literal Translation" },
+  { id: 'darby', name: 'Darby Translation' },
 ];
 
 export const DEFAULT_BIBLE_VERSION = 'kjv';
