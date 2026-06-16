@@ -117,7 +117,9 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     listen<QuerySnapshot>('Progress', getProgressCollection(user.uid), (snap) => {
       const progress = snap.docs.map((doc) => {
         const data = doc.data() as Record<string, unknown>;
-        const updatedAtMillis = (data.updatedAt as { toMillis?: () => number })?.toMillis?.() || (data.lastReadAt ? new Date(data.lastReadAt as string).getTime() : 0);
+        const cloudUpdatedAt = (data.updatedAt as { toMillis?: () => number })?.toMillis?.();
+        const fallbackLastRead = data.lastReadAt ? new Date(data.lastReadAt as string).getTime() : 0;
+        const updatedAtMillis = (data.updatedAtMillis as number) || cloudUpdatedAt || fallbackLastRead;
         return { ...data, updatedAtMillis } as unknown as Progress;
       });
       dispatch({ type: 'CLOUD_SYNC_PROGRESS', progress });
