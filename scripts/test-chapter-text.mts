@@ -43,13 +43,16 @@ eq('collapses embedded newlines from bible-api.com',
   'In the beginning God created the heavens');
 
 // ── resolveBibleVersion ──────────────────────────────────────────────────────
+// Default is now 'web' (modern, public-domain, reliable) for fresh installs.
 eq('known lowercase code passes through', resolveBibleVersion('web'), 'web');
+eq('modern copyrighted id passes through', resolveBibleVersion('niv'), 'niv');
+eq('mixed-case ESV normalizes to esv', resolveBibleVersion('ESV'), 'esv');
 eq('legacy uppercase KJV normalizes to kjv', resolveBibleVersion('KJV'), 'kjv');
-eq('mixed-case WEBBE normalizes', resolveBibleVersion('WEBBE'), 'webbe');
-eq('incomplete OEB is rejected (not offered) → kjv', resolveBibleVersion('oeb-us'), 'kjv');
-eq('unknown/copyrighted code falls back to default kjv', resolveBibleVersion('ESV'), 'kjv');
-eq('undefined falls back to default kjv', resolveBibleVersion(undefined), 'kjv');
-eq('empty string falls back to default kjv', resolveBibleVersion(''), 'kjv');
+eq('now-removed WEBBE falls back to default web', resolveBibleVersion('WEBBE'), 'web');
+eq('incomplete OEB is rejected (not offered) → default web', resolveBibleVersion('oeb-us'), 'web');
+eq('unknown code falls back to default web', resolveBibleVersion('zzz'), 'web');
+eq('undefined falls back to default web', resolveBibleVersion(undefined), 'web');
+eq('empty string falls back to default web', resolveBibleVersion(''), 'web');
 
 // ── report ──────────────────────────────────────────────────────────────────
 if (fail > 0) {

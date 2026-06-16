@@ -4,7 +4,14 @@
  */
 
 import { get, set } from 'idb-keyval';
-import { BIBLE_VERSION_NAMES, DEFAULT_BIBLE_VERSION, resolveBibleVersion } from '../constants';
+import {
+  BIBLE_VERSION_NAMES,
+  BOLLS_BIBLE_BOOK_IDS,
+  DEFAULT_BIBLE_VERSION,
+  getBibleVersion,
+  resolveBibleVersion,
+} from '../constants';
+import { fetchWithProxy } from './api';
 
 export interface ChapterVerse {
   verse: number;
@@ -19,10 +26,10 @@ export interface ChapterTextResponse {
   _cachedAt?: number;
 }
 
-// v2: bumped from v1, which could cache a KJV fall-back under a non-KJV key
-// (back when the reader tried unsupported bolls.life codes). Bumping discards
-// those poisoned entries so every version re-fetches its real text.
-const CACHE_PREFIX = 'chapter_text_v2_';
+// v3: bumped when modern translations (NIV/NLT/ESV/NKJV) were added via the
+// bolls.life proxy. Earlier caches could hold a KJV fall-back under a non-KJV
+// key; bumping discards those so every version re-fetches its real text.
+const CACHE_PREFIX = 'chapter_text_v3_';
 const FETCH_TIMEOUT_MS = 12000;
 
 // L1 in-memory cache to avoid repeated IndexedDB reads / re-parsing.
@@ -80,21 +87,67 @@ async function fetchFromBibleApi(
   };
 }
 
+interface BollsVerse {
+  verse?: number;
+  text?: string;
+}
+
 /**
- * Fetch a full chapter's text for a given translation from bible-api.com
- * (keyless, CORS-friendly). Two-tier cache (memory + IndexedDB): once read, a
- * chapter is cached permanently and works offline. If the requested
- * translation fails for any reason, falls back to the public-domain KJV —
- * but the returned translationName reflects whatever genuinely loaded, so the
- * UI never mislabels KJV as another version.
+ * Fetch a chapter from bolls.life (via our Cloud Function proxy, to dodge
+ * CORS). bolls serves the modern, copyrighted translations — NIV/NLT/ESV/NKJV.
+ * Its book ids are numeric (Genesis = 1 … Revelation = 66) and verse text is
+ * HTML, which cleanVerseText() strips. Returns null on any failure so the
+ * caller can fall back to public-domain text rather than show a broken page.
+ */
+async function fetchFromBolls(
+  bookName: string,
+  chapter: number,
+  slug: string,
+  displayName: string,
+  signal: AbortSignal
+): Promise<ChapterTextResponse | null> {
+  const bookId = BOLLS_BIBLE_BOOK_IDS[bookName];
+  if (!bookId) return null;
+
+  const url = `https://bolls.life/get-text/${slug}/${bookId}/${chapter}/`;
+  const data = (await fetchWithProxy(url, signal)) as BollsVerse[];
+  if (!Array.isArray(data) || data.length === 0) return null;
+
+  const verses = data
+    .map((v) => ({ verse: Number(v.verse), text: cleanVerseText(v.text || '') }))
+    .filter((v) => Number.isFinite(v.verse) && v.text.length > 0)
+    .sort((a, b) => a.verse - b.verse);
+
+  if (verses.length === 0) return null;
+
+  return {
+    reference: `${bookName} ${chapter}`,
+    verses,
+    translationId: slug,
+    translationName: displayName,
+    _cachedAt: Date.now(),
+  };
+}
+
+/**
+ * Fetch a full chapter's text for the selected translation.
+ *
+ * Backend is chosen per-version: public-domain texts come straight from
+ * bible-api.com; modern copyrighted texts (NIV/NLT/ESV/NKJV) come from
+ * bolls.life through our proxy. Two-tier cache (memory + IndexedDB): once read,
+ * a chapter is cached permanently and works offline. If the requested
+ * translation fails for any reason, falls back to the public-domain KJV — but
+ * the returned translationName reflects whatever genuinely loaded, so the UI
+ * never mislabels KJV as another version.
  */
 export async function getChapterText(
   bookName: string,
   chapter: number,
   version: string = DEFAULT_BIBLE_VERSION
 ): Promise<ChapterTextResponse> {
-  const code = resolveBibleVersion(version);
-  const cacheKey = `${CACHE_PREFIX}${code}_${bookName}_${chapter}`;
+  const id = resolveBibleVersion(version);
+  const entry = getBibleVersion(id);
+  const cacheKey = `${CACHE_PREFIX}${id}_${bookName}_${chapter}`;
 
   const mem = memoryCache.get(cacheKey);
   if (mem) return mem;
@@ -115,16 +168,19 @@ export async function getChapterText(
   try {
     let result: ChapterTextResponse | null = null;
 
-    // 1. Primary: the selected translation.
+    // 1. Primary: the selected translation, from its own backend.
     try {
-      result = await fetchFromBibleApi(bookName, chapter, code, controller.signal);
+      result =
+        entry.source === 'bolls'
+          ? await fetchFromBolls(bookName, chapter, entry.code, entry.name, controller.signal)
+          : await fetchFromBibleApi(bookName, chapter, entry.code, controller.signal);
     } catch {
       // network/parse error — handled by fallback below
     }
 
     // 2. Fallback: public-domain KJV (only if a different version was asked
     //    for and failed). The header will correctly read "King James Version".
-    if (!result && code !== 'kjv') {
+    if (!result && id !== 'kjv') {
       try {
         result = await fetchFromBibleApi(bookName, chapter, 'kjv', controller.signal);
       } catch {
