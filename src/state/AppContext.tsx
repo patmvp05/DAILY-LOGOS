@@ -67,15 +67,17 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     };
   }, [hasHydrated]);
 
-  // Prefetch proverb content when online
+  // Prefetch proverb content when online, in the selected Bible version.
+  // Re-runs when the version changes so the warmed cache always matches.
+  const bibleVersion = state.settings.bibleVersion;
   useEffect(() => {
     const triggerPrefetch = () => {
-      if (navigator.onLine) prefetchProverbs();
+      if (navigator.onLine) prefetchProverbs(bibleVersion);
     };
     window.addEventListener('online', triggerPrefetch);
     triggerPrefetch();
     return () => window.removeEventListener('online', triggerPrefetch);
-  }, []);
+  }, [bibleVersion]);
 
   // Async hydration from IndexedDB
   useEffect(() => {

@@ -79,7 +79,7 @@ export function useReadingActions(
     
     const category = CATEGORIES_BY_ID.get(categoryId)!;
     const historyEntries: HistoryEntry[] = historySteps.map((step, index) => {
-      const cached = getCachedReadTime(step.bookName, step.chapter);
+      const cached = getCachedReadTime(step.bookName, step.chapter, currentState.settings.bibleVersion);
       return {
         id: `${Date.now()}_${index}_${Math.random().toString(36).substring(7)}`,
         timestamp: new Date().toISOString(),

@@ -11,6 +11,8 @@
  * Run with: npx tsx scripts/test-chapter-fetch.mts
  */
 import { getChapterText } from '../src/lib/chapterText';
+import { getProverb } from '../src/lib/proverbCache';
+import { getChapterInfo } from '../src/lib/bibleCache';
 
 let pass = 0;
 let fail = 0;
@@ -97,6 +99,29 @@ async function run() {
   installFetch();
   const legacy = await getChapterText('John', 1, 'WEBBE'); // removed code → default web
   ok('legacy/removed code resolves to default and loads', legacy.verses.length > 0, String(legacy.verses.length));
+
+  // 5. The DAILY PROVERB respects the selected version (was hard-coded to ESV/KJV
+  //    before). A modern pick must route through the bolls proxy, not KJV.
+  installFetch();
+  const provNiv = await getProverb(10, 'niv');
+  ok('proverb (NIV) uses the bolls proxy', calls.some((u) => u.includes('bibleProxy') && u.includes(encodeURIComponent('get-text/NIV/20/10'))),
+    `calls=${JSON.stringify(calls)}`);
+  ok('proverb (NIV) labeled New International Version', provNiv.translation_name === 'New International Version', provNiv.translation_name);
+  ok('proverb (NIV) has joined text', provNiv.text.length > 0 && provNiv.verses.length > 0);
+
+  installFetch();
+  const provWeb = await getProverb(11, 'web');
+  ok('proverb (WEB) uses bible-api, not the proxy', calls.some((u) => u.includes('bible-api.com')) && !calls.some((u) => u.includes('bibleProxy')),
+    `calls=${JSON.stringify(calls)}`);
+
+  // 6. The CARD PREVIEW (first verse + read time) respects the selected version
+  //    (was hard-coded to KJV before).
+  installFetch();
+  const infoNkjv = await getChapterInfo('Mark', 9, 'nkjv');
+  ok('card preview (NKJV) uses the bolls proxy', calls.some((u) => u.includes('bibleProxy') && u.includes(encodeURIComponent('get-text/NKJV/41/9'))),
+    `calls=${JSON.stringify(calls)}`);
+  ok('card preview returns a first verse', infoNkjv.firstVerse.length > 0 && infoNkjv.firstVerse !== 'Could not load preview.', infoNkjv.firstVerse);
+  ok('card preview computes a positive read time', infoNkjv.readTime > 0, String(infoNkjv.readTime));
 
   if (fail > 0) {
     console.error(failures.join('\n'));

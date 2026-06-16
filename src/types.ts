@@ -20,7 +20,7 @@ export interface UserSettings {
   // restrict writes to theme/startDate/updatedAt, and these are sensibly
   // per-device anyway: e.g. KJV on one device, ESV on another). They persist
   // through the local IndexedDB/localStorage state.
-  bibleVersion?: string; // bolls.life translation short-code; default 'KJV'
+  bibleVersion?: string; // BIBLE_VERSIONS id (e.g. 'niv', 'web'); default 'web'
   typography?: 'default' | 'editorial';
   updatedAt?: string; // ISO string or similar for LWW guard
 }

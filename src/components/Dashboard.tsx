@@ -53,7 +53,8 @@ function DashboardComponent({
   // unrelated sync event happened to push the local state up.
   const { advanceChapter } = useReadingActions(state, dispatch, user);
   const dayOfMonth = new Date().getDate();
-  const { proverbSnippet, isFetchingProverb } = useProverb(dayOfMonth);
+  const bibleVersion = state.settings.bibleVersion;
+  const { proverbSnippet, isFetchingProverb } = useProverb(dayOfMonth, bibleVersion);
 
   const {
     setActivePlanCategory, setShowProverbModal, setActiveDevotion,
@@ -76,7 +77,7 @@ function DashboardComponent({
       if (h.readTime && h.readTime > 0) {
         return sum + h.readTime;
       }
-      const cached = getCachedReadTime(h.bookName, h.chapter);
+      const cached = getCachedReadTime(h.bookName, h.chapter, bibleVersion);
       if (cached && cached > 0) {
         return sum + cached;
       }
@@ -84,7 +85,7 @@ function DashboardComponent({
       return sum + perCh;
     }, 0);
     return { minutes, chapterCount: todayEntries.length, entries: todayEntries };
-  }, [state.history]);
+  }, [state.history, bibleVersion]);
 
   const { catProgress } = useMemo(() => 
     computeProgressStats(state.progress, state.completedBooks),
@@ -116,7 +117,7 @@ function DashboardComponent({
           const category = CATEGORIES_BY_ID.get(prog.categoryId);
           if (!category) return null;
           const book = category.books[prog.bookIndex];
-          const key = `${prog.categoryId}:${prog.bookIndex}:${prog.chapter}`;
+          const key = `${bibleVersion}:${prog.categoryId}:${prog.bookIndex}:${prog.chapter}`;
           if (chapterInfos[key]) return null;
           return { key, bookName: book.name, chapter: prog.chapter };
         })
@@ -128,7 +129,7 @@ function DashboardComponent({
         // 2. Fetch all missing chapter infos in parallel
         const results = await Promise.all(
           tasks.map(async (task) => {
-            const info = await getChapterInfo(task.bookName, task.chapter);
+            const info = await getChapterInfo(task.bookName, task.chapter, bibleVersion);
             return { key: task.key, info };
           })
         );
@@ -148,7 +149,7 @@ function DashboardComponent({
 
     loadInfos();
     return () => { active = false; };
-  }, [state.progress, chapterInfos]);
+  }, [state.progress, chapterInfos, bibleVersion]);
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-8 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 transition-opacity duration-300">
@@ -432,7 +433,7 @@ function DashboardComponent({
             const todayStr = format(new Date(), 'yyyy-MM-dd');
             const isDone = prog.localDate === todayStr;
             const bookIsCompleted = state.completedBooks.has(`${cat.id}:${book.name}`);
-            const infoKey = `${cat.id}:${prog.bookIndex}:${prog.chapter}`;
+            const infoKey = `${bibleVersion}:${cat.id}:${prog.bookIndex}:${prog.chapter}`;
             const info = chapterInfos[infoKey];
             
             return (

@@ -43,7 +43,7 @@ export const AppModals = memo(({
    const { toggleBookCompletion, jumpToBook, saveProverbJournal, resetProgress, logProverbRead, advanceChapter } = useReadingActions(state, dispatch, user);
 
    const dayOfMonth = new Date().getDate();
-   const { proverbContent, isFetchingProverb } = useProverb(dayOfMonth);
+   const { proverbContent, isFetchingProverb } = useProverb(dayOfMonth, state.settings.bibleVersion);
 
    return (
      <Suspense fallback={<ModalLoader />}>
