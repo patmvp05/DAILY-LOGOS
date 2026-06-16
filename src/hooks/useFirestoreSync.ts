@@ -152,7 +152,27 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
         if (d.categoryId && d.bookName) return `${d.categoryId}:${d.bookName}`;
         return d.key as string;
       }).filter((k: string): k is string => !!k);
-      dispatch({ type: 'CLOUD_SYNC_COMPLETED', completed });
+
+      // The reducer now treats the cloud set as authoritative (so un-completions
+      // propagate). On the FIRST snapshot only, migrate any local guest/offline
+      // completions the cloud doesn't yet have, so making it authoritative can't
+      // silently drop a completion that simply hadn't been uploaded. After the
+      // first fire the cloud is trusted as-is.
+      let effective = completed;
+      if (!firstFire.has('CompletedBooks')) {
+        const cloudSet = new Set(completed);
+        const missing = [...stateRef.current.completedBooks].filter((k) => !cloudSet.has(k));
+        if (missing.length) {
+          effective = [...completed, ...missing];
+          writeActionBatch(user.uid, {
+            completedBooks: missing.map((k) => {
+              const [categoryId, bookName] = k.split(':');
+              return { categoryId, bookName };
+            }),
+          }).catch((err) => logDiagnostic('sync', 'error', 'Completed-books migration write failed', err));
+        }
+      }
+      dispatch({ type: 'CLOUD_SYNC_COMPLETED', completed: effective });
     });
 
     // 4. Journals

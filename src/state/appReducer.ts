@@ -256,8 +256,14 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return changed ? { ...state, progress: finalProgress } : state;
     }
     case 'CLOUD_SYNC_COMPLETED': {
-      // Never let an empty cloud cache wipe local non-empty data
-      if (action.completed.length === 0 && state.completedBooks.size > 0) return state;
+      // The cloud completed-books collection is authoritative, including the
+      // empty set: adopting it is how un-completing a book — e.g. stepping
+      // back across a book boundary, or un-marking one in the Full Plan — gets
+      // propagated to other devices. (The old "never overwrite with empty"
+      // guard left a stale completion stuck forever once the cloud reached
+      // zero.) Guest/offline completions are migrated up by the listener's
+      // first-fire push-back in useFirestoreSync, so adopting the cloud set
+      // can never silently drop a completion that simply hadn't synced yet.
       if (state.completedBooks.size === action.completed.length &&
           action.completed.every(k => state.completedBooks.has(k))) return state;
       return { ...state, completedBooks: new Set(action.completed) };

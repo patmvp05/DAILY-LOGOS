@@ -10,7 +10,8 @@
     "clean": "rm -rf dist",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "test": "tsx scripts/test-conflict.mts",
+    "test": "tsx scripts/test-conflict.mts && tsx scripts/sim-sync.mts",
+    "test:sim": "tsx scripts/sim-sync.mts",
     "emulators": "firebase emulators:start --only auth,firestore",
     "dev:emulator": "VITE_USE_FIREBASE_EMULATOR=true vite --port=3000 --host=0.0.0.0"
   },
