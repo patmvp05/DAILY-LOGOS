@@ -136,36 +136,49 @@ export const CATEGORIES: Category[] = [
 export const CATEGORIES_BY_ID = new Map(CATEGORIES.map(c => [c.id, c]));
 
 export interface BibleVersion {
-  id: string;   // bolls.life translation short-code (e.g. "KJV")
+  id: string;   // bible-api.com translation code (also stored in settings)
   name: string; // human-readable name for the Configuration dropdown
 }
 
 /**
- * Curated list of popular English translations served by the keyless
- * bolls.life API (already proxied via fetchWithProxy). KJV and ESV are
- * confirmed live (ESV powers the daily Proverb); the rest are standard
- * bolls offerings. If any version ever returns no text, the reader falls
- * back to the public-domain KJV via bible-api.com, so an unavailable code
- * degrades gracefully instead of breaking the reader.
+ * Translations the in-app reader can fetch. These are the keyless,
+ * CORS-friendly translations served directly by bible-api.com — the same
+ * mechanism the app already uses successfully — so switching between them
+ * always returns real, distinct text (no silent fall-back to one version).
+ *
+ * IMPORTANT: every entry here must be COMPLETE for all 66 books, or selecting
+ * it would fall back to KJV on the missing books. That's why the Open English
+ * Bible (oeb-us/oeb-cw) is deliberately excluded — its Old Testament is still
+ * unfinished (no Genesis, etc.). KJV, WEB, WEBBE and BBE are all full Bibles.
+ *
+ * Note: modern copyrighted translations (ESV/NIV/NLT/NASB) are not available
+ * on any free keyless API for licensing reasons. The "World English Bible"
+ * (web) is a modern, readable, public-domain option. Getting ESV/NIV would
+ * require routing the user's own API.Bible account through a server-side
+ * proxy — tracked as a separate follow-up.
  */
 export const BIBLE_VERSIONS: BibleVersion[] = [
-  { id: 'KJV', name: 'King James Version' },
-  { id: 'NKJV', name: 'New King James Version' },
-  { id: 'ESV', name: 'English Standard Version' },
-  { id: 'NIV', name: 'New International Version' },
-  { id: 'NLT', name: 'New Living Translation' },
-  { id: 'NASB', name: 'New American Standard Bible' },
-  { id: 'AMP', name: 'Amplified Bible' },
-  { id: 'ASV', name: 'American Standard Version' },
-  { id: 'WEB', name: 'World English Bible' },
-  { id: 'YLT', name: "Young's Literal Translation" },
+  { id: 'kjv', name: 'King James Version' },
+  { id: 'web', name: 'World English Bible (Modern)' },
+  { id: 'webbe', name: 'World English Bible (British)' },
+  { id: 'bbe', name: 'Bible in Basic English' },
 ];
 
-export const DEFAULT_BIBLE_VERSION = 'KJV';
+export const DEFAULT_BIBLE_VERSION = 'kjv';
 
 export const BIBLE_VERSION_NAMES: Record<string, string> = Object.fromEntries(
   BIBLE_VERSIONS.map((v) => [v.id, v.name])
 );
+
+/**
+ * Normalize a stored version id to a known, valid bible-api.com code. Handles
+ * legacy values (e.g. an uppercase "KJV" saved by an earlier build) and any
+ * unknown code by falling back to the default.
+ */
+export function resolveBibleVersion(id?: string): string {
+  const lower = (id || '').toLowerCase();
+  return BIBLE_VERSIONS.some((v) => v.id === lower) ? lower : DEFAULT_BIBLE_VERSION;
+}
 
 export const BOLLS_BIBLE_BOOK_IDS: Record<string, number> = {
   'Genesis': 1, 'Exodus': 2, 'Leviticus': 3, 'Numbers': 4, 'Deuteronomy': 5,

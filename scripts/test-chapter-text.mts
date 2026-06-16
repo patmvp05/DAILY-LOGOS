@@ -5,7 +5,8 @@
  * Unit checks for the pure helpers behind the in-app chapter reader.
  * Run with: npx tsx scripts/test-chapter-text.mts
  */
-import { cleanVerseText, looksLikeReferenceList } from '../src/lib/chapterText';
+import { cleanVerseText } from '../src/lib/chapterText';
+import { resolveBibleVersion } from '../src/constants';
 
 let pass = 0;
 let fail = 0;
@@ -37,29 +38,18 @@ eq('leaves clean text untouched',
   cleanVerseText('For God so loved the world'),
   'For God so loved the world');
 
-// ── looksLikeReferenceList ──────────────────────────────────────────────────
-const realScripture = [
-  { verse: 1, text: 'In the beginning God created the heaven and the earth.' },
-  { verse: 2, text: 'And the earth was without form, and void; and darkness was upon the face of the deep.' },
-  { verse: 3, text: 'And God said, Let there be light: and there was light.' },
-];
-eq('real scripture is NOT a reference list', looksLikeReferenceList(realScripture), false);
+eq('collapses embedded newlines from bible-api.com',
+  cleanVerseText('In the beginning\nGod created\nthe heavens'),
+  'In the beginning God created the heavens');
 
-const crossRefs = [
-  { verse: 1, text: 'John 1:1' },
-  { verse: 2, text: '1 Cor 2:3' },
-  { verse: 3, text: 'Gen 1:1' },
-];
-eq('cross-reference list IS detected', looksLikeReferenceList(crossRefs), true);
-
-eq('empty array is treated as non-scripture', looksLikeReferenceList([]), true);
-
-const linkSpam = [
-  { verse: 1, text: 'see https://bolls.life/x' },
-  { verse: 2, text: 'http://example.com' },
-  { verse: 3, text: 'http://example.org' },
-];
-eq('link spam IS detected', looksLikeReferenceList(linkSpam), true);
+// ── resolveBibleVersion ──────────────────────────────────────────────────────
+eq('known lowercase code passes through', resolveBibleVersion('web'), 'web');
+eq('legacy uppercase KJV normalizes to kjv', resolveBibleVersion('KJV'), 'kjv');
+eq('mixed-case WEBBE normalizes', resolveBibleVersion('WEBBE'), 'webbe');
+eq('incomplete OEB is rejected (not offered) → kjv', resolveBibleVersion('oeb-us'), 'kjv');
+eq('unknown/copyrighted code falls back to default kjv', resolveBibleVersion('ESV'), 'kjv');
+eq('undefined falls back to default kjv', resolveBibleVersion(undefined), 'kjv');
+eq('empty string falls back to default kjv', resolveBibleVersion(''), 'kjv');
 
 // ── report ──────────────────────────────────────────────────────────────────
 if (fail > 0) {

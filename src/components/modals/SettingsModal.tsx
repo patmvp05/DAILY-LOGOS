@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '../../lib/utils';
-import { BIBLE_VERSIONS, DEFAULT_BIBLE_VERSION } from '../../constants';
+import { BIBLE_VERSIONS, resolveBibleVersion } from '../../constants';
 
 import { setUserSettings } from '../../lib/sync';
 import { getDiagnosticReport } from '../../lib/diagnostics';
@@ -265,12 +265,12 @@ interface SettingsModalProps {
                 <div className="flex items-center gap-3 p-4 border border-[var(--audible-border)] rounded-xl bg-white dark:bg-[#1A1A1A] text-[var(--audible-text-primary)]">
                   <BookText size={20} className="text-zinc-400 dark:text-zinc-600 shrink-0" />
                   <select
-                    value={state.settings.bibleVersion || DEFAULT_BIBLE_VERSION}
+                    value={resolveBibleVersion(state.settings.bibleVersion)}
                     onChange={(e) => dispatch({ type: 'SET_BIBLE_VERSION', version: e.target.value })}
                     className="bg-transparent border-none outline-none font-bold flex-1 text-sm appearance-none cursor-pointer"
                   >
                     {BIBLE_VERSIONS.map((v) => (
-                      <option key={v.id} value={v.id}>{v.name} ({v.id})</option>
+                      <option key={v.id} value={v.id}>{v.name}</option>
                     ))}
                   </select>
                   <ChevronDown size={16} className="text-zinc-400 dark:text-zinc-600 shrink-0 pointer-events-none" />

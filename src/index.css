@@ -139,6 +139,13 @@ html[data-typography="editorial"] body {
   font-family: var(--font-body);
 }
 
+/* In-app reader: legibility polish for long-form scripture reading. */
+.reader-prose {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 html[data-typography="editorial"] h1,
 html[data-typography="editorial"] h2,
 html[data-typography="editorial"] h3,
