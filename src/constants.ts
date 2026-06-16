@@ -135,6 +135,38 @@ export const CATEGORIES: Category[] = [
 
 export const CATEGORIES_BY_ID = new Map(CATEGORIES.map(c => [c.id, c]));
 
+export interface BibleVersion {
+  id: string;   // bolls.life translation short-code (e.g. "KJV")
+  name: string; // human-readable name for the Configuration dropdown
+}
+
+/**
+ * Curated list of popular English translations served by the keyless
+ * bolls.life API (already proxied via fetchWithProxy). KJV and ESV are
+ * confirmed live (ESV powers the daily Proverb); the rest are standard
+ * bolls offerings. If any version ever returns no text, the reader falls
+ * back to the public-domain KJV via bible-api.com, so an unavailable code
+ * degrades gracefully instead of breaking the reader.
+ */
+export const BIBLE_VERSIONS: BibleVersion[] = [
+  { id: 'KJV', name: 'King James Version' },
+  { id: 'NKJV', name: 'New King James Version' },
+  { id: 'ESV', name: 'English Standard Version' },
+  { id: 'NIV', name: 'New International Version' },
+  { id: 'NLT', name: 'New Living Translation' },
+  { id: 'NASB', name: 'New American Standard Bible' },
+  { id: 'AMP', name: 'Amplified Bible' },
+  { id: 'ASV', name: 'American Standard Version' },
+  { id: 'WEB', name: 'World English Bible' },
+  { id: 'YLT', name: "Young's Literal Translation" },
+];
+
+export const DEFAULT_BIBLE_VERSION = 'KJV';
+
+export const BIBLE_VERSION_NAMES: Record<string, string> = Object.fromEntries(
+  BIBLE_VERSIONS.map((v) => [v.id, v.name])
+);
+
 export const BOLLS_BIBLE_BOOK_IDS: Record<string, number> = {
   'Genesis': 1, 'Exodus': 2, 'Leviticus': 3, 'Numbers': 4, 'Deuteronomy': 5,
   'Joshua': 6, 'Judges': 7, 'Ruth': 8, '1 Samuel': 9, '2 Samuel': 10,

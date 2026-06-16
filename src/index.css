@@ -121,3 +121,35 @@
   animation: pulse-scale 2s infinite ease-in-out;
 }
 
+/* ── Editorial typography option ────────────────────────────────────────────
+   A previewable alternative to the default Inter look. The commercial fonts
+   the user requested — Blanco (serif body) and Proxima Nova (sans headings /
+   nav) — are listed FIRST in each stack, so if they're ever licensed (e.g.
+   via an Adobe Fonts kit) they activate automatically with no code change.
+   Until then, the free Google Fonts Source Serif 4 and Montserrat stand in.
+   These rules are intentionally UNLAYERED so they win over Tailwind's
+   @layer base body/heading declarations. Toggled by data-typography on <html>
+   (see App.tsx); absence of the attribute = the untouched original. */
+:root {
+  --font-heading: "Proxima Nova", "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Blanco", "Source Serif 4", Georgia, "Times New Roman", serif;
+}
+
+html[data-typography="editorial"] body {
+  font-family: var(--font-body);
+}
+
+html[data-typography="editorial"] h1,
+html[data-typography="editorial"] h2,
+html[data-typography="editorial"] h3,
+html[data-typography="editorial"] h4,
+html[data-typography="editorial"] h5,
+html[data-typography="editorial"] h6,
+html[data-typography="editorial"] nav,
+html[data-typography="editorial"] button,
+html[data-typography="editorial"] input,
+html[data-typography="editorial"] select,
+html[data-typography="editorial"] textarea {
+  font-family: var(--font-heading);
+}
+

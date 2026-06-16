@@ -21,6 +21,8 @@ export type AppAction =
   | { type: 'UPSERT_JOURNAL', journal: ProverbJournal }
   | { type: 'DELETE_JOURNAL', id: string }
   | { type: 'SET_THEME', theme: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook' }
+  | { type: 'SET_BIBLE_VERSION', version: string }
+  | { type: 'SET_TYPOGRAPHY', typography: 'default' | 'editorial' }
   | { type: 'ADD_DEVOTIONAL', devotional: Devotional }
   | { type: 'DELETE_DEVOTIONAL', id: string }
   | { type: 'LOG_HISTORY', entry: HistoryEntry }
@@ -176,6 +178,10 @@ function mergeAppState(current: AppState, incoming: Partial<AppState>): AppState
         startDate: newStartDate,
         theme: inc.theme || current.settings.theme,
         userName: inc.userName || current.settings.userName,
+        // Device-local prefs: keep whatever the incoming (saved) state carries,
+        // else preserve the current value.
+        bibleVersion: inc.bibleVersion ?? current.settings.bibleVersion,
+        typography: inc.typography ?? current.settings.typography,
         updatedAt: inc.updatedAt || current.settings.updatedAt
       };
     }
@@ -383,6 +389,16 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           updatedAt: new Date().toISOString() // Local stamp to prevent cloud-revert
         } 
       };
+    }
+    case 'SET_BIBLE_VERSION': {
+      if (state.settings.bibleVersion === action.version) return state;
+      // Device-local preference — intentionally does NOT bump `updatedAt`, so
+      // it never interferes with the cloud settings last-write-wins guard.
+      return { ...state, settings: { ...state.settings, bibleVersion: action.version } };
+    }
+    case 'SET_TYPOGRAPHY': {
+      if (state.settings.typography === action.typography) return state;
+      return { ...state, settings: { ...state.settings, typography: action.typography } };
     }
     case 'ADD_DEVOTIONAL': {
       return { ...state, customDevotionals: [...state.customDevotionals, action.devotional] };

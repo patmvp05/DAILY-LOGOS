@@ -18,6 +18,7 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
   const [showHistory, setShowHistory] = React.useState(false);
   const [activePlanCategory, setActivePlanCategory] = React.useState<string | null>(null);
   const [selectingCategoryId, setSelectingCategoryId] = React.useState<string | null>(null);
+  const [readerCategoryId, setReaderCategoryId] = React.useState<string | null>(null);
   const [activeDevotion, setActiveDevotion] = React.useState<{ name: string, url: string } | null>(null);
   const [showProverbModal, setShowProverbModal] = React.useState(false);
   const [isStartMenuOpen, setIsStartMenuOpen] = React.useState(false);
@@ -50,6 +51,7 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
     showHistory, setShowHistory,
     activePlanCategory, setActivePlanCategory,
     selectingCategoryId, setSelectingCategoryId,
+    readerCategoryId, setReaderCategoryId,
     activeDevotion, setActiveDevotion,
     showProverbModal, setShowProverbModal,
     isStartMenuOpen, setIsStartMenuOpen,
@@ -61,6 +63,7 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
     showSyncCheck, setShowSyncCheck
   }), [
     showSettings, showHistory, activePlanCategory, selectingCategoryId,
+    readerCategoryId,
     activeDevotion, showProverbModal, isStartMenuOpen, confirmDialog,
     toast, journalDraft, syncStatus, lastSyncTime, showSyncCheck
   ]);

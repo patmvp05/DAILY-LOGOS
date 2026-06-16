@@ -41,6 +41,9 @@ export interface UiContextType {
   setActivePlanCategory: (catId: string | null) => void;
   selectingCategoryId: string | null;
   setSelectingCategoryId: (catId: string | null) => void;
+  // Category whose current chapter is open in the in-app reader (null = closed).
+  readerCategoryId: string | null;
+  setReaderCategoryId: (catId: string | null) => void;
   activeDevotion: { name: string, url: string } | null;
   setActiveDevotion: (dev: { name: string, url: string } | null) => void;
   showProverbModal: boolean;

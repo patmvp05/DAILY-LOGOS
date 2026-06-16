@@ -20,10 +20,14 @@ import {
   LogOut,
   User as UserIcon,
   LogIn,
-  Bug
+  Bug,
+  BookText,
+  Type,
+  ChevronDown
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '../../lib/utils';
+import { BIBLE_VERSIONS, DEFAULT_BIBLE_VERSION } from '../../constants';
 
 import { setUserSettings } from '../../lib/sync';
 import { getDiagnosticReport } from '../../lib/diagnostics';
@@ -254,6 +258,60 @@ interface SettingsModalProps {
                     className="bg-transparent border-none outline-none font-bold flex-1 text-sm appearance-none"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] uppercase font-black tracking-[0.12em] text-[var(--audible-text-secondary)] block mb-3">Bible Version</label>
+                <div className="flex items-center gap-3 p-4 border border-[var(--audible-border)] rounded-xl bg-white dark:bg-[#1A1A1A] text-[var(--audible-text-primary)]">
+                  <BookText size={20} className="text-zinc-400 dark:text-zinc-600 shrink-0" />
+                  <select
+                    value={state.settings.bibleVersion || DEFAULT_BIBLE_VERSION}
+                    onChange={(e) => dispatch({ type: 'SET_BIBLE_VERSION', version: e.target.value })}
+                    className="bg-transparent border-none outline-none font-bold flex-1 text-sm appearance-none cursor-pointer"
+                  >
+                    {BIBLE_VERSIONS.map((v) => (
+                      <option key={v.id} value={v.id}>{v.name} ({v.id})</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} className="text-zinc-400 dark:text-zinc-600 shrink-0 pointer-events-none" />
+                </div>
+                <p className="text-[10px] text-[var(--audible-text-secondary)] font-bold tracking-tight mt-2 px-1 opacity-70">
+                  Used by the in-app chapter reader. Saved on this device.
+                </p>
+              </div>
+
+              <div>
+                <label className="text-[10px] uppercase font-black tracking-[0.12em] text-[var(--audible-text-secondary)] block mb-3">Typography</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { id: 'default', name: 'Original', sub: 'Inter' },
+                    { id: 'editorial', name: 'Editorial', sub: 'Serif + Montserrat' }
+                  ].map(({ id, name, sub }) => {
+                    const current = state.settings.typography || 'default';
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => dispatch({ type: 'SET_TYPOGRAPHY', typography: id as 'default' | 'editorial' })}
+                        className={cn(
+                          "flex flex-col items-start gap-1 p-4 border rounded-[16px] transition-all text-left",
+                          current === id
+                            ? "border-brand bg-brand/[0.03] text-brand shadow-sm"
+                            : "border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]"
+                        )}
+                      >
+                        <span className="flex items-center gap-2 text-[13px] font-bold">
+                          <Type size={14} />
+                          {name}
+                        </span>
+                        <span className="text-[10px] uppercase tracking-widest opacity-70">{sub}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[10px] text-[var(--audible-text-secondary)] font-bold tracking-tight mt-2 px-1 opacity-70">
+                  "Editorial" previews Blanco / Proxima Nova using close free stand-ins (Source Serif + Montserrat). Tap "Original" to revert anytime.
+                </p>
               </div>
 
               <div className="pt-10 border-t border-[var(--audible-border)] text-center py-10 opacity-30">

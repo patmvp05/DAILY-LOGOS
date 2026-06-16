@@ -18,6 +18,7 @@ const ProverbModal = lazy(() => import('./modals/ProverbModal'));
 const CategoryPlanModal = lazy(() => import('./modals/CategoryPlanModal'));
 const BookSelectorModal = lazy(() => import('./modals/BookSelectorModal'));
 const DevotionalModal = lazy(() => import('./modals/DevotionalModal'));
+const ReaderModal = lazy(() => import('./modals/ReaderModal'));
 
 
 import { useProverb } from '../hooks/useProverb';
@@ -34,12 +35,12 @@ export const AppModals = memo(({
    const { state, dispatch } = useApp();
    const {
      showSettings, showHistory, activePlanCategory, selectingCategoryId,
-     activeDevotion, showProverbModal,
+     readerCategoryId, activeDevotion, showProverbModal,
      syncStatus, lastSyncTime, showSyncCheck
    } = useUi();
 
    const { user, loading: isAuthLoading, logout } = useAuth();
-   const { toggleBookCompletion, jumpToBook, saveProverbJournal, resetProgress, logProverbRead } = useReadingActions(state, dispatch, user);
+   const { toggleBookCompletion, jumpToBook, saveProverbJournal, resetProgress, logProverbRead, advanceChapter } = useReadingActions(state, dispatch, user);
 
    const dayOfMonth = new Date().getDate();
    const { proverbContent, isFetchingProverb } = useProverb(dayOfMonth);
@@ -73,6 +74,7 @@ export const AppModals = memo(({
 
       {activePlanCategory && <CategoryPlanModal toggleBookCompletion={toggleBookCompletion} />}
       {selectingCategoryId && <BookSelectorModal jumpToBook={jumpToBook} toggleBookCompletion={toggleBookCompletion} />}
+      {readerCategoryId && <ReaderModal advanceChapter={advanceChapter} />}
       {activeDevotion && <DevotionalModal />}
     </Suspense>
   );

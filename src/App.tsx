@@ -52,6 +52,17 @@ export default function App() {
 
   useTheme(state.settings.theme);
 
+  // Apply the typography preference as a data attribute on <html>; the CSS in
+  // index.css swaps the body/heading font stacks when it's "editorial".
+  useEffect(() => {
+    const root = document.documentElement;
+    if (state.settings.typography === 'editorial') {
+      root.setAttribute('data-typography', 'editorial');
+    } else {
+      root.removeAttribute('data-typography');
+    }
+  }, [state.settings.typography]);
+
   useEffect(() => {
     setSyncStatus(sync.syncStatus);
     setLastSyncTime(sync.lastSyncTime);

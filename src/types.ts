@@ -16,6 +16,12 @@ export interface UserSettings {
   startDate: string; // ISO string
   userName?: string;
   theme: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook';
+  // Device-local preferences (not synced to Firestore — the user-doc rules
+  // restrict writes to theme/startDate/updatedAt, and these are sensibly
+  // per-device anyway: e.g. KJV on one device, ESV on another). They persist
+  // through the local IndexedDB/localStorage state.
+  bibleVersion?: string; // bolls.life translation short-code; default 'KJV'
+  typography?: 'default' | 'editorial';
   updatedAt?: string; // ISO string or similar for LWW guard
 }
 

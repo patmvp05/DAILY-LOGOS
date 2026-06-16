@@ -10,13 +10,14 @@ import {
   Play, 
   ArrowRight, 
   Sparkles, 
-  ChevronRight, 
-  ExternalLink, 
-  Cloud, 
-  LogIn, 
+  ChevronRight,
+  ExternalLink,
+  Cloud,
+  LogIn,
   RefreshCw,
   Minus,
-  Plus
+  Plus,
+  BookOpen
 } from 'lucide-react';
 import { format, parseISO, subDays } from 'date-fns';
 import { CATEGORIES, CATEGORIES_BY_ID, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
@@ -46,13 +47,17 @@ function DashboardComponent({
 }: DashboardProps) {
   const { state, dispatch } = useApp();
   const { streak, dayNumber, overallProgress, totalRead, totalChaptersCount, lastReadProgress } = useAppStats(state);
-  const { advanceChapter } = useReadingActions(state, dispatch, null);
+  // Pass the signed-in user so chapter advances from the cards actually write
+  // to the cloud (progress + history). Previously this was `null`, which
+  // silently skipped the cloud write and left other devices stale until an
+  // unrelated sync event happened to push the local state up.
+  const { advanceChapter } = useReadingActions(state, dispatch, user);
   const dayOfMonth = new Date().getDate();
   const { proverbSnippet, isFetchingProverb } = useProverb(dayOfMonth);
 
-  const { 
-    setActivePlanCategory, setShowProverbModal, setActiveDevotion, 
-    setSelectingCategoryId, setJournalDraft, syncStatus
+  const {
+    setActivePlanCategory, setShowProverbModal, setActiveDevotion,
+    setSelectingCategoryId, setReaderCategoryId, setJournalDraft, syncStatus
   } = useUi();
 
   const [chapterInfos, setChapterInfos] = useState<Record<string, { firstVerse: string, readTime: number }>>({});
@@ -444,6 +449,7 @@ function DashboardComponent({
                 progressStats={catProgress[cat.id]}
                 advanceChapter={advanceChapter}
                 setSelectingCategoryId={setSelectingCategoryId}
+                onOpenReader={setReaderCategoryId}
               />
             );
           })}
@@ -465,6 +471,7 @@ interface CategoryCardProps {
   progressStats: { pct: number; chaptersRead: number; totalChapters: number } | undefined;
   advanceChapter: (catId: string, diff: number) => void;
   setSelectingCategoryId: (catId: string) => void;
+  onOpenReader: (catId: string) => void;
 }
 
 const CategoryCard = memo(({
@@ -477,7 +484,8 @@ const CategoryCard = memo(({
   info,
   progressStats,
   advanceChapter,
-  setSelectingCategoryId
+  setSelectingCategoryId,
+  onOpenReader
 }: CategoryCardProps) => {
   return (
     <div
@@ -510,28 +518,43 @@ const CategoryCard = memo(({
             </span>
           )}
 
-          <button 
-            onClick={() => setSelectingCategoryId(cat.id)}
-            className="group/btn flex items-center gap-2 mt-2 w-full text-left"
-          >
-            <div className="relative">
+          <div className="flex items-center gap-2 mt-2">
+            <button
+              onClick={() => onOpenReader(cat.id)}
+              title="Read this chapter"
+              className="group/btn flex items-center gap-2 text-left min-w-0 flex-1"
+            >
               <h3 className={cn(
-                "text-3xl font-bold tracking-tighter transition-transform uppercase group-hover/btn:scale-[1.01]",
+                "text-3xl font-bold tracking-tighter transition-transform uppercase group-hover/btn:scale-[1.01] truncate",
                 bookIsCompleted ? "text-white" : isDone ? "text-zinc-400 dark:text-zinc-600" : "text-[var(--text-primary)]"
               )}>
                 {book.name} {prog.chapter}
               </h3>
-            </div>
-            <ChevronRight size={20} className={cn("transition-all opacity-0 group-hover/btn:opacity-100 group-hover/btn:translate-x-1", bookIsCompleted ? "text-white" : "text-brand")} />
-          </button>
+              <BookOpen size={18} className={cn("shrink-0 transition-all opacity-0 group-hover/btn:opacity-100", bookIsCompleted ? "text-white" : "text-brand")} />
+            </button>
+            <button
+              onClick={() => setSelectingCategoryId(cat.id)}
+              title="Switch book"
+              className={cn(
+                "shrink-0 p-1.5 rounded-full transition-colors",
+                bookIsCompleted ? "text-white/80 hover:bg-white/10" : "text-brand hover:bg-brand/10"
+              )}
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
 
           {info ? (
-            <p className={cn(
-              "text-xs font-medium italic line-clamp-1 opacity-70 mt-1",
-              bookIsCompleted ? "text-white" : "text-[var(--text-secondary)]"
-            )}>
+            <button
+              onClick={() => onOpenReader(cat.id)}
+              title="Read this chapter"
+              className={cn(
+                "text-xs font-medium italic line-clamp-1 opacity-70 mt-1 text-left hover:opacity-100 transition-opacity",
+                bookIsCompleted ? "text-white" : "text-[var(--text-secondary)]"
+              )}
+            >
               {info.firstVerse}
-            </p>
+            </button>
           ) : (
             <div className="h-4 w-32 bg-[var(--bg-tertiary)] mt-1 rounded animate-pulse" />
           )}

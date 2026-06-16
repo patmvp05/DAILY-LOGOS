@@ -1,0 +1,194 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { motion } from 'motion/react';
+import { BookOpen, X, ArrowRight, Check, RefreshCw, Sparkles } from 'lucide-react';
+
+import { useApp } from '../../state/AppContextCore';
+import { useUi } from '../../state/UiContextCore';
+import { CATEGORIES_BY_ID, DEFAULT_BIBLE_VERSION } from '../../constants';
+import { calculateNextProgress } from '../../lib/bible';
+import { getChapterText, type ChapterTextResponse } from '../../lib/chapterText';
+
+interface ReaderModalProps {
+  // Wired from AppModals' useReadingActions (with the signed-in user), so
+  // tapping "Next Chapter" logs history, marks completion, and cloud-syncs —
+  // exactly like the dashboard "+" button.
+  advanceChapter: (categoryId: string, amount: number) => void;
+}
+
+function ReaderModal({ advanceChapter }: ReaderModalProps) {
+  const { state } = useApp();
+  const { readerCategoryId, setReaderCategoryId } = useUi();
+
+  const version = state.settings.bibleVersion || DEFAULT_BIBLE_VERSION;
+  const category = readerCategoryId ? CATEGORIES_BY_ID.get(readerCategoryId) : undefined;
+  const progress = state.progress.find((p) => p.categoryId === readerCategoryId);
+  const book = category && progress ? category.books[progress.bookIndex] : undefined;
+  const chapter = progress?.chapter;
+
+  const [content, setContent] = useState<ChapterTextResponse | null>(null);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const onClose = useCallback(() => setReaderCategoryId(null), [setReaderCategoryId]);
+
+  // Is there a chapter beyond the current one (within this category's plan)?
+  // calculateNextProgress returns the same position at the terminal chapter.
+  const hasNext = (() => {
+    if (!readerCategoryId || !progress) return false;
+    const next = calculateNextProgress(readerCategoryId, 1, progress, state.completedBooks).progress;
+    return !(next.bookIndex === progress.bookIndex && next.chapter === progress.chapter);
+  })();
+
+  const load = useCallback(async () => {
+    if (!book || !chapter) return;
+    setStatus('loading');
+    try {
+      const data = await getChapterText(book.name, chapter, version);
+      setContent(data);
+      setStatus('ready');
+    } catch {
+      setStatus('error');
+    }
+  }, [book, chapter, version]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  // Jump back to the top whenever the chapter changes (e.g. after "Next").
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [book?.name, chapter]);
+
+  if (!category || !progress || !book || !chapter) return null;
+
+  const onPrimary = () => {
+    if (hasNext) {
+      // Optimistic loading state; advancing updates global progress (debounced),
+      // which re-renders this modal onto the next chapter and refetches.
+      setStatus('loading');
+      advanceChapter(readerCategoryId!, 1);
+    } else {
+      onClose();
+    }
+  };
+
+  return (
+    <>
+      <motion.div
+        key="reader-overlay"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-black/80 backdrop-blur-md z-[500]"
+      />
+      <motion.div
+        key="reader-window"
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="fixed inset-0 sm:inset-4 md:inset-x-auto md:inset-y-8 md:left-1/2 md:-translate-x-1/2 md:w-[760px] md:max-w-[calc(100vw-4rem)] bg-[var(--bg-primary)] z-[510] flex flex-col border border-[var(--border-color)] shadow-2xl sm:rounded-[24px] overflow-hidden"
+      >
+        {/* Header */}
+        <div className="flex justify-between items-center px-5 sm:px-8 py-5 bg-[var(--bg-primary)] border-b border-[var(--border-color)] shrink-0">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white bg-brand shadow-sm shrink-0">
+              <BookOpen size={22} />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tighter text-[var(--text-primary)] truncate">
+                {book.name} {chapter}
+              </h3>
+              <p className="text-[11px] text-[var(--text-secondary)] font-bold uppercase tracking-widest truncate">
+                {category.name}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close reader"
+            className="p-2 sm:p-3 rounded-full hover:scale-105 transition-transform bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] shrink-0"
+          >
+            <X size={22} />
+          </button>
+        </div>
+
+        {/* Reading area */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto ios-scroll bg-[var(--bg-primary)]">
+          <div className="px-6 sm:px-12 py-8 sm:py-12 max-w-[680px] mx-auto">
+            {status === 'loading' ? (
+              <div className="py-24 flex flex-col items-center justify-center text-center">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
+                  className="w-12 h-12 border-4 border-brand border-t-transparent rounded-full mb-4"
+                />
+                <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
+                  Opening the scroll...
+                </p>
+              </div>
+            ) : status === 'error' ? (
+              <div className="py-24 flex flex-col items-center justify-center text-center gap-4">
+                <p className="text-sm font-medium text-[var(--text-secondary)] max-w-xs">
+                  We couldn't load {book.name} {chapter} right now. Check your connection and try again.
+                </p>
+                <button
+                  onClick={load}
+                  className="flex items-center gap-2 px-5 py-3 rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] font-bold uppercase tracking-widest text-[11px] active:scale-95 transition-transform"
+                >
+                  <RefreshCw size={14} />
+                  Retry
+                </button>
+              </div>
+            ) : (
+              <>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-brand mb-8 flex items-center gap-2">
+                  <Sparkles size={12} />
+                  {content?.translationName || version}
+                </p>
+                <div className="space-y-5 text-[19px] sm:text-xl leading-[1.85] text-[var(--text-primary)] font-serif">
+                  {content?.verses.map((v) => (
+                    <p key={v.verse}>
+                      <span className="text-[11px] font-black align-top mr-2 text-brand opacity-60 tabular-nums">
+                        {v.verse}
+                      </span>
+                      {v.text}
+                    </p>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom action bar */}
+        <div className="px-5 sm:px-8 py-4 sm:py-5 border-t border-[var(--border-color)] bg-[var(--bg-primary)] shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <button
+            onClick={onPrimary}
+            className="w-full p-4 sm:p-5 font-bold uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-[18px] shadow-sm hover:opacity-90 active:scale-[0.98]"
+          >
+            {hasNext ? (
+              <>
+                Next Chapter
+                <ArrowRight size={18} />
+              </>
+            ) : (
+              <>
+                Done
+                <Check size={18} />
+              </>
+            )}
+          </button>
+        </div>
+      </motion.div>
+    </>
+  );
+}
+
+export default ReaderModal;
