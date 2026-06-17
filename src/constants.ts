@@ -149,17 +149,21 @@ export interface BibleVersion {
  * Two backends, picked per-version by `source`:
  *  - 'bibleapi': bible-api.com (keyless, CORS-friendly). Public-domain texts
  *    only. `code` is the bible-api.com translation slug (e.g. 'web', 'kjv').
- *  - 'bolls':    bolls.life via our Cloud Function proxy (functions/index.js).
- *    Serves the modern, copyrighted translations people actually read. `code`
+ *  - 'bolls':    modern, copyrighted translations served from same-origin static
+ *    files at /bible/{code}/{bookId}/{chapter}.json (pre-fetched from bolls.life
+ *    by scripts/fetch-bible-static.mjs — bolls.life blocks runtime access). `code`
  *    is the bolls.life translation short-name (e.g. 'NIV', 'ESV').
  *
  * Every entry must be COMPLETE for all 66 books, or it would fall back to KJV
- * on the missing books. If a bolls translation ever fails (bad code, network),
- * getChapterText() falls back to public-domain KJV — but the header always
- * reflects what genuinely loaded, so a version is never mislabeled.
+ * on the missing books. If a modern translation ever fails to load (missing
+ * file, network), getChapterText() falls back to public-domain KJV — but the
+ * header always reflects what genuinely loaded, so a version is never mislabeled.
  */
 export const BIBLE_VERSIONS: BibleVersion[] = [
-  // Modern, copyrighted — via bolls.life (direct browser fetch, proxy fallback)
+  // Modern, copyrighted — served from same-origin static files (public/bible/),
+  // pre-fetched from bolls.life by scripts/fetch-bible-static.mjs. ('bolls' here
+  // means "the bolls-sourced static set", NOT a runtime bolls.life call — that's
+  // blocked by Cloudflare. See AGENTS.md.)
   { id: 'niv',  name: 'New International Version', source: 'bolls', code: 'NIV',  modern: true },
   { id: 'nlt',  name: 'New Living Translation',    source: 'bolls', code: 'NLT',  modern: true },
   { id: 'esv',  name: 'English Standard Version',  source: 'bolls', code: 'ESV',  modern: true },

@@ -100,6 +100,20 @@ const PUBLIC_DIR = join(__dirname, '..', 'public', 'bible');
 const DELAY_MS = 350;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Mirror of cleanVerseText() in src/lib/chapterText.ts. Kept in sync by hand —
+// this standalone Node script can't import the TS source. Strips bolls.life's
+// Strong's numbers, superscripts and any stray HTML down to clean prose so the
+// static files are the final, render-ready shape.
+function cleanVerseText(raw) {
+  return String(raw)
+    .replace(/<S>[^<]*<\/S>/gi, '')
+    .replace(/<sup>[^<]*<\/sup>/gi, '')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]*>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 async function fetchChapter(version, bookId, chapter) {
   const url = `https://bolls.life/get-text/${version}/${bookId}/${chapter}/`;
   const res = await fetch(url, {
@@ -110,6 +124,26 @@ async function fetchChapter(version, bookId, chapter) {
   });
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
   return res.json();
+}
+
+/**
+ * Transform a raw bolls.life chapter response into the exact ChapterTextResponse
+ * shape getChapterText() returns, so the runtime can use the file verbatim with
+ * no parsing/cleaning. (_cachedAt is stamped at fetch time on the client.)
+ */
+function toChapterResponse(raw, bookName, chapter, code, displayName) {
+  if (!Array.isArray(raw)) return null;
+  const verses = raw
+    .map((v) => ({ verse: Number(v.verse), text: cleanVerseText(v.text || '') }))
+    .filter((v) => Number.isFinite(v.verse) && v.text.length > 0)
+    .sort((a, b) => a.verse - b.verse);
+  if (verses.length === 0) return null;
+  return {
+    reference: `${bookName} ${chapter}`,
+    verses,
+    translationId: code,
+    translationName: displayName,
+  };
 }
 
 async function main() {
@@ -133,9 +167,11 @@ async function main() {
         }
 
         try {
-          const data = await fetchChapter(ver.code, book.id, ch);
+          const raw = await fetchChapter(ver.code, book.id, ch);
+          const shaped = toChapterResponse(raw, book.name, ch, ver.code, ver.name);
+          if (!shaped) throw new Error('empty/invalid chapter payload');
           mkdirSync(outDir, { recursive: true });
-          writeFileSync(outFile, JSON.stringify(data));
+          writeFileSync(outFile, JSON.stringify(shaped));
           verFetched++;
           fetched++;
 
@@ -155,6 +191,9 @@ async function main() {
 
   console.log(`\n✅ Complete: ${fetched} chapters fetched, ${errors} errors`);
   console.log(`Files saved to: public/bible/`);
+  if (errors > 0) {
+    console.log(`\n⚠️  ${errors} chapters failed — re-run the script to retry only the missing ones.`);
+  }
   console.log(`\nNext steps:`);
   console.log(`  git add public/bible/`);
   console.log(`  git commit -m "Add static Bible text for modern translations"`);

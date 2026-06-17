@@ -8,6 +8,7 @@ import type { ReactNode } from 'react';
 import { appReducer } from './appReducer';
 import { saveState, loadState, loadStateAsync, saveStateSync } from '../lib/storage';
 import { prefetchProverbs } from '../lib/proverbCache';
+import { prefetchBibleChapters } from '../lib/prefetchBible';
 import { AppContext } from './AppContextCore';
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
@@ -78,6 +79,24 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     triggerPrefetch();
     return () => window.removeEventListener('online', triggerPrefetch);
   }, [bibleVersion]);
+
+  // Warm the cache 7 chapters ahead of the user's position in every category,
+  // in their selected version, so the reader opens instantly and works offline.
+  // Waits for hydration (so we prefetch from real progress, not the initial
+  // defaults), debounces rapid progress changes, and re-warms when coming back
+  // online. prefetchBibleChapters is idempotent — cached chapters are no-ops.
+  useEffect(() => {
+    if (!hasHydrated) return;
+    const triggerPrefetch = () => {
+      if (navigator.onLine) prefetchBibleChapters(stateRef.current.progress, bibleVersion);
+    };
+    const timer = setTimeout(triggerPrefetch, 2000);
+    window.addEventListener('online', triggerPrefetch);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('online', triggerPrefetch);
+    };
+  }, [hasHydrated, state.progress, bibleVersion]);
 
   // Async hydration from IndexedDB
   useEffect(() => {

@@ -37,13 +37,16 @@ function waitForPort(port, timeoutMs = 30000) {
   });
 }
 
-// Pull the translation code out of either backend's URL.
+// Pull the translation code out of any backend's URL (bible-api query, legacy
+// bolls get-text path, or same-origin static /bible/CODE/... file).
 function codeFromUrl(url) {
   const m1 = url.match(/translation=([a-z0-9-]+)/i);
   if (m1) return m1[1].toUpperCase();
   const dec = decodeURIComponent(url);
   const m2 = dec.match(/get-text\/([A-Za-z0-9]+)\//);
   if (m2) return m2[1].toUpperCase();
+  const m3 = url.match(/\/bible\/([A-Za-z0-9]+)\//);
+  if (m3) return m3[1].toUpperCase();
   return 'UNK';
 }
 
@@ -54,6 +57,16 @@ async function installRoutes(page) {
     if (req.isNavigationRequest() && req.frame() === page.mainFrame()
         && !url.startsWith(`http://127.0.0.1:${PORT}`) && !url.startsWith('about:')) {
       return route.abort();
+    }
+    // Same-origin static Bible files for modern versions: /bible/CODE/book/ch.json.
+    // Encode the requested code into the verse text so the test can assert the
+    // visible text reflects the chosen version.
+    if (/\/bible\/[A-Za-z0-9]+\/\d+\/\d+\.json/.test(url)) {
+      const CODE = codeFromUrl(url);
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        reference: `${CODE} ref`, translationId: CODE.toLowerCase(), translationName: CODE,
+        verses: Array.from({ length: 8 }, (_, i) => ({ verse: i + 1, text: `${CODE} verse ${i + 1} sample reading content here.` })),
+      }) });
     }
     if (url.includes('bible-api.com')) {
       const CODE = codeFromUrl(url);

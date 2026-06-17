@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fetchWithProxy } from './api';
+import { fetchJson } from './api';
 
 export interface WeatherSnapshot {
   tempF: number;
@@ -71,7 +71,7 @@ export async function fetchWeather(lat: number, lng: number, city: string): Prom
 
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&temperature_unit=fahrenheit&timezone=auto`;
-    const data = await fetchWithProxy(url, controller.signal);
+    const data = await fetchJson(url, controller.signal);
     clearTimeout(timeoutId);
 
     if (!data || !data.current || !data.daily) throw new Error('Weather data invalid');

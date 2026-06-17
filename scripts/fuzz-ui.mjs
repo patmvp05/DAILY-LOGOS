@@ -76,6 +76,11 @@ const BIBLE_API_JSON = {
 const BOLLS_JSON = Array.from({ length: 20 }, (_, i) => ({
   pk: i + 1, verse: i + 1, text: `Mock <i>modern</i> verse ${i + 1}.<S>1</S>`,
 }));
+// Same-origin static file (final ChapterTextResponse shape) for modern versions.
+const STATIC_BIBLE_JSON = {
+  reference: 'Mock 1', translationId: 'niv', translationName: 'Modern Version',
+  verses: Array.from({ length: 20 }, (_, i) => ({ verse: i + 1, text: `Mock modern verse ${i + 1}.` })),
+};
 
 async function installRoutes(page) {
   // Only MOCK the two Bible backends so the reader renders deterministic text.
@@ -94,9 +99,14 @@ async function installRoutes(page) {
         && !url.startsWith('about:')) {
       return route.abort();
     }
+    // Modern versions now load from same-origin static files (/bible/...).
+    if (/\/bible\/[A-Za-z0-9]+\/\d+\/\d+\.json/.test(url)) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(STATIC_BIBLE_JSON) });
+    }
     if (url.includes('bible-api.com')) {
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(BIBLE_API_JSON) });
     }
+    // Legacy bolls path kept as a harmless fallback for older cached clients.
     if (url.includes('bibleProxy') || url.includes('a.run.app') || url.includes('bolls.life')) {
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(BOLLS_JSON) });
     }

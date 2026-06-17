@@ -60,6 +60,24 @@ export default defineConfig(() => {
           globIgnores: ['**/reset.html'],
           runtimeCaching: [
             {
+              // Same-origin static Bible text (public/bible/**). Immutable, so
+              // serve from cache first and keep it for a year. Not precached
+              // (see globPatterns) — only the chapters the user actually opens
+              // or that the look-ahead prefetch warms get stored on-device.
+              urlPattern: /\/bible\/[A-Z]+\/\d+\/\d+\.json$/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'static-bible-text',
+                expiration: {
+                  maxEntries: 6000,
+                  maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            },
+            {
               urlPattern: /^https:\/\/.*(bolls\.life|bibleproxy.*\.run\.app)\/.*/,
               handler: 'StaleWhileRevalidate',
               options: {
