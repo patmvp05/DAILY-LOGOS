@@ -6,10 +6,8 @@
 import { resolveBibleVersion } from '../constants';
 import { getChapterText } from './chapterText';
 
-// v9: version-aware cache keys (prior versions hard-coded KJV, so the card
-// previews ignored the selected translation). Bumped so stale KJV-only entries
-// are discarded.
-const CACHE_PREFIX = 'bible_chapter_cache_v9_';
+// v10: direct browser fetch to bolls.life; NCV added. Bump discards v9 stale entries.
+const CACHE_PREFIX = 'bible_chapter_cache_v10_';
 
 interface ChapterInfo {
   firstVerse: string;

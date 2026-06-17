@@ -159,11 +159,12 @@ export interface BibleVersion {
  * reflects what genuinely loaded, so a version is never mislabeled.
  */
 export const BIBLE_VERSIONS: BibleVersion[] = [
-  // Modern, copyrighted — via bolls.life proxy
+  // Modern, copyrighted — via bolls.life (direct browser fetch, proxy fallback)
   { id: 'niv',  name: 'New International Version', source: 'bolls', code: 'NIV',  modern: true },
   { id: 'nlt',  name: 'New Living Translation',    source: 'bolls', code: 'NLT',  modern: true },
   { id: 'esv',  name: 'English Standard Version',  source: 'bolls', code: 'ESV',  modern: true },
   { id: 'nkjv', name: 'New King James Version',    source: 'bolls', code: 'NKJV', modern: true },
+  { id: 'ncv',  name: 'New Century Version',        source: 'bolls', code: 'NCV',  modern: true },
   // Modern, public-domain — via bible-api.com (always reliable, cached, offline)
   { id: 'web',  name: 'World English Bible',       source: 'bibleapi', code: 'web', modern: true },
   // Classic, public-domain — via bible-api.com

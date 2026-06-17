@@ -33,12 +33,11 @@ function installFetch(opts: { bollsFails?: boolean } = {}) {
     const url = typeof input === 'string' ? input : input.toString();
     calls.push(url);
 
-    // bolls.life through our Cloud Function proxy: /bibleProxy?path=<bolls url>
-    if (url.includes('bibleProxy') && url.includes('bolls.life')) {
+    // Direct bolls.life fetch (new: tried before proxy) or proxy path
+    if (url.includes('bolls.life')) {
       if (opts.bollsFails) {
         return { ok: false, status: 502, statusText: 'Bad Gateway', json: async () => ({}) };
       }
-      // bolls get-text returns an array of { verse, text(HTML), pk }
       return {
         ok: true, status: 200, statusText: 'OK',
         json: async () => ([
@@ -71,9 +70,9 @@ async function run() {
   // 1. Modern version (NIV) routes through the bolls proxy and cleans HTML.
   installFetch();
   const niv = await getChapterText('John', 3, 'niv');
-  ok('NIV uses the bolls proxy', calls.some((u) => u.includes('bibleProxy') && u.includes('bolls.life')),
+  ok('NIV fetches from bolls.life', calls.some((u) => u.includes('bolls.life')),
     `calls=${JSON.stringify(calls)}`);
-  ok('NIV requests the right slug + book id', calls.some((u) => u.includes(encodeURIComponent('get-text/NIV/43/3'))),
+  ok('NIV requests the right slug + book id', calls.some((u) => u.includes('get-text/NIV/43/3')),
     `calls=${JSON.stringify(calls)}`);
   ok('NIV strips Strong\'s/markup', niv.verses[0].text === 'For God so loved the world,', niv.verses[0].text);
   ok('NIV labeled as New International Version', niv.translationName === 'New International Version', niv.translationName);
@@ -84,7 +83,7 @@ async function run() {
   const web = await getChapterText('Genesis', 1, 'web');
   ok('WEB uses bible-api.com directly', calls.every((u) => u.includes('bible-api.com')),
     `calls=${JSON.stringify(calls)}`);
-  ok('WEB never touches the proxy', !calls.some((u) => u.includes('bibleProxy')));
+  ok('WEB never touches bolls.life', !calls.some((u) => u.includes('bolls.life')));
   ok('WEB labeled correctly', web.translationName === 'World English Bible', web.translationName);
 
   // 3. Bolls failure for a modern version falls back to public-domain KJV,
@@ -104,24 +103,32 @@ async function run() {
   //    before). A modern pick must route through the bolls proxy, not KJV.
   installFetch();
   const provNiv = await getProverb(10, 'niv');
-  ok('proverb (NIV) uses the bolls proxy', calls.some((u) => u.includes('bibleProxy') && u.includes(encodeURIComponent('get-text/NIV/20/10'))),
+  ok('proverb (NIV) fetches from bolls.life', calls.some((u) => u.includes('bolls.life') && u.includes('get-text/NIV/20/10')),
     `calls=${JSON.stringify(calls)}`);
   ok('proverb (NIV) labeled New International Version', provNiv.translation_name === 'New International Version', provNiv.translation_name);
   ok('proverb (NIV) has joined text', provNiv.text.length > 0 && provNiv.verses.length > 0);
 
   installFetch();
   const provWeb = await getProverb(11, 'web');
-  ok('proverb (WEB) uses bible-api, not the proxy', calls.some((u) => u.includes('bible-api.com')) && !calls.some((u) => u.includes('bibleProxy')),
+  ok('proverb (WEB) uses bible-api, not bolls', calls.some((u) => u.includes('bible-api.com')) && !calls.some((u) => u.includes('bolls.life')),
     `calls=${JSON.stringify(calls)}`);
 
   // 6. The CARD PREVIEW (first verse + read time) respects the selected version
   //    (was hard-coded to KJV before).
   installFetch();
   const infoNkjv = await getChapterInfo('Mark', 9, 'nkjv');
-  ok('card preview (NKJV) uses the bolls proxy', calls.some((u) => u.includes('bibleProxy') && u.includes(encodeURIComponent('get-text/NKJV/41/9'))),
+  ok('card preview (NKJV) fetches from bolls.life', calls.some((u) => u.includes('bolls.life') && u.includes('get-text/NKJV/41/9')),
     `calls=${JSON.stringify(calls)}`);
   ok('card preview returns a first verse', infoNkjv.firstVerse.length > 0 && infoNkjv.firstVerse !== 'Could not load preview.', infoNkjv.firstVerse);
   ok('card preview computes a positive read time', infoNkjv.readTime > 0, String(infoNkjv.readTime));
+
+  // 7. NCV (New Century Version) routes through bolls.life.
+  installFetch();
+  const ncv = await getChapterText('Psalms', 23, 'ncv');
+  ok('NCV fetches from bolls.life', calls.some((u) => u.includes('bolls.life') && u.includes('get-text/NCV/19/23')),
+    `calls=${JSON.stringify(calls)}`);
+  ok('NCV labeled New Century Version', ncv.translationName === 'New Century Version', ncv.translationName);
+  ok('NCV returns verses', ncv.verses.length > 0, String(ncv.verses.length));
 
   if (fail > 0) {
     console.error(failures.join('\n'));

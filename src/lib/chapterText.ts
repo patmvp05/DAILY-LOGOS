@@ -26,10 +26,9 @@ export interface ChapterTextResponse {
   _cachedAt?: number;
 }
 
-// v3: bumped when modern translations (NIV/NLT/ESV/NKJV) were added via the
-// bolls.life proxy. Earlier caches could hold a KJV fall-back under a non-KJV
-// key; bumping discards those so every version re-fetches its real text.
-const CACHE_PREFIX = 'chapter_text_v3_';
+// v4: direct browser fetch to bolls.life (bypasses proxy Cloudflare 403);
+// NCV added. Bump discards stale KJV-fallback entries from v3.
+const CACHE_PREFIX = 'chapter_text_v4_';
 const FETCH_TIMEOUT_MS = 12000;
 
 // L1 in-memory cache to avoid repeated IndexedDB reads / re-parsing.
