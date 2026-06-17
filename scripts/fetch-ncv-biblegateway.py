@@ -1,25 +1,28 @@
 #!/usr/bin/env python3
 """
-Scrape the New Century Version (NCV) from BibleGateway via the `meaningless`
-package and write it as static JSON under public/bible/NCV/{bookId}/{chapter}.json
-— the exact ChapterTextResponse shape the app's getChapterText() expects.
+Scrape the New Century Version (NCV) directly from BibleGateway and write it as
+static JSON under public/bible/NCV/{bookId}/{chapter}.json — the exact
+ChapterTextResponse shape the app's getChapterText() expects.
 
-Why BibleGateway: bolls.life (our source for NIV/ESV/NLT/NKJV) does NOT carry
-NCV — its get-text/NCV endpoint returns an empty array. BibleGateway does have
-NCV, and `meaningless` is a maintained scraper that parses its HTML cleanly.
+Why direct (not the `meaningless` lib): bolls.life doesn't carry NCV at all, and
+`meaningless` rejects NCV via a hardcoded allowlist (UnsupportedTranslationError).
+BibleGateway DOES serve NCV, so we fetch its passage HTML and parse the verse
+spans ourselves with BeautifulSoup.
 
-Resumable: skips chapters whose files already exist, so a re-run only fills
-gaps left by throttling. Set SMOKE=1 to fetch just John 3 and assert it's
-non-empty (fast reachability/capability check). DELAY tunes the polite gap.
+Resumable: skips chapters whose files already exist. Set SMOKE=1 to fetch just
+John 3 and assert it's non-empty (fast reachability/capability check). DELAY
+tunes the polite gap between requests.
 
 Run:  python scripts/fetch-ncv-biblegateway.py
 """
 import os
+import re
 import sys
 import json
 import time
 
-from meaningless import WebExtractor
+import requests
+from bs4 import BeautifulSoup
 
 # (name, bookId, chapterCount) — bookId matches BOLLS_BIBLE_BOOK_IDS in src/constants.ts
 BOOKS = [
@@ -43,25 +46,55 @@ BOOKS = [
     ("3 John", 64, 1), ("Jude", 65, 1), ("Revelation", 66, 22),
 ]
 
-# meaningless uses its own canonical book names for a few books.
-NAME_OVERRIDES = {"Song of Solomon": "Song of Songs"}
-
 OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "bible", "NCV")
 DELAY = float(os.environ.get("DELAY", "1.0"))
 MAX_RETRIES = 5
+UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 
-extractor = WebExtractor(translation="NCV", output_as_list=True, show_passage_numbers=False)
+# A verse span carries a class like "text John-3-16" / "text 1Cor-1-2" — the
+# trailing -<chapter>-<verse> is what we key on.
+VERSE_CLASS_RE = re.compile(r"^[\w]+-(\d+)-(\d+)$")
+
+session = requests.Session()
+session.headers.update({"User-Agent": UA, "Accept-Language": "en-US,en;q=0.9"})
 
 
 def fetch_chapter(book_name, chapter):
     """Return a list of {verse, text} for one chapter, or [] if nothing usable."""
-    name = NAME_OVERRIDES.get(book_name, book_name)
-    verses = extractor.get_chapter(name, chapter)  # list[str], one entry per verse
+    resp = session.get(
+        "https://www.biblegateway.com/passage/",
+        params={"search": f"{book_name} {chapter}", "version": "NCV"},
+        timeout=30,
+    )
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    # Strip everything that isn't verse prose.
+    for sel in [
+        "sup.versenum", "span.chapternum", "sup.footnote", "sup.crossreference",
+        "div.footnotes", "div.crossrefs", "div.passage-other-trans", "h1", "h2", "h3", "h4",
+    ]:
+        for el in soup.select(sel):
+            el.decompose()
+
+    # Group verse fragments by verse number (a verse can span multiple .text spans).
+    verses = {}
+    for span in soup.select("div.passage-text span.text"):
+        vnum = None
+        for cls in span.get("class", []):
+            m = VERSE_CLASS_RE.match(cls)
+            if m:
+                vnum = int(m.group(2))
+                break
+        if vnum is None:
+            continue
+        verses.setdefault(vnum, []).append(span.get_text(" ", strip=True))
+
     out = []
-    for i, raw in enumerate(verses or []):
-        text = " ".join((raw or "").split()).strip()
+    for v in sorted(verses):
+        text = " ".join(" ".join(verses[v]).split()).strip()
         if text:
-            out.append({"verse": i + 1, "text": text})
+            out.append({"verse": v, "text": text})
     return out
 
 

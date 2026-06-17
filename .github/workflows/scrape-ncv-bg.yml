@@ -33,8 +33,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install meaningless (BibleGateway parser)
-        run: pip install meaningless
+      - name: Install scraper deps
+        run: pip install requests beautifulsoup4
 
       - name: Smoke test — NCV John 3 via BibleGateway
         env:
@@ -53,7 +53,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/bible/
+          [ -d public/bible ] && git add public/bible/ || echo "no public/bible yet"
           if git diff --cached --quiet; then
             echo "No new NCV files to commit"
           else
