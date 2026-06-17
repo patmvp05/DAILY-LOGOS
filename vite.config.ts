@@ -78,13 +78,13 @@ export default defineConfig(() => {
               }
             },
             {
-              urlPattern: /^https:\/\/.*(bolls\.life|bibleproxy.*\.run\.app)\/.*/,
-              handler: 'StaleWhileRevalidate',
+              urlPattern: /^https:\/\/(api\.allorigins\.win|corsproxy\.io)\/.*/,
+              handler: 'NetworkFirst',
               options: {
-                cacheName: 'bolls-bible-cache',
+                cacheName: 'cors-proxy-bible',
                 expiration: {
-                  maxEntries: 200,
-                  maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                  maxEntries: 500,
+                  maxAgeSeconds: 60 * 60 * 24 * 365
                 },
                 cacheableResponse: {
                   statuses: [0, 200]

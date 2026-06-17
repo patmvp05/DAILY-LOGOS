@@ -92,23 +92,6 @@ interface BollsVerse {
   text?: string;
 }
 
-/**
- * Fetch a modern, copyrighted translation (NIV/NLT/ESV/NKJV/NCV) from the
- * app's own origin — static JSON pre-fetched from bolls.life by
- * scripts/fetch-bible-static.mjs and deployed under public/bible/.
- *
- * This replaces the old runtime bolls.life fetch, which failed everywhere:
- * the Cloud Function proxy got Cloudflare 403, and direct browser fetch had no
- * CORS, so every modern version silently fell back to KJV. Serving from the
- * same origin means no CORS, no Cloudflare, no proxy — it just works, offline
- * included once cached.
- *
- * Files are written in the final ChapterTextResponse shape (text already
- * cleaned), so we trust them verbatim. If a file is missing (e.g. the static
- * set hasn't been generated yet), returns null and the caller falls back to
- * public-domain KJV. The legacy raw-bolls array shape is still handled for
- * resilience. Book ids are numeric (Genesis = 1 … Revelation = 66).
- */
 async function fetchFromStatic(
   bookName: string,
   chapter: number,
@@ -119,20 +102,16 @@ async function fetchFromStatic(
   const bookId = BOLLS_BIBLE_BOOK_IDS[bookName];
   if (!bookId) return null;
 
-  // Absolute, root-relative path — the app is served at scope '/' (see manifest),
-  // so static Bible files live at /bible/... on the same origin.
   const url = `/bible/${slug}/${bookId}/${chapter}.json`;
   const res = await fetch(url, { signal });
   if (!res.ok) return null;
 
   const data = (await res.json()) as ChapterTextResponse | BollsVerse[];
 
-  // Preferred path: file is already in final shape — use it as-is.
   if (!Array.isArray(data) && Array.isArray(data.verses) && data.verses.length > 0) {
     return { ...data, translationName: displayName, _cachedAt: Date.now() };
   }
 
-  // Fallback: legacy raw-bolls array shape — clean + reshape.
   if (Array.isArray(data)) {
     const verses = data
       .map((v) => ({ verse: Number(v.verse), text: cleanVerseText(v.text || '') }))
@@ -149,6 +128,71 @@ async function fetchFromStatic(
   }
 
   return null;
+}
+
+function parseBollsResponse(
+  data: BollsVerse[],
+  bookName: string,
+  chapter: number,
+  slug: string,
+  displayName: string
+): ChapterTextResponse | null {
+  const verses = data
+    .map((v) => ({ verse: Number(v.verse), text: cleanVerseText(v.text || '') }))
+    .filter((v) => Number.isFinite(v.verse) && v.text.length > 0)
+    .sort((a, b) => a.verse - b.verse);
+  if (verses.length === 0) return null;
+  return {
+    reference: `${bookName} ${chapter}`,
+    verses,
+    translationId: slug,
+    translationName: displayName,
+    _cachedAt: Date.now(),
+  };
+}
+
+const CORS_PROXIES = [
+  (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  (url: string) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+];
+
+async function fetchFromBollsViaProxy(
+  bookName: string,
+  chapter: number,
+  slug: string,
+  displayName: string,
+  signal: AbortSignal
+): Promise<ChapterTextResponse | null> {
+  const bookId = BOLLS_BIBLE_BOOK_IDS[bookName];
+  if (!bookId) return null;
+
+  const targetUrl = `https://bolls.life/get-text/${slug}/${bookId}/${chapter}/`;
+
+  for (const makeProxyUrl of CORS_PROXIES) {
+    try {
+      const res = await fetch(makeProxyUrl(targetUrl), { signal });
+      if (!res.ok) continue;
+      const data = (await res.json()) as BollsVerse[];
+      if (!Array.isArray(data) || data.length === 0) continue;
+      const result = parseBollsResponse(data, bookName, chapter, slug, displayName);
+      if (result) return result;
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+async function fetchModernTranslation(
+  bookName: string,
+  chapter: number,
+  slug: string,
+  displayName: string,
+  signal: AbortSignal
+): Promise<ChapterTextResponse | null> {
+  const staticResult = await fetchFromStatic(bookName, chapter, slug, displayName, signal);
+  if (staticResult) return staticResult;
+  return fetchFromBollsViaProxy(bookName, chapter, slug, displayName, signal);
 }
 
 /**
@@ -194,7 +238,7 @@ export async function getChapterText(
     try {
       result =
         entry.source === 'bolls'
-          ? await fetchFromStatic(bookName, chapter, entry.code, entry.name, controller.signal)
+          ? await fetchModernTranslation(bookName, chapter, entry.code, entry.name, controller.signal)
           : await fetchFromBibleApi(bookName, chapter, entry.code, controller.signal);
     } catch {
       // network/parse error — handled by fallback below
