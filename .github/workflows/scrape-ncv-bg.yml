@@ -1,0 +1,74 @@
+name: Scrape NCV (BibleGateway)
+
+# bolls.life does NOT carry the New Century Version (its get-text/NCV returns
+# []), so NCV is scraped from BibleGateway via the `meaningless` parser. Runs on
+# GitHub's runners. A fast SMOKE step fails in ~1 min if BibleGateway is
+# unreachable/unsupported; the full scrape is resumable and always commits
+# whatever it got, so re-running converges to all 1,189 chapters.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/scrape-ncv-bg.yml'
+      - 'scripts/fetch-ncv-biblegateway.py'
+  workflow_dispatch:
+
+concurrency:
+  group: scrape-bible
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install meaningless (BibleGateway parser)
+        run: pip install meaningless
+
+      - name: Smoke test — NCV John 3 via BibleGateway
+        env:
+          SMOKE: '1'
+        run: python scripts/fetch-ncv-biblegateway.py
+
+      # Allowed to time out — partial progress is committed below; re-run resumes.
+      - name: Scrape NCV
+        id: scrape
+        continue-on-error: true
+        timeout-minutes: 50
+        run: python scripts/fetch-ncv-biblegateway.py
+
+      - name: Commit NCV static files (even if incomplete)
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/bible/
+          if git diff --cached --quiet; then
+            echo "No new NCV files to commit"
+          else
+            COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
+            git commit -m "Add NCV Bible text via BibleGateway CI (+${COUNT} chapter files)"
+            git push origin main
+          fi
+
+      - name: Report NCV completeness
+        if: always()
+        run: |
+          HAVE=$(find public/bible/NCV -name '*.json' 2>/dev/null | wc -l | tr -d ' ')
+          echo "NCV chapters present: ${HAVE} / 1189"
+          if [ "${HAVE}" -lt 1189 ]; then
+            echo "::warning::NCV incomplete (${HAVE}/1189). Re-run to fill the rest."
+          else
+            echo "NCV complete ✅"
+          fi

@@ -107,7 +107,9 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = join(__dirname, '..', 'public', 'bible');
 
-const DELAY_MS = 350;
+const DELAY_MS = 500;           // polite gap between successful requests
+const MAX_RETRIES = 6;          // per-chapter retries before giving up (gap filled on re-run)
+const MAX_BACKOFF_MS = 30000;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Mirror of cleanVerseText() in src/lib/chapterText.ts. Kept in sync by hand —
@@ -124,16 +126,36 @@ function cleanVerseText(raw) {
     .trim();
 }
 
+// Fetch one chapter, retrying with exponential backoff on throttling (429) and
+// transient 5xx/network errors. bolls.life rate-limits sustained scraping, so
+// backing off (rather than hammering) is what actually lets a full run finish
+// without gaps. Gives up after MAX_RETRIES — that chapter is simply left for a
+// resumable re-run to fill.
 async function fetchChapter(version, bookId, chapter) {
   const url = `https://bolls.life/get-text/${version}/${bookId}/${chapter}/`;
-  const res = await fetch(url, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
-      'Accept': 'application/json, text/plain, */*',
-    },
-  });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
-  return res.json();
+  let lastErr;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const backoff = Math.min(2000 * 2 ** attempt, MAX_BACKOFF_MS);
+    try {
+      const res = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+          'Accept': 'application/json, text/plain, */*',
+        },
+      });
+      if (res.status === 429 || res.status >= 500) {
+        // Throttled / transient — wait and retry.
+        if (attempt < MAX_RETRIES) { await sleep(backoff); continue; }
+        throw new Error(`${res.status} ${res.statusText} (retries exhausted)`);
+      }
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
+      return res.json();
+    } catch (err) {
+      lastErr = err;
+      if (attempt < MAX_RETRIES) { await sleep(backoff); continue; }
+    }
+  }
+  throw lastErr || new Error(`failed: ${url}`);
 }
 
 /**
