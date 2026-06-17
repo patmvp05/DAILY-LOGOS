@@ -6,8 +6,11 @@
 import { resolveBibleVersion } from '../constants';
 import { getChapterText } from './chapterText';
 
-// v10: direct browser fetch to bolls.life; NCV added. Bump discards v9 stale entries.
-const CACHE_PREFIX = 'bible_chapter_cache_v10_';
+// v11: bumped to discard KJV-fallback previews that got cached under a modern
+// version's key before that version's static files were deployed. We also now
+// refuse to persist fallback previews (see getChapterInfo), so once the real
+// text deploys the preview self-heals on next load.
+const CACHE_PREFIX = 'bible_chapter_cache_v11_';
 
 interface ChapterInfo {
   firstVerse: string;
@@ -85,11 +88,16 @@ export async function getChapterInfo(
 
     const result: ChapterInfo = { firstVerse, readTime };
 
+    // Memory-cache always; only persist a preview built from the genuinely
+    // requested translation — never a KJV fallback (ct._fallback), so a missing
+    // modern version's card preview self-heals once its static files deploy.
     memoryCache.set(key, result);
-    try {
-      localStorage.setItem(key, JSON.stringify(result));
-    } catch {
-      console.warn('Failed to cache bible chapter info');
+    if (!ct._fallback) {
+      try {
+        localStorage.setItem(key, JSON.stringify(result));
+      } catch {
+        console.warn('Failed to cache bible chapter info');
+      }
     }
 
     return result;

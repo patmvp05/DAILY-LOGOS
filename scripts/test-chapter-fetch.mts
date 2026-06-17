@@ -26,9 +26,10 @@ function ok(name: string, cond: boolean, detail = '') {
 type FetchResponse = { ok: boolean; status: number; statusText: string; json: () => Promise<unknown> };
 const calls: string[] = [];
 
-// Parse "/bible/NIV/43/3.json" → { code, bookId, chapter }.
+// Parse "/bible/NIV/43/3.json" (optionally with a ?b= cache-bust query) →
+// { code, bookId, chapter }.
 function parseStaticUrl(url: string) {
-  const m = url.match(/\/bible\/([A-Z]+)\/(\d+)\/(\d+)\.json$/);
+  const m = url.match(/\/bible\/([A-Z]+)\/(\d+)\/(\d+)\.json(?:\?|$)/);
   return m ? { code: m[1], bookId: Number(m[2]), chapter: Number(m[3]) } : null;
 }
 
@@ -100,6 +101,7 @@ async function run() {
   ok('NIV never touches bolls.life at runtime', !calls.some((u) => u.includes('bolls.life')));
   ok('NIV labeled as New International Version', niv.translationName === 'New International Version', niv.translationName);
   ok('NIV returns all verses', niv.verses.length === 2, String(niv.verses.length));
+  ok('NIV success is not flagged as a fallback', !niv._fallback);
 
   // 1b. Legacy raw-bolls shape is still cleaned + reshaped at runtime.
   installFetch({ staticRaw: true });
@@ -122,6 +124,7 @@ async function run() {
   ok('ESV (missing file) falls back to bible-api KJV', calls.some((u) => u.includes('bible-api.com') && u.includes('translation=kjv')),
     `calls=${JSON.stringify(calls)}`);
   ok('fallback is honestly labeled KJV (not ESV)', esv.translationName === 'King James Version', esv.translationName);
+  ok('fallback is flagged _fallback (so it is never persisted)', esv._fallback === true, String(esv._fallback));
 
   // 4. Unknown/legacy id resolves to the default (web) and still loads.
   installFetch();

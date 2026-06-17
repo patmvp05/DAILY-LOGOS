@@ -30,7 +30,7 @@ function installFetch() {
   globalThis.fetch = (async (input: RequestInfo | URL): Promise<FetchResponse> => {
     const url = typeof input === 'string' ? input : input.toString();
     calls.push(url);
-    const m = url.match(/\/bible\/([A-Z]+)\/(\d+)\/(\d+)\.json$/);
+    const m = url.match(/\/bible\/([A-Z]+)\/(\d+)\/(\d+)\.json(?:\?|$)/);
     if (m) {
       return {
         ok: true, status: 200, statusText: 'OK',
@@ -48,7 +48,7 @@ function installFetch() {
 // Extract just the "bookId/chapter" tail of each static fetch, in call order.
 function fetchedChapters() {
   return calls
-    .map((u) => u.match(/\/bible\/[A-Z]+\/(\d+)\/(\d+)\.json$/))
+    .map((u) => u.match(/\/bible\/[A-Z]+\/(\d+)\/(\d+)\.json(?:\?|$)/))
     .filter((m): m is RegExpMatchArray => !!m)
     .map((m) => `${m[1]}/${m[2]}`);
 }

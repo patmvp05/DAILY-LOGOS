@@ -23,13 +23,25 @@ export interface ChapterTextResponse {
   translationId: string;
   translationName: string;
   _cachedAt?: number;
+  // True when this is the KJV safety-net, not the requested translation (e.g. a
+  // modern version's static file wasn't deployed yet). Fallbacks are NEVER
+  // persisted to disk — only memory-cached for the session — so the moment the
+  // real text deploys, the next reload fetches it instead of a stuck KJV.
+  _fallback?: boolean;
 }
 
-// v5: modern translations now served from same-origin static files
-// (public/bible/...), since bolls.life blocks both the proxy (Cloudflare 403)
-// and direct browser fetch (no CORS). Bump discards v4 entries that fell back
-// to KJV under a modern-version key while bolls was unreachable.
-const CACHE_PREFIX = 'chapter_text_v5_';
+// v6: bumped from v5 to discard any KJV-fallback entries that got persisted
+// under a modern-version key while that version's static files weren't deployed
+// yet. Going forward, fallbacks are memory-only (see getChapterText), so this
+// is the last time stale fallbacks should ever reach disk.
+const CACHE_PREFIX = 'chapter_text_v6_';
+// One-time cache-bust on the static-file URL. Earlier builds requested
+// /bible/<CODE>/.../<ch>.json before those files existed; Firebase's SPA rewrite
+// answered with index.html (HTTP 200) and our old `immutable` header told the
+// browser to keep it for a year. Appending ?b=N makes a fresh URL key that
+// bypasses those poisoned entries so the real JSON is fetched. Bump if ever
+// needed again.
+const STATIC_CACHE_BUST = 'b=2';
 const FETCH_TIMEOUT_MS = 12000;
 
 // L1 in-memory cache to avoid repeated IndexedDB reads / re-parsing.
@@ -102,7 +114,7 @@ async function fetchFromStatic(
   const bookId = BOLLS_BIBLE_BOOK_IDS[bookName];
   if (!bookId) return null;
 
-  const url = `/bible/${slug}/${bookId}/${chapter}.json`;
+  const url = `/bible/${slug}/${bookId}/${chapter}.json?${STATIC_CACHE_BUST}`;
   const res = await fetch(url, { signal });
   if (!res.ok) return null;
 
@@ -203,11 +215,16 @@ export async function getChapterText(
   // 2. Fallback: public-domain KJV (only if a different version was asked for
   //    and failed), with its OWN fresh timeout so it always gets a fair attempt.
   //    The header will correctly read "King James Version" — never mislabeled.
+  let isFallback = false;
   if (!result && id !== 'kjv') {
     try {
       result = await fetchWithTimeout((signal) =>
         fetchFromBibleApi(bookName, chapter, 'kjv', signal)
       );
+      if (result) {
+        result._fallback = true;
+        isFallback = true;
+      }
     } catch {
       // ignore — handled by the throw below
     }
@@ -217,11 +234,16 @@ export async function getChapterText(
     throw new Error(`${bookName} ${chapter} could not be loaded.`);
   }
 
+  // Memory-cache everything (cheap, session-scoped). Persist to IndexedDB ONLY
+  // for the genuinely-requested translation — never a KJV fallback, so a
+  // missing modern version self-heals on the next reload once its files deploy.
   memoryCache.set(cacheKey, result);
-  try {
-    await set(cacheKey, result);
-  } catch {
-    // storage full / private mode — memory cache still serves this session
+  if (!isFallback) {
+    try {
+      await set(cacheKey, result);
+    } catch {
+      // storage full / private mode — memory cache still serves this session
+    }
   }
 
   return result;

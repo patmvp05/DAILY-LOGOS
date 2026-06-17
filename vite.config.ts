@@ -60,14 +60,18 @@ export default defineConfig(() => {
           globIgnores: ['**/reset.html'],
           runtimeCaching: [
             {
-              // Same-origin static Bible text (public/bible/**). Immutable, so
-              // serve from cache first and keep it for a year. Not precached
-              // (see globPatterns) — only the chapters the user actually opens
-              // or that the look-ahead prefetch warms get stored on-device.
-              urlPattern: /\/bible\/[A-Z]+\/\d+\/\d+\.json$/,
-              handler: 'CacheFirst',
+              // Same-origin static Bible text (public/bible/**, optional ?b=
+              // cache-bust). NetworkFirst — NOT CacheFirst — because a chapter's
+              // file may not exist yet (Firebase's SPA rewrite would answer a
+              // missing file with index.html); going to the network first means
+              // that once the real JSON is deployed it's picked up immediately,
+              // while the cache still serves it offline. The app's own
+              // IndexedDB cache makes repeat reads instant regardless.
+              urlPattern: /\/bible\/[A-Z]+\/\d+\/\d+\.json(\?.*)?$/,
+              handler: 'NetworkFirst',
               options: {
-                cacheName: 'static-bible-text',
+                cacheName: 'static-bible-text-v2',
+                networkTimeoutSeconds: 8,
                 expiration: {
                   maxEntries: 6000,
                   maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
