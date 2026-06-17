@@ -6,19 +6,26 @@
   the daily proverb, card previews, and the reader all go through it.
 - **Two backends, chosen per-version by the `source` field in `src/constants.ts`:**
   - `bibleapi` — public-domain texts (WEB default, KJV) from bible-api.com (keyless, CORS-friendly).
-  - `bolls` — modern, copyrighted texts (NIV/NLT/ESV/NKJV/NCV) served from **same-origin
-    static JSON files** under `public/bible/{CODE}/{bookId}/{chapter}.json`.
+  - `bolls` — modern, copyrighted texts served from **same-origin static JSON files** under
+    `public/bible/{CODE}/{bookId}/{chapter}.json`. (`source: 'bolls'` just means "served from
+    those static files"; the file's *origin* depends on the version — see below.)
 - **Why static files:** bolls.life blocks runtime access — the GCP Cloud Function proxy
   gets Cloudflare 403, the dev sandbox is allowlist-blocked, and direct browser fetch has
   no CORS. Public CORS proxies don't help (they're datacenter IPs too). So the text is
   fetched ONCE and committed. Do NOT reintroduce a runtime bolls.life or proxy fetch for
   Bible text; it does not work in production.
-- **Regenerating static text (no local machine needed):** the `.github/workflows/scrape-ncv.yml`
-  GitHub Action runs `scripts/fetch-bible-static.mjs` ON GITHUB'S RUNNERS, which CAN reach
-  bolls.life (verified: HTTP 200). It probes reachability, scrapes, and commits `public/bible/`
-  to `main`. Trigger it by pushing a change to the workflow or the script (or via the Actions
-  tab). `ONLY_VERSION=NCV` (env) scrapes one translation at a time; the script is resumable
-  (skips existing files). Running it locally still works too (`node scripts/fetch-bible-static.mjs`).
+- **Where each version's static files come from (verified):**
+  - bolls.life HAS: NIV, NIV2011, ESV, NLT, NKJV, NASB, AMP, NET → scrape with
+    `scripts/fetch-bible-static.mjs` (clean JSON API). It does NOT have NCV/CSB/NRSV/NASB2020
+    (its get-text endpoint returns `[]`).
+  - **NCV** → scraped from **BibleGateway** (`scripts/fetch-ncv-biblegateway.py`,
+    requests+BeautifulSoup). bolls lacks it and the `meaningless` lib rejects it. ✅ 1189/1189 committed.
+- **Regenerating static text (no local machine needed):** GitHub Actions runs the scrapers
+  ON GITHUB'S RUNNERS, which CAN reach bolls.life / BibleGateway (the sandbox can't).
+  - NCV: `.github/workflows/scrape-ncv-bg.yml` (BibleGateway). Has a fail-fast smoke test,
+    is time-bounded + always-commits + resumable (re-run fills gaps), reports completeness.
+  - bolls versions: `scripts/fetch-bible-static.mjs` honors `ONLY_VERSION=NIV,ESV,...`; add a
+    workflow like scrape-ncv-bg to run it. Resumable (skips existing files).
 - **Honest fallback:** if a chapter fails to load, `getChapterText()` falls back to
   public-domain KJV but labels it "King James Version" (never mislabeled) and flags the
   result `_fallback`. **Fallbacks are memory-only — NEVER persisted to IndexedDB/localStorage**
@@ -44,5 +51,10 @@
 ## Deployment & Syncing
 - Firebase Hosting auto-deploys on push to `main` (the `dist/` build). Cloud Functions do
   NOT auto-deploy.
+- **IMPORTANT — scraper commits don't auto-deploy:** when a scrape workflow commits
+  `public/bible/**` to `main`, that push uses `GITHUB_TOKEN`, and GitHub does NOT trigger
+  workflows for `GITHUB_TOKEN` pushes (anti-recursion). So the Firebase deploy does NOT fire
+  on the bot's commit. After a scrape lands, push any follow-up commit to `main` (a normal
+  user push) to deploy the new static files.
 - **Offline Mode:** a local sync queue in IndexedDB caches reading progress when offline and
   syncs to Firebase on reconnection.
