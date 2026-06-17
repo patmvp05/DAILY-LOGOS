@@ -13,13 +13,23 @@
  * all external API dependencies for modern translations.
  */
 
-const VERSIONS = [
+const ALL_VERSIONS = [
   { code: 'NIV',  name: 'New International Version' },
   { code: 'NLT',  name: 'New Living Translation' },
   { code: 'ESV',  name: 'English Standard Version' },
   { code: 'NKJV', name: 'New King James Version' },
   { code: 'NCV',  name: 'New Century Version' },
 ];
+
+// Optional ONLY_VERSION env (comma-separated codes, e.g. "NCV" or "NIV,ESV")
+// scrapes just those versions — lets CI fetch one translation at a time.
+const ONLY = (process.env.ONLY_VERSION || '')
+  .split(',')
+  .map((s) => s.trim().toUpperCase())
+  .filter(Boolean);
+const VERSIONS = ONLY.length
+  ? ALL_VERSIONS.filter((v) => ONLY.includes(v.code))
+  : ALL_VERSIONS;
 
 const BOOKS = [
   { id: 1, name: 'Genesis', chapters: 50 },

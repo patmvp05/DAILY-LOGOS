@@ -130,69 +130,26 @@ async function fetchFromStatic(
   return null;
 }
 
-function parseBollsResponse(
-  data: BollsVerse[],
-  bookName: string,
-  chapter: number,
-  slug: string,
-  displayName: string
-): ChapterTextResponse | null {
-  const verses = data
-    .map((v) => ({ verse: Number(v.verse), text: cleanVerseText(v.text || '') }))
-    .filter((v) => Number.isFinite(v.verse) && v.text.length > 0)
-    .sort((a, b) => a.verse - b.verse);
-  if (verses.length === 0) return null;
-  return {
-    reference: `${bookName} ${chapter}`,
-    verses,
-    translationId: slug,
-    translationName: displayName,
-    _cachedAt: Date.now(),
-  };
-}
-
-const CORS_PROXIES = [
-  (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  (url: string) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
-];
-
-async function fetchFromBollsViaProxy(
-  bookName: string,
-  chapter: number,
-  slug: string,
-  displayName: string,
-  signal: AbortSignal
-): Promise<ChapterTextResponse | null> {
-  const bookId = BOLLS_BIBLE_BOOK_IDS[bookName];
-  if (!bookId) return null;
-
-  const targetUrl = `https://bolls.life/get-text/${slug}/${bookId}/${chapter}/`;
-
-  for (const makeProxyUrl of CORS_PROXIES) {
-    try {
-      const res = await fetch(makeProxyUrl(targetUrl), { signal });
-      if (!res.ok) continue;
-      const data = (await res.json()) as BollsVerse[];
-      if (!Array.isArray(data) || data.length === 0) continue;
-      const result = parseBollsResponse(data, bookName, chapter, slug, displayName);
-      if (result) return result;
-    } catch {
-      continue;
-    }
+/**
+ * Run a single network fetch under its OWN abort timeout.
+ *
+ * Critical: each attempt gets a fresh AbortController. Previously the primary
+ * fetch and the KJV fallback shared one controller — so if the primary used up
+ * the budget (e.g. a slow path), the fallback inherited an already-aborted
+ * signal and threw instantly, surfacing "couldn't load" instead of degrading
+ * to KJV. A fresh controller per attempt guarantees the fallback always gets a
+ * fair, full-timeout try.
+ */
+async function fetchWithTimeout<T>(
+  fn: (signal: AbortSignal) => Promise<T>
+): Promise<T> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    return await fn(controller.signal);
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return null;
-}
-
-async function fetchModernTranslation(
-  bookName: string,
-  chapter: number,
-  slug: string,
-  displayName: string,
-  signal: AbortSignal
-): Promise<ChapterTextResponse | null> {
-  const staticResult = await fetchFromStatic(bookName, chapter, slug, displayName, signal);
-  if (staticResult) return staticResult;
-  return fetchFromBollsViaProxy(bookName, chapter, slug, displayName, signal);
 }
 
 /**
@@ -228,45 +185,44 @@ export async function getChapterText(
     // fall through to fetch
   }
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  let result: ChapterTextResponse | null = null;
 
+  // 1. Primary: the selected translation, from its own backend, under its own
+  //    timeout. Modern (NIV/ESV/NLT/NKJV/NCV) → same-origin static file;
+  //    public-domain → bible-api.com.
   try {
-    let result: ChapterTextResponse | null = null;
-
-    // 1. Primary: the selected translation, from its own backend.
-    try {
-      result =
-        entry.source === 'bolls'
-          ? await fetchModernTranslation(bookName, chapter, entry.code, entry.name, controller.signal)
-          : await fetchFromBibleApi(bookName, chapter, entry.code, controller.signal);
-    } catch {
-      // network/parse error — handled by fallback below
-    }
-
-    // 2. Fallback: public-domain KJV (only if a different version was asked
-    //    for and failed). The header will correctly read "King James Version".
-    if (!result && id !== 'kjv') {
-      try {
-        result = await fetchFromBibleApi(bookName, chapter, 'kjv', controller.signal);
-      } catch {
-        // ignore — handled by the throw below
-      }
-    }
-
-    if (!result) {
-      throw new Error(`${bookName} ${chapter} could not be loaded.`);
-    }
-
-    memoryCache.set(cacheKey, result);
-    try {
-      await set(cacheKey, result);
-    } catch {
-      // storage full / private mode — memory cache still serves this session
-    }
-
-    return result;
-  } finally {
-    clearTimeout(timeoutId);
+    result = await fetchWithTimeout((signal) =>
+      entry.source === 'bolls'
+        ? fetchFromStatic(bookName, chapter, entry.code, entry.name, signal)
+        : fetchFromBibleApi(bookName, chapter, entry.code, signal)
+    );
+  } catch {
+    // network/parse error — handled by fallback below
   }
+
+  // 2. Fallback: public-domain KJV (only if a different version was asked for
+  //    and failed), with its OWN fresh timeout so it always gets a fair attempt.
+  //    The header will correctly read "King James Version" — never mislabeled.
+  if (!result && id !== 'kjv') {
+    try {
+      result = await fetchWithTimeout((signal) =>
+        fetchFromBibleApi(bookName, chapter, 'kjv', signal)
+      );
+    } catch {
+      // ignore — handled by the throw below
+    }
+  }
+
+  if (!result) {
+    throw new Error(`${bookName} ${chapter} could not be loaded.`);
+  }
+
+  memoryCache.set(cacheKey, result);
+  try {
+    await set(cacheKey, result);
+  } catch {
+    // storage full / private mode — memory cache still serves this session
+  }
+
+  return result;
 }

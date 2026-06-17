@@ -78,10 +78,12 @@ export default defineConfig(() => {
               }
             },
             {
-              urlPattern: /^https:\/\/(api\.allorigins\.win|corsproxy\.io)\/.*/,
-              handler: 'NetworkFirst',
+              // bible-api.com (public-domain texts + KJV fallback). Cache so a
+              // re-read works offline; revalidate in the background when online.
+              urlPattern: /^https:\/\/bible-api\.com\/.*/,
+              handler: 'StaleWhileRevalidate',
               options: {
-                cacheName: 'cors-proxy-bible',
+                cacheName: 'bible-api-cache',
                 expiration: {
                   maxEntries: 500,
                   maxAgeSeconds: 60 * 60 * 24 * 365
