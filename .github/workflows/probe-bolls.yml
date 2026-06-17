@@ -1,0 +1,43 @@
+name: Probe bolls translations
+
+# Fast diagnostic (seconds): what does bolls.life actually serve? Lists English
+# translations and dumps raw get-text responses for NCV vs. known modern codes,
+# so we know which versions can really be scraped and under what code.
+
+on:
+  push:
+    paths:
+      - '.github/workflows/probe-bolls.yml'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect bolls.life
+        run: |
+          UA='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
+          get() { curl -sS -m 25 -H "User-Agent: $UA" -H "Accept: application/json, text/plain, */*" -H "Referer: https://bolls.life/" "$1"; }
+
+          echo "===== translations list candidates ====="
+          for u in \
+            "https://bolls.life/static/bolls/app/views/languages.json" \
+            "https://bolls.life/get-translations/" \
+            "https://bolls.life/static/translations.json" ; do
+            echo "---- $u ----"
+            code=$(curl -sS -m 25 -o /tmp/list.json -w "%{http_code}" -H "User-Agent: $UA" "$u")
+            echo "HTTP $code  bytes $(wc -c < /tmp/list.json 2>/dev/null || echo 0)"
+            if [ "$code" = "200" ]; then
+              echo "english entries mentioning New Century / NCV / NIV / ESV / NLT / NKJV / NASB:"
+              grep -ioE '"[A-Z0-9]{2,8}"|new century|new international|english standard|new living|new king james|new american standard' /tmp/list.json | sort -u | head -80 || true
+            fi
+          done
+
+          echo
+          echo "===== raw get-text by code (John 3 = book 43, ch 3) ====="
+          for code in NCV NIV NIV2011 ESV NLT NKJV NASB NASB2020 AMP CSB NET NRSV; do
+            body=$(get "https://bolls.life/get-text/$code/43/3/")
+            n=$(printf '%s' "$body" | head -c 100000 | grep -oE '"verse"' | wc -l | tr -d ' ')
+            echo "---- $code : verses≈$n, first 160 bytes:"
+            printf '%s' "$body" | head -c 160; echo
+          done
