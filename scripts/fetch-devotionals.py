@@ -183,96 +183,61 @@ def _dump_blocks(sec, limit=60):
 
 def probe_biblegateway():
     """
-    DIAGNOSTIC round 2: BibleGateway proved My Utmost isn't listed and Streams
-    is paywalled. Now probe the actual free sources:
-      - utmost.org for Chambers (official site, shows daily reading publicly)
-      - crosswalk.com, heartlight.org for Cowman (Streams in the Desert)
-    Dumps page structure so parsers can be written. Exits non-zero.
+    DIAGNOSTIC round 4: verify per-day URL access.
+    - crosswalk.com: test per-day URLs (streams-in-the-desert-january-1st.html)
+    - utmost.org: check sitemap/RSS/WP API for date-based access
     """
-    # 1. utmost.org — the official Oswald Chambers site
-    utmost_urls = [
-        "https://utmost.org/",
-        "https://utmost.org/classic/",
-        "https://utmost.org/classic/missionary-munitions-of-war-classic/",
-        "https://utmost.org/missionary-munitions-of-war/",
+
+    # 1. Crosswalk per-day URLs — do they serve specific days or redirect to today?
+    crosswalk_day_urls = [
+        ("crosswalk jan 1", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-january-1st.html"),
+        ("crosswalk jan 2", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-january-2nd.html"),
+        ("crosswalk feb 15", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-february-15th.html"),
+        ("crosswalk dec 25", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-december-25th.html"),
+        ("crosswalk mar 1", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-march-1st.html"),
     ]
-    for url in utmost_urls:
-        print(f"\n### utmost.org: GET {url}")
+    for label, url in crosswalk_day_urls:
+        print(f"\n### {label}: GET {url}")
         r = _bg_get(url)
         if not (r and r.status_code == 200):
             print(f"    status={r.status_code if r else 'ERR'} final={r.url if r else ''}")
             continue
         print(f"    final={r.url}")
         soup = BeautifulSoup(r.text, "html.parser")
-        title = soup.find("title")
-        print(f"    <title>: {clean_text(title.get_text()) if title else '(none)'}")
-        sec = None
-        for sel in ["article", "div.entry-content", "div.post-content",
-                    "div.devotional-content", "div.content", "main"]:
-            sec = soup.select_one(sel)
-            if sec:
-                print(f"    container: {sel}")
-                break
-        if not sec:
-            sec = soup.body
-            print("    container: <body>")
-        if sec:
-            _dump_blocks(sec)
-        # Also dump raw HTML of the first content container to see exact markup
-        if sec and sec != soup.body:
-            raw = sec.decode()[:2000]
-            print(f"\n    >> RAW HTML (first 2000 chars):")
-            for line in raw.split("\n")[:60]:
-                print(f"    {line}")
+        h1 = soup.find("h1")
+        if h1:
+            print(f"    <h1>: {clean_text(h1.get_text())[:120]}")
+        article = soup.find("article")
+        if article:
+            ps = [clean_text(p.get_text())[:120] for p in article.find_all("p")
+                  if not p.get("class") and clean_text(p.get_text()) and len(clean_text(p.get_text())) > 20]
+            print(f"    body paragraphs: {len(ps)}")
+            if ps:
+                print(f"    first: {ps[0]}")
 
-    # 2. Try to discover utmost.org's date-based URL pattern
-    print("\n### utmost.org: looking for date-based URL patterns")
-    r = _bg_get("https://utmost.org/")
-    if r and r.status_code == 200:
-        soup = BeautifulSoup(r.text, "html.parser")
-        seen = set()
-        for a in soup.find_all("a", href=True):
-            h = a["href"]
-            if "utmost.org" in h and h not in seen:
-                seen.add(h)
-        print(f"    ({len(seen)} unique utmost.org links)")
-        for h in sorted(seen)[:40]:
-            print(f"      {h}")
-
-    # 3. Streams in the Desert — try free sources
-    streams_urls = [
-        "https://www.crosswalk.com/devotionals/desert/",
-        "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-january-1.html",
-        "https://www.heartlight.org/classic/desert/0101-desert.html",
-        "https://www.heartlight.org/classic/desert/",
+    # 2. utmost.org — check sitemap, RSS, and WP REST API for date access
+    utmost_discovery = [
+        ("utmost sitemap", "https://utmost.org/sitemap.xml"),
+        ("utmost sitemap index", "https://utmost.org/sitemap_index.xml"),
+        ("utmost RSS", "https://utmost.org/feed/"),
+        ("utmost WP API posts", "https://utmost.org/wp-json/wp/v2/posts?per_page=5"),
+        ("utmost WP API pages", "https://utmost.org/wp-json/wp/v2/pages?per_page=5&search=utmost"),
     ]
-    for url in streams_urls:
-        print(f"\n### Streams source: GET {url}")
+    for label, url in utmost_discovery:
+        print(f"\n### {label}: GET {url}")
         r = _bg_get(url)
-        if not (r and r.status_code == 200):
-            print(f"    status={r.status_code if r else 'ERR'} final={r.url if r else ''}")
+        if not r:
+            print(f"    ERR (no response)")
             continue
-        print(f"    final={r.url}")
-        soup = BeautifulSoup(r.text, "html.parser")
-        title = soup.find("title")
-        print(f"    <title>: {clean_text(title.get_text()) if title else '(none)'}")
-        sec = None
-        for sel in ["article", "div.entry-content", "div.post-content",
-                    "div.devotional-content", "div.content-body", "main"]:
-            sec = soup.select_one(sel)
-            if sec:
-                print(f"    container: {sel}")
-                break
-        if not sec:
-            sec = soup.body
-            print("    container: <body>")
-        if sec:
-            _dump_blocks(sec)
-        if sec and sec != soup.body:
-            raw = sec.decode()[:2000]
-            print(f"\n    >> RAW HTML (first 2000 chars):")
-            for line in raw.split("\n")[:60]:
-                print(f"    {line}")
+        print(f"    status={r.status_code} final={r.url}")
+        if r.status_code != 200:
+            continue
+        ct = r.headers.get("content-type", "")
+        print(f"    content-type: {ct}")
+        text = r.text[:3000]
+        print(f"    first 3000 chars:")
+        for line in text.split("\n")[:60]:
+            print(f"    {line[:200]}")
 
     print("\n[DIAGNOSE=bg] probe complete — exiting non-zero so nothing is scraped.")
     sys.exit(1)
