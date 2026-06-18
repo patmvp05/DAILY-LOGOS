@@ -21,6 +21,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Fast diagnostic job (own logs, never truncated by the long scrape job):
+  # dumps BibleGateway's devotional slugs + page structure for My Utmost and
+  # Streams in the Desert so their parser can be built without local access.
+  probe-bg:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install scraper deps
+        run: pip install requests beautifulsoup4
+      - name: Probe BibleGateway devotionals
+        continue-on-error: true
+        env:
+          DIAGNOSE: 'bg'
+        run: python scripts/fetch-devotionals.py
+
   scrape:
     runs-on: ubuntu-latest
     timeout-minutes: 120
