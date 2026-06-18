@@ -181,98 +181,96 @@ def _dump_blocks(sec, limit=60):
             break
 
 
+def _probe_page(url, label):
+    """Fetch a URL, dump title + container structure + raw HTML. Returns soup or None."""
+    print(f"\n### {label}: GET {url}")
+    r = _bg_get(url)
+    if not (r and r.status_code == 200):
+        print(f"    status={r.status_code if r else 'ERR'} final={r.url if r else ''}")
+        return None
+    print(f"    final={r.url}")
+    soup = BeautifulSoup(r.text, "html.parser")
+    title = soup.find("title")
+    print(f"    <title>: {clean_text(title.get_text()) if title else '(none)'}")
+    sec = None
+    for sel in ["article", "div.entry-content", "div.post-content",
+                "div.devotional-content", "div.content-body", "div.content", "main"]:
+        sec = soup.select_one(sel)
+        if sec:
+            print(f"    container: {sel}")
+            break
+    if not sec:
+        sec = soup.body
+        print("    container: <body>")
+    if sec:
+        _dump_blocks(sec)
+    if sec and sec != soup.body:
+        raw = sec.decode()[:2500]
+        print(f"\n    >> RAW HTML (first 2500 chars):")
+        for line in raw.split("\n")[:80]:
+            print(f"    {line}")
+    return soup
+
+
 def probe_biblegateway():
     """
-    DIAGNOSTIC round 2: BibleGateway proved My Utmost isn't listed and Streams
-    is paywalled. Now probe the actual free sources:
-      - utmost.org for Chambers (official site, shows daily reading publicly)
-      - crosswalk.com, heartlight.org for Cowman (Streams in the Desert)
-    Dumps page structure so parsers can be written. Exits non-zero.
+    DIAGNOSTIC round 3: probe the actual reading pages for Chambers and Cowman.
+    Previous rounds showed: BibleGateway has neither (My Utmost missing, Streams
+    paywalled). utmost.org homepage works but subpages ERR. crosswalk.com shows
+    Streams full text (today only). This round:
+    1. Try utmost.org/classic/today/ and /updated/today/ (found as links)
+    2. Try crosswalk archive patterns for Streams
+    3. Try gutenberg.org for full-text public domain editions
+    Exits non-zero.
     """
-    # 1. utmost.org — the official Oswald Chambers site
-    utmost_urls = [
-        "https://utmost.org/",
-        "https://utmost.org/classic/",
-        "https://utmost.org/classic/missionary-munitions-of-war-classic/",
-        "https://utmost.org/missionary-munitions-of-war/",
-    ]
-    for url in utmost_urls:
-        print(f"\n### utmost.org: GET {url}")
-        r = _bg_get(url)
-        if not (r and r.status_code == 200):
-            print(f"    status={r.status_code if r else 'ERR'} final={r.url if r else ''}")
-            continue
-        print(f"    final={r.url}")
-        soup = BeautifulSoup(r.text, "html.parser")
-        title = soup.find("title")
-        print(f"    <title>: {clean_text(title.get_text()) if title else '(none)'}")
-        sec = None
-        for sel in ["article", "div.entry-content", "div.post-content",
-                    "div.devotional-content", "div.content", "main"]:
-            sec = soup.select_one(sel)
-            if sec:
-                print(f"    container: {sel}")
-                break
-        if not sec:
-            sec = soup.body
-            print("    container: <body>")
-        if sec:
-            _dump_blocks(sec)
-        # Also dump raw HTML of the first content container to see exact markup
-        if sec and sec != soup.body:
-            raw = sec.decode()[:2000]
-            print(f"\n    >> RAW HTML (first 2000 chars):")
-            for line in raw.split("\n")[:60]:
-                print(f"    {line}")
 
-    # 2. Try to discover utmost.org's date-based URL pattern
-    print("\n### utmost.org: looking for date-based URL patterns")
-    r = _bg_get("https://utmost.org/")
-    if r and r.status_code == 200:
-        soup = BeautifulSoup(r.text, "html.parser")
-        seen = set()
-        for a in soup.find_all("a", href=True):
-            h = a["href"]
-            if "utmost.org" in h and h not in seen:
-                seen.add(h)
-        print(f"    ({len(seen)} unique utmost.org links)")
-        for h in sorted(seen)[:40]:
-            print(f"      {h}")
-
-    # 3. Streams in the Desert — try free sources
-    streams_urls = [
-        "https://www.crosswalk.com/devotionals/desert/",
-        "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-january-1.html",
-        "https://www.heartlight.org/classic/desert/0101-desert.html",
-        "https://www.heartlight.org/classic/desert/",
+    # 1. utmost.org — try the "today" reading pages discovered from homepage links
+    utmost_reading_urls = [
+        ("utmost classic today", "https://utmost.org/classic/today/"),
+        ("utmost updated today", "https://utmost.org/updated/today/"),
+        ("utmost modern-classic today", "https://utmost.org/modern-classic/today/"),
     ]
-    for url in streams_urls:
-        print(f"\n### Streams source: GET {url}")
-        r = _bg_get(url)
-        if not (r and r.status_code == 200):
-            print(f"    status={r.status_code if r else 'ERR'} final={r.url if r else ''}")
-            continue
-        print(f"    final={r.url}")
-        soup = BeautifulSoup(r.text, "html.parser")
-        title = soup.find("title")
-        print(f"    <title>: {clean_text(title.get_text()) if title else '(none)'}")
-        sec = None
-        for sel in ["article", "div.entry-content", "div.post-content",
-                    "div.devotional-content", "div.content-body", "main"]:
-            sec = soup.select_one(sel)
-            if sec:
-                print(f"    container: {sel}")
-                break
-        if not sec:
-            sec = soup.body
-            print("    container: <body>")
-        if sec:
-            _dump_blocks(sec)
-        if sec and sec != soup.body:
-            raw = sec.decode()[:2000]
-            print(f"\n    >> RAW HTML (first 2000 chars):")
-            for line in raw.split("\n")[:60]:
-                print(f"    {line}")
+    for label, url in utmost_reading_urls:
+        soup = _probe_page(url, label)
+        if soup:
+            seen = set()
+            for a in soup.find_all("a", href=True):
+                h = a["href"]
+                if ("utmost.org" in h or h.startswith("/")) and h not in seen:
+                    seen.add(h)
+            print(f"    links on page ({len(seen)}):")
+            for h in sorted(seen)[:30]:
+                print(f"      {h}")
+
+    # 2. Crosswalk Streams — try archive/calendar/date-based patterns
+    streams_archive_urls = [
+        ("crosswalk today", "https://www.crosswalk.com/devotionals/desert/"),
+        ("crosswalk archive", "https://www.crosswalk.com/devotionals/desert/archives/"),
+        ("crosswalk jan1 slug", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-january-1-11587591.html"),
+        ("crosswalk jan1 slug2", "https://www.crosswalk.com/devotionals/desert/january-1.html"),
+        ("crosswalk date path", "https://www.crosswalk.com/devotionals/desert/2024/01/01/"),
+    ]
+    for label, url in streams_archive_urls:
+        soup = _probe_page(url, label)
+        if soup:
+            seen = set()
+            for a in soup.find_all("a", href=True):
+                h = a["href"]
+                if "desert" in h and h not in seen:
+                    seen.add(h)
+            if seen:
+                print(f"    desert links ({len(seen)}):")
+                for h in sorted(seen)[:20]:
+                    print(f"      {h}")
+
+    # 3. Try Project Gutenberg for full-text editions
+    gutenberg_urls = [
+        ("gutenberg utmost search", "https://www.gutenberg.org/ebooks/search/?query=my+utmost+for+his+highest"),
+        ("gutenberg streams search", "https://www.gutenberg.org/ebooks/search/?query=streams+in+the+desert+cowman"),
+        ("gutenberg chambers", "https://www.gutenberg.org/ebooks/search/?query=oswald+chambers"),
+    ]
+    for label, url in gutenberg_urls:
+        _probe_page(url, label)
 
     print("\n[DIAGNOSE=bg] probe complete — exiting non-zero so nothing is scraped.")
     sys.exit(1)
