@@ -129,9 +129,12 @@ def probe_ccel():
                 links = []
                 for a in soup.find_all("a", href=True):
                     h = a["href"]
-                    if f"/ccel/{author}/" in h and h not in links:
+                    # Dump any link that mentions the author or looks like a work
+                    # page, so the real work ID surfaces regardless of href shape.
+                    if (author in h or "/ccel/" in h) and h not in links:
                         links.append(h)
-                for h in links[:25]:
+                print(f"      ({len(links)} candidate links)")
+                for h in links[:50]:
                     print(f"      {h}")
                 found = True
                 break
@@ -149,80 +152,80 @@ def clean_text(text):
     return text
 
 
-def scrape_spurgeon(month, day, month_day):
-    """Scrape Spurgeon's Morning and Evening from CCEL."""
-    month_name = MONTHS[month - 1]
-    # CCEL URL pattern: /d/spurgeon/morning_evening/morning_evening.{MonthDD}.html
-    # Try both morning and evening
-    entries = []
+_QUOTE_CHARS = "\"“”‘’'"
 
-    for period in ["morning", "evening"]:
-        # CCEL uses: /ccel/s/spurgeon/morning_evening/{period}/{month_name}{day:02d}
-        url = f"https://www.ccel.org/ccel/s/spurgeon/morning_evening/{period}/{month_name}{day:02d}.html"
+
+def _strip_quotes(text):
+    """Remove surrounding straight/curly quotes from a scripture pull-quote."""
+    return text.strip().strip(_QUOTE_CHARS).strip()
+
+
+def _parse_morneve_reading(html, period):
+    """
+    Parse one CCEL Morning-and-Evening reading page into an entry dict.
+
+    Verified markup (morneve.d{MMDD}{am|pm}.html), content in <div id="book-section">:
+      <h2>            "Morning, January 1"   (title — skipped)
+      <p class=crossref>  "Go To Evening Reading"   (nav — skipped)
+      <p class=passage>   the scripture pull-quote
+      <h3 class=scripPassage>  the scripture reference
+      <p class=normal>    body paragraphs
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    sec = soup.find("div", id="book-section") or soup.find("div", id="content")
+    if not sec:
+        return None
+
+    passage_el = sec.find("p", class_="passage")
+    scripture = _strip_quotes(clean_text(passage_el.get_text())) if passage_el else ""
+
+    ref_el = sec.find("h3", class_="scripPassage")
+    reference = clean_text(ref_el.get_text()) if ref_el else ""
+
+    body_paragraphs = [
+        clean_text(p.get_text())
+        for p in sec.find_all("p", class_="normal")
+        if clean_text(p.get_text())
+    ]
+
+    if not body_paragraphs:
+        return None
+
+    entry = {"period": period, "body": body_paragraphs}
+    if scripture:
+        entry["scripture"] = scripture
+    if reference:
+        entry["reference"] = reference
+    return entry
+
+
+def scrape_spurgeon(month, day, month_day):
+    """
+    Scrape Spurgeon's Morning and Evening from CCEL — two readings/day.
+    URL scheme (confirmed via DIAGNOSE probe):
+      https://www.ccel.org/ccel/spurgeon/morneve.d{MMDD}{am|pm}.html
+    """
+    entries = []
+    for period, suffix in [("morning", "am"), ("evening", "pm")]:
+        url = f"https://www.ccel.org/ccel/spurgeon/morneve.d{month:02d}{day:02d}{suffix}.html"
         resp = fetch_with_retry(url)
         if not resp:
-            # Try alternate URL pattern
-            url = f"https://www.ccel.org/ccel/spurgeon/morning_evening/{period}/{month_name}{day:02d}.html"
-            resp = fetch_with_retry(url)
-        if not resp:
             continue
-
-        soup = BeautifulSoup(resp.text, "html.parser")
-
-        # Extract scripture reference and text
-        scripture = ""
-        reference = ""
-        body_paragraphs = []
-
-        # Look for the scripture verse (usually in a blockquote or specific div)
-        verse_el = soup.find("p", class_="verse") or soup.find("blockquote")
-        if verse_el:
-            scripture = clean_text(verse_el.get_text())
-
-        # Look for reference
-        ref_el = soup.find("p", class_="ref") or soup.find("cite")
-        if ref_el:
-            reference = clean_text(ref_el.get_text())
-
-        # Extract body text
-        content_div = soup.find("div", class_="text") or soup.find("div", id="content-main") or soup.find("article")
-        if content_div:
-            for p in content_div.find_all("p"):
-                cls = p.get("class", [])
-                if "verse" in cls or "ref" in cls:
-                    continue
-                text = clean_text(p.get_text())
-                if text and len(text) > 10:
-                    body_paragraphs.append(text)
-
-        # If no structured content found, try getting all text
-        if not body_paragraphs:
-            main = soup.find("main") or soup.find("body")
-            if main:
-                for p in main.find_all("p"):
-                    text = clean_text(p.get_text())
-                    if text and len(text) > 20:
-                        body_paragraphs.append(text)
-
-        if body_paragraphs:
-            entry = {"period": period, "body": body_paragraphs}
-            if scripture:
-                entry["scripture"] = scripture
-            if reference:
-                entry["reference"] = reference
+        entry = _parse_morneve_reading(resp.text, period)
+        if entry:
             entries.append(entry)
+        time.sleep(DELAY)
 
     if not entries:
         return None
 
-    title = f"{MONTHS[month-1].capitalize()} {day}"
     return {
         "slug": "morning-evening",
         "date": month_day,
-        "title": title,
+        "title": f"{MONTHS[month-1].capitalize()} {day}",
         "entries": entries,
         "author": "Charles H. Spurgeon",
-        "source": "CCEL"
+        "source": "CCEL",
     }
 
 
@@ -353,8 +356,16 @@ def scrape_streams(month, day, month_day):
     }
 
 
+# Only Spurgeon's Morning & Evening is confirmed on CCEL (verified URL scheme +
+# markup via DIAGNOSE). Chambers/Cowman CCEL paths are still unknown — their
+# scrapers stay defined but are NOT enabled here to avoid ~18min of guaranteed
+# 404s per run. Re-add once their work IDs are discovered.
 SCRAPERS = {
     "morning-evening": scrape_spurgeon,
+}
+
+# Defined but not yet enabled (see note above).
+_UNVERIFIED_SCRAPERS = {
     "my-utmost": scrape_utmost,
     "streams-in-the-desert": scrape_streams,
 }
