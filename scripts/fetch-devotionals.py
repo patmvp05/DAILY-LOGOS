@@ -214,47 +214,19 @@ def _probe_page(url, label):
 
 def probe_biblegateway():
     """
-    DIAGNOSTIC round 4: verify per-day URL access.
-    - crosswalk.com: test per-day URLs (streams-in-the-desert-january-1st.html)
-    - utmost.org: check sitemap/RSS/WP API for date-based access
+    DIAGNOSTIC round 5: fetch utmost.org classic sitemap to discover per-reading
+    URLs, then sample one reading page to verify structure.
+    Crosswalk per-day URLs already confirmed working in round 4.
     """
+    import xml.etree.ElementTree as ET
 
-    # 1. Crosswalk per-day URLs — do they serve specific days or redirect to today?
-    crosswalk_day_urls = [
-        ("crosswalk jan 1", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-january-1st.html"),
-        ("crosswalk jan 2", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-january-2nd.html"),
-        ("crosswalk feb 15", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-february-15th.html"),
-        ("crosswalk dec 25", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-december-25th.html"),
-        ("crosswalk mar 1", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-march-1st.html"),
+    # 1. Fetch classic-sitemap1.xml — should list all individual classic readings
+    sitemaps = [
+        ("classic-sitemap", "https://utmost.org/classic-sitemap1.xml"),
+        ("modern-classic-sitemap", "https://utmost.org/modern-classic-sitemap1.xml"),
     ]
-    for label, url in crosswalk_day_urls:
-        print(f"\n### {label}: GET {url}")
-        r = _bg_get(url)
-        if not (r and r.status_code == 200):
-            print(f"    status={r.status_code if r else 'ERR'} final={r.url if r else ''}")
-            continue
-        print(f"    final={r.url}")
-        soup = BeautifulSoup(r.text, "html.parser")
-        h1 = soup.find("h1")
-        if h1:
-            print(f"    <h1>: {clean_text(h1.get_text())[:120]}")
-        article = soup.find("article")
-        if article:
-            ps = [clean_text(p.get_text())[:120] for p in article.find_all("p")
-                  if not p.get("class") and clean_text(p.get_text()) and len(clean_text(p.get_text())) > 20]
-            print(f"    body paragraphs: {len(ps)}")
-            if ps:
-                print(f"    first: {ps[0]}")
-
-    # 2. utmost.org — check sitemap, RSS, and WP REST API for date access
-    utmost_discovery = [
-        ("utmost sitemap", "https://utmost.org/sitemap.xml"),
-        ("utmost sitemap index", "https://utmost.org/sitemap_index.xml"),
-        ("utmost RSS", "https://utmost.org/feed/"),
-        ("utmost WP API posts", "https://utmost.org/wp-json/wp/v2/posts?per_page=5"),
-        ("utmost WP API pages", "https://utmost.org/wp-json/wp/v2/pages?per_page=5&search=utmost"),
-    ]
-    for label, url in utmost_discovery:
+    sample_urls = {}
+    for label, url in sitemaps:
         print(f"\n### {label}: GET {url}")
         r = _bg_get(url)
         if not r:
@@ -265,10 +237,56 @@ def probe_biblegateway():
             continue
         ct = r.headers.get("content-type", "")
         print(f"    content-type: {ct}")
-        text = r.text[:3000]
-        print(f"    first 3000 chars:")
-        for line in text.split("\n")[:60]:
-            print(f"    {line[:200]}")
+
+        try:
+            root = ET.fromstring(r.text)
+            ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+            locs = [el.text for el in root.findall(".//sm:loc", ns) if el.text]
+            print(f"    total URLs: {len(locs)}")
+            print(f"    first 10:")
+            for u in locs[:10]:
+                print(f"      {u}")
+            print(f"    last 5:")
+            for u in locs[-5:]:
+                print(f"      {u}")
+            if locs:
+                sample_urls[label] = locs[:3]
+        except Exception as e:
+            print(f"    XML parse error: {e}")
+            text = r.text[:5000]
+            print(f"    raw (first 5000 chars):")
+            for line in text.split("\n")[:80]:
+                print(f"    {line[:200]}")
+
+    # 2. Sample a few reading pages from each sitemap
+    for label, urls in sample_urls.items():
+        for url in urls[:2]:
+            print(f"\n### {label} sample: GET {url}")
+            r = _bg_get(url)
+            if not r:
+                print(f"    ERR")
+                continue
+            print(f"    status={r.status_code} final={r.url}")
+            if r.status_code != 200:
+                continue
+            soup = BeautifulSoup(r.text, "html.parser")
+            h1 = soup.find("h1")
+            if h1:
+                print(f"    <h1>: {clean_text(h1.get_text())[:150]}")
+            h3 = soup.find("h3")
+            if h3:
+                print(f"    <h3>: {clean_text(h3.get_text())[:150]}")
+            # Look for content containers
+            for sel in ["article", "div.entry-content", "div.elementor-widget-theme-post-content",
+                        "div.elementor-text-editor", "main"]:
+                el = soup.select_one(sel)
+                if el:
+                    ps = [clean_text(p.get_text())[:150] for p in el.find_all("p")
+                          if clean_text(p.get_text()) and len(clean_text(p.get_text())) > 15]
+                    print(f"    {sel}: {len(ps)} paragraphs")
+                    for p in ps[:3]:
+                        print(f"      {p}")
+                    break
 
     print("\n[DIAGNOSE=bg] probe complete — exiting non-zero so nothing is scraped.")
     sys.exit(1)
