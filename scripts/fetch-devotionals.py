@@ -64,94 +64,79 @@ def fetch_with_retry(url, retries=MAX_RETRIES):
     return None
 
 
+def _get(url):
+    try:
+        return requests.get(url, headers=HEADERS, timeout=30, allow_redirects=True)
+    except requests.RequestException as e:
+        print(f"    EXCEPTION: {e}")
+        return None
+
+
+def _clean_section(sec):
+    """Strip CCEL nav/search/footer boilerplate from a content section in place."""
+    for jid in ["reader-toc", "navbar-popup-loading", "navbar-popup-content",
+                "ccel-footer", "copyright"]:
+        for el in sec.find_all(id=jid):
+            el.decompose()
+    for tag in sec.find_all(["nav", "form", "script", "style", "button", "header", "footer"]):
+        tag.decompose()
+
+
 def probe_ccel():
     """
-    DIAGNOSTIC: fetch CCEL's known-good entry points and dump their real URL
-    scheme + HTML structure into the logs, so we can write a correct parser
-    without guessing. Exits non-zero so nothing is scraped/committed on a
-    diagnostic run.
-
-    `morneve.today.html` / `morneve.toc.html` are confirmed-real CCEL URLs;
-    the `today` page reveals the canonical per-day URL via its redirect /
-    <link rel=canonical>, and dumping the content div shows how scripture and
-    body are marked up.
+    DIAGNOSTIC round 2: now that we know Spurgeon's day-page URL scheme
+    (morneve.d{MMDD}{am|pm}.html) and that the reading lives in
+    <div id="book-section">, dump that section's INNER block markup so the
+    parser can target scripture vs body exactly. Also probe CCEL author pages
+    for Chambers/Cowman to discover the real work IDs (the guessed ones 404'd).
+    Exits non-zero so nothing is scraped/committed.
     """
-    candidates = {
-        "spurgeon/morneve": [
-            "https://www.ccel.org/ccel/spurgeon/morneve.today.html",
-            "https://www.ccel.org/ccel/spurgeon/morneve.toc.html",
-            "https://www.ccel.org/ccel/spurgeon/morneve.d0101am.html",
-        ],
-        "chambers/utmost": [
-            "https://www.ccel.org/ccel/chambers/utmost.today.html",
-            "https://www.ccel.org/ccel/chambers/utmost.toc.html",
-            "https://www.ccel.org/ccel/chambers/utmost.html",
-        ],
-        "cowman/streams": [
-            "https://www.ccel.org/ccel/cowman/streams.today.html",
-            "https://www.ccel.org/ccel/cowman/streams.toc.html",
-            "https://www.ccel.org/ccel/c/cowman/streams/streams.html",
-        ],
-    }
-
-    for work, urls in candidates.items():
-        print(f"\n{'='*70}\nWORK: {work}\n{'='*70}")
-        for url in urls:
-            print(f"\n--- GET {url}")
-            try:
-                resp = requests.get(url, headers=HEADERS, timeout=30, allow_redirects=True)
-            except requests.RequestException as e:
-                print(f"    EXCEPTION: {e}")
-                continue
-            print(f"    status={resp.status_code}  final_url={resp.url}")
-            if resp.status_code != 200:
-                continue
-
-            soup = BeautifulSoup(resp.text, "html.parser")
-
-            title = soup.find("title")
-            print(f"    <title>: {clean_text(title.get_text()) if title else '(none)'}")
-
-            canon = soup.find("link", rel="canonical")
-            if canon and canon.get("href"):
-                print(f"    canonical: {canon['href']}")
-            og = soup.find("meta", property="og:url")
-            if og and og.get("content"):
-                print(f"    og:url: {og['content']}")
-
-            # Internal links that reveal the per-reading URL scheme.
-            work_leaf = work.split("/")[-1]
-            seen = []
-            for a in soup.find_all("a", href=True):
-                h = a["href"]
-                if work_leaf in h and h not in seen:
-                    seen.append(h)
-                if len(seen) >= 12:
+    # 1. Spurgeon day-page inner structure.
+    print("\n### SPURGEON inner markup — morneve.d0101am.html")
+    r = _get("https://www.ccel.org/ccel/spurgeon/morneve.d0101am.html")
+    if r and r.status_code == 200:
+        soup = BeautifulSoup(r.text, "html.parser")
+        sec = soup.find("div", id="book-section") or soup.find("div", id="content")
+        if sec:
+            _clean_section(sec)
+            print("    block elements (<tag.class> text[:160]):")
+            n = 0
+            for el in sec.find_all(["h1", "h2", "h3", "h4", "p", "blockquote", "cite"]):
+                txt = clean_text(el.get_text())
+                if not txt:
+                    continue
+                cls = ".".join(el.get("class", [])) or "(none)"
+                print(f"      <{el.name}.{cls}> {txt[:160]}")
+                n += 1
+                if n >= 40:
                     break
-            print(f"    sample links containing '{work_leaf}':")
-            for h in seen:
-                print(f"      {h}")
+        else:
+            print("    NO book-section/content div found")
+    else:
+        print(f"    status={r.status_code if r else 'ERR'}")
 
-            # Dump candidate content containers + how scripture/body look.
-            for sel in [
-                ("div", {"class": "text"}),
-                ("div", {"id": "content-main"}),
-                ("div", {"class": "ccel-text"}),
-                ("article", {}),
-                ("div", {"id": "main"}),
-            ]:
-                tag, attrs = sel
-                el = soup.find(tag, attrs=attrs) if attrs else soup.find(tag)
-                if el:
-                    snippet = el.decode()[:1500]
-                    print(f"    >> container <{tag} {attrs}> first 1500 chars of HTML:")
-                    print("    " + snippet.replace("\n", "\n    "))
-                    break
-            else:
-                body = soup.find("body")
-                if body:
-                    print("    >> NO known container matched; first 1200 chars of <body>:")
-                    print("    " + body.decode()[:1200].replace("\n", "\n    "))
+    # 2. Discover real work IDs for Chambers (My Utmost) + Cowman (Streams).
+    for author in ["chambers", "cowman"]:
+        print(f"\n### CCEL author page: {author}")
+        found = False
+        for url in [f"https://www.ccel.org/ccel/{author}/",
+                    f"https://www.ccel.org/ccel/{author}",
+                    f"https://www.ccel.org/a/{author}"]:
+            r = _get(url)
+            print(f"    GET {url} -> {r.status_code if r else 'ERR'} final={r.url if r else ''}")
+            if r and r.status_code == 200:
+                soup = BeautifulSoup(r.text, "html.parser")
+                links = []
+                for a in soup.find_all("a", href=True):
+                    h = a["href"]
+                    if f"/ccel/{author}/" in h and h not in links:
+                        links.append(h)
+                for h in links[:25]:
+                    print(f"      {h}")
+                found = True
+                break
+        if not found:
+            print("    (author landing not found at guessed paths)")
 
     print("\n[DIAGNOSE] probe complete — exiting non-zero so nothing is scraped.")
     sys.exit(1)
