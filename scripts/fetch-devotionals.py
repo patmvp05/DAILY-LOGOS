@@ -28,6 +28,19 @@ OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public
 DELAY = float(os.environ.get("DELAY", "1.5"))
 MAX_RETRIES = 5
 
+# My Utmost (Chambers, 1927) and Streams in the Desert (Cowman, 1925) are public
+# domain but NOT on CCEL. BibleGateway hosts both as dated devotionals with a
+# clean per-day URL — and the CI runner can reach BibleGateway (proven by the
+# NCV scraper). Use a real Chrome UA like that scraper does.
+BG_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+bg_session = requests.Session()
+bg_session.headers.update({"User-Agent": BG_UA, "Accept-Language": "en-US,en;q=0.9"})
+
+# BibleGateway devotional slugs (confirmed via DIAGNOSE=bg probe). Date page:
+#   https://www.biblegateway.com/devotionals/{slug}/{YYYY}/{MM}/{DD}
+BG_UTMOST_SLUG = "my-utmost-for-his-highest"
+BG_STREAMS_SLUG = "streams-in-the-desert"
+
 MONTHS = [
     "january", "february", "march", "april", "may", "june",
     "july", "august", "september", "october", "november", "december"
@@ -142,6 +155,93 @@ def probe_ccel():
             print("    (author landing not found at guessed paths)")
 
     print("\n[DIAGNOSE] probe complete — exiting non-zero so nothing is scraped.")
+    sys.exit(1)
+
+
+def _bg_get(url, params=None):
+    try:
+        return bg_session.get(url, params=params, timeout=30, allow_redirects=True)
+    except requests.RequestException as e:
+        print(f"    EXCEPTION: {e}")
+        return None
+
+
+def _dump_blocks(sec, limit=60):
+    """Print <tag.class> text[:160] for block elements inside a section."""
+    n = 0
+    for el in sec.find_all(["h1", "h2", "h3", "h4", "h5", "p", "blockquote", "cite"]):
+        txt = clean_text(el.get_text())
+        if not txt:
+            continue
+        cls = ".".join(el.get("class", [])) or "(none)"
+        print(f"      <{el.name}.{cls}> {txt[:160]}")
+        n += 1
+        if n >= limit:
+            print("      … (truncated)")
+            break
+
+
+def probe_biblegateway():
+    """
+    DIAGNOSTIC: discover BibleGateway's devotional slugs + page structure for
+    My Utmost and Streams in the Desert (the runner can reach BibleGateway; our
+    sandbox can't). Dumps the devotionals index links + a sample date page's
+    content markup so the parser can target scripture/reference/body exactly.
+    Exits non-zero so nothing is scraped/committed.
+    """
+    # 1. Index — surface the real slugs for the two works.
+    print("\n### BibleGateway devotionals index")
+    r = _bg_get("https://www.biblegateway.com/devotionals/")
+    if r and r.status_code == 200:
+        soup = BeautifulSoup(r.text, "html.parser")
+        seen = set()
+        for a in soup.find_all("a", href=True):
+            h = a["href"]
+            if "/devotionals/" not in h:
+                continue
+            m = re.search(r"/devotionals/([a-z0-9-]+)", h)
+            if not m:
+                continue
+            slug = m.group(1)
+            if slug in seen:
+                continue
+            seen.add(slug)
+            txt = clean_text(a.get_text())[:60]
+            print(f"      {slug:50s} {txt}")
+        print(f"    ({len(seen)} unique devotional slugs)")
+    else:
+        print(f"    status={r.status_code if r else 'ERR'}")
+
+    # 2. Sample date pages for candidate slugs — dump content structure.
+    candidates = [
+        "my-utmost-for-his-highest",
+        "my-utmost-for-his-highest-classic-edition",
+        "my-utmost-for-his-highest-classic",
+        "streams-in-the-desert",
+    ]
+    for slug in candidates:
+        url = f"https://www.biblegateway.com/devotionals/{slug}/2024/01/01"
+        print(f"\n### {url}")
+        r = _bg_get(url)
+        if not (r and r.status_code == 200):
+            print(f"    status={r.status_code if r else 'ERR'} final={r.url if r else ''}")
+            continue
+        print(f"    final={r.url}")
+        soup = BeautifulSoup(r.text, "html.parser")
+        sec = None
+        for sel in ["div.devotional-content", "article", "div.dev-content",
+                    "div.page-devotionals", "main"]:
+            sec = soup.select_one(sel)
+            if sec:
+                print(f"    container: {sel}")
+                break
+        if not sec:
+            sec = soup.body
+            print("    container: <body> (no specific match)")
+        if sec:
+            _dump_blocks(sec)
+
+    print("\n[DIAGNOSE=bg] probe complete — exiting non-zero so nothing is scraped.")
     sys.exit(1)
 
 
@@ -372,7 +472,10 @@ _UNVERIFIED_SCRAPERS = {
 
 
 def main():
-    if os.environ.get("DIAGNOSE", "") == "1":
+    diag = os.environ.get("DIAGNOSE", "")
+    if diag == "bg":
+        probe_biblegateway()  # exits non-zero; nothing is scraped
+    if diag == "1":
         probe_ccel()  # exits non-zero; nothing is scraped
 
     smoke = os.environ.get("SMOKE", "") == "1"
