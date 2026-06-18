@@ -14,6 +14,7 @@ between requests (default 1.5s).
 
 Run:  python scripts/fetch-devotionals.py
 """
+import html as html_mod
 import os
 import re
 import sys
@@ -392,52 +393,98 @@ def scrape_spurgeon(month, day, month_day):
     }
 
 
+_utmost_date_map = None
+
+
+def _load_utmost_date_map():
+    """Fetch all classic posts via WP REST API, build MM-DD → {slug, title} map.
+
+    The WP date field encodes the devotional calendar date: e.g. 2023-04-13 → April 13.
+    Feb 29 uses a leap year (2024). We extract just the MM-DD portion.
+    """
+    global _utmost_date_map
+    if _utmost_date_map is not None:
+        return
+    _utmost_date_map = {}
+    page = 1
+    while True:
+        api_url = (
+            f"https://utmost.org/wp-json/wp/v2/classic"
+            f"?per_page=100&page={page}&_fields=date,slug,title"
+        )
+        try:
+            r = bg_session.get(api_url, timeout=30)
+            if r.status_code != 200:
+                print(f"  WP API page {page}: HTTP {r.status_code}, stopping")
+                break
+            posts = r.json()
+            if not posts:
+                break
+            for post in posts:
+                date_str = post.get("date", "")
+                if "T" not in date_str:
+                    continue
+                ymd = date_str.split("T")[0].split("-")
+                if len(ymd) != 3:
+                    continue
+                mm_dd = f"{ymd[1]}-{ymd[2]}"
+                _utmost_date_map[mm_dd] = {
+                    "slug": post.get("slug", ""),
+                    "title": (post.get("title") or {}).get("rendered", ""),
+                }
+            page += 1
+            time.sleep(1)
+        except Exception as e:
+            print(f"  WP API error page {page}: {e}")
+            break
+    print(f"  Utmost date map: {len(_utmost_date_map)} entries loaded from WP API",
+          flush=True)
+
+
 def scrape_utmost(month, day, month_day):
-    """Scrape My Utmost for His Highest from CCEL."""
-    month_name = MONTHS[month - 1]
-    url = f"https://www.ccel.org/ccel/c/chambers/utmost/{month_name}{day:02d}.html"
-    resp = fetch_with_retry(url)
-    if not resp:
-        # Try alternate pattern
-        url = f"https://www.ccel.org/ccel/chambers/utmost/{month_name}{day:02d}.html"
-        resp = fetch_with_retry(url)
+    """
+    Scrape My Utmost for His Highest (classic edition) from utmost.org.
+    Uses WP REST API for date→slug mapping, then scrapes the page HTML.
+    """
+    _load_utmost_date_map()
+
+    info = (_utmost_date_map or {}).get(month_day)
+    if not info:
+        return None
+
+    slug = info["slug"]
+    title = html_mod.unescape(info["title"]) if info["title"] else f"{MONTHS[month-1].capitalize()} {day}"
+    url = f"https://utmost.org/classic/{slug}/"
+
+    resp = _bg_fetch_with_retry(url)
     if not resp:
         return None
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    scripture = ""
-    reference = ""
+    # Body from the Elementor post-content widget
+    content_widget = soup.select_one("div.elementor-widget-theme-post-content")
     body_paragraphs = []
-
-    verse_el = soup.find("p", class_="verse") or soup.find("blockquote")
-    if verse_el:
-        scripture = clean_text(verse_el.get_text())
-
-    ref_el = soup.find("p", class_="ref") or soup.find("cite")
-    if ref_el:
-        reference = clean_text(ref_el.get_text())
-
-    content_div = soup.find("div", class_="text") or soup.find("div", id="content-main") or soup.find("article")
-    if content_div:
-        for p in content_div.find_all("p"):
-            cls = p.get("class", [])
-            if "verse" in cls or "ref" in cls:
-                continue
+    if content_widget:
+        for p in content_widget.find_all("p"):
             text = clean_text(p.get_text())
             if text and len(text) > 10:
                 body_paragraphs.append(text)
 
     if not body_paragraphs:
-        main = soup.find("main") or soup.find("body")
-        if main:
-            for p in main.find_all("p"):
-                text = clean_text(p.get_text())
-                if text and len(text) > 20:
-                    body_paragraphs.append(text)
-
-    if not body_paragraphs:
         return None
+
+    # Scripture: Elementor text-editor widget with "verse -- reference" pattern
+    scripture = ""
+    reference = ""
+    for widget in soup.select("div.elementor-widget-text-editor"):
+        text = clean_text(widget.get_text())
+        if " -- " in text and len(text) < 500:
+            parts = text.rsplit(" -- ", 1)
+            if len(parts) == 2:
+                scripture = _strip_quotes(parts[0].strip())
+                reference = parts[1].strip()
+                break
 
     entry = {"body": body_paragraphs}
     if scripture:
@@ -445,90 +492,108 @@ def scrape_utmost(month, day, month_day):
     if reference:
         entry["reference"] = reference
 
-    title = f"{MONTHS[month-1].capitalize()} {day}"
     return {
         "slug": "my-utmost",
         "date": month_day,
         "title": title,
         "entries": [entry],
         "author": "Oswald Chambers",
-        "source": "CCEL"
+        "source": "utmost.org",
     }
 
 
+def _ordinal(n):
+    """1→'1st', 2→'2nd', 3→'3rd', 4→'4th', ..., 21→'21st', etc."""
+    if 11 <= n % 100 <= 13:
+        return f"{n}th"
+    return f"{n}{['th','st','nd','rd'][min(n % 10, 4)] if n % 10 < 4 else 'th'}"
+
+
+def _bg_fetch_with_retry(url, retries=MAX_RETRIES):
+    """GET with Chrome UA + exponential backoff. Returns Response on 200, None on 404."""
+    for attempt in range(retries):
+        try:
+            resp = bg_session.get(url, timeout=30, allow_redirects=True)
+            if resp.status_code == 200:
+                return resp
+            if resp.status_code == 404:
+                return None
+            print(f"  HTTP {resp.status_code} for {url}, retry {attempt+1}/{retries}")
+        except requests.RequestException as e:
+            print(f"  Error fetching {url}: {e}, retry {attempt+1}/{retries}")
+        wait = min(2 ** attempt, 30)
+        time.sleep(wait)
+    return None
+
+
 def scrape_streams(month, day, month_day):
-    """Scrape Streams in the Desert from CCEL."""
+    """
+    Scrape Streams in the Desert from crosswalk.com.
+    URL: /devotionals/desert/streams-in-the-desert-{month}-{ordinal}.html
+    Confirmed working (round 4 probe): per-day URLs serve unique content.
+    """
     month_name = MONTHS[month - 1]
-    url = f"https://www.ccel.org/ccel/c/cowman/streams/{month_name}{day:02d}.html"
-    resp = fetch_with_retry(url)
-    if not resp:
-        url = f"https://www.ccel.org/ccel/cowman/streams/{month_name}{day:02d}.html"
-        resp = fetch_with_retry(url)
+    ordinal = _ordinal(day)
+    url = f"https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-{month_name}-{ordinal}.html"
+    resp = _bg_fetch_with_retry(url)
     if not resp:
         return None
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
+    h1 = soup.find("h1")
+    title = clean_text(h1.get_text()) if h1 else f"{month_name.capitalize()} {day}"
+    if " - " in title:
+        title = title.split(" - ", 1)[-1].strip()
+
+    article = soup.find("article")
+    if not article:
+        return None
+
+    body_paragraphs = []
     scripture = ""
     reference = ""
-    body_paragraphs = []
 
-    verse_el = soup.find("p", class_="verse") or soup.find("blockquote")
-    if verse_el:
-        scripture = clean_text(verse_el.get_text())
-
-    ref_el = soup.find("p", class_="ref") or soup.find("cite")
-    if ref_el:
-        reference = clean_text(ref_el.get_text())
-
-    content_div = soup.find("div", class_="text") or soup.find("div", id="content-main") or soup.find("article")
-    if content_div:
-        for p in content_div.find_all("p"):
-            cls = p.get("class", [])
-            if "verse" in cls or "ref" in cls:
-                continue
-            text = clean_text(p.get_text())
-            if text and len(text) > 10:
-                body_paragraphs.append(text)
+    for p in article.find_all("p"):
+        if p.get("class"):
+            continue
+        text = clean_text(p.get_text())
+        if not text or len(text) < 15:
+            continue
+        body_paragraphs.append(text)
 
     if not body_paragraphs:
-        main = soup.find("main") or soup.find("body")
-        if main:
-            for p in main.find_all("p"):
-                text = clean_text(p.get_text())
-                if text and len(text) > 20:
-                    body_paragraphs.append(text)
+        return None
+
+    # First paragraph often contains the scripture quote + reference
+    first = body_paragraphs[0]
+    ref_match = re.search(r'\(([A-Z0-9][a-zA-Z]*\.?\s+\d+[:\d\-,;\s]*(?:[a-zA-Z]*\.?\s*\d*[:\d\-,;\s]*)*)\)\s*$', first)
+    if ref_match:
+        reference = ref_match.group(1).strip()
+        scripture = first[:ref_match.start()].strip()
+        body_paragraphs = body_paragraphs[1:]
 
     if not body_paragraphs:
         return None
 
     entry = {"body": body_paragraphs}
     if scripture:
-        entry["scripture"] = scripture
+        entry["scripture"] = _strip_quotes(scripture)
     if reference:
         entry["reference"] = reference
 
-    title = f"{MONTHS[month-1].capitalize()} {day}"
     return {
         "slug": "streams-in-the-desert",
         "date": month_day,
         "title": title,
         "entries": [entry],
         "author": "L.B. Cowman",
-        "source": "CCEL"
+        "source": "Crosswalk",
     }
 
 
-# Only Spurgeon's Morning & Evening is confirmed on CCEL (verified URL scheme +
-# markup via DIAGNOSE). Chambers/Cowman CCEL paths are still unknown — their
-# scrapers stay defined but are NOT enabled here to avoid ~18min of guaranteed
-# 404s per run. Re-add once their work IDs are discovered.
 SCRAPERS = {
     "morning-evening": scrape_spurgeon,
-}
-
-# Defined but not yet enabled (see note above).
-_UNVERIFIED_SCRAPERS = {
     "my-utmost": scrape_utmost,
     "streams-in-the-desert": scrape_streams,
 }
