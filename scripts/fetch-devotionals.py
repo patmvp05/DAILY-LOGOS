@@ -181,8 +181,40 @@ def _dump_blocks(sec, limit=60):
             break
 
 
+def _probe_page(url, label):
+    """Fetch a URL, dump title + container structure + raw HTML. Returns soup or None."""
+    print(f"\n### {label}: GET {url}")
+    r = _bg_get(url)
+    if not (r and r.status_code == 200):
+        print(f"    status={r.status_code if r else 'ERR'} final={r.url if r else ''}")
+        return None
+    print(f"    final={r.url}")
+    soup = BeautifulSoup(r.text, "html.parser")
+    title = soup.find("title")
+    print(f"    <title>: {clean_text(title.get_text()) if title else '(none)'}")
+    sec = None
+    for sel in ["article", "div.entry-content", "div.post-content",
+                "div.devotional-content", "div.content-body", "div.content", "main"]:
+        sec = soup.select_one(sel)
+        if sec:
+            print(f"    container: {sel}")
+            break
+    if not sec:
+        sec = soup.body
+        print("    container: <body>")
+    if sec:
+        _dump_blocks(sec)
+    if sec and sec != soup.body:
+        raw = sec.decode()[:2500]
+        print(f"\n    >> RAW HTML (first 2500 chars):")
+        for line in raw.split("\n")[:80]:
+            print(f"    {line}")
+    return soup
+
+
 def probe_biblegateway():
     """
+<<<<<<< HEAD
     DIAGNOSTIC: discover BibleGateway's devotional slugs + page structure for
     My Utmost and Streams in the Desert (the runner can reach BibleGateway; our
     sandbox can't). Dumps the devotionals index links + a sample date page's
@@ -240,6 +272,66 @@ def probe_biblegateway():
             print("    container: <body> (no specific match)")
         if sec:
             _dump_blocks(sec)
+=======
+    DIAGNOSTIC round 3: probe the actual reading pages for Chambers and Cowman.
+    Previous round showed utmost.org homepage works but subpages ERR, and
+    crosswalk.com shows Streams full text (today only). This round:
+    1. Try utmost.org/classic/today/ and /updated/today/ (found as links)
+    2. Try crosswalk archive patterns for Streams
+    3. Try gutenberg.org for full-text public domain editions
+    Exits non-zero.
+    """
+
+    # 1. utmost.org — try the "today" reading pages discovered from homepage links
+    utmost_reading_urls = [
+        ("utmost classic today", "https://utmost.org/classic/today/"),
+        ("utmost updated today", "https://utmost.org/updated/today/"),
+        ("utmost modern-classic today", "https://utmost.org/modern-classic/today/"),
+    ]
+    for label, url in utmost_reading_urls:
+        soup = _probe_page(url, label)
+        if soup:
+            # Look for any links to other readings (archive/date patterns)
+            seen = set()
+            for a in soup.find_all("a", href=True):
+                h = a["href"]
+                if ("utmost.org" in h or h.startswith("/")) and h not in seen:
+                    seen.add(h)
+            print(f"    links on page ({len(seen)}):")
+            for h in sorted(seen)[:30]:
+                print(f"      {h}")
+
+    # 2. Crosswalk Streams — try archive/calendar/date-based patterns
+    streams_archive_urls = [
+        ("crosswalk today", "https://www.crosswalk.com/devotionals/desert/"),
+        ("crosswalk archive", "https://www.crosswalk.com/devotionals/desert/archives/"),
+        ("crosswalk jan1 slug", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-january-1-11587591.html"),
+        ("crosswalk jan1 slug2", "https://www.crosswalk.com/devotionals/desert/january-1.html"),
+        ("crosswalk date path", "https://www.crosswalk.com/devotionals/desert/2024/01/01/"),
+    ]
+    for label, url in streams_archive_urls:
+        soup = _probe_page(url, label)
+        if soup:
+            # Surface any archive/calendar links
+            seen = set()
+            for a in soup.find_all("a", href=True):
+                h = a["href"]
+                if "desert" in h and h not in seen:
+                    seen.add(h)
+            if seen:
+                print(f"    desert links ({len(seen)}):")
+                for h in sorted(seen)[:20]:
+                    print(f"      {h}")
+
+    # 3. Try Project Gutenberg for full-text editions
+    gutenberg_urls = [
+        ("gutenberg utmost search", "https://www.gutenberg.org/ebooks/search/?query=my+utmost+for+his+highest"),
+        ("gutenberg streams search", "https://www.gutenberg.org/ebooks/search/?query=streams+in+the+desert+cowman"),
+        ("gutenberg chambers", "https://www.gutenberg.org/ebooks/search/?query=oswald+chambers"),
+    ]
+    for label, url in gutenberg_urls:
+        _probe_page(url, label)
+>>>>>>> 78b04f1 (Probe utmost.org reading pages + crosswalk archives + Gutenberg)
 
     print("\n[DIAGNOSE=bg] probe complete — exiting non-zero so nothing is scraped.")
     sys.exit(1)
