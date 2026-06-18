@@ -19,10 +19,19 @@ interface ExternalDevotionalMeta {
 
 type DevotionalMeta = InternalDevotionalMeta | ExternalDevotionalMeta;
 
+// Maps a devotional `id` → how it's read. INTERNAL = native in-app reader
+// backed by same-origin static JSON (public/devotionals/{slug}/{MM-DD}.json).
+// EXTERNAL (the default for any id not listed) = opens the source site in the
+// browser at the day's reading.
+//
+// Only Spurgeon's Morning & Evening is internal: it's public domain AND hosted
+// on CCEL with a clean per-day URL scheme, so we scrape it to static JSON.
+// My Utmost (Chambers, 1927) and Streams in the Desert (Cowman, 1925) are now
+// public domain too, but are NOT on CCEL — so until their text is sourced
+// elsewhere they stay external links (utmost.org / crosswalk both show the
+// current day's reading). Flip them to internal here once their JSON exists.
 const CATALOG: Record<string, DevotionalMeta> = {
   spurgeon: { kind: 'internal', slug: 'morning-evening', author: 'Charles H. Spurgeon' },
-  utmost: { kind: 'internal', slug: 'my-utmost', author: 'Oswald Chambers' },
-  streams: { kind: 'internal', slug: 'streams-in-the-desert', author: 'L.B. Cowman' },
 };
 
 export function resolveDevotionalKind(id: string): DevotionalKind {
