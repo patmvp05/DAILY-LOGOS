@@ -183,63 +183,96 @@ def _dump_blocks(sec, limit=60):
 
 def probe_biblegateway():
     """
-    DIAGNOSTIC: discover BibleGateway's devotional slugs + page structure for
-    My Utmost and Streams in the Desert (the runner can reach BibleGateway; our
-    sandbox can't). Dumps the devotionals index links + a sample date page's
-    content markup so the parser can target scripture/reference/body exactly.
-    Exits non-zero so nothing is scraped/committed.
+    DIAGNOSTIC round 2: BibleGateway proved My Utmost isn't listed and Streams
+    is paywalled. Now probe the actual free sources:
+      - utmost.org for Chambers (official site, shows daily reading publicly)
+      - crosswalk.com, heartlight.org for Cowman (Streams in the Desert)
+    Dumps page structure so parsers can be written. Exits non-zero.
     """
-    # 1. Index — surface the real slugs for the two works.
-    print("\n### BibleGateway devotionals index")
-    r = _bg_get("https://www.biblegateway.com/devotionals/")
-    if r and r.status_code == 200:
-        soup = BeautifulSoup(r.text, "html.parser")
-        seen = set()
-        for a in soup.find_all("a", href=True):
-            h = a["href"]
-            if "/devotionals/" not in h:
-                continue
-            m = re.search(r"/devotionals/([a-z0-9-]+)", h)
-            if not m:
-                continue
-            slug = m.group(1)
-            if slug in seen:
-                continue
-            seen.add(slug)
-            txt = clean_text(a.get_text())[:60]
-            print(f"      {slug:50s} {txt}")
-        print(f"    ({len(seen)} unique devotional slugs)")
-    else:
-        print(f"    status={r.status_code if r else 'ERR'}")
-
-    # 2. Sample date pages for candidate slugs — dump content structure.
-    candidates = [
-        "my-utmost-for-his-highest",
-        "my-utmost-for-his-highest-classic-edition",
-        "my-utmost-for-his-highest-classic",
-        "streams-in-the-desert",
+    # 1. utmost.org — the official Oswald Chambers site
+    utmost_urls = [
+        "https://utmost.org/",
+        "https://utmost.org/classic/",
+        "https://utmost.org/classic/missionary-munitions-of-war-classic/",
+        "https://utmost.org/missionary-munitions-of-war/",
     ]
-    for slug in candidates:
-        url = f"https://www.biblegateway.com/devotionals/{slug}/2024/01/01"
-        print(f"\n### {url}")
+    for url in utmost_urls:
+        print(f"\n### utmost.org: GET {url}")
         r = _bg_get(url)
         if not (r and r.status_code == 200):
             print(f"    status={r.status_code if r else 'ERR'} final={r.url if r else ''}")
             continue
         print(f"    final={r.url}")
         soup = BeautifulSoup(r.text, "html.parser")
+        title = soup.find("title")
+        print(f"    <title>: {clean_text(title.get_text()) if title else '(none)'}")
         sec = None
-        for sel in ["div.devotional-content", "article", "div.dev-content",
-                    "div.page-devotionals", "main"]:
+        for sel in ["article", "div.entry-content", "div.post-content",
+                    "div.devotional-content", "div.content", "main"]:
             sec = soup.select_one(sel)
             if sec:
                 print(f"    container: {sel}")
                 break
         if not sec:
             sec = soup.body
-            print("    container: <body> (no specific match)")
+            print("    container: <body>")
         if sec:
             _dump_blocks(sec)
+        # Also dump raw HTML of the first content container to see exact markup
+        if sec and sec != soup.body:
+            raw = sec.decode()[:2000]
+            print(f"\n    >> RAW HTML (first 2000 chars):")
+            for line in raw.split("\n")[:60]:
+                print(f"    {line}")
+
+    # 2. Try to discover utmost.org's date-based URL pattern
+    print("\n### utmost.org: looking for date-based URL patterns")
+    r = _bg_get("https://utmost.org/")
+    if r and r.status_code == 200:
+        soup = BeautifulSoup(r.text, "html.parser")
+        seen = set()
+        for a in soup.find_all("a", href=True):
+            h = a["href"]
+            if "utmost.org" in h and h not in seen:
+                seen.add(h)
+        print(f"    ({len(seen)} unique utmost.org links)")
+        for h in sorted(seen)[:40]:
+            print(f"      {h}")
+
+    # 3. Streams in the Desert — try free sources
+    streams_urls = [
+        "https://www.crosswalk.com/devotionals/desert/",
+        "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-january-1.html",
+        "https://www.heartlight.org/classic/desert/0101-desert.html",
+        "https://www.heartlight.org/classic/desert/",
+    ]
+    for url in streams_urls:
+        print(f"\n### Streams source: GET {url}")
+        r = _bg_get(url)
+        if not (r and r.status_code == 200):
+            print(f"    status={r.status_code if r else 'ERR'} final={r.url if r else ''}")
+            continue
+        print(f"    final={r.url}")
+        soup = BeautifulSoup(r.text, "html.parser")
+        title = soup.find("title")
+        print(f"    <title>: {clean_text(title.get_text()) if title else '(none)'}")
+        sec = None
+        for sel in ["article", "div.entry-content", "div.post-content",
+                    "div.devotional-content", "div.content-body", "main"]:
+            sec = soup.select_one(sel)
+            if sec:
+                print(f"    container: {sel}")
+                break
+        if not sec:
+            sec = soup.body
+            print("    container: <body>")
+        if sec:
+            _dump_blocks(sec)
+        if sec and sec != soup.body:
+            raw = sec.decode()[:2000]
+            print(f"\n    >> RAW HTML (first 2000 chars):")
+            for line in raw.split("\n")[:60]:
+                print(f"    {line}")
 
     print("\n[DIAGNOSE=bg] probe complete — exiting non-zero so nothing is scraped.")
     sys.exit(1)
