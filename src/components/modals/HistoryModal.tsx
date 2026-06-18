@@ -112,7 +112,7 @@ const HistoryModal: React.FC = () => {
                                     {format(parseISO(entry.timestamp), 'h:mm a')}
                                   </span>
                                 </div>
-                                <h4 className="text-xl font-bold tracking-tight text-[var(--text-primary)] uppercase">{entry.bookName} {entry.chapter}</h4>
+                                <h4 className="text-xl font-bold tracking-tight text-[var(--text-primary)] uppercase">{entry.bookName}{entry.chapter > 0 ? ` ${entry.chapter}` : ''}</h4>
                               </div>
                             </div>
                           ))}

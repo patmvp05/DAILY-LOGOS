@@ -46,6 +46,8 @@ export interface UiContextType {
   setReaderCategoryId: (catId: string | null) => void;
   activeDevotion: { name: string, url: string } | null;
   setActiveDevotion: (dev: { name: string, url: string } | null) => void;
+  activeInternalDevotional: { id: string, slug: string, name: string } | null;
+  setActiveInternalDevotional: (dev: { id: string, slug: string, name: string } | null) => void;
   showProverbModal: boolean;
   setShowProverbModal: (val: boolean) => void;
   isStartMenuOpen: boolean;

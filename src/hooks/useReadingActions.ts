@@ -341,6 +341,41 @@ export function useReadingActions(
     triggerHaptic('medium');
   }, [state.history, user, dispatch]);
 
+  const logDevotionalRead = useCallback((slug: string, name: string) => {
+    const alreadyLogged = state.history.some(h =>
+      h.categoryId === 'devotional' &&
+      h.bookName === name &&
+      (() => {
+        try {
+          return isToday(parseISO(h.timestamp));
+        } catch {
+          return false;
+        }
+      })()
+    );
+
+    if (alreadyLogged) return;
+
+    const entry: HistoryEntry = {
+      id: `devotional_${slug}_${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      timestampMillis: Date.now(),
+      localDate: format(new Date(), 'yyyy-MM-dd'),
+      categoryId: 'devotional',
+      categoryName: 'Devotional',
+      bookName: name,
+      chapter: 0,
+    };
+
+    dispatch({ type: 'LOG_HISTORY', entry });
+    if (user) {
+      writeActionBatch(user.uid, {
+        history: [entry]
+      }).catch(err => console.error("Devotional sync failed:", err));
+    }
+    triggerHaptic('medium');
+  }, [state.history, user, dispatch]);
+
   return {
     advanceChapter,
     jumpToBook,
@@ -348,6 +383,7 @@ export function useReadingActions(
     saveProverbJournal,
     deleteJournal,
     resetProgress,
-    logProverbRead
+    logProverbRead,
+    logDevotionalRead
   };
 }

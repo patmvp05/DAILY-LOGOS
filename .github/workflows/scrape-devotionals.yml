@@ -1,0 +1,81 @@
+name: Scrape Devotionals (CCEL)
+
+# Scrapes public-domain devotionals from ccel.org:
+#   - Morning and Evening (Spurgeon)
+#   - My Utmost for His Highest (Chambers)
+#   - Streams in the Desert (Cowman)
+#
+# IMPORTANT: commits via GITHUB_TOKEN do NOT trigger deploy workflows.
+# After this runs, a follow-up user push is needed to deploy the new files.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/scrape-devotionals.yml'
+      - 'scripts/fetch-devotionals.py'
+  workflow_dispatch:
+
+concurrency:
+  group: scrape-devotionals
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install scraper deps
+        run: pip install requests beautifulsoup4
+
+      - name: Smoke test — Jan 1 for each slug
+        env:
+          SMOKE: '1'
+        run: python scripts/fetch-devotionals.py
+
+      # Allowed to time out — partial progress is committed below; re-run resumes.
+      - name: Scrape all devotionals
+        id: scrape
+        continue-on-error: true
+        timeout-minutes: 100
+        run: python scripts/fetch-devotionals.py
+
+      - name: Commit devotional static files (even if incomplete)
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          [ -d public/devotionals ] && git add public/devotionals/ || echo "no public/devotionals yet"
+          if git diff --cached --quiet; then
+            echo "No new devotional files to commit"
+          else
+            COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
+            git commit -m "Add devotional text via CCEL CI (+${COUNT} day files)"
+            git push origin main
+          fi
+
+      - name: Report completeness
+        if: always()
+        run: |
+          TOTAL=0
+          for SLUG in morning-evening my-utmost streams-in-the-desert; do
+            HAVE=$(find public/devotionals/${SLUG} -name '*.json' 2>/dev/null | wc -l | tr -d ' ')
+            echo "${SLUG}: ${HAVE} / 366"
+            TOTAL=$((TOTAL + HAVE))
+          done
+          echo "Total: ${TOTAL} / 1098"
+          if [ "${TOTAL}" -lt 1098 ]; then
+            echo "::warning::Devotionals incomplete (${TOTAL}/1098). Re-run to fill the rest."
+          else
+            echo "All devotionals complete"
+          fi

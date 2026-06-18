@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ExternalLink, Check } from 'lucide-react';
 import { useUi } from '../../state/UiContextCore';
@@ -13,53 +13,53 @@ const DevotionalModal: React.FC = () => {
 
   const onClose = () => setActiveDevotion(null);
 
+  useEffect(() => {
+    if (activeDevotion?.url) {
+      window.open(activeDevotion.url, '_blank', 'noopener,noreferrer');
+    }
+  }, [activeDevotion?.url]);
+
   if (!activeDevotion) return null;
 
   return (
     <>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
         className="fixed inset-0 bg-black/80 backdrop-blur-md z-[500]"
       />
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="fixed inset-4 md:inset-10 bg-[var(--audible-nav)] z-[510] flex flex-col border border-[var(--audible-border)] shadow-2xl rounded-2xl overflow-hidden"
+        className="fixed inset-x-4 top-[30%] md:inset-x-[25%] bg-[var(--bg-primary)] z-[510] flex flex-col border border-[var(--border-color)] shadow-2xl rounded-[24px] overflow-hidden"
       >
-        <div className="flex justify-between items-center px-6 py-5 bg-white dark:bg-[#1A1A1A] border-b border-[var(--audible-border)] shrink-0">
+        <div className="p-8 sm:p-10 flex flex-col items-center text-center gap-6">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-brand text-white shadow-sm">
+            <ExternalLink size={28} />
+          </div>
           <div>
-            <h3 className="text-sm font-black uppercase tracking-[0.12em] text-[var(--audible-text-primary)]">{activeDevotion.name}</h3>
-            <p className="text-[10px] text-[var(--audible-text-secondary)] font-bold uppercase tracking-tight truncate max-w-[250px] sm:max-w-md opacity-60">{activeDevotion.url}</p>
+            <h3 className="text-xl font-bold uppercase tracking-tighter text-[var(--text-primary)] mb-2">{activeDevotion.name}</h3>
+            <p className="text-[11px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">Opens in your browser</p>
           </div>
-          <div className="flex items-center gap-4">
-            <a 
-              href={activeDevotion.url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="p-2 text-[var(--audible-text-secondary)] hover:text-brand transition-all"
-              title="Open in new tab"
-            >
-              <ExternalLink size={20} />
-            </a>
-            <button 
-              onClick={onClose}
-              className="p-3 bg-black dark:bg-white text-white dark:text-black rounded-full hover:scale-110 active:scale-95 transition-all shadow-md"
-            >
-              <Check size={20} />
-            </button>
-          </div>
-        </div>
-        <div className="flex-1 bg-white relative">
-          <iframe 
-            src={activeDevotion.url} 
-            className="w-full h-full border-none"
-            title={activeDevotion.name}
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-          />
+          <a
+            href={activeDevotion.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full p-4 font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 bg-brand text-white rounded-[16px] shadow-sm hover:opacity-90 active:scale-95"
+          >
+            <ExternalLink size={14} />
+            Open in Browser
+          </a>
+          <button
+            onClick={onClose}
+            className="w-full p-4 font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 rounded-[16px] bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm hover:bg-[var(--bg-tertiary)] active:scale-95"
+          >
+            <Check size={14} />
+            Close
+          </button>
         </div>
       </motion.div>
     </>

@@ -9,6 +9,7 @@ import { appReducer } from './appReducer';
 import { saveState, loadState, loadStateAsync, saveStateSync } from '../lib/storage';
 import { prefetchProverbs } from '../lib/proverbCache';
 import { prefetchBibleChapters } from '../lib/prefetchBible';
+import { prefetchDevotionals } from '../lib/devotionalContent';
 import { AppContext } from './AppContextCore';
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
@@ -79,6 +80,15 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     triggerPrefetch();
     return () => window.removeEventListener('online', triggerPrefetch);
   }, [bibleVersion]);
+
+  useEffect(() => {
+    const triggerPrefetch = () => {
+      if (navigator.onLine) prefetchDevotionals();
+    };
+    window.addEventListener('online', triggerPrefetch);
+    triggerPrefetch();
+    return () => window.removeEventListener('online', triggerPrefetch);
+  }, []);
 
   // Warm the cache 7 chapters ahead of the user's position in every category,
   // in their selected version, so the reader opens instantly and works offline.

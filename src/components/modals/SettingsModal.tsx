@@ -445,7 +445,7 @@ interface SettingsModalProps {
                       value={newDevotional.url}
                       onChange={(e) => setNewDevotional({...newDevotional, url: e.target.value})}
                     />
-                    <p className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-[0.12em] px-2 italic">Example: https://site.com/{'{{date}}'}</p>
+                    <p className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-[0.12em] px-2 italic">{'Tokens: {{date}}, {{YYYY}}, {{MM}}, {{DD}}'}</p>
                   </div>
                     <button 
                       onClick={() => {

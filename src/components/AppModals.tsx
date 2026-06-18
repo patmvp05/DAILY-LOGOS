@@ -18,10 +18,13 @@ const ProverbModal = lazy(() => import('./modals/ProverbModal'));
 const CategoryPlanModal = lazy(() => import('./modals/CategoryPlanModal'));
 const BookSelectorModal = lazy(() => import('./modals/BookSelectorModal'));
 const DevotionalModal = lazy(() => import('./modals/DevotionalModal'));
+const DevotionalReaderModal = lazy(() => import('./modals/DevotionalReaderModal'));
 const ReaderModal = lazy(() => import('./modals/ReaderModal'));
 
 
 import { useProverb } from '../hooks/useProverb';
+import { useDevotional } from '../hooks/useDevotional';
+import { getDevotionalAuthor } from '../lib/devotionalCatalog';
 
 interface AppModalsProps {
   isSigningIn: boolean;
@@ -35,15 +38,17 @@ export const AppModals = memo(({
    const { state, dispatch } = useApp();
    const {
      showSettings, showHistory, activePlanCategory, selectingCategoryId,
-     readerCategoryId, activeDevotion, showProverbModal,
+     readerCategoryId, activeDevotion, activeInternalDevotional, setActiveInternalDevotional,
+     showProverbModal,
      syncStatus, lastSyncTime, showSyncCheck
    } = useUi();
 
    const { user, loading: isAuthLoading, logout } = useAuth();
-   const { toggleBookCompletion, jumpToBook, saveProverbJournal, resetProgress, logProverbRead, advanceChapter } = useReadingActions(state, dispatch, user);
+   const { toggleBookCompletion, jumpToBook, saveProverbJournal, resetProgress, logProverbRead, logDevotionalRead, advanceChapter } = useReadingActions(state, dispatch, user);
 
    const dayOfMonth = new Date().getDate();
    const { proverbContent, isFetchingProverb } = useProverb(dayOfMonth, state.settings.bibleVersion);
+   const { devotionalContent, isFetchingDevotional, error: devotionalError } = useDevotional(activeInternalDevotional?.slug ?? null);
 
    return (
      <Suspense fallback={<ModalLoader />}>
@@ -76,6 +81,17 @@ export const AppModals = memo(({
       {selectingCategoryId && <BookSelectorModal jumpToBook={jumpToBook} toggleBookCompletion={toggleBookCompletion} />}
       {readerCategoryId && <ReaderModal advanceChapter={advanceChapter} />}
       {activeDevotion && <DevotionalModal />}
+      {activeInternalDevotional && (
+        <DevotionalReaderModal
+          name={activeInternalDevotional.name}
+          author={getDevotionalAuthor(activeInternalDevotional.id)}
+          isFetching={isFetchingDevotional}
+          content={devotionalContent}
+          error={devotionalError}
+          onClose={() => setActiveInternalDevotional(null)}
+          onRead={() => logDevotionalRead(activeInternalDevotional.slug, activeInternalDevotional.name)}
+        />
+      )}
     </Suspense>
   );
 });

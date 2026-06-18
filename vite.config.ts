@@ -82,6 +82,21 @@ export default defineConfig(() => {
               }
             },
             {
+              urlPattern: /\/devotionals\/[a-z-]+\/\d{2}-\d{2}\.json(\?.*)?$/,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'static-devotional-text-v1',
+                networkTimeoutSeconds: 8,
+                expiration: {
+                  maxEntries: 1200,
+                  maxAgeSeconds: 60 * 60 * 24 * 365
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            },
+            {
               // bible-api.com (public-domain texts + KJV fallback). Cache so a
               // re-read works offline; revalidate in the background when online.
               urlPattern: /^https:\/\/bible-api\.com\/.*/,

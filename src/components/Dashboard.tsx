@@ -31,6 +31,7 @@ import { useUi } from '../state/UiContextCore';
 import { useAppStats } from '../hooks/useAppStats';
 import { useReadingActions } from '../hooks/useReadingActions';
 import { useProverb } from '../hooks/useProverb';
+import { resolveDevotionalKind, getDevotionalSlug, interpolateDevotionalUrl } from '../lib/devotionalCatalog';
 
 interface DashboardProps {
   handleLogin: (redirect?: boolean) => void;
@@ -57,7 +58,7 @@ function DashboardComponent({
   const { proverbSnippet, isFetchingProverb } = useProverb(dayOfMonth, bibleVersion);
 
   const {
-    setActivePlanCategory, setShowProverbModal, setActiveDevotion,
+    setActivePlanCategory, setShowProverbModal, setActiveDevotion, setActiveInternalDevotional,
     setSelectingCategoryId, setReaderCategoryId, setJournalDraft, syncStatus
   } = useUi();
 
@@ -326,21 +327,33 @@ function DashboardComponent({
               <div className="space-y-6">
                 {state.customDevotionals.length > 0 && (
                   <div className="pt-6 border-t border-[var(--border-color)]">
-                    <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-4">External Devotionals</p>
+                    <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-4">Daily Devotionals</p>
                     <div className="space-y-2">
-                      {state.customDevotionals.map(dev => (
-                        <button 
-                          key={dev.id}
-                          onClick={() => setActiveDevotion({ name: dev.name, url: dev.url })}
-                          className="w-full flex items-center justify-between p-4 border border-[var(--border-color)] hover:border-brand transition-all text-left bg-[var(--bg-primary)] group rounded-2xl"
-                        >
-                          <div className="flex items-center gap-3">
-                            <ExternalLink size={14} className="text-zinc-400 group-hover:text-brand" />
-                            <span className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">{dev.name}</span>
-                          </div>
-                          <ChevronRight size={16} className="text-zinc-400 group-hover:text-brand group-hover:translate-x-0.5 transition-all" />
-                        </button>
-                      ))}
+                      {state.customDevotionals.map(dev => {
+                        const kind = resolveDevotionalKind(dev.id);
+                        const slug = getDevotionalSlug(dev.id);
+                        return (
+                          <button
+                            key={dev.id}
+                            onClick={() => {
+                              if (kind === 'internal' && slug) {
+                                setActiveInternalDevotional({ id: dev.id, slug, name: dev.name });
+                              } else {
+                                setActiveDevotion({ name: dev.name, url: interpolateDevotionalUrl(dev.url) });
+                              }
+                            }}
+                            className="w-full flex items-center justify-between p-4 border border-[var(--border-color)] hover:border-brand transition-all text-left bg-[var(--bg-primary)] group rounded-2xl"
+                          >
+                            <div className="flex items-center gap-3">
+                              {kind === 'internal'
+                                ? <BookOpen size={14} className="text-zinc-400 group-hover:text-brand" />
+                                : <ExternalLink size={14} className="text-zinc-400 group-hover:text-brand" />}
+                              <span className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">{dev.name}</span>
+                            </div>
+                            <ChevronRight size={16} className="text-zinc-400 group-hover:text-brand group-hover:translate-x-0.5 transition-all" />
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
