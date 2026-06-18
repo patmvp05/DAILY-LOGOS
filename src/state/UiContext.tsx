@@ -20,6 +20,7 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
   const [selectingCategoryId, setSelectingCategoryId] = React.useState<string | null>(null);
   const [readerCategoryId, setReaderCategoryId] = React.useState<string | null>(null);
   const [activeDevotion, setActiveDevotion] = React.useState<{ name: string, url: string } | null>(null);
+  const [activeInternalDevotional, setActiveInternalDevotional] = React.useState<{ id: string, slug: string, name: string } | null>(null);
   const [showProverbModal, setShowProverbModal] = React.useState(false);
   const [isStartMenuOpen, setIsStartMenuOpen] = React.useState(false);
   const [journalDraft, setJournalDraft] = React.useState<JournalDraftState>({
@@ -53,6 +54,7 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
     selectingCategoryId, setSelectingCategoryId,
     readerCategoryId, setReaderCategoryId,
     activeDevotion, setActiveDevotion,
+    activeInternalDevotional, setActiveInternalDevotional,
     showProverbModal, setShowProverbModal,
     isStartMenuOpen, setIsStartMenuOpen,
     confirmDialog, setConfirmDialog, closeConfirmDialog,
@@ -64,7 +66,7 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
   }), [
     showSettings, showHistory, activePlanCategory, selectingCategoryId,
     readerCategoryId,
-    activeDevotion, showProverbModal, isStartMenuOpen, confirmDialog,
+    activeDevotion, activeInternalDevotional, showProverbModal, isStartMenuOpen, confirmDialog,
     toast, journalDraft, syncStatus, lastSyncTime, showSyncCheck
   ]);
 
