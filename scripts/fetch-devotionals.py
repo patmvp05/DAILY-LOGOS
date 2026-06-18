@@ -214,79 +214,95 @@ def _probe_page(url, label):
 
 def probe_biblegateway():
     """
-    DIAGNOSTIC round 5: fetch utmost.org classic sitemap to discover per-reading
-    URLs, then sample one reading page to verify structure.
-    Crosswalk per-day URLs already confirmed working in round 4.
+    DIAGNOSTIC round 6: find date metadata on utmost.org classic reading pages,
+    try WP API for "classic" custom post type, and test CCEL Chambers URL.
     """
-    import xml.etree.ElementTree as ET
 
-    # 1. Fetch classic-sitemap1.xml — should list all individual classic readings
-    sitemaps = [
-        ("classic-sitemap", "https://utmost.org/classic-sitemap1.xml"),
-        ("modern-classic-sitemap", "https://utmost.org/modern-classic-sitemap1.xml"),
+    # 1. Deep-inspect a classic reading page for date indicators
+    sample_url = "https://utmost.org/classic/what-to-do-under-the-conditions-classic/"
+    print(f"\n### Deep inspect classic page: {sample_url}")
+    r = _bg_get(sample_url)
+    if r and r.status_code == 200:
+        soup = BeautifulSoup(r.text, "html.parser")
+
+        # Meta tags (og:, article:, etc.)
+        print("    META TAGS:")
+        for meta in soup.find_all("meta"):
+            name = meta.get("property") or meta.get("name") or ""
+            content = meta.get("content", "")
+            if any(k in name.lower() for k in ["date", "time", "publish", "modif", "article"]):
+                print(f"      {name} = {content}")
+            if any(k in name.lower() for k in ["og:", "twitter:"]):
+                print(f"      {name} = {content[:120]}")
+
+        # <time> elements
+        for t in soup.find_all("time"):
+            print(f"    <time>: datetime={t.get('datetime')} text={clean_text(t.get_text())[:80]}")
+
+        # JSON-LD structured data
+        for script in soup.find_all("script", type="application/ld+json"):
+            print(f"    JSON-LD: {script.string[:500] if script.string else 'empty'}")
+
+        # All h2/h3/h4 elements (date might be in a heading)
+        print("    HEADINGS:")
+        for tag in ["h1", "h2", "h3", "h4"]:
+            for el in soup.find_all(tag):
+                txt = clean_text(el.get_text())[:120]
+                if txt:
+                    print(f"      <{tag}>: {txt}")
+
+        # Elementor widgets — look for date widget or scripture widget
+        print("    ELEMENTOR WIDGETS:")
+        for w in soup.select("div.elementor-widget"):
+            wtype = " ".join(w.get("class", []))
+            txt = clean_text(w.get_text())[:150]
+            if txt and len(txt) > 5:
+                print(f"      [{wtype[:80]}]: {txt}")
+
+    # 2. Try WP REST API for "classic" custom post type
+    wp_endpoints = [
+        ("classic CPT", "https://utmost.org/wp-json/wp/v2/classic?per_page=3"),
+        ("WP types", "https://utmost.org/wp-json/wp/v2/types"),
+        ("classic by slug", "https://utmost.org/wp-json/wp/v2/classic?slug=what-to-do-under-the-conditions-classic&per_page=1"),
     ]
-    sample_urls = {}
-    for label, url in sitemaps:
+    for label, url in wp_endpoints:
         print(f"\n### {label}: GET {url}")
         r = _bg_get(url)
         if not r:
-            print(f"    ERR (no response)")
+            print("    ERR (no response)")
             continue
-        print(f"    status={r.status_code} final={r.url}")
-        if r.status_code != 200:
-            continue
-        ct = r.headers.get("content-type", "")
-        print(f"    content-type: {ct}")
-
-        try:
-            root = ET.fromstring(r.text)
-            ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
-            locs = [el.text for el in root.findall(".//sm:loc", ns) if el.text]
-            print(f"    total URLs: {len(locs)}")
-            print(f"    first 10:")
-            for u in locs[:10]:
-                print(f"      {u}")
-            print(f"    last 5:")
-            for u in locs[-5:]:
-                print(f"      {u}")
-            if locs:
-                sample_urls[label] = locs[:3]
-        except Exception as e:
-            print(f"    XML parse error: {e}")
-            text = r.text[:5000]
-            print(f"    raw (first 5000 chars):")
-            for line in text.split("\n")[:80]:
+        print(f"    status={r.status_code}")
+        if r.status_code == 200:
+            text = r.text[:3000]
+            print(f"    response (first 3000 chars):")
+            for line in text.split("\n")[:50]:
                 print(f"    {line[:200]}")
 
-    # 2. Sample a few reading pages from each sitemap
-    for label, urls in sample_urls.items():
-        for url in urls[:2]:
-            print(f"\n### {label} sample: GET {url}")
-            r = _bg_get(url)
-            if not r:
-                print(f"    ERR")
-                continue
-            print(f"    status={r.status_code} final={r.url}")
-            if r.status_code != 200:
-                continue
+    # 3. Test CCEL Chambers URLs
+    ccel_urls = [
+        ("CCEL chambers jan1", "https://www.ccel.org/ccel/chambers/utmost/january01.html"),
+        ("CCEL chambers jan1 v2", "https://www.ccel.org/ccel/c/chambers/utmost/january01.html"),
+        ("CCEL chambers index", "https://www.ccel.org/ccel/chambers/utmost.html"),
+        ("CCEL chambers index v2", "https://www.ccel.org/ccel/c/chambers/utmost.html"),
+    ]
+    for label, url in ccel_urls:
+        print(f"\n### {label}: GET {url}")
+        r = _bg_get(url)
+        if not r:
+            print("    ERR (no response)")
+            continue
+        print(f"    status={r.status_code} final={r.url}")
+        if r.status_code == 200:
             soup = BeautifulSoup(r.text, "html.parser")
             h1 = soup.find("h1")
             if h1:
                 print(f"    <h1>: {clean_text(h1.get_text())[:150]}")
-            h3 = soup.find("h3")
-            if h3:
-                print(f"    <h3>: {clean_text(h3.get_text())[:150]}")
-            # Look for content containers
-            for sel in ["article", "div.entry-content", "div.elementor-widget-theme-post-content",
-                        "div.elementor-text-editor", "main"]:
-                el = soup.select_one(sel)
-                if el:
-                    ps = [clean_text(p.get_text())[:150] for p in el.find_all("p")
-                          if clean_text(p.get_text()) and len(clean_text(p.get_text())) > 15]
-                    print(f"    {sel}: {len(ps)} paragraphs")
-                    for p in ps[:3]:
-                        print(f"      {p}")
-                    break
+            links = [a["href"] for a in soup.find_all("a", href=True)
+                     if "chambers" in a["href"] or "utmost" in a["href"]]
+            if links:
+                print(f"    relevant links ({len(links)}):")
+                for l in links[:15]:
+                    print(f"      {l}")
 
     print("\n[DIAGNOSE=bg] probe complete — exiting non-zero so nothing is scraped.")
     sys.exit(1)
