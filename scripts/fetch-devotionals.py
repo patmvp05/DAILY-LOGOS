@@ -42,14 +42,16 @@ def all_month_days():
             yield m, d, f"{m:02d}-{d:02d}"
 
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (compatible; DailyLogosBot/1.0; Bible reading app)"
+}
+
+
 def fetch_with_retry(url, retries=MAX_RETRIES):
-    """GET with exponential backoff."""
+    """GET with exponential backoff. Returns the Response on 200, None on 404."""
     for attempt in range(retries):
         try:
-            headers = {
-                "User-Agent": "DailyLogosBot/1.0 (Bible reading app; devotional content fetch)"
-            }
-            resp = requests.get(url, headers=headers, timeout=30)
+            resp = requests.get(url, headers=HEADERS, timeout=30, allow_redirects=True)
             if resp.status_code == 200:
                 return resp
             if resp.status_code == 404:
@@ -60,6 +62,99 @@ def fetch_with_retry(url, retries=MAX_RETRIES):
         wait = min(2 ** attempt, 30)
         time.sleep(wait)
     return None
+
+
+def probe_ccel():
+    """
+    DIAGNOSTIC: fetch CCEL's known-good entry points and dump their real URL
+    scheme + HTML structure into the logs, so we can write a correct parser
+    without guessing. Exits non-zero so nothing is scraped/committed on a
+    diagnostic run.
+
+    `morneve.today.html` / `morneve.toc.html` are confirmed-real CCEL URLs;
+    the `today` page reveals the canonical per-day URL via its redirect /
+    <link rel=canonical>, and dumping the content div shows how scripture and
+    body are marked up.
+    """
+    candidates = {
+        "spurgeon/morneve": [
+            "https://www.ccel.org/ccel/spurgeon/morneve.today.html",
+            "https://www.ccel.org/ccel/spurgeon/morneve.toc.html",
+            "https://www.ccel.org/ccel/spurgeon/morneve.d0101am.html",
+        ],
+        "chambers/utmost": [
+            "https://www.ccel.org/ccel/chambers/utmost.today.html",
+            "https://www.ccel.org/ccel/chambers/utmost.toc.html",
+            "https://www.ccel.org/ccel/chambers/utmost.html",
+        ],
+        "cowman/streams": [
+            "https://www.ccel.org/ccel/cowman/streams.today.html",
+            "https://www.ccel.org/ccel/cowman/streams.toc.html",
+            "https://www.ccel.org/ccel/c/cowman/streams/streams.html",
+        ],
+    }
+
+    for work, urls in candidates.items():
+        print(f"\n{'='*70}\nWORK: {work}\n{'='*70}")
+        for url in urls:
+            print(f"\n--- GET {url}")
+            try:
+                resp = requests.get(url, headers=HEADERS, timeout=30, allow_redirects=True)
+            except requests.RequestException as e:
+                print(f"    EXCEPTION: {e}")
+                continue
+            print(f"    status={resp.status_code}  final_url={resp.url}")
+            if resp.status_code != 200:
+                continue
+
+            soup = BeautifulSoup(resp.text, "html.parser")
+
+            title = soup.find("title")
+            print(f"    <title>: {clean_text(title.get_text()) if title else '(none)'}")
+
+            canon = soup.find("link", rel="canonical")
+            if canon and canon.get("href"):
+                print(f"    canonical: {canon['href']}")
+            og = soup.find("meta", property="og:url")
+            if og and og.get("content"):
+                print(f"    og:url: {og['content']}")
+
+            # Internal links that reveal the per-reading URL scheme.
+            work_leaf = work.split("/")[-1]
+            seen = []
+            for a in soup.find_all("a", href=True):
+                h = a["href"]
+                if work_leaf in h and h not in seen:
+                    seen.append(h)
+                if len(seen) >= 12:
+                    break
+            print(f"    sample links containing '{work_leaf}':")
+            for h in seen:
+                print(f"      {h}")
+
+            # Dump candidate content containers + how scripture/body look.
+            for sel in [
+                ("div", {"class": "text"}),
+                ("div", {"id": "content-main"}),
+                ("div", {"class": "ccel-text"}),
+                ("article", {}),
+                ("div", {"id": "main"}),
+            ]:
+                tag, attrs = sel
+                el = soup.find(tag, attrs=attrs) if attrs else soup.find(tag)
+                if el:
+                    snippet = el.decode()[:1500]
+                    print(f"    >> container <{tag} {attrs}> first 1500 chars of HTML:")
+                    print("    " + snippet.replace("\n", "\n    "))
+                    break
+            else:
+                body = soup.find("body")
+                if body:
+                    print("    >> NO known container matched; first 1200 chars of <body>:")
+                    print("    " + body.decode()[:1200].replace("\n", "\n    "))
+
+    print("\n[DIAGNOSE] probe complete — exiting non-zero so nothing is scraped.")
+    sys.exit(1)
 
 
 def clean_text(text):
@@ -281,6 +376,9 @@ SCRAPERS = {
 
 
 def main():
+    if os.environ.get("DIAGNOSE", "") == "1":
+        probe_ccel()  # exits non-zero; nothing is scraped
+
     smoke = os.environ.get("SMOKE", "") == "1"
 
     for slug, scraper in SCRAPERS.items():
