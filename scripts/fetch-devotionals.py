@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """
-Scrape three public-domain devotionals from CCEL and write them as static JSON
+Scrape three public-domain devotionals and write them as static JSON
 under public/devotionals/{slug}/{MM-DD}.json.
 
-Works:
-  - morning-evening  (Charles Spurgeon) — 2 entries/day (morning + evening)
-  - my-utmost        (Oswald Chambers)  — 1 entry/day
-  - streams-in-the-desert (L.B. Cowman) — 1 entry/day
+Sources:
+  - morning-evening       (Spurgeon)  — CCEL          — 2 entries/day
+  - my-utmost             (Chambers)  — utmost.org    — 1 entry/day
+  - streams-in-the-desert (Cowman)    — crosswalk.com — 1 entry/day
 
 Resumable: skips days whose files already exist. Set SMOKE=1 to fetch just
-Jan 1 for each slug as a reachability check. DELAY tunes the polite gap
-between requests (default 1.5s).
+Jan 1 for each slug as a reachability check.
 
 Run:  python scripts/fetch-devotionals.py
 """
@@ -37,10 +36,6 @@ BG_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHT
 bg_session = requests.Session()
 bg_session.headers.update({"User-Agent": BG_UA, "Accept-Language": "en-US,en;q=0.9"})
 
-# BibleGateway devotional slugs (confirmed via DIAGNOSE=bg probe). Date page:
-#   https://www.biblegateway.com/devotionals/{slug}/{YYYY}/{MM}/{DD}
-BG_UTMOST_SLUG = "my-utmost-for-his-highest"
-BG_STREAMS_SLUG = "streams-in-the-desert"
 
 MONTHS = [
     "january", "february", "march", "april", "may", "june",
@@ -78,14 +73,6 @@ def fetch_with_retry(url, retries=MAX_RETRIES):
     return None
 
 
-def _get(url):
-    try:
-        return requests.get(url, headers=HEADERS, timeout=30, allow_redirects=True)
-    except requests.RequestException as e:
-        print(f"    EXCEPTION: {e}")
-        return None
-
-
 def _clean_section(sec):
     """Strip CCEL nav/search/footer boilerplate from a content section in place."""
     for jid in ["reader-toc", "navbar-popup-loading", "navbar-popup-content",
@@ -94,219 +81,6 @@ def _clean_section(sec):
             el.decompose()
     for tag in sec.find_all(["nav", "form", "script", "style", "button", "header", "footer"]):
         tag.decompose()
-
-
-def probe_ccel():
-    """
-    DIAGNOSTIC round 2: now that we know Spurgeon's day-page URL scheme
-    (morneve.d{MMDD}{am|pm}.html) and that the reading lives in
-    <div id="book-section">, dump that section's INNER block markup so the
-    parser can target scripture vs body exactly. Also probe CCEL author pages
-    for Chambers/Cowman to discover the real work IDs (the guessed ones 404'd).
-    Exits non-zero so nothing is scraped/committed.
-    """
-    # 1. Spurgeon day-page inner structure.
-    print("\n### SPURGEON inner markup — morneve.d0101am.html")
-    r = _get("https://www.ccel.org/ccel/spurgeon/morneve.d0101am.html")
-    if r and r.status_code == 200:
-        soup = BeautifulSoup(r.text, "html.parser")
-        sec = soup.find("div", id="book-section") or soup.find("div", id="content")
-        if sec:
-            _clean_section(sec)
-            print("    block elements (<tag.class> text[:160]):")
-            n = 0
-            for el in sec.find_all(["h1", "h2", "h3", "h4", "p", "blockquote", "cite"]):
-                txt = clean_text(el.get_text())
-                if not txt:
-                    continue
-                cls = ".".join(el.get("class", [])) or "(none)"
-                print(f"      <{el.name}.{cls}> {txt[:160]}")
-                n += 1
-                if n >= 40:
-                    break
-        else:
-            print("    NO book-section/content div found")
-    else:
-        print(f"    status={r.status_code if r else 'ERR'}")
-
-    # 2. Discover real work IDs for Chambers (My Utmost) + Cowman (Streams).
-    for author in ["chambers", "cowman"]:
-        print(f"\n### CCEL author page: {author}")
-        found = False
-        for url in [f"https://www.ccel.org/ccel/{author}/",
-                    f"https://www.ccel.org/ccel/{author}",
-                    f"https://www.ccel.org/a/{author}"]:
-            r = _get(url)
-            print(f"    GET {url} -> {r.status_code if r else 'ERR'} final={r.url if r else ''}")
-            if r and r.status_code == 200:
-                soup = BeautifulSoup(r.text, "html.parser")
-                links = []
-                for a in soup.find_all("a", href=True):
-                    h = a["href"]
-                    # Dump any link that mentions the author or looks like a work
-                    # page, so the real work ID surfaces regardless of href shape.
-                    if (author in h or "/ccel/" in h) and h not in links:
-                        links.append(h)
-                print(f"      ({len(links)} candidate links)")
-                for h in links[:50]:
-                    print(f"      {h}")
-                found = True
-                break
-        if not found:
-            print("    (author landing not found at guessed paths)")
-
-    print("\n[DIAGNOSE] probe complete — exiting non-zero so nothing is scraped.")
-    sys.exit(1)
-
-
-def _bg_get(url, params=None):
-    try:
-        return bg_session.get(url, params=params, timeout=30, allow_redirects=True)
-    except requests.RequestException as e:
-        print(f"    EXCEPTION: {e}")
-        return None
-
-
-def _dump_blocks(sec, limit=60):
-    """Print <tag.class> text[:160] for block elements inside a section."""
-    n = 0
-    for el in sec.find_all(["h1", "h2", "h3", "h4", "h5", "p", "blockquote", "cite"]):
-        txt = clean_text(el.get_text())
-        if not txt:
-            continue
-        cls = ".".join(el.get("class", [])) or "(none)"
-        print(f"      <{el.name}.{cls}> {txt[:160]}")
-        n += 1
-        if n >= limit:
-            print("      … (truncated)")
-            break
-
-
-def _probe_page(url, label):
-    """Fetch a URL, dump title + container structure + raw HTML. Returns soup or None."""
-    print(f"\n### {label}: GET {url}")
-    r = _bg_get(url)
-    if not (r and r.status_code == 200):
-        print(f"    status={r.status_code if r else 'ERR'} final={r.url if r else ''}")
-        return None
-    print(f"    final={r.url}")
-    soup = BeautifulSoup(r.text, "html.parser")
-    title = soup.find("title")
-    print(f"    <title>: {clean_text(title.get_text()) if title else '(none)'}")
-    sec = None
-    for sel in ["article", "div.entry-content", "div.post-content",
-                "div.devotional-content", "div.content-body", "div.content", "main"]:
-        sec = soup.select_one(sel)
-        if sec:
-            print(f"    container: {sel}")
-            break
-    if not sec:
-        sec = soup.body
-        print("    container: <body>")
-    if sec:
-        _dump_blocks(sec)
-    if sec and sec != soup.body:
-        raw = sec.decode()[:2500]
-        print(f"\n    >> RAW HTML (first 2500 chars):")
-        for line in raw.split("\n")[:80]:
-            print(f"    {line}")
-    return soup
-
-
-def probe_biblegateway():
-    """
-    DIAGNOSTIC round 6: find date metadata on utmost.org classic reading pages,
-    try WP API for "classic" custom post type, and test CCEL Chambers URL.
-    """
-
-    # 1. Deep-inspect a classic reading page for date indicators
-    sample_url = "https://utmost.org/classic/what-to-do-under-the-conditions-classic/"
-    print(f"\n### Deep inspect classic page: {sample_url}")
-    r = _bg_get(sample_url)
-    if r and r.status_code == 200:
-        soup = BeautifulSoup(r.text, "html.parser")
-
-        # Meta tags (og:, article:, etc.)
-        print("    META TAGS:")
-        for meta in soup.find_all("meta"):
-            name = meta.get("property") or meta.get("name") or ""
-            content = meta.get("content", "")
-            if any(k in name.lower() for k in ["date", "time", "publish", "modif", "article"]):
-                print(f"      {name} = {content}")
-            if any(k in name.lower() for k in ["og:", "twitter:"]):
-                print(f"      {name} = {content[:120]}")
-
-        # <time> elements
-        for t in soup.find_all("time"):
-            print(f"    <time>: datetime={t.get('datetime')} text={clean_text(t.get_text())[:80]}")
-
-        # JSON-LD structured data
-        for script in soup.find_all("script", type="application/ld+json"):
-            print(f"    JSON-LD: {script.string[:500] if script.string else 'empty'}")
-
-        # All h2/h3/h4 elements (date might be in a heading)
-        print("    HEADINGS:")
-        for tag in ["h1", "h2", "h3", "h4"]:
-            for el in soup.find_all(tag):
-                txt = clean_text(el.get_text())[:120]
-                if txt:
-                    print(f"      <{tag}>: {txt}")
-
-        # Elementor widgets — look for date widget or scripture widget
-        print("    ELEMENTOR WIDGETS:")
-        for w in soup.select("div.elementor-widget"):
-            wtype = " ".join(w.get("class", []))
-            txt = clean_text(w.get_text())[:150]
-            if txt and len(txt) > 5:
-                print(f"      [{wtype[:80]}]: {txt}")
-
-    # 2. Try WP REST API for "classic" custom post type
-    wp_endpoints = [
-        ("classic CPT", "https://utmost.org/wp-json/wp/v2/classic?per_page=3"),
-        ("WP types", "https://utmost.org/wp-json/wp/v2/types"),
-        ("classic by slug", "https://utmost.org/wp-json/wp/v2/classic?slug=what-to-do-under-the-conditions-classic&per_page=1"),
-    ]
-    for label, url in wp_endpoints:
-        print(f"\n### {label}: GET {url}")
-        r = _bg_get(url)
-        if not r:
-            print("    ERR (no response)")
-            continue
-        print(f"    status={r.status_code}")
-        if r.status_code == 200:
-            text = r.text[:3000]
-            print(f"    response (first 3000 chars):")
-            for line in text.split("\n")[:50]:
-                print(f"    {line[:200]}")
-
-    # 3. Test CCEL Chambers URLs
-    ccel_urls = [
-        ("CCEL chambers jan1", "https://www.ccel.org/ccel/chambers/utmost/january01.html"),
-        ("CCEL chambers jan1 v2", "https://www.ccel.org/ccel/c/chambers/utmost/january01.html"),
-        ("CCEL chambers index", "https://www.ccel.org/ccel/chambers/utmost.html"),
-        ("CCEL chambers index v2", "https://www.ccel.org/ccel/c/chambers/utmost.html"),
-    ]
-    for label, url in ccel_urls:
-        print(f"\n### {label}: GET {url}")
-        r = _bg_get(url)
-        if not r:
-            print("    ERR (no response)")
-            continue
-        print(f"    status={r.status_code} final={r.url}")
-        if r.status_code == 200:
-            soup = BeautifulSoup(r.text, "html.parser")
-            h1 = soup.find("h1")
-            if h1:
-                print(f"    <h1>: {clean_text(h1.get_text())[:150]}")
-            links = [a["href"] for a in soup.find_all("a", href=True)
-                     if "chambers" in a["href"] or "utmost" in a["href"]]
-            if links:
-                print(f"    relevant links ({len(links)}):")
-                for l in links[:15]:
-                    print(f"      {l}")
-
-    print("\n[DIAGNOSE=bg] probe complete — exiting non-zero so nothing is scraped.")
-    sys.exit(1)
 
 
 def clean_text(text):
@@ -597,12 +371,6 @@ SCRAPERS = {
 
 
 def main():
-    diag = os.environ.get("DIAGNOSE", "")
-    if diag == "bg":
-        probe_biblegateway()  # exits non-zero; nothing is scraped
-    if diag == "1":
-        probe_ccel()  # exits non-zero; nothing is scraped
-
     smoke = os.environ.get("SMOKE", "") == "1"
 
     for slug, scraper in SCRAPERS.items():

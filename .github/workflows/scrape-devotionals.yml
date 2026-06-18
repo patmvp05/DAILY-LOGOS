@@ -1,9 +1,9 @@
-name: Scrape Devotionals (CCEL)
+name: Scrape Devotionals
 
-# Scrapes public-domain devotionals from ccel.org:
-#   - Morning and Evening (Spurgeon)
-#   - My Utmost for His Highest (Chambers)
-#   - Streams in the Desert (Cowman)
+# Scrapes public-domain devotionals to static JSON:
+#   - Morning and Evening (Spurgeon) — CCEL
+#   - My Utmost for His Highest (Chambers) — utmost.org
+#   - Streams in the Desert (Cowman) — crosswalk.com
 #
 # IMPORTANT: commits via GITHUB_TOKEN do NOT trigger deploy workflows.
 # After this runs, a follow-up user push is needed to deploy the new files.
@@ -21,27 +21,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Fast diagnostic job (own logs, never truncated by the long scrape job):
-  # dumps BibleGateway's devotional slugs + page structure for My Utmost and
-  # Streams in the Desert so their parser can be built without local access.
-  probe-bg:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Install scraper deps
-        run: pip install requests beautifulsoup4
-      - name: Probe BibleGateway devotionals
-        continue-on-error: true
-        env:
-          DIAGNOSE: 'bg'
-        run: python scripts/fetch-devotionals.py
-
   scrape:
     runs-on: ubuntu-latest
     timeout-minutes: 120
@@ -58,15 +37,6 @@ jobs:
 
       - name: Install scraper deps
         run: pip install requests beautifulsoup4
-
-      # DIAGNOSTIC: dumps CCEL's real URL scheme + HTML structure into the logs
-      # (the runner can reach CCEL; our sandbox can't). continue-on-error so its
-      # output is always captured. Remove once the parser is confirmed working.
-      - name: Probe CCEL structure
-        continue-on-error: true
-        env:
-          DIAGNOSE: '1'
-        run: python scripts/fetch-devotionals.py
 
       - name: Smoke test — Jan 1 for each slug
         env:
@@ -90,7 +60,7 @@ jobs:
             echo "No new devotional files to commit"
           else
             COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
-            git commit -m "Add devotional text via CCEL CI (+${COUNT} day files)"
+            git commit -m "Add devotional text via CI (+${COUNT} day files)"
             git push origin main
           fi
 
