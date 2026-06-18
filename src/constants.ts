@@ -236,10 +236,6 @@ export const BOOK_ABBREVIATIONS: Record<string, string> = {
   'Jude': 'Jud', 'Revelation': 'Rev',
 };
 
-export const BOOK_CHAPTER_COUNTS: Record<string, number> = Object.fromEntries(
-  CATEGORIES.flatMap(c => c.books).map(b => [b.name, b.chapters])
-);
-
 export const DEFAULT_BOOK_MINUTES = 4; // fallback if a book isn't in the map
 
 export const BOOK_READ_MINUTES: Record<string, number> = {

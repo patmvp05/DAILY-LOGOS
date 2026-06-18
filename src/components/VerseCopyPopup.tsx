@@ -19,7 +19,6 @@ interface VerseCopyPopupProps {
   chapter: number;
   totalChaptersInBook: number;
   versionId: string;
-  versionName: string;
   onClose: () => void;
 }
 
@@ -30,7 +29,6 @@ function VerseCopyPopup({
   chapter,
   totalChaptersInBook,
   versionId,
-  versionName,
   onClose,
 }: VerseCopyPopupProps) {
   const { showToast } = useUi();
@@ -50,11 +48,6 @@ function VerseCopyPopup({
     const chVs = extraChapters.get(rangeEndChapter);
     return chVs && chVs.length > 0 ? chVs[chVs.length - 1].verse : 1;
   }, [rangeEndChapter, chapter, lastVerseInCurrentChapter, extraChapters]);
-
-  const canExpandDown = !(
-    rangeEndChapter >= chapter + totalChaptersInBook - (chapter % totalChaptersInBook === 0 ? totalChaptersInBook : chapter % totalChaptersInBook)
-    && rangeEndVerse >= lastVerseInEndChapter
-  );
 
   const atBookEnd = rangeEndChapter >= totalChaptersInBook && rangeEndVerse >= lastVerseInEndChapter;
   const atAnchor = rangeEndChapter === chapter && rangeEndVerse === anchorVerse;

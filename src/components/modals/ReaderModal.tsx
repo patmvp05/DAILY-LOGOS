@@ -269,7 +269,6 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
               chapter={chapter}
               totalChaptersInBook={book.chapters}
               versionId={content.translationId}
-              versionName={content.translationName}
               onClose={() => setSelectedVerse(null)}
             />
           )}
