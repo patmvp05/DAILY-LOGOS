@@ -12,6 +12,8 @@ import { useUi } from '../../state/UiContextCore';
 import { CATEGORIES_BY_ID, DEFAULT_BIBLE_VERSION } from '../../constants';
 import { calculateNextProgress } from '../../lib/bible';
 import { getChapterText, type ChapterTextResponse } from '../../lib/chapterText';
+import { triggerHaptic } from '../../lib/haptic';
+import VerseCopyPopup from '../VerseCopyPopup';
 
 interface ReaderModalProps {
   // Wired from AppModals' useReadingActions (with the signed-in user), so
@@ -48,6 +50,7 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
   // the end of the chapter (or immediately for chapters short enough to fit
   // without scrolling). Latches true so it stays visible if you scroll back up.
   const [atEnd, setAtEnd] = useState(false);
+  const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
 
   const handleScroll = () => {
     const el = scrollRef.current;
@@ -80,6 +83,7 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
   // off the effect body (never a synchronous setState-in-effect).
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
+    setSelectedVerse(null);
     const raf = requestAnimationFrame(() => {
       const el = scrollRef.current;
       if (!el) return;
@@ -191,12 +195,20 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
                 </h2>
                 <div className="reader-prose font-serif text-[19px] sm:text-[20px] leading-[1.9] text-[var(--text-primary)]">
                   {content?.verses.map((v) => (
-                    <p key={v.verse} className="mb-[1.1em]">
-                      <span className="text-[12px] font-bold align-super mr-1.5 text-brand/70 tabular-nums select-none">
+                    <div key={v.verse} className="mb-[1.1em]">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedVerse(v.verse);
+                          triggerHaptic('light');
+                        }}
+                        className="text-[12px] font-bold align-super mr-1.5 text-brand/70 tabular-nums select-none cursor-pointer hover:text-brand active:scale-110 transition-all inline"
+                      >
                         {v.verse}
-                      </span>
+                      </button>
                       {v.text}
-                    </p>
+                    </div>
                   ))}
                 </div>
                 {/* Spacer so the last verse isn't hidden behind the revealed action bar */}
@@ -246,6 +258,22 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Verse copy popup */}
+        <AnimatePresence>
+          {selectedVerse !== null && content && (
+            <VerseCopyPopup
+              anchorVerse={selectedVerse}
+              currentVerses={content.verses}
+              bookName={book.name}
+              chapter={chapter}
+              totalChaptersInBook={book.chapters}
+              versionId={content.translationId}
+              versionName={content.translationName}
+              onClose={() => setSelectedVerse(null)}
+            />
+          )}
+        </AnimatePresence>
       </motion.div>
     </>
   );

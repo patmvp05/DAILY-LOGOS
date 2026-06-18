@@ -217,6 +217,29 @@ export const BOLLS_BIBLE_BOOK_IDS: Record<string, number> = {
   'Revelation': 66
 };
 
+export const BOOK_ABBREVIATIONS: Record<string, string> = {
+  'Genesis': 'Gen', 'Exodus': 'Exo', 'Leviticus': 'Lev', 'Numbers': 'Num', 'Deuteronomy': 'Deu',
+  'Joshua': 'Jos', 'Judges': 'Jdg', 'Ruth': 'Rut',
+  '1 Samuel': '1Sa', '2 Samuel': '2Sa', '1 Kings': '1Ki', '2 Kings': '2Ki',
+  '1 Chronicles': '1Ch', '2 Chronicles': '2Ch', 'Ezra': 'Ezr', 'Nehemiah': 'Neh', 'Esther': 'Est',
+  'Job': 'Job', 'Psalms': 'Psa', 'Proverbs': 'Pro', 'Ecclesiastes': 'Ecc', 'Song of Solomon': 'Sng',
+  'Isaiah': 'Isa', 'Jeremiah': 'Jer', 'Lamentations': 'Lam', 'Ezekiel': 'Eze', 'Daniel': 'Dan',
+  'Hosea': 'Hos', 'Joel': 'Joe', 'Amos': 'Amo', 'Obadiah': 'Oba', 'Jonah': 'Jon',
+  'Micah': 'Mic', 'Nahum': 'Nah', 'Habakkuk': 'Hab', 'Zephaniah': 'Zep', 'Haggai': 'Hag',
+  'Zechariah': 'Zec', 'Malachi': 'Mal',
+  'Matthew': 'Mat', 'Mark': 'Mar', 'Luke': 'Luk', 'John': 'Joh', 'Acts': 'Act',
+  'Romans': 'Rom', '1 Corinthians': '1Co', '2 Corinthians': '2Co',
+  'Galatians': 'Gal', 'Ephesians': 'Eph', 'Philippians': 'Php', 'Colossians': 'Col',
+  '1 Thessalonians': '1Th', '2 Thessalonians': '2Th', '1 Timothy': '1Ti', '2 Timothy': '2Ti',
+  'Titus': 'Tit', 'Philemon': 'Phm', 'Hebrews': 'Heb', 'James': 'Jam',
+  '1 Peter': '1Pe', '2 Peter': '2Pe', '1 John': '1Jn', '2 John': '2Jn', '3 John': '3Jn',
+  'Jude': 'Jud', 'Revelation': 'Rev',
+};
+
+export const BOOK_CHAPTER_COUNTS: Record<string, number> = Object.fromEntries(
+  CATEGORIES.flatMap(c => c.books).map(b => [b.name, b.chapters])
+);
+
 export const DEFAULT_BOOK_MINUTES = 4; // fallback if a book isn't in the map
 
 export const BOOK_READ_MINUTES: Record<string, number> = {
