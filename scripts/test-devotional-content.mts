@@ -103,26 +103,26 @@ function installFetch(opts: { fail404?: string } = {}) {
 // ── Catalog tests ──
 
 ok('catalog: spurgeon is internal', resolveDevotionalKind('spurgeon') === 'internal');
-ok('catalog: utmost is internal', resolveDevotionalKind('utmost') === 'internal');
-ok('catalog: streams is internal', resolveDevotionalKind('streams') === 'internal');
 ok('catalog: daily-bread is external', resolveDevotionalKind('daily-bread') === 'external');
 ok('catalog: insight is external', resolveDevotionalKind('insight') === 'external');
 ok('catalog: random id is external', resolveDevotionalKind('some-custom-id') === 'external');
 
+// Only Spurgeon (morning-evening) is internal; My Utmost / Streams are external
+// (not on CCEL) until their text is sourced — see devotionalCatalog.ts.
+ok('catalog: utmost is external', resolveDevotionalKind('utmost') === 'external');
+ok('catalog: streams is external', resolveDevotionalKind('streams') === 'external');
+
 ok('slug: spurgeon → morning-evening', getDevotionalSlug('spurgeon') === 'morning-evening');
-ok('slug: utmost → my-utmost', getDevotionalSlug('utmost') === 'my-utmost');
-ok('slug: streams → streams-in-the-desert', getDevotionalSlug('streams') === 'streams-in-the-desert');
+ok('slug: utmost (external) returns null', getDevotionalSlug('utmost') === null);
+ok('slug: streams (external) returns null', getDevotionalSlug('streams') === null);
 ok('slug: external returns null', getDevotionalSlug('daily-bread') === null);
 
 ok('author: spurgeon', getDevotionalAuthor('spurgeon') === 'Charles H. Spurgeon');
-ok('author: utmost', getDevotionalAuthor('utmost') === 'Oswald Chambers');
-ok('author: streams', getDevotionalAuthor('streams') === 'L.B. Cowman');
+ok('author: utmost (external) returns null', getDevotionalAuthor('utmost') === null);
 ok('author: external returns null', getDevotionalAuthor('daily-bread') === null);
 
-ok('INTERNAL_SLUGS has 3 entries', INTERNAL_DEVOTIONAL_SLUGS.length === 3);
+ok('INTERNAL_SLUGS has 1 entry', INTERNAL_DEVOTIONAL_SLUGS.length === 1);
 ok('INTERNAL_SLUGS contains morning-evening', INTERNAL_DEVOTIONAL_SLUGS.includes('morning-evening'));
-ok('INTERNAL_SLUGS contains my-utmost', INTERNAL_DEVOTIONAL_SLUGS.includes('my-utmost'));
-ok('INTERNAL_SLUGS contains streams-in-the-desert', INTERNAL_DEVOTIONAL_SLUGS.includes('streams-in-the-desert'));
 
 // ── Date helpers ──
 
