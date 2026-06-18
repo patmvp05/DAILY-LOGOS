@@ -38,6 +38,15 @@ jobs:
       - name: Install scraper deps
         run: pip install requests beautifulsoup4
 
+      # DIAGNOSTIC: dumps CCEL's real URL scheme + HTML structure into the logs
+      # (the runner can reach CCEL; our sandbox can't). continue-on-error so its
+      # output is always captured. Remove once the parser is confirmed working.
+      - name: Probe CCEL structure
+        continue-on-error: true
+        env:
+          DIAGNOSE: '1'
+        run: python scripts/fetch-devotionals.py
+
       - name: Smoke test — Jan 1 for each slug
         env:
           SMOKE: '1'
