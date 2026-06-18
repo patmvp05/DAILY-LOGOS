@@ -214,63 +214,61 @@ def _probe_page(url, label):
 
 def probe_biblegateway():
     """
-    DIAGNOSTIC round 3: probe the actual reading pages for Chambers and Cowman.
-    Previous rounds showed: BibleGateway has neither (My Utmost missing, Streams
-    paywalled). utmost.org homepage works but subpages ERR. crosswalk.com shows
-    Streams full text (today only). This round:
-    1. Try utmost.org/classic/today/ and /updated/today/ (found as links)
-    2. Try crosswalk archive patterns for Streams
-    3. Try gutenberg.org for full-text public domain editions
-    Exits non-zero.
+    DIAGNOSTIC round 4: verify per-day URL access.
+    - crosswalk.com: test per-day URLs (streams-in-the-desert-january-1st.html)
+    - utmost.org: check sitemap/RSS/WP API for date-based access
     """
 
-    # 1. utmost.org — try the "today" reading pages discovered from homepage links
-    utmost_reading_urls = [
-        ("utmost classic today", "https://utmost.org/classic/today/"),
-        ("utmost updated today", "https://utmost.org/updated/today/"),
-        ("utmost modern-classic today", "https://utmost.org/modern-classic/today/"),
+    # 1. Crosswalk per-day URLs — do they serve specific days or redirect to today?
+    crosswalk_day_urls = [
+        ("crosswalk jan 1", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-january-1st.html"),
+        ("crosswalk jan 2", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-january-2nd.html"),
+        ("crosswalk feb 15", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-february-15th.html"),
+        ("crosswalk dec 25", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-december-25th.html"),
+        ("crosswalk mar 1", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-march-1st.html"),
     ]
-    for label, url in utmost_reading_urls:
-        soup = _probe_page(url, label)
-        if soup:
-            seen = set()
-            for a in soup.find_all("a", href=True):
-                h = a["href"]
-                if ("utmost.org" in h or h.startswith("/")) and h not in seen:
-                    seen.add(h)
-            print(f"    links on page ({len(seen)}):")
-            for h in sorted(seen)[:30]:
-                print(f"      {h}")
+    for label, url in crosswalk_day_urls:
+        print(f"\n### {label}: GET {url}")
+        r = _bg_get(url)
+        if not (r and r.status_code == 200):
+            print(f"    status={r.status_code if r else 'ERR'} final={r.url if r else ''}")
+            continue
+        print(f"    final={r.url}")
+        soup = BeautifulSoup(r.text, "html.parser")
+        h1 = soup.find("h1")
+        if h1:
+            print(f"    <h1>: {clean_text(h1.get_text())[:120]}")
+        article = soup.find("article")
+        if article:
+            ps = [clean_text(p.get_text())[:120] for p in article.find_all("p")
+                  if not p.get("class") and clean_text(p.get_text()) and len(clean_text(p.get_text())) > 20]
+            print(f"    body paragraphs: {len(ps)}")
+            if ps:
+                print(f"    first: {ps[0]}")
 
-    # 2. Crosswalk Streams — try archive/calendar/date-based patterns
-    streams_archive_urls = [
-        ("crosswalk today", "https://www.crosswalk.com/devotionals/desert/"),
-        ("crosswalk archive", "https://www.crosswalk.com/devotionals/desert/archives/"),
-        ("crosswalk jan1 slug", "https://www.crosswalk.com/devotionals/desert/streams-in-the-desert-january-1-11587591.html"),
-        ("crosswalk jan1 slug2", "https://www.crosswalk.com/devotionals/desert/january-1.html"),
-        ("crosswalk date path", "https://www.crosswalk.com/devotionals/desert/2024/01/01/"),
+    # 2. utmost.org — check sitemap, RSS, and WP REST API for date access
+    utmost_discovery = [
+        ("utmost sitemap", "https://utmost.org/sitemap.xml"),
+        ("utmost sitemap index", "https://utmost.org/sitemap_index.xml"),
+        ("utmost RSS", "https://utmost.org/feed/"),
+        ("utmost WP API posts", "https://utmost.org/wp-json/wp/v2/posts?per_page=5"),
+        ("utmost WP API pages", "https://utmost.org/wp-json/wp/v2/pages?per_page=5&search=utmost"),
     ]
-    for label, url in streams_archive_urls:
-        soup = _probe_page(url, label)
-        if soup:
-            seen = set()
-            for a in soup.find_all("a", href=True):
-                h = a["href"]
-                if "desert" in h and h not in seen:
-                    seen.add(h)
-            if seen:
-                print(f"    desert links ({len(seen)}):")
-                for h in sorted(seen)[:20]:
-                    print(f"      {h}")
-
-    # 3. Try Project Gutenberg for full-text editions
-    gutenberg_urls = [
-        ("gutenberg utmost search", "https://www.gutenberg.org/ebooks/search/?query=my+utmost+for+his+highest"),
-        ("gutenberg streams search", "https://www.gutenberg.org/ebooks/search/?query=streams+in+the+desert+cowman"),
-        ("gutenberg chambers", "https://www.gutenberg.org/ebooks/search/?query=oswald+chambers"),
-    ]
-    for label, url in gutenberg_urls:
-        _probe_page(url, label)
+    for label, url in utmost_discovery:
+        print(f"\n### {label}: GET {url}")
+        r = _bg_get(url)
+        if not r:
+            print(f"    ERR (no response)")
+            continue
+        print(f"    status={r.status_code} final={r.url}")
+        if r.status_code != 200:
+            continue
+        ct = r.headers.get("content-type", "")
+        print(f"    content-type: {ct}")
+        text = r.text[:3000]
+        print(f"    first 3000 chars:")
+        for line in text.split("\n")[:60]:
+            print(f"    {line[:200]}")
 
     print("\n[DIAGNOSE=bg] probe complete — exiting non-zero so nothing is scraped.")
     sys.exit(1)
