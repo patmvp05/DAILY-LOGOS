@@ -292,7 +292,7 @@ def scrape_utmost(month, day, month_day):
 
 
 def _ordinal(n):
-    """1→'1st', 2→'2nd', 3→'3rd', 4→'4th', ..., 21→'21st', etc."""
+    """1→1st, 2→2nd, 3→3rd, 4→4th, ..., 21→21st, etc."""
     if 11 <= n % 100 <= 13:
         return f"{n}th"
     return f"{n}{['th','st','nd','rd'][min(n % 10, 4)] if n % 10 < 4 else 'th'}"
@@ -436,30 +436,183 @@ def _probe_url(url, label=""):
 
 
 def probe_insight():
-    """Probe insight.org to discover URL patterns and HTML structure."""
+    """Probe insight.org — round 2: WP sitemap, REST API, individual page HTML."""
     print("=" * 60)
-    print("INSIGHT FOR LIVING — URL DISCOVERY PROBE")
+    print("INSIGHT FOR LIVING — PROBE ROUND 2")
     print("=" * 60)
 
-    urls = [
-        ("robots.txt", "https://insight.org/robots.txt"),
-        ("sitemap", "https://insight.org/sitemap.xml"),
-        ("main page", "https://insight.org/resources/daily-devotional"),
-        ("rss feed", "https://insight.org/feed"),
-        ("devo feed", "https://insight.org/resources/daily-devotional/feed"),
-        ("dated query", "https://insight.org/resources/daily-devotional?date=2026-06-19"),
-        ("dated path", "https://insight.org/resources/daily-devotional/2026/06/19"),
-        ("crosswalk alt", "https://www.crosswalk.com/devotionals/insight-for-living/"),
-        ("bg alt", "https://www.biblegateway.com/devotionals/insight-for-living/"),
-        ("individual path", "https://insight.org/resources/daily-devotional/individual"),
-    ]
+    # 1) WP sitemap for daily-devotional custom post type
+    print("\n--- WP Sitemap: daily-devotional posts ---")
+    sitemap_url = "https://insight.org/wp-sitemap-posts-daily-devotional-1.xml"
+    resp = bg_session.get(sitemap_url, timeout=30)
+    print(f"  Status: {resp.status_code}")
+    if resp.status_code == 200:
+        soup = BeautifulSoup(resp.text, "xml")
+        locs = [loc.text for loc in soup.find_all("loc")]
+        print(f"  Total URLs in sitemap: {len(locs)}")
+        for u in locs[:10]:
+            print(f"    {u}")
+        if len(locs) > 10:
+            print(f"    ... ({len(locs) - 10} more)")
+            for u in locs[-5:]:
+                print(f"    {u}")
+        lastmods = [lm.text for lm in soup.find_all("lastmod")]
+        if lastmods:
+            print(f"  Date range: {lastmods[-1]} to {lastmods[0]}")
+    else:
+        print(f"  Body preview: {resp.text[:500]}")
+    time.sleep(2)
 
-    for label, url in urls:
-        _probe_url(url, label)
-        time.sleep(2)
+    # 2) WP REST API for daily-devotional
+    print("\n--- WP REST API: /wp-json/wp/v2/daily-devotional ---")
+    api_url = "https://insight.org/wp-json/wp/v2/daily-devotional?per_page=3&_fields=id,date,slug,title,content,excerpt,meta"
+    resp = bg_session.get(api_url, timeout=30)
+    print(f"  Status: {resp.status_code}")
+    if resp.status_code == 200:
+        try:
+            posts = resp.json()
+            print(f"  Posts returned: {len(posts)}")
+            for post in posts:
+                print(f"  ---")
+                print(f"  id={post.get('id')} slug={post.get('slug')} date={post.get('date')}")
+                title = post.get("title", {}).get("rendered", "")
+                print(f"  title: {title}")
+                content = post.get("content", {}).get("rendered", "")
+                print(f"  content length: {len(content)} chars")
+                print(f"  content preview: {content[:500]}")
+                meta = post.get("meta", {})
+                if meta:
+                    print(f"  meta keys: {list(meta.keys()) if isinstance(meta, dict) else meta}")
+                excerpt = post.get("excerpt", {}).get("rendered", "")
+                if excerpt:
+                    print(f"  excerpt: {excerpt[:300]}")
+        except Exception as e:
+            print(f"  JSON parse error: {e}")
+            print(f"  Body: {resp.text[:500]}")
+    else:
+        print(f"  Body: {resp.text[:500]}")
+    time.sleep(2)
+
+    # 2b) Try alternate REST API route names
+    for route in ["daily-devotionals", "devotional", "devotionals"]:
+        alt_url = f"https://insight.org/wp-json/wp/v2/{route}?per_page=1&_fields=id,slug,title"
+        resp = bg_session.get(alt_url, timeout=30)
+        print(f"\n  REST /wp/v2/{route}: {resp.status_code}")
+        if resp.status_code == 200:
+            print(f"    {resp.text[:300]}")
+    time.sleep(2)
+
+    # 3) Individual devotional page — parse HTML structure
+    print("\n--- Individual devotional page ---")
+    page_url = "https://insight.org/resources/daily-devotional/are-you-lost"
+    resp = bg_session.get(page_url, timeout=30)
+    print(f"  URL: {page_url}")
+    print(f"  Status: {resp.status_code}")
+    if resp.status_code == 200:
+        soup = BeautifulSoup(resp.text, "html.parser")
+        title = soup.find("title")
+        print(f"  <title>: {title.get_text().strip() if title else 'NONE'}")
+
+        h1 = soup.find("h1")
+        print(f"  <h1>: {h1.get_text().strip() if h1 else 'NONE'}")
+
+        # Look for meta tags with date info
+        for meta in soup.find_all("meta"):
+            name = meta.get("property", meta.get("name", ""))
+            if any(kw in name.lower() for kw in ["date", "publish", "modified", "time"]):
+                print(f"  meta[{name}]: {meta.get('content', '')}")
+
+        # Dump all heading tags within article/main
+        article = soup.find("article") or soup.find("main") or soup.find("div", {"role": "main"})
+        container_name = "article" if soup.find("article") else "main"
+        if article:
+            print(f"\n  Container: <{container_name}>")
+
+            # All headings
+            for level in ["h1", "h2", "h3", "h4"]:
+                for h in article.find_all(level):
+                    print(f"    <{level}>: {h.get_text().strip()[:150]}")
+
+            # Classes on direct children
+            print(f"\n  Direct children tags+classes:")
+            for child in article.children:
+                if hasattr(child, 'name') and child.name:
+                    cls = child.get("class", [])
+                    text_preview = child.get_text().strip()[:80]
+                    print(f"    <{child.name} class=\"{' '.join(cls)}\">{text_preview}")
+
+            # All paragraphs
+            paras = article.find_all("p")
+            print(f"\n  Paragraphs in <{container_name}>: {len(paras)}")
+            for i, p in enumerate(paras):
+                cls = p.get("class", [])
+                text = p.get_text().strip()
+                print(f"    p[{i}] class={cls}: {text[:200]}")
+
+            # Blockquotes (often used for scripture)
+            bqs = article.find_all("blockquote")
+            if bqs:
+                print(f"\n  Blockquotes: {len(bqs)}")
+                for i, bq in enumerate(bqs):
+                    print(f"    bq[{i}]: {bq.get_text().strip()[:200]}")
+
+            # Look for scripture reference patterns
+            for em in article.find_all(["em", "i", "cite", "span"]):
+                text = em.get_text().strip()
+                if re.search(r'\d+:\d+', text) or any(book in text for book in ["Genesis", "Exodus", "Psalm", "Matthew", "John", "Romans", "Acts"]):
+                    cls = em.get("class", [])
+                    print(f"    Scripture ref? <{em.name} class={cls}>: {text[:150]}")
+
+        else:
+            print("  No <article> or <main> found")
+            print(f"  Body preview:\n{resp.text[:3000]}")
+    time.sleep(2)
+
+    # 4) Try a second devotional page to confirm structure consistency
+    print("\n--- Second devotional page ---")
+    page_url2 = "https://insight.org/resources/daily-devotional/change-your-routine"
+    resp = bg_session.get(page_url2, timeout=30)
+    print(f"  URL: {page_url2}")
+    print(f"  Status: {resp.status_code}")
+    if resp.status_code == 200:
+        soup = BeautifulSoup(resp.text, "html.parser")
+        h1 = soup.find("h1")
+        print(f"  <h1>: {h1.get_text().strip() if h1 else 'NONE'}")
+
+        article = soup.find("article") or soup.find("main")
+        if article:
+            paras = article.find_all("p")
+            print(f"  Paragraphs: {len(paras)}")
+            for i, p in enumerate(paras):
+                cls = p.get("class", [])
+                text = p.get_text().strip()
+                print(f"    p[{i}] class={cls}: {text[:200]}")
+
+    # 5) Check the main listing page for date extraction
+    print("\n--- Main listing page: date extraction ---")
+    resp = bg_session.get("https://insight.org/resources/daily-devotional", timeout=30)
+    if resp.status_code == 200:
+        soup = BeautifulSoup(resp.text, "html.parser")
+        # Look for structured date elements near devotional links
+        links = soup.find_all("a", href=re.compile(r"/resources/daily-devotional/[a-z]"))
+        print(f"  Devotional links found: {len(links)}")
+        for link in links[:8]:
+            href = link.get("href", "")
+            # Check parent and siblings for date info
+            parent = link.parent
+            text = link.get_text().strip()
+            parent_text = parent.get_text().strip() if parent else ""
+            parent_cls = parent.get("class", []) if parent else []
+            print(f"    href={href}")
+            print(f"      link text: {text[:100]}")
+            print(f"      parent <{parent.name if parent else '?'} class={parent_cls}>: {parent_text[:150]}")
+            # Check for time/date elements nearby
+            time_el = parent.find("time") if parent else None
+            if time_el:
+                print(f"      <time>: datetime={time_el.get('datetime', '')} text={time_el.get_text().strip()}")
 
     print("\n" + "=" * 60)
-    print("PROBE COMPLETE")
+    print("PROBE ROUND 2 COMPLETE")
     print("=" * 60)
 
 

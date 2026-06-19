@@ -36,7 +36,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install scraper deps
-        run: pip install requests beautifulsoup4
+        run: pip install requests beautifulsoup4 lxml
 
       - name: Probe Insight for Living (if PROBE=insight)
         if: always()
