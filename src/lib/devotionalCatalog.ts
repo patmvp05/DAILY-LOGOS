@@ -28,6 +28,7 @@ const CATALOG: Record<string, DevotionalMeta> = {
   spurgeon: { kind: 'internal', slug: 'morning-evening', author: 'Charles H. Spurgeon' },
   utmost: { kind: 'internal', slug: 'my-utmost', author: 'Oswald Chambers' },
   streams: { kind: 'internal', slug: 'streams-in-the-desert', author: 'L.B. Cowman' },
+  insight: { kind: 'internal', slug: 'insight-for-living', author: 'Charles R. Swindoll' },
 };
 
 export function resolveDevotionalKind(id: string): DevotionalKind {

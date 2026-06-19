@@ -363,10 +363,120 @@ def scrape_streams(month, day, month_day):
     }
 
 
+_insight_date_map = None
+
+
+def _load_insight_date_map():
+    """Fetch all daily-devotional posts via WP REST API, build MM-DD → {slug, title, content} map.
+
+    The WP date field encodes the devotional calendar date (e.g. 2026-06-19T00:00:00).
+    Only ~93 posts are available at a time (rolling window), so many days will be missing.
+    """
+    global _insight_date_map
+    if _insight_date_map is not None:
+        return
+    _insight_date_map = {}
+    page = 1
+    while True:
+        api_url = (
+            f"https://insight.org/wp-json/wp/v2/daily-devotional"
+            f"?per_page=100&page={page}&_fields=date,slug,title,content"
+        )
+        try:
+            r = bg_session.get(api_url, timeout=30)
+            if r.status_code != 200:
+                print(f"  Insight API page {page}: HTTP {r.status_code}, stopping")
+                break
+            posts = r.json()
+            if not posts:
+                break
+            for post in posts:
+                date_str = post.get("date", "")
+                if "T" not in date_str:
+                    continue
+                ymd = date_str.split("T")[0].split("-")
+                if len(ymd) != 3:
+                    continue
+                mm_dd = f"{ymd[1]}-{ymd[2]}"
+                _insight_date_map[mm_dd] = {
+                    "slug": post.get("slug", ""),
+                    "title": (post.get("title") or {}).get("rendered", ""),
+                    "content": (post.get("content") or {}).get("rendered", ""),
+                }
+            page += 1
+            time.sleep(1)
+        except Exception as e:
+            print(f"  Insight API error page {page}: {e}")
+            break
+    print(f"  Insight date map: {len(_insight_date_map)} entries loaded from WP API",
+          flush=True)
+
+
+def scrape_insight(month, day, month_day):
+    """
+    Scrape Insight for Living (Chuck Swindoll) from insight.org WP REST API.
+    Content is served directly as HTML in the API response — no page scraping needed.
+    """
+    _load_insight_date_map()
+
+    info = (_insight_date_map or {}).get(month_day)
+    if not info:
+        return None
+
+    title = html_mod.unescape(info["title"]) if info["title"] else f"{MONTHS[month-1].capitalize()} {day}"
+    content_html = info.get("content", "")
+    if not content_html:
+        return None
+
+    soup = BeautifulSoup(content_html, "html.parser")
+
+    scripture = ""
+    reference = ""
+    body_paragraphs = []
+
+    bq = soup.find("blockquote")
+    if bq:
+        bq_text = clean_text(bq.get_text())
+        ref_match = re.search(r'\(([A-Z0-9][a-zA-Z]*\.?\s+\d+[:\d\-,;\s]*(?:[a-zA-Z]*\.?\s*\d*[:\d\-,;\s]*)*)\)\s*$', bq_text)
+        if ref_match:
+            reference = ref_match.group(1).strip()
+            scripture = _strip_quotes(bq_text[:ref_match.start()].strip())
+        else:
+            scripture = _strip_quotes(bq_text)
+        bq.decompose()
+
+    for p in soup.find_all("p", class_="wp-block-paragraph"):
+        text = clean_text(p.get_text())
+        if not text or len(text) < 10:
+            continue
+        if any(skip in text for skip in ["GET DEVOTIONAL", "Sign up to receive", "Chuck Swindoll explains that Insight"]):
+            continue
+        body_paragraphs.append(text)
+
+    if not body_paragraphs:
+        return None
+
+    entry = {"body": body_paragraphs}
+    if scripture:
+        entry["scripture"] = scripture
+    if reference:
+        entry["reference"] = reference
+
+    return {
+        "slug": "insight-for-living",
+        "date": month_day,
+        "title": title,
+        "entries": [entry],
+        "author": "Charles R. Swindoll",
+        "source": "insight.org",
+    }
+
+
 SCRAPERS = {
     "morning-evening": scrape_spurgeon,
     "my-utmost": scrape_utmost,
     "streams-in-the-desert": scrape_streams,
+    "insight-for-living": scrape_insight,
 }
 
 
@@ -628,13 +738,20 @@ def main():
         os.makedirs(slug_dir, exist_ok=True)
 
         if smoke:
-            print(f"[SMOKE] {slug}: fetching Jan 1...")
-            result = scraper(1, 1, "01-01")
+            if slug == "insight-for-living":
+                import datetime
+                today = datetime.date.today()
+                smoke_m, smoke_d = today.month, today.day
+                smoke_md = f"{smoke_m:02d}-{smoke_d:02d}"
+            else:
+                smoke_m, smoke_d, smoke_md = 1, 1, "01-01"
+            print(f"[SMOKE] {slug}: fetching {smoke_md}...")
+            result = scraper(smoke_m, smoke_d, smoke_md)
             if not result:
-                print(f"  FAIL: no content returned for {slug} Jan 1")
+                print(f"  FAIL: no content returned for {slug} {smoke_md}")
                 sys.exit(1)
             if not result["entries"] or not result["entries"][0]["body"]:
-                print(f"  FAIL: empty body for {slug} Jan 1")
+                print(f"  FAIL: empty body for {slug} {smoke_md}")
                 sys.exit(1)
             print(f"  OK: {len(result['entries'])} entry/entries, {sum(len(e['body']) for e in result['entries'])} paragraphs total")
             continue

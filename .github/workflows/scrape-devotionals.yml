@@ -1,9 +1,10 @@
 name: Scrape Devotionals
 
-# Scrapes public-domain devotionals to static JSON:
+# Scrapes devotionals to static JSON:
 #   - Morning and Evening (Spurgeon) — CCEL
 #   - My Utmost for His Highest (Chambers) — utmost.org
 #   - Streams in the Desert (Cowman) — crosswalk.com
+#   - Insight for Living (Swindoll) — insight.org (rolling ~93-day window)
 #
 # IMPORTANT: commits via GITHUB_TOKEN do NOT trigger deploy workflows.
 # After this runs, a follow-up user push is needed to deploy the new files.
@@ -79,9 +80,11 @@ jobs:
             echo "${SLUG}: ${HAVE} / 366"
             TOTAL=$((TOTAL + HAVE))
           done
-          echo "Total: ${TOTAL} / 1098"
+          echo "Total (full-year): ${TOTAL} / 1098"
           if [ "${TOTAL}" -lt 1098 ]; then
             echo "::warning::Devotionals incomplete (${TOTAL}/1098). Re-run to fill the rest."
           else
-            echo "All devotionals complete"
+            echo "All full-year devotionals complete"
           fi
+          INSIGHT=$(find public/devotionals/insight-for-living -name '*.json' 2>/dev/null | wc -l | tr -d ' ')
+          echo "insight-for-living: ${INSIGHT} (rolling window, ~93 available)"

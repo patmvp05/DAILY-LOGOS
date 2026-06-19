@@ -95,6 +95,19 @@ function installFetch(opts: { fail404?: string } = {}) {
         }),
       };
     }
+    if (url.includes('/devotionals/insight-for-living/')) {
+      return {
+        ok: true, status: 200,
+        json: async () => ({
+          slug: 'insight-for-living',
+          date: '06-18',
+          title: 'Are You Lost?',
+          entries: [{ body: ['Being lost is a terrifying experience.'], scripture: 'He has given us eternal life', reference: '1 John 5:11-13' }],
+          author: 'Charles R. Swindoll',
+          source: 'insight.org',
+        }),
+      };
+    }
 
     return { ok: false, status: 404, json: async () => ({}) };
   };
@@ -104,7 +117,7 @@ function installFetch(opts: { fail404?: string } = {}) {
 
 ok('catalog: spurgeon is internal', resolveDevotionalKind('spurgeon') === 'internal');
 ok('catalog: daily-bread is external', resolveDevotionalKind('daily-bread') === 'external');
-ok('catalog: insight is external', resolveDevotionalKind('insight') === 'external');
+ok('catalog: insight is internal', resolveDevotionalKind('insight') === 'internal');
 ok('catalog: random id is external', resolveDevotionalKind('some-custom-id') === 'external');
 
 ok('catalog: utmost is internal', resolveDevotionalKind('utmost') === 'internal');
@@ -113,17 +126,20 @@ ok('catalog: streams is internal', resolveDevotionalKind('streams') === 'interna
 ok('slug: spurgeon → morning-evening', getDevotionalSlug('spurgeon') === 'morning-evening');
 ok('slug: utmost → my-utmost', getDevotionalSlug('utmost') === 'my-utmost');
 ok('slug: streams → streams-in-the-desert', getDevotionalSlug('streams') === 'streams-in-the-desert');
+ok('slug: insight → insight-for-living', getDevotionalSlug('insight') === 'insight-for-living');
 ok('slug: external returns null', getDevotionalSlug('daily-bread') === null);
 
 ok('author: spurgeon', getDevotionalAuthor('spurgeon') === 'Charles H. Spurgeon');
 ok('author: utmost', getDevotionalAuthor('utmost') === 'Oswald Chambers');
 ok('author: streams', getDevotionalAuthor('streams') === 'L.B. Cowman');
+ok('author: insight', getDevotionalAuthor('insight') === 'Charles R. Swindoll');
 ok('author: external returns null', getDevotionalAuthor('daily-bread') === null);
 
-ok('INTERNAL_SLUGS has 3 entries', INTERNAL_DEVOTIONAL_SLUGS.length === 3);
+ok('INTERNAL_SLUGS has 4 entries', INTERNAL_DEVOTIONAL_SLUGS.length === 4);
 ok('INTERNAL_SLUGS contains morning-evening', INTERNAL_DEVOTIONAL_SLUGS.includes('morning-evening'));
 ok('INTERNAL_SLUGS contains my-utmost', INTERNAL_DEVOTIONAL_SLUGS.includes('my-utmost'));
 ok('INTERNAL_SLUGS contains streams-in-the-desert', INTERNAL_DEVOTIONAL_SLUGS.includes('streams-in-the-desert'));
+ok('INTERNAL_SLUGS contains insight-for-living', INTERNAL_DEVOTIONAL_SLUGS.includes('insight-for-living'));
 
 // ── Date helpers ──
 
@@ -183,6 +199,12 @@ ok('utmost: no period field', utmost.entries[0].period === undefined);
 const streams = await getDevotional('streams-in-the-desert', '04-20');
 ok('streams: single entry', streams.entries.length === 1);
 ok('streams: has body', streams.entries[0].body[0] === 'Stream flows on.');
+
+const insight = await getDevotional('insight-for-living', '05-10');
+ok('insight: single entry', insight.entries.length === 1);
+ok('insight: has body', insight.entries[0].body[0] === 'Being lost is a terrifying experience.');
+ok('insight: has scripture', insight.entries[0].scripture === 'He has given us eternal life');
+ok('insight: has reference', insight.entries[0].reference === '1 John 5:11-13');
 
 // ── Feb 29 fallback ──
 
