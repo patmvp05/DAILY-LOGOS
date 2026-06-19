@@ -90,7 +90,7 @@ def clean_text(text):
     return text
 
 
-_QUOTE_CHARS = "\"“”‘’'"
+_QUOTE_CHARS = "“”‘’\"'"
 
 
 def _strip_quotes(text):
@@ -370,7 +370,104 @@ SCRAPERS = {
 }
 
 
+def _probe_url(url, label=""):
+    """Fetch a URL with Chrome UA and dump structure to stdout for CI log analysis."""
+    tag = f"[PROBE {label}]" if label else "[PROBE]"
+    print(f"\n{tag} GET {url}")
+    try:
+        resp = bg_session.get(url, timeout=30, allow_redirects=True)
+        print(f"  Status: {resp.status_code}")
+        print(f"  Content-Type: {resp.headers.get('Content-Type', 'unknown')}")
+        print(f"  Final URL: {resp.url}")
+
+        if resp.status_code != 200:
+            print(f"  Body preview: {resp.text[:500]}")
+            return
+
+        ct = resp.headers.get("Content-Type", "")
+        if "json" in ct or "xml" in ct or "rss" in ct or "atom" in ct:
+            print(f"  Body (first 5000 chars):\n{resp.text[:5000]}")
+            return
+
+        soup = BeautifulSoup(resp.text, "html.parser")
+
+        title_tag = soup.find("title")
+        if title_tag:
+            print(f"  <title>: {clean_text(title_tag.get_text())}")
+
+        for link in soup.find_all("link", attrs={"type": True}):
+            lt = link.get("type", "")
+            if "rss" in lt or "atom" in lt or "xml" in lt:
+                print(f"  RSS/Atom link: {link.get('href', '')} (type={lt})")
+
+        hrefs = set()
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            if any(kw in href.lower() for kw in ["devotional", "daily", "devoti", "swindoll"]):
+                hrefs.add(href)
+        if hrefs:
+            print(f"  Relevant <a> hrefs ({len(hrefs)}):")
+            for h in sorted(hrefs)[:30]:
+                print(f"    {h}")
+
+        h1 = soup.find("h1")
+        if h1:
+            print(f"  <h1>: {clean_text(h1.get_text())}")
+
+        article = soup.find("article")
+        if article:
+            paras = [clean_text(p.get_text()) for p in article.find_all("p") if clean_text(p.get_text())]
+            print(f"  <article> found: {len(paras)} paragraphs")
+            for p in paras[:5]:
+                print(f"    {p[:200]}")
+
+        main_el = soup.find("main") or soup.find("div", {"role": "main"})
+        if main_el and not article:
+            paras = [clean_text(p.get_text()) for p in main_el.find_all("p") if clean_text(p.get_text())]
+            print(f"  <main> found: {len(paras)} paragraphs")
+            for p in paras[:5]:
+                print(f"    {p[:200]}")
+
+        if not article and not main_el:
+            print(f"  Body preview (first 3000 chars of HTML):\n{resp.text[:3000]}")
+
+    except Exception as e:
+        print(f"  ERROR: {e}")
+
+
+def probe_insight():
+    """Probe insight.org to discover URL patterns and HTML structure."""
+    print("=" * 60)
+    print("INSIGHT FOR LIVING — URL DISCOVERY PROBE")
+    print("=" * 60)
+
+    urls = [
+        ("robots.txt", "https://insight.org/robots.txt"),
+        ("sitemap", "https://insight.org/sitemap.xml"),
+        ("main page", "https://insight.org/resources/daily-devotional"),
+        ("rss feed", "https://insight.org/feed"),
+        ("devo feed", "https://insight.org/resources/daily-devotional/feed"),
+        ("dated query", "https://insight.org/resources/daily-devotional?date=2026-06-19"),
+        ("dated path", "https://insight.org/resources/daily-devotional/2026/06/19"),
+        ("crosswalk alt", "https://www.crosswalk.com/devotionals/insight-for-living/"),
+        ("bg alt", "https://www.biblegateway.com/devotionals/insight-for-living/"),
+        ("individual path", "https://insight.org/resources/daily-devotional/individual"),
+    ]
+
+    for label, url in urls:
+        _probe_url(url, label)
+        time.sleep(2)
+
+    print("\n" + "=" * 60)
+    print("PROBE COMPLETE")
+    print("=" * 60)
+
+
 def main():
+    if os.environ.get("PROBE", "") == "insight":
+        probe_insight()
+        return
+
     smoke = os.environ.get("SMOKE", "") == "1"
 
     for slug, scraper in SCRAPERS.items():
