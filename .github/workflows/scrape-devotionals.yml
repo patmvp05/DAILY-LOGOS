@@ -38,6 +38,12 @@ jobs:
       - name: Install scraper deps
         run: pip install requests beautifulsoup4
 
+      - name: Probe Insight for Living (if PROBE=insight)
+        if: always()
+        env:
+          PROBE: 'insight'
+        run: python scripts/fetch-devotionals.py
+
       - name: Smoke test — Jan 1 for each slug
         env:
           SMOKE: '1'
