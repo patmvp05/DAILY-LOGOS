@@ -257,135 +257,43 @@ function DashboardComponent({
           <div className="cb-card mb-10 overflow-hidden relative group">
             <div className="relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16 blur-xl" />
-              <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-4">Plan Status</p>
-
-              <div className="space-y-2 mb-6">
-                <div className="flex justify-between items-end">
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Overall Progress</span>
-                  <div className="text-right">
-                    <span className="text-sm font-bold text-[var(--text-primary)] tabular-nums block leading-none">{overallProgress}%</span>
-                    <span className="text-[10px] font-medium text-[var(--text-secondary)] mt-1 tracking-tight tabular-nums opacity-80 block">
-                      {totalRead} / {totalChaptersCount} Chapters
-                    </span>
-                  </div>
-                </div>
-                <div
-                  className="relative w-full h-[8px] rounded-full overflow-hidden bg-[var(--bg-tertiary)]"
-                  role="progressbar"
-                  aria-valuenow={overallProgress}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                >
-                  <div
-                    style={{ width: `${overallProgress}%` }}
-                    className={cn(
-                      "h-full rounded-full transition-all duration-700 ease-out bg-brand",
-                      overallProgress < 100 && "shimmer-effect"
-                    )}
-                  />
-                </div>
+              <div className="flex items-baseline justify-between mb-1">
+                <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold">
+                  Today's Reading
+                </p>
+                <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest italic opacity-70">
+                  {format(new Date(), 'EEE, MMM d')}
+                </span>
               </div>
-
-              {state.customDevotionals.length > 0 && (
-                <div className="pt-6 border-t border-[var(--border-color)]">
-                  <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-4">Daily Devotionals</p>
-                  <div className="space-y-2">
-                    {state.customDevotionals.map(dev => {
-                      const kind = resolveDevotionalKind(dev.id);
-                      const slug = getDevotionalSlug(dev.id);
-                      return (
-                        <button
-                          key={dev.id}
-                          onClick={() => {
-                            if (kind === 'internal' && slug) {
-                              setActiveInternalDevotional({ id: dev.id, slug, name: dev.name });
-                            } else {
-                              setActiveDevotion({ name: dev.name, url: interpolateDevotionalUrl(dev.url) });
-                            }
-                          }}
-                          className="w-full flex items-center justify-between p-4 border border-[var(--border-color)] hover:border-brand transition-all text-left bg-[var(--bg-primary)] group rounded-2xl"
-                        >
-                          <div className="flex items-center gap-3">
-                            {kind === 'internal'
-                              ? <BookOpen size={14} className="text-zinc-400 group-hover:text-brand" />
-                              : <ExternalLink size={14} className="text-zinc-400 group-hover:text-brand" />}
-                            <span className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">{dev.name}</span>
-                          </div>
-                          <ChevronRight size={16} className="text-zinc-400 group-hover:text-brand group-hover:translate-x-0.5 transition-all" />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <div className="pt-6 border-t border-[var(--border-color)]">
-                <div className="flex items-baseline gap-3 mb-8 text-[var(--text-primary)]">
-                  <h2 className="text-[40px] font-bold tracking-tighter">{streak}</h2>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold uppercase tracking-widest text-brand">Day Streak</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-7 gap-1 mb-6 group-hover:opacity-100 transition-opacity">
-                  {Array.from({ length: 7 }).map((_, i) => {
-                    const checkDate = subDays(new Date(), 6 - i);
-                    const isTodayVisit = i === 6;
-                    const dateStr = format(checkDate, 'yyyy-MM-dd');
-                    const hasReadOnDay = readDatesSet.has(dateStr);
-                    return (
-                      <div key={i} className="flex flex-col items-center gap-1">
-                        <div className={cn(
-                          "w-full aspect-square transition-all duration-500 rounded-full",
-                          hasReadOnDay ? "bg-brand" : "bg-[var(--bg-tertiary)]",
-                          isTodayVisit && !hasReadOnDay && "bg-transparent border-2 border-brand/50 border-dashed"
-                        )} />
-                        <span className="text-[9px] font-bold uppercase text-[var(--text-secondary)] mt-1">{format(checkDate, 'eee')[0]}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="pt-6 border-t border-[var(--border-color)]">
-                <div className="flex items-baseline justify-between mb-1">
-                  <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold">
-                    Today's Reading
-                  </p>
-                  <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest italic opacity-70">
-                    {format(new Date(), 'EEE, MMM d')}
+              <div className="flex items-baseline gap-2">
+                <h2 className={cn(
+                  "text-[40px] font-bold tracking-tighter",
+                  todayReadingStats.minutes === 0
+                    ? "text-[var(--text-secondary)] opacity-50"
+                    : "text-[var(--text-primary)]"
+                )}>
+                  {todayReadingStats.minutes}
+                </h2>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold uppercase tracking-widest text-brand">
+                    {todayReadingStats.minutes === 1 ? 'Minute' : 'Minutes'}
+                  </span>
+                  <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest italic opacity-70 leading-none mt-1">
+                    {todayReadingStats.chapterCount === 0
+                      ? 'No chapters yet today'
+                      : `${todayReadingStats.chapterCount} chapter${todayReadingStats.chapterCount === 1 ? '' : 's'} read`}
                   </span>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <h2 className={cn(
-                    "text-[40px] font-bold tracking-tighter",
-                    todayReadingStats.minutes === 0
-                      ? "text-[var(--text-secondary)] opacity-50"
-                      : "text-[var(--text-primary)]"
-                  )}>
-                    {todayReadingStats.minutes}
-                  </h2>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold uppercase tracking-widest text-brand">
-                      {todayReadingStats.minutes === 1 ? 'Minute' : 'Minutes'}
-                    </span>
-                    <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest italic opacity-70 leading-none mt-1">
-                      {todayReadingStats.chapterCount === 0
-                        ? 'No chapters yet today'
-                        : `${todayReadingStats.chapterCount} chapter${todayReadingStats.chapterCount === 1 ? '' : 's'} read`}
-                    </span>
-                  </div>
-                </div>
-                {todayReadingStats.entries.length > 0 && (
-                  <p className="text-[11px] text-[var(--text-secondary)] font-medium mt-3 line-clamp-1 opacity-80">
-                    {todayReadingStats.entries
-                      .slice(0, 3)
-                      .map(e => `${e.bookName} ${e.chapter}`)
-                      .join(' · ')}
-                    {todayReadingStats.entries.length > 3 && ` · +${todayReadingStats.entries.length - 3} more`}
-                  </p>
-                )}
               </div>
+              {todayReadingStats.entries.length > 0 && (
+                <p className="text-[11px] text-[var(--text-secondary)] font-medium mt-3 line-clamp-1 opacity-80">
+                  {todayReadingStats.entries
+                    .slice(0, 3)
+                    .map(e => `${e.bookName} ${e.chapter}`)
+                    .join(' · ')}
+                  {todayReadingStats.entries.length > 3 && ` · +${todayReadingStats.entries.length - 3} more`}
+                </p>
+              )}
             </div>
           </div>
         </section>
@@ -444,16 +352,16 @@ function DashboardComponent({
           {CATEGORIES.map((cat, idx) => {
             const prog = state.progress.find(p => p.categoryId === cat.id);
             if (!prog) return null;
-            
+
             const book = cat.books[prog.bookIndex];
             const todayStr = format(new Date(), 'yyyy-MM-dd');
             const isDone = prog.localDate === todayStr;
             const bookIsCompleted = state.completedBooks.has(`${cat.id}:${book.name}`);
             const infoKey = `${bibleVersion}:${cat.id}:${prog.bookIndex}:${prog.chapter}`;
             const info = chapterInfos[infoKey];
-            
+
             return (
-              <CategoryCard 
+              <CategoryCard
                 key={cat.id}
                 cat={cat}
                 idx={idx}
@@ -470,6 +378,101 @@ function DashboardComponent({
               />
             );
           })}
+        </div>
+
+        <div className="cb-card mt-6 overflow-hidden relative group">
+          <div className="relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16 blur-xl" />
+            <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-4">Plan Status</p>
+
+            <div className="space-y-2 mb-6">
+              <div className="flex justify-between items-end">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Overall Progress</span>
+                <div className="text-right">
+                  <span className="text-sm font-bold text-[var(--text-primary)] tabular-nums block leading-none">{overallProgress}%</span>
+                  <span className="text-[10px] font-medium text-[var(--text-secondary)] mt-1 tracking-tight tabular-nums opacity-80 block">
+                    {totalRead} / {totalChaptersCount} Chapters
+                  </span>
+                </div>
+              </div>
+              <div
+                className="relative w-full h-[8px] rounded-full overflow-hidden bg-[var(--bg-tertiary)]"
+                role="progressbar"
+                aria-valuenow={overallProgress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                <div
+                  style={{ width: `${overallProgress}%` }}
+                  className={cn(
+                    "h-full rounded-full transition-all duration-700 ease-out bg-brand",
+                    overallProgress < 100 && "shimmer-effect"
+                  )}
+                />
+              </div>
+            </div>
+
+            {state.customDevotionals.length > 0 && (
+              <div className="pt-6 border-t border-[var(--border-color)]">
+                <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-4">Daily Devotionals</p>
+                <div className="space-y-2">
+                  {state.customDevotionals.map(dev => {
+                    const kind = resolveDevotionalKind(dev.id);
+                    const slug = getDevotionalSlug(dev.id);
+                    return (
+                      <button
+                        key={dev.id}
+                        onClick={() => {
+                          if (kind === 'internal' && slug) {
+                            setActiveInternalDevotional({ id: dev.id, slug, name: dev.name });
+                          } else {
+                            setActiveDevotion({ name: dev.name, url: interpolateDevotionalUrl(dev.url) });
+                          }
+                        }}
+                        className="w-full flex items-center justify-between p-4 border border-[var(--border-color)] hover:border-brand transition-all text-left bg-[var(--bg-primary)] group rounded-2xl"
+                      >
+                        <div className="flex items-center gap-3">
+                          {kind === 'internal'
+                            ? <BookOpen size={14} className="text-zinc-400 group-hover:text-brand" />
+                            : <ExternalLink size={14} className="text-zinc-400 group-hover:text-brand" />}
+                          <span className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">{dev.name}</span>
+                        </div>
+                        <ChevronRight size={16} className="text-zinc-400 group-hover:text-brand group-hover:translate-x-0.5 transition-all" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="pt-6 border-t border-[var(--border-color)]">
+              <div className="flex items-baseline gap-3 mb-8 text-[var(--text-primary)]">
+                <h2 className="text-[40px] font-bold tracking-tighter">{streak}</h2>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold uppercase tracking-widest text-brand">Day Streak</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 mb-6 group-hover:opacity-100 transition-opacity">
+                {Array.from({ length: 7 }).map((_, i) => {
+                  const checkDate = subDays(new Date(), 6 - i);
+                  const isTodayVisit = i === 6;
+                  const dateStr = format(checkDate, 'yyyy-MM-dd');
+                  const hasReadOnDay = readDatesSet.has(dateStr);
+                  return (
+                    <div key={i} className="flex flex-col items-center gap-1">
+                      <div className={cn(
+                        "w-full aspect-square transition-all duration-500 rounded-full",
+                        hasReadOnDay ? "bg-brand" : "bg-[var(--bg-tertiary)]",
+                        isTodayVisit && !hasReadOnDay && "bg-transparent border-2 border-brand/50 border-dashed"
+                      )} />
+                      <span className="text-[9px] font-bold uppercase text-[var(--text-secondary)] mt-1">{format(checkDate, 'eee')[0]}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </main>
