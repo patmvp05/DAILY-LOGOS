@@ -6,7 +6,7 @@
 import React, { useRef } from 'react';
 import { motion } from 'motion/react';
 import { BookOpen, Check, Sparkles } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import type { DevotionalContent } from '../../lib/devotionalContent';
 
 interface DevotionalReaderModalProps {
@@ -73,7 +73,11 @@ function DevotionalReaderModal({
             </div>
             <div>
               <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tighter text-[var(--text-primary)]">{name}</h3>
-              <p className="text-[11px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">{format(new Date(), 'EEEE, MMMM do')}</p>
+              <p className="text-[11px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">
+                {content?.date
+                  ? format(parse(content.date, 'MM-dd', new Date()), 'EEEE, MMMM do')
+                  : format(new Date(), 'EEEE, MMMM do')}
+              </p>
             </div>
           </div>
           <button

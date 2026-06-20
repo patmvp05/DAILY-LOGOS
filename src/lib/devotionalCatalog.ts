@@ -61,6 +61,10 @@ export function getAdjacentMonthDays(d: Date = new Date()): string[] {
   ];
 }
 
+export function getRecentMonthDays(count: number, d: Date = new Date()): string[] {
+  return Array.from({ length: count }, (_, i) => getLocalMonthDay(subDays(d, i)));
+}
+
 export function interpolateDevotionalUrl(url: string, d: Date = new Date()): string {
   return url
     .replace(/\{\{date\}\}/g, format(d, 'yyyy-MM-dd'))
