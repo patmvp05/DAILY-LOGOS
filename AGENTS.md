@@ -49,17 +49,23 @@
   `DevotionalReaderModal.tsx`. Prefetches yesterday/today/tomorrow on load/online
   (`AppContext.tsx`). Scroll-to-bottom or close logs a once-per-day read (`logDevotionalRead`,
   `categoryId:'devotional'`, `chapter:0` — counts toward streak, not plan progress).
-- **Currently internal:** only **Spurgeon's Morning & Evening** (`morning-evening`, 2
-  readings/day) — public domain AND on CCEL with a clean per-day URL
-  (`morneve.d{MMDD}{am|pm}.html`; scripture `<p class=passage>`, reference
-  `<h3 class=scripPassage>`, body `<p class=normal>` in `<div id=book-section>`).
-  **My Utmost** (Chambers) and **Streams in the Desert** (Cowman) are public domain but NOT on
-  CCEL, so they stay **external** (utmost.org / crosswalk show the current day) until their
-  text is sourced elsewhere — flip them to internal in `devotionalCatalog.ts` once JSON exists.
+- **Currently internal (4):**
+  - **Spurgeon's Morning & Evening** (`morning-evening`, 2 readings/day) — CCEL,
+    `morneve.d{MMDD}{am|pm}.html`; scripture `<p class=passage>`, reference
+    `<h3 class=scripPassage>`, body `<p class=normal>` in `<div id=book-section>`.
+  - **My Utmost for His Highest** (`my-utmost`, Chambers) — utmost.org WP REST API
+    (`/wp-json/wp/v2/classic`) maps each post's `date` → MM-DD; page HTML parsed for body.
+  - **Streams in the Desert** (`streams-in-the-desert`, Cowman) — crosswalk.com per-day URL
+    (`streams-in-the-desert-{month}-{ordinal}.html`).
+  - **Insight for Living** (`insight-for-living`, Swindoll) — insight.org WP REST API
+    (`/wp-json/wp/v2/daily-devotional`) returns content HTML directly; scripture from
+    `<blockquote>`, body from `<p class=wp-block-paragraph>`. **Rolling ~93-day window** —
+    only recent dates are available (not a full 366), unlike the other three.
 - **Content pipeline:** `scripts/fetch-devotionals.py` + `.github/workflows/scrape-devotionals.yml`
-  (CCEL, GitHub Actions — the sandbox/WebFetch can't reach CCEL but the runner can). Fail-fast
-  smoke (Spurgeon Jan 1), resumable, commits `public/devotionals/**`. A `DIAGNOSE=1` mode dumps
-  CCEL's URL scheme + HTML structure into the logs (how the parser was derived without local
+  (GitHub Actions — the sandbox/WebFetch can't reach these sites but the runner can; some block
+  bot UAs so a Chrome UA `bg_session` is used). Fail-fast smoke (Jan 1, or today for Insight's
+  rolling window), resumable, commits `public/devotionals/**`. A `PROBE=insight` mode dumps a
+  site's URL scheme + HTML/API structure into the logs (how parsers are derived without local
   access). Same GITHUB_TOKEN-doesn't-deploy caveat as the Bible scrapers (see Deployment).
 - **External `{{date}}` interpolation** (`interpolateDevotionalUrl`): `{{date}}`→`yyyy-MM-dd`,
   plus `{{YYYY}}`/`{{MM}}`/`{{DD}}`, all local time, applied at click time. The old blocked
