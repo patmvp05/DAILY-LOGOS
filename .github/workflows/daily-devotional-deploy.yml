@@ -1,0 +1,72 @@
+name: Daily Devotional Refresh & Deploy
+
+# Runs daily at 22:00 UTC (05:00 Vietnam / ~17:00 US Eastern).
+# Scrapes the latest Insight for Living devotional from insight.org,
+# commits any new files, then builds + deploys to Firebase Hosting.
+# Can also be triggered manually via workflow_dispatch.
+
+on:
+  schedule:
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: daily-devotional-deploy
+  cancel-in-progress: false
+
+jobs:
+  scrape-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install scraper deps
+        run: pip install requests beautifulsoup4 lxml
+
+      - name: Scrape devotionals (skips existing files)
+        timeout-minutes: 15
+        run: python scripts/fetch-devotionals.py
+
+      - name: Commit new devotional files
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          [ -d public/devotionals ] && git add public/devotionals/ || echo "no public/devotionals yet"
+          if git diff --cached --quiet; then
+            echo "No new devotional files to commit"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+          else
+            COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
+            git commit -m "Add devotional text via daily refresh (+${COUNT} day files)"
+            git push origin main
+            echo "committed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.commit.outputs.committed == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install & build
+        if: steps.commit.outputs.committed == 'true'
+        run: npm ci && npm run build
+
+      - name: Deploy to Firebase Hosting
+        if: steps.commit.outputs.committed == 'true'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: gen-lang-client-0538747272

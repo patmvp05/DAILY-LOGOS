@@ -4,7 +4,7 @@
  */
 
 import { get, set } from 'idb-keyval';
-import { getLocalMonthDay, getAdjacentMonthDays, INTERNAL_DEVOTIONAL_SLUGS } from './devotionalCatalog';
+import { getLocalMonthDay, getAdjacentMonthDays, getRecentMonthDays, INTERNAL_DEVOTIONAL_SLUGS } from './devotionalCatalog';
 
 export interface DevotionalEntry {
   period?: 'morning' | 'evening';
@@ -64,31 +64,20 @@ export async function getDevotional(
 
   let result: DevotionalContent | null = null;
 
-  try {
-    result = await fetchWithTimeout(async (signal) => {
-      const url = `/devotionals/${slug}/${day}.json?${STATIC_CACHE_BUST}`;
-      const res = await fetch(url, { signal });
-      if (!res.ok) return null;
-      const data = await res.json();
-      return { ...data, _cachedAt: Date.now() } as DevotionalContent;
-    });
-  } catch {
-    // network error
-  }
-
-  // Feb 29 fallback: try Feb 28
-  if (!result && day === '02-29') {
+  const fallbackDays = getRecentMonthDays(8);
+  for (const tryDay of fallbackDays) {
     try {
       result = await fetchWithTimeout(async (signal) => {
-        const url = `/devotionals/${slug}/02-28.json?${STATIC_CACHE_BUST}`;
+        const url = `/devotionals/${slug}/${tryDay}.json?${STATIC_CACHE_BUST}`;
         const res = await fetch(url, { signal });
         if (!res.ok) return null;
         const data = await res.json();
         return { ...data, _cachedAt: Date.now() } as DevotionalContent;
       });
     } catch {
-      // ignore
+      // network error, try next day
     }
+    if (result) break;
   }
 
   if (!result) {
