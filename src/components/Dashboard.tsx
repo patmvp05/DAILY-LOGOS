@@ -109,6 +109,24 @@ function DashboardComponent({
     return dates;
   }, [state.history]);
 
+  // Reading-plan card order: parts not yet read today float to the top (in plan
+  // order); parts already read today sink to the bottom. The "done" flag is based on
+  // today's local date, so the order naturally resets to Part 01 on top each new day.
+  // We keep each card's original index so the "PART 0X" label stays tied to the part.
+  const orderedCategories = useMemo(() => {
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const doneToday = (catId: string) =>
+      state.progress.find(p => p.categoryId === catId)?.localDate === todayStr;
+    return CATEGORIES
+      .map((cat, idx) => ({ cat, idx }))
+      .sort((a, b) => {
+        const aDone = doneToday(a.cat.id);
+        const bDone = doneToday(b.cat.id);
+        if (aDone !== bDone) return aDone ? 1 : -1;
+        return a.idx - b.idx;
+      });
+  }, [state.progress]);
+
   useEffect(() => {
     let active = true;
     
@@ -350,7 +368,7 @@ function DashboardComponent({
             </div>
           )}
 
-          {CATEGORIES.map((cat, idx) => {
+          {orderedCategories.map(({ cat, idx }) => {
             const prog = state.progress.find(p => p.categoryId === cat.id);
             if (!prog) return null;
 
