@@ -72,7 +72,7 @@ function DashboardComponent({
   const todayReadingStats = useMemo(() => {
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     const todayEntries = state.history.filter(
-      h => h.localDate === todayStr
+      h => h.localDate === todayStr && h.categoryId !== 'devotional'
     );
     const minutes = todayEntries.reduce((sum, h) => {
       if (h.readTime && h.readTime > 0) {
@@ -96,6 +96,7 @@ function DashboardComponent({
   const readDatesSet = useMemo(() => {
     const dates = new Set<string>();
     state.history.forEach(entry => {
+      if (entry.categoryId === 'devotional') return;
       if (entry.localDate) {
         dates.add(entry.localDate);
       } else if (entry.timestamp) {

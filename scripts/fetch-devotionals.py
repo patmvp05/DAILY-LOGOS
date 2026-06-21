@@ -298,6 +298,51 @@ def _ordinal(n):
     return f"{n}{['th','st','nd','rd'][min(n % 10, 4)] if n % 10 < 4 else 'th'}"
 
 
+STREAMS_PROMO = "Purchase your own copy of this devotional"
+
+
+def _reconstruct_streams_paragraphs(paras):
+    """Turn crosswalk's overlapping/duplicated <p> blocks into clean paragraphs.
+
+    crosswalk returns the full devotional as one block, an exact duplicate, then
+    progressively shorter suffixes of that block (the real paragraph boundaries),
+    each ending with a promo footer. We take the longest block, use the suffix
+    offsets as paragraph breaks, and strip the trailing promo. If no suffix pattern
+    is present (clean HTML), we just de-duplicate and drop the promo line.
+    """
+    if not paras:
+        return paras
+
+    p0 = max(paras, key=len)
+    starts = {0}
+    found_suffix = False
+    for frag in paras:
+        if frag != p0 and p0.endswith(frag):
+            starts.add(len(p0) - len(frag))
+            found_suffix = True
+
+    if not found_suffix:
+        seen = set()
+        out = []
+        for t in paras:
+            if STREAMS_PROMO in t or t in seen:
+                continue
+            seen.add(t)
+            out.append(t)
+        return out
+
+    cut = p0.find(STREAMS_PROMO)
+    if cut == -1:
+        cut = len(p0)
+    bounds = sorted(s for s in starts if s < cut) + [cut]
+    out = []
+    for i in range(len(bounds) - 1):
+        seg = p0[bounds[i]:bounds[i + 1]].strip()
+        if seg:
+            out.append(seg)
+    return out
+
+
 def scrape_streams(month, day, month_day):
     """
     Scrape Streams in the Desert from crosswalk.com.
@@ -334,6 +379,13 @@ def scrape_streams(month, day, month_day):
             continue
         body_paragraphs.append(text)
 
+    if not body_paragraphs:
+        return None
+
+    # crosswalk.com serves overlapping <p> tags: the full devotional as one block,
+    # an exact duplicate of it, then progressively shorter suffixes (the original
+    # paragraphs), each with a promo footer appended. Reconstruct clean paragraphs.
+    body_paragraphs = _reconstruct_streams_paragraphs(body_paragraphs)
     if not body_paragraphs:
         return None
 
