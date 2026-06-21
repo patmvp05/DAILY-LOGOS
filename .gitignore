@@ -8,4 +8,8 @@ coverage/
 !.env.example
 .firebase/
 
+# Python (scrapers)
+__pycache__/
+*.pyc
+
 testsprite_tests/
