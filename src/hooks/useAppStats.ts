@@ -16,6 +16,7 @@ export function useAppStats(state: AppState) {
     const uniqueDays = new Set<string>();
     
     for (const h of state.history) {
+      if (h.categoryId === 'devotional') continue;
       if (h.localDate) {
         uniqueDays.add(h.localDate);
       } else if (h.timestamp) {

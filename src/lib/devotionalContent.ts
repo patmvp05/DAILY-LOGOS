@@ -4,6 +4,7 @@
  */
 
 import { get, set } from 'idb-keyval';
+import { parse, isValid } from 'date-fns';
 import { getLocalMonthDay, getAdjacentMonthDays, getRecentMonthDays, INTERNAL_DEVOTIONAL_SLUGS } from './devotionalCatalog';
 
 export interface DevotionalEntry {
@@ -63,8 +64,13 @@ export async function getDevotional(
   }
 
   let result: DevotionalContent | null = null;
+  let resolvedDay = day;
 
-  const fallbackDays = getRecentMonthDays(8);
+  // Walk back from the requested day so a missing latest day (e.g. content not yet
+  // published, or Feb 29) falls back to the most recent available. Parse against a
+  // leap year so '02-29' is a valid base date.
+  const baseDate = monthDay ? parse(monthDay, 'MM-dd', new Date(2024, 0, 1)) : new Date();
+  const fallbackDays = isValid(baseDate) ? getRecentMonthDays(8, baseDate) : [day];
   for (const tryDay of fallbackDays) {
     try {
       result = await fetchWithTimeout(async (signal) => {
@@ -77,16 +83,22 @@ export async function getDevotional(
     } catch {
       // network error, try next day
     }
-    if (result) break;
+    if (result) {
+      resolvedDay = tryDay;
+      break;
+    }
   }
 
   if (!result) {
     throw new Error(`Devotional ${slug} for ${day} could not be loaded.`);
   }
 
-  memoryCache.set(memKey, result);
+  // Cache under the day that actually resolved (not the requested day) so a fallback
+  // result isn't pinned once the requested day's own content becomes available.
+  const resolvedMemKey = `${slug}_${resolvedDay}`;
+  memoryCache.set(resolvedMemKey, result);
   try {
-    await set(cacheKey, result);
+    await set(`${CACHE_PREFIX}${resolvedMemKey}`, result);
   } catch {
     // storage full / private mode
   }
