@@ -4,15 +4,18 @@
  */
 
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, Check, Sparkles, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 
 import { useUi } from '../../state/UiContextCore';
+import { triggerHaptic } from '../../lib/haptic';
+import VerseCopyPopup from '../VerseCopyPopup';
 
 interface ProverbContent {
   verses?: { verse: number; text: string }[];
   text?: string;
+  translation_id?: string;
   translation_name?: string;
 }
 
@@ -34,6 +37,7 @@ function ProverbModal({
   const { setShowProverbModal, journalDraft, setJournalDraft } = useUi();
   const [journalVerse, setJournalVerse] = useState(journalDraft.verse);
   const [journalContent, setJournalContent] = useState(journalDraft.content);
+  const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
 
   // Scroll tracking to trigger read completion
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -112,7 +116,17 @@ function ProverbModal({
                   {proverbContent?.verses ? (
                     proverbContent.verses.map((v, i) => (
                       <p key={i} className="mb-2">
-                        <span className="text-[10px] font-black align-top mr-2 text-brand opacity-60">{v.verse}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedVerse(v.verse);
+                            triggerHaptic('light');
+                          }}
+                          className="text-[10px] font-black align-top mr-2 text-brand opacity-60 cursor-pointer hover:opacity-100 active:scale-110 transition-all inline"
+                        >
+                          {v.verse}
+                        </button>
                         {v.text}
                       </p>
                     ))
@@ -186,6 +200,20 @@ function ProverbModal({
             </div>
           </div>
         </div>
+
+        <AnimatePresence>
+          {selectedVerse !== null && proverbContent?.verses && (
+            <VerseCopyPopup
+              anchorVerse={selectedVerse}
+              currentVerses={proverbContent.verses}
+              bookName="Proverbs"
+              chapter={dayOfMonth}
+              totalChaptersInBook={31}
+              versionId={proverbContent.translation_id || 'web'}
+              onClose={() => setSelectedVerse(null)}
+            />
+          )}
+        </AnimatePresence>
       </motion.div>
     </>
   );
