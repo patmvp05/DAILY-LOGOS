@@ -75,7 +75,16 @@ const HistoryModal: React.FC = () => {
                 const groups: Record<string, typeof sortedHistory> = {};
                 
                 sortedHistory.forEach(entry => {
-                  const dateKey = format(parseISO(entry.timestamp), 'yyyy-MM-dd');
+                  // Legacy/synced entries can carry missing or malformed
+                  // timestamps (format() on an invalid date throws) — fall back
+                  // to localDate rather than crashing the whole modal.
+                  let dateKey = '';
+                  try {
+                    const d = parseISO(entry.timestamp);
+                    if (!isNaN(d.getTime())) dateKey = format(d, 'yyyy-MM-dd');
+                  } catch { /* fall through to localDate */ }
+                  if (!dateKey) dateKey = entry.localDate || '';
+                  if (!dateKey) return;
                   if (!groups[dateKey]) groups[dateKey] = [];
                   groups[dateKey].push(entry);
                 });
@@ -109,7 +118,12 @@ const HistoryModal: React.FC = () => {
                                 <div className="flex justify-between items-baseline mb-1">
                                   <p className="text-[11px] uppercase tracking-widest font-bold text-[var(--text-secondary)]">{entry.categoryName}</p>
                                   <span className="text-[11px] font-bold text-[var(--text-secondary)] tabular-nums">
-                                    {format(parseISO(entry.timestamp), 'h:mm a')}
+                                    {(() => {
+                                      try {
+                                        const d = parseISO(entry.timestamp);
+                                        return isNaN(d.getTime()) ? '' : format(d, 'h:mm a');
+                                      } catch { return ''; }
+                                    })()}
                                   </span>
                                 </div>
                                 <h4 className="text-xl font-bold tracking-tight text-[var(--text-primary)] uppercase">{entry.bookName}{entry.chapter > 0 ? ` ${entry.chapter}` : ''}</h4>

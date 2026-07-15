@@ -83,6 +83,21 @@ export async function getDevotional(
     } catch {
       // network error, try next day
     }
+    if (!result) {
+      // Network failed or the file doesn't exist — serve this day's cached
+      // copy if we have one. Results are cached under the RESOLVED day, so
+      // without this probe a fallback shown yesterday is unreachable offline
+      // (the top-of-function lookup only checks the requested day).
+      const tryKey = `${slug}_${tryDay}`;
+      result = memoryCache.get(tryKey) ?? null;
+      if (!result) {
+        try {
+          result = (await get<DevotionalContent>(`${CACHE_PREFIX}${tryKey}`)) ?? null;
+        } catch {
+          // IndexedDB unavailable — keep walking back
+        }
+      }
+    }
     if (result) {
       resolvedDay = tryDay;
       break;
