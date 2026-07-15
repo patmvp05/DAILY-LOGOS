@@ -24,6 +24,7 @@ const ReaderModal = lazy(() => import('./modals/ReaderModal'));
 
 import { useProverb } from '../hooks/useProverb';
 import { useDevotional } from '../hooks/useDevotional';
+import { useToday } from '../hooks/useToday';
 import { getDevotionalAuthor } from '../lib/devotionalCatalog';
 
 interface AppModalsProps {
@@ -46,7 +47,9 @@ export const AppModals = memo(({
    const { user, loading: isAuthLoading, logout } = useAuth();
    const { toggleBookCompletion, jumpToBook, saveProverbJournal, resetProgress, logProverbRead, logDevotionalRead, advanceChapter } = useReadingActions(state, dispatch, user);
 
-   const dayOfMonth = new Date().getDate();
+   // useToday keeps this fresh across midnight so the proverb modal opens on
+   // the right chapter without a reload.
+   const dayOfMonth = Number(useToday().slice(8, 10));
    const { proverbContent, isFetchingProverb } = useProverb(dayOfMonth, state.settings.bibleVersion);
    const { devotionalContent, isFetchingDevotional, error: devotionalError } = useDevotional(activeInternalDevotional?.slug ?? null);
 

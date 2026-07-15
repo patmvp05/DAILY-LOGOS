@@ -31,6 +31,7 @@ import { useUi } from '../state/UiContextCore';
 import { useAppStats } from '../hooks/useAppStats';
 import { useReadingActions } from '../hooks/useReadingActions';
 import { useProverb } from '../hooks/useProverb';
+import { useToday } from '../hooks/useToday';
 import { resolveDevotionalKind, getDevotionalSlug, interpolateDevotionalUrl } from '../lib/devotionalCatalog';
 
 interface DashboardProps {
@@ -53,7 +54,10 @@ function DashboardComponent({
   // silently skipped the cloud write and left other devices stale until an
   // unrelated sync event happened to push the local state up.
   const { advanceChapter } = useReadingActions(state, dispatch, user);
-  const dayOfMonth = new Date().getDate();
+  // Kept fresh across midnight/background-resume so daily stats, card order,
+  // and the proverb chapter all roll over without a reload.
+  const todayStr = useToday();
+  const dayOfMonth = Number(todayStr.slice(8, 10));
   const bibleVersion = state.settings.bibleVersion;
   const { proverbSnippet, isFetchingProverb } = useProverb(dayOfMonth, bibleVersion);
 
@@ -70,7 +74,6 @@ function DashboardComponent({
   };
 
   const todayReadingStats = useMemo(() => {
-    const todayStr = format(new Date(), 'yyyy-MM-dd');
     const todayEntries = state.history.filter(
       h => h.localDate === todayStr && h.categoryId !== 'devotional'
     );
@@ -86,7 +89,7 @@ function DashboardComponent({
       return sum + perCh;
     }, 0);
     return { minutes, chapterCount: todayEntries.length, entries: todayEntries };
-  }, [state.history, bibleVersion]);
+  }, [state.history, bibleVersion, todayStr]);
 
   const { catProgress } = useMemo(() => 
     computeProgressStats(state.progress, state.completedBooks),
@@ -114,7 +117,6 @@ function DashboardComponent({
   // today's local date, so the order naturally resets to Part 01 on top each new day.
   // We keep each card's original index so the "PART 0X" label stays tied to the part.
   const orderedCategories = useMemo(() => {
-    const todayStr = format(new Date(), 'yyyy-MM-dd');
     const doneToday = (catId: string) =>
       state.progress.find(p => p.categoryId === catId)?.localDate === todayStr;
     return CATEGORIES
@@ -125,7 +127,7 @@ function DashboardComponent({
         if (aDone !== bDone) return aDone ? 1 : -1;
         return a.idx - b.idx;
       });
-  }, [state.progress]);
+  }, [state.progress, todayStr]);
 
   useEffect(() => {
     let active = true;

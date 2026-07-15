@@ -7,8 +7,13 @@ import { useMemo } from 'react';
 import { format, differenceInCalendarDays, parseISO, subDays } from 'date-fns';
 import { AppState } from '../types';
 import { computeProgressStats } from '../lib/utils';
+import { useToday } from './useToday';
 
 export function useAppStats(state: AppState) {
+  // Fresh across midnight/background-resume so streak and day number don't
+  // freeze on yesterday while the PWA stays open.
+  const todayStr = useToday();
+
   const streak = useMemo(() => {
     if (state.history.length === 0) return 0;
     
@@ -36,8 +41,7 @@ export function useAppStats(state: AppState) {
     if (uniqueDays.size === 0) return 0;
     
     const sortedDays = Array.from(uniqueDays).sort((a, b) => b.localeCompare(a));
-    const todayStr = format(new Date(), 'yyyy-MM-dd');
-    const yesterdayStr = format(subDays(new Date(), 1), 'yyyy-MM-dd');
+    const yesterdayStr = format(subDays(parseISO(todayStr), 1), 'yyyy-MM-dd');
 
     const newestDay = sortedDays[0];
     
@@ -58,7 +62,7 @@ export function useAppStats(state: AppState) {
     }
     
     return currentStreak;
-  }, [state.history]);
+  }, [state.history, todayStr]);
 
   const dayNumber = useMemo(() => {
     if (!state.settings.startDate) return 0;
@@ -66,7 +70,7 @@ export function useAppStats(state: AppState) {
       // Normalize today and start to the same time of day (noon) to avoid timezone-edge switches
       const startRaw = parseISO(state.settings.startDate);
       const start = new Date(startRaw.getFullYear(), startRaw.getMonth(), startRaw.getDate(), 12, 0, 0);
-      const now = new Date();
+      const now = parseISO(todayStr);
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
       
       const num = differenceInCalendarDays(today, start) + 1;
@@ -80,7 +84,7 @@ export function useAppStats(state: AppState) {
       console.error("Day calculation error", e);
       return 1;
     }
-  }, [state.settings.startDate]);
+  }, [state.settings.startDate, todayStr]);
 
   const { overallProgress, totalRead, totalChaptersCount } = useMemo(() => 
     computeProgressStats(state.progress, state.completedBooks),

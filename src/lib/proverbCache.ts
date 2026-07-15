@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { addDays, subDays } from 'date-fns';
 import { getChapterText } from './chapterText';
 import { resolveBibleVersion } from '../constants';
 
@@ -53,8 +54,12 @@ export async function getProverb(chapter: number, version?: string): Promise<Pro
  * version, so opening the proverb modal is instant and works offline.
  */
 export async function prefetchProverbs(version?: string) {
-  const day = new Date().getDate();
-  const days = [day === 1 ? 31 : day - 1, day, day === 31 ? 1 : day + 1];
+  // Real calendar math, not ±1 clamped to 31: after a 30-day month, "yesterday"
+  // on the 1st is chapter 30 (not 31), and "tomorrow" on the 30th is chapter 1.
+  const now = new Date();
+  const days = Array.from(
+    new Set([subDays(now, 1).getDate(), now.getDate(), addDays(now, 1).getDate()])
+  );
 
   for (const d of days) {
     try {

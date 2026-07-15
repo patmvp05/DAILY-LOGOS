@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, Check, Sparkles, FileText } from 'lucide-react';
 import { format } from 'date-fns';
@@ -39,12 +39,18 @@ function ProverbModal({
   const [journalContent, setJournalContent] = useState(journalDraft.content);
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
 
-  // Scroll tracking to trigger read completion
+  // Scroll tracking to trigger read completion. The ref latch matters:
+  // momentum scrolling fires many events before the "already logged today"
+  // check in logProverbRead sees the updated history, so without it a single
+  // scroll to the bottom could log duplicate entries (and Firestore writes).
+  const hasLoggedRef = useRef(false);
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (hasLoggedRef.current || isFetchingProverb || !proverbContent) return;
     const target = e.currentTarget;
     const { scrollTop, scrollHeight, clientHeight } = target;
     // If within 50px of bottom, count as read
     if (scrollTop + clientHeight >= scrollHeight - 50) {
+      hasLoggedRef.current = true;
       logProverbRead(dayOfMonth);
     }
   };

@@ -6,8 +6,26 @@
 import React, { useRef } from 'react';
 import { motion } from 'motion/react';
 import { BookOpen, Check, Sparkles } from 'lucide-react';
-import { format, parse } from 'date-fns';
+import { format, parse, isValid } from 'date-fns';
 import type { DevotionalContent } from '../../lib/devotionalContent';
+
+/**
+ * Format a devotional's own 'MM-dd' date for the header, resolving it to its
+ * most recent real occurrence. Parsing against the current year alone breaks
+ * two ways: '02-29' in a non-leap year is an Invalid Date (and format() on it
+ * THROWS, white-screening the modal), and a '12-31' fallback shown on Jan 1
+ * would get the wrong year's weekday. Try this year, then last year; if the
+ * day exists in neither (02-29 twice running), show it without a weekday.
+ */
+function formatDevotionalDate(monthDay: string): string {
+  const now = new Date();
+  for (const year of [now.getFullYear(), now.getFullYear() - 1]) {
+    const d = parse(monthDay, 'MM-dd', new Date(year, 0, 1));
+    if (isValid(d) && d.getTime() <= now.getTime()) return format(d, 'EEEE, MMMM do');
+  }
+  const leapRef = parse(monthDay, 'MM-dd', new Date(2024, 0, 1));
+  return isValid(leapRef) ? format(leapRef, 'MMMM do') : format(now, 'EEEE, MMMM do');
+}
 
 interface DevotionalReaderModalProps {
   name: string;
@@ -30,8 +48,12 @@ function DevotionalReaderModal({
 }: DevotionalReaderModalProps) {
   const hasLoggedRef = useRef(false);
 
+  // Only a devotional that actually rendered counts as read — never log while
+  // still fetching or after a load error (closing the error screen isn't reading).
+  const canLogRead = !isFetching && !error && !!content;
+
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    if (hasLoggedRef.current) return;
+    if (hasLoggedRef.current || !canLogRead) return;
     const target = e.currentTarget;
     const { scrollTop, scrollHeight, clientHeight } = target;
     if (scrollTop + clientHeight >= scrollHeight - 50) {
@@ -41,7 +63,7 @@ function DevotionalReaderModal({
   };
 
   const handleClose = () => {
-    if (!hasLoggedRef.current) {
+    if (!hasLoggedRef.current && canLogRead) {
       hasLoggedRef.current = true;
       onRead();
     }
@@ -75,7 +97,7 @@ function DevotionalReaderModal({
               <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tighter text-[var(--text-primary)]">{name}</h3>
               <p className="text-[11px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">
                 {content?.date
-                  ? format(parse(content.date, 'MM-dd', new Date()), 'EEEE, MMMM do')
+                  ? formatDevotionalDate(content.date)
                   : format(new Date(), 'EEEE, MMMM do')}
               </p>
             </div>
