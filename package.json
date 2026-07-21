@@ -10,7 +10,7 @@
     "clean": "rm -rf dist",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "test": "tsx scripts/test-conflict.mts && tsx scripts/sim-sync.mts && tsx scripts/test-chapter-text.mts && tsx scripts/test-chapter-fetch.mts && tsx scripts/test-prefetch-bible.mts && tsx scripts/test-verse-copy.mts && tsx scripts/test-devotional-content.mts",
+    "test": "tsx scripts/test-conflict.mts && tsx scripts/sim-sync.mts && tsx scripts/test-chapter-text.mts && tsx scripts/test-chapter-fetch.mts && tsx scripts/test-prefetch-bible.mts && tsx scripts/test-verse-copy.mts && tsx scripts/test-devotional-content.mts && tsx scripts/test-progress-stats.mts",
     "test:sim": "tsx scripts/sim-sync.mts",
     "fuzz:ui": "vite build && node scripts/fuzz-ui.mjs",
     "emulators": "firebase emulators:start --only auth,firestore",

@@ -34,6 +34,7 @@ import { getDiagnosticReport } from '../../lib/diagnostics';
 import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 import { useAuth } from '../../hooks/useAuth';
+import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
 import { AppState } from '../../types';
 
 interface SettingsModalProps {
@@ -66,6 +67,7 @@ interface SettingsModalProps {
   const [newDevotional, setNewDevotional] = React.useState({ name: '', description: '', url: '' });
 
   const onClose = () => setShowSettings(false);
+  const dismissOverlay = useOverlayDismiss(onClose);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   const handleForceRefresh = async () => {
@@ -90,7 +92,7 @@ interface SettingsModalProps {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={dismissOverlay}
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
       />
       <motion.div 

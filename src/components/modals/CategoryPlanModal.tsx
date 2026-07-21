@@ -13,6 +13,7 @@ import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 import { useStandaloneDetection } from '../../hooks/useStandaloneDetection';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
 
 interface CategoryPlanModalProps {
   toggleBookCompletion: (catId: string, bookName: string) => void;
@@ -27,6 +28,7 @@ const CategoryPlanModal: React.FC<CategoryPlanModalProps> = ({
   const prefersReducedMotion = usePrefersReducedMotion();
 
   const onClose = () => setActivePlanCategory(null);
+  const dismissOverlay = useOverlayDismiss(onClose);
   const springConfig = { stiffness: 380, damping: 30, mass: 0.8 };
 
   return (
@@ -35,7 +37,7 @@ const CategoryPlanModal: React.FC<CategoryPlanModalProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={dismissOverlay}
         className="fixed inset-0 bg-black/40 backdrop-blur-md sm:backdrop-blur-xl z-[200]"
       />
       <motion.div 

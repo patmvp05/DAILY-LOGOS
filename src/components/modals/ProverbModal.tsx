@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 
 import { useUi } from '../../state/UiContextCore';
 import { triggerHaptic } from '../../lib/haptic';
+import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
 import VerseCopyPopup from '../VerseCopyPopup';
 
 interface ProverbContent {
@@ -59,6 +60,9 @@ function ProverbModal({
     setShowProverbModal(false);
     setJournalDraft({ id: null, content: '', verse: '' });
   };
+  // Ignore the delayed "ghost click" from the tap that opened this modal so it
+  // doesn't close itself immediately (see useOverlayDismiss).
+  const dismissOverlay = useOverlayDismiss(onClose);
 
   return (
     <>
@@ -67,7 +71,7 @@ function ProverbModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={dismissOverlay}
         className="fixed inset-0 bg-black/80 backdrop-blur-md z-[500]"
       />
       <motion.div 

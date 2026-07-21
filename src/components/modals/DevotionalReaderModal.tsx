@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { BookOpen, Check, Sparkles } from 'lucide-react';
 import { format, parse, isValid } from 'date-fns';
 import type { DevotionalContent } from '../../lib/devotionalContent';
+import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
 
 /**
  * Format a devotional's own 'MM-dd' date for the header, resolving it to its
@@ -69,6 +70,8 @@ function DevotionalReaderModal({
     }
     onClose();
   };
+  // Ignore the ghost click from the tap that opened this modal (see hook).
+  const dismissOverlay = useOverlayDismiss(handleClose);
 
   return (
     <>
@@ -77,7 +80,7 @@ function DevotionalReaderModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={handleClose}
+        onClick={dismissOverlay}
         className="fixed inset-0 bg-black/80 backdrop-blur-md z-[500]"
       />
       <motion.div
