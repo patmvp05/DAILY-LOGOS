@@ -7,11 +7,13 @@ import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ExternalLink, Check } from 'lucide-react';
 import { useUi } from '../../state/UiContextCore';
+import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
 
 const DevotionalModal: React.FC = () => {
   const { activeDevotion, setActiveDevotion } = useUi();
 
   const onClose = () => setActiveDevotion(null);
+  const dismissOverlay = useOverlayDismiss(onClose);
 
   useEffect(() => {
     if (activeDevotion?.url) {
@@ -27,7 +29,7 @@ const DevotionalModal: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={dismissOverlay}
         className="fixed inset-0 bg-black/80 backdrop-blur-md z-[500]"
       />
       <motion.div

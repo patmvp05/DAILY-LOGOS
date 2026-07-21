@@ -13,6 +13,7 @@ import { CATEGORIES_BY_ID, DEFAULT_BIBLE_VERSION } from '../../constants';
 import { calculateNextProgress } from '../../lib/bible';
 import { getChapterText, type ChapterTextResponse } from '../../lib/chapterText';
 import { triggerHaptic } from '../../lib/haptic';
+import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
 import VerseCopyPopup from '../VerseCopyPopup';
 
 interface ReaderModalProps {
@@ -59,6 +60,7 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
   };
 
   const onClose = () => setReaderCategoryId(null);
+  const dismissOverlay = useOverlayDismiss(onClose);
 
   // Is there a chapter beyond the current one (within this category's plan)?
   // calculateNextProgress returns the same position at the terminal chapter.
@@ -98,6 +100,12 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
   const status: 'loading' | 'ready' | 'error' = !settled ? 'loading' : result.error ? 'error' : 'ready';
   const content = settled ? result.data : null;
 
+  // Last verse number of the loaded chapter, so the header can show the verse
+  // range (e.g. "16:1–31") — a quick sense of how long the chapter is.
+  const lastVerse = content && content.verses.length > 0
+    ? content.verses[content.verses.length - 1].verse
+    : null;
+
   const onPrimary = () => {
     if (hasNext) {
       // Advancing updates global progress (debounced), which re-renders this
@@ -115,7 +123,7 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={dismissOverlay}
         className="fixed inset-0 bg-black/80 backdrop-blur-md z-[500]"
       />
       <motion.div
@@ -141,6 +149,11 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
             <div className="min-w-0">
               <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tighter text-[var(--text-primary)] truncate">
                 {book.name} {chapter}
+                {lastVerse !== null && (
+                  <span className="ml-1.5 align-middle text-[11px] sm:text-xs font-semibold tracking-normal text-[var(--text-secondary)] tabular-nums">
+                    :1–{lastVerse}
+                  </span>
+                )}
               </h3>
               <p className="text-[11px] text-[var(--text-secondary)] font-bold uppercase tracking-widest truncate">
                 {category.name}
@@ -192,6 +205,9 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
                 </p>
                 <h2 className="font-serif text-[28px] sm:text-[32px] font-semibold tracking-tight text-[var(--text-primary)] mb-8">
                   {book.name} {chapter}
+                  {lastVerse !== null && (
+                    <span className="text-[var(--text-secondary)] font-normal">:1–{lastVerse}</span>
+                  )}
                 </h2>
                 <div className="reader-prose font-serif text-[19px] sm:text-[20px] leading-[1.9] text-[var(--text-primary)]">
                   {content?.verses.map((v) => (

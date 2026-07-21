@@ -12,6 +12,7 @@ import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 import { useStandaloneDetection } from '../../hooks/useStandaloneDetection';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
 
 interface BookSelectorModalProps {
   jumpToBook: (catId: string, bookIndex: number) => void;
@@ -28,6 +29,7 @@ const BookSelectorModal: React.FC<BookSelectorModalProps> = ({
   const prefersReducedMotion = usePrefersReducedMotion();
 
   const onClose = () => setSelectingCategoryId(null);
+  const dismissOverlay = useOverlayDismiss(onClose);
   const springConfig = { stiffness: 380, damping: 30, mass: 0.8 };
 
   if (!selectingCategoryId) return null;
@@ -40,7 +42,7 @@ const BookSelectorModal: React.FC<BookSelectorModalProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={dismissOverlay}
         className="fixed inset-0 bg-black/40 backdrop-blur-md sm:backdrop-blur-xl z-[200]"
       />
       <motion.div 

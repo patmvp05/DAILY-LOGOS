@@ -36,10 +36,14 @@ export function computeProgressStats(progress: Progress[], completedBooks: Set<s
     let chaptersRead = 0;
     for (let i = 0; i < cat.books.length; i++) {
       const book = cat.books[i];
-      const isCompletedManually = completedBooks.has(`${cat.id}:${book.name}`);
-      const isPastBook = i < prog.bookIndex;
+      const isCompleted = completedBooks.has(`${cat.id}:${book.name}`);
 
-      if (isCompletedManually || isPastBook) {
+      // Count a book as read only if it's actually marked complete (sequential
+      // reading records every finished book in completedBooks), plus the
+      // partial chapters of the book currently in progress. We deliberately do
+      // NOT count every book before the progress pointer: skipping ahead to a
+      // later book must not silently mark the skipped-over books as read.
+      if (isCompleted) {
         chaptersRead += book.chapters;
       } else if (i === prog.bookIndex) {
         chaptersRead += Math.max(0, prog.chapter - 1);

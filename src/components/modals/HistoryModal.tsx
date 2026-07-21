@@ -13,6 +13,7 @@ import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 import { useStandaloneDetection } from '../../hooks/useStandaloneDetection';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
 
 const HistoryModal: React.FC = () => {
   const { state, dispatch } = useApp();
@@ -21,6 +22,7 @@ const HistoryModal: React.FC = () => {
   const prefersReducedMotion = usePrefersReducedMotion();
 
   const onClose = () => setShowHistory(false);
+  const dismissOverlay = useOverlayDismiss(onClose);
 
   const springConfig = { stiffness: 380, damping: 30, mass: 0.8 };
 
@@ -39,7 +41,7 @@ const HistoryModal: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={dismissOverlay}
         className="fixed inset-0 bg-black/40 backdrop-blur-md sm:backdrop-blur-xl z-[200]"
       />
       <motion.div 
