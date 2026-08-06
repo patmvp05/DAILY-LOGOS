@@ -59,12 +59,30 @@ export interface Devotional {
   url: string;
 }
 
+/** One hour slot of a 24-hour sprint. */
+export interface SprintHour {
+  done: boolean;
+  reference?: string; // what was read that hour, e.g. "John 3"
+}
+
+/**
+ * A "24-Hour Scripture Sprint": one chapter every hour for a full day.
+ * An occasional discipline (a few times a year), not part of the daily plan —
+ * so it is tracked separately and never touches plan progress or reading stats.
+ * Keyed by calendar date; `hours` is keyed by hour-of-day '0'..'23'.
+ */
+export interface ScriptureSprint {
+  date: string; // yyyy-MM-dd
+  hours: Record<string, SprintHour>;
+}
+
 export interface AppState {
   progress: Progress[];
   settings: UserSettings;
   history: HistoryEntry[];
   proverbJournals: ProverbJournal[];
   customDevotionals: Devotional[];
+  scriptureSprints: ScriptureSprint[]; // newest first; local-only, capped
   completedBooks: Set<string>; // "categoryId:bookName"
   isCloudHydrated?: boolean; // UI flag for cloud sync completion
 }

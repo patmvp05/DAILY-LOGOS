@@ -144,6 +144,7 @@ function baseState(progress: Progress[]): AppState {
     history: [],
     proverbJournals: [],
     customDevotionals: [],
+    scriptureSprints: [],
     completedBooks: new Set<string>(),
   };
 }

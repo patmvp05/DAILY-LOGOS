@@ -36,7 +36,8 @@ export default function App() {
     activePlanCategory, setActivePlanCategory, 
     selectingCategoryId, setSelectingCategoryId, 
     activeDevotion, setActiveDevotion,
-    showProverbModal, setShowProverbModal, isStartMenuOpen, setIsStartMenuOpen, confirmDialog, setConfirmDialog,
+    showProverbModal, setShowProverbModal, showSprintModal, setShowSprintModal,
+    isStartMenuOpen, setIsStartMenuOpen, confirmDialog, setConfirmDialog,
     closeConfirmDialog, toast, setToast, showToast, setJournalDraft,
     setSyncStatus, setLastSyncTime, setShowSyncCheck,
     syncStatus, lastSyncTime, showSyncCheck
@@ -131,11 +132,11 @@ export default function App() {
     onNewJournal: () => { setJournalDraft({ id: null, content: '', verse: '' }); setShowProverbModal(true); },
     onClose: () => {
       setShowSettings(false); setShowHistory(false); setActivePlanCategory(null); setSelectingCategoryId(null);
-      setActiveDevotion(null); setShowProverbModal(false); setIsStartMenuOpen(false);
+      setActiveDevotion(null); setShowProverbModal(false); setShowSprintModal(false); setIsStartMenuOpen(false);
     }
   });
 
-  useScrollLock(showSettings || showHistory || !!activePlanCategory || !!selectingCategoryId || !!activeDevotion || showProverbModal || isStartMenuOpen);
+  useScrollLock(showSettings || showHistory || !!activePlanCategory || !!selectingCategoryId || !!activeDevotion || showProverbModal || showSprintModal || isStartMenuOpen);
   
   const toggleTheme = useCallback(() => {
     // Only the three themes that produce a distinct, defined appearance are in

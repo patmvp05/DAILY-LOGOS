@@ -17,7 +17,8 @@ import {
   RefreshCw,
   Minus,
   Plus,
-  BookOpen
+  BookOpen,
+  Flame
 } from 'lucide-react';
 import { format, parseISO, subDays } from 'date-fns';
 import { CATEGORIES, CATEGORIES_BY_ID, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
@@ -62,7 +63,7 @@ function DashboardComponent({
   const { proverbSnippet, isFetchingProverb } = useProverb(dayOfMonth, bibleVersion);
 
   const {
-    setActivePlanCategory, setShowProverbModal, setActiveDevotion, setActiveInternalDevotional,
+    setActivePlanCategory, setShowProverbModal, setShowSprintModal, setActiveDevotion, setActiveInternalDevotional,
     setSelectingCategoryId, setReaderCategoryId, setJournalDraft, syncStatus
   } = useUi();
 
@@ -91,7 +92,15 @@ function DashboardComponent({
     return { minutes, chapterCount: todayEntries.length, entries: todayEntries };
   }, [state.history, bibleVersion, todayStr]);
 
-  const { catProgress } = useMemo(() => 
+  // Hours checked off in today's 24-hour sprint (its own discipline — never
+  // folded into plan progress or reading stats).
+  const sprintCompleted = useMemo(() => {
+    const sprint = (state.scriptureSprints ?? []).find(s => s.date === todayStr);
+    if (!sprint) return 0;
+    return Object.values(sprint.hours).filter(h => h.done).length;
+  }, [state.scriptureSprints, todayStr]);
+
+  const { catProgress } = useMemo(() =>
     computeProgressStats(state.progress, state.completedBooks),
   [state.progress, state.completedBooks]);
 
@@ -317,6 +326,48 @@ function DashboardComponent({
               )}
             </div>
           </div>
+          {/* 24-Hour Scripture Sprint — an occasional discipline, so it sits
+              quietly at the bottom rather than competing with the daily plan. */}
+          <button
+            onClick={() => setShowSprintModal(true)}
+            className="w-full mb-6 relative overflow-hidden group text-left block cb-card-interactive"
+          >
+            <div className="relative">
+              <Flame
+                className="absolute top-0 right-0 group-hover:scale-110 transition-transform text-brand/20 dark:text-brand/40"
+                size={48}
+              />
+              <p className="text-[11px] uppercase tracking-widest font-bold mb-4 text-[var(--text-secondary)]">
+                24-Hour Sprint
+              </p>
+              <div className="flex items-baseline gap-2 mb-3">
+                <h2 className={cn(
+                  'text-3xl font-bold tracking-tighter',
+                  sprintCompleted === 0 ? 'text-[var(--text-primary)]' : 'text-brand'
+                )}>
+                  {sprintCompleted > 0 ? `${sprintCompleted} / 24` : '24 Chapters'}
+                </h2>
+              </div>
+              {sprintCompleted > 0 ? (
+                <>
+                  <div className="h-1.5 w-full rounded-full bg-[var(--border-color)] overflow-hidden mb-3">
+                    <div
+                      className="h-full rounded-full bg-brand transition-all duration-500"
+                      style={{ width: `${Math.round((sprintCompleted / 24) * 100)}%` }}
+                    />
+                  </div>
+                  <p className="text-xs font-semibold text-brand">
+                    {sprintCompleted === 24 ? 'Complete — well done →' : 'Keep going →'}
+                  </p>
+                </>
+              ) : (
+                <p className="text-[15px] text-[var(--text-secondary)] leading-relaxed">
+                  One chapter every hour, for a full day. Tap to begin whenever you
+                  want to stir up a hunger for the Word.
+                </p>
+              )}
+            </div>
+          </button>
         </section>
 
         <footer className="text-[10px] text-zinc-400 uppercase tracking-[0.2em] font-black pt-8 hidden lg:block opacity-60">

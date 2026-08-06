@@ -20,6 +20,7 @@ const BookSelectorModal = lazy(() => import('./modals/BookSelectorModal'));
 const DevotionalModal = lazy(() => import('./modals/DevotionalModal'));
 const DevotionalReaderModal = lazy(() => import('./modals/DevotionalReaderModal'));
 const ReaderModal = lazy(() => import('./modals/ReaderModal'));
+const ScriptureSprintModal = lazy(() => import('./modals/ScriptureSprintModal'));
 
 
 import { useProverb } from '../hooks/useProverb';
@@ -40,7 +41,7 @@ export const AppModals = memo(({
    const {
      showSettings, showHistory, activePlanCategory, selectingCategoryId,
      readerCategoryId, activeDevotion, activeInternalDevotional, setActiveInternalDevotional,
-     showProverbModal,
+     showProverbModal, showSprintModal,
      syncStatus, lastSyncTime, showSyncCheck
    } = useUi();
 
@@ -49,7 +50,8 @@ export const AppModals = memo(({
 
    // useToday keeps this fresh across midnight so the proverb modal opens on
    // the right chapter without a reload.
-   const dayOfMonth = Number(useToday().slice(8, 10));
+   const todayStr = useToday();
+   const dayOfMonth = Number(todayStr.slice(8, 10));
    const { proverbContent, isFetchingProverb } = useProverb(dayOfMonth, state.settings.bibleVersion);
    const { devotionalContent, isFetchingDevotional, error: devotionalError } = useDevotional(activeInternalDevotional?.slug ?? null);
 
@@ -79,6 +81,8 @@ export const AppModals = memo(({
           logProverbRead={logProverbRead}
         />
       )}
+
+      {showSprintModal && <ScriptureSprintModal todayStr={todayStr} />}
 
       {activePlanCategory && <CategoryPlanModal toggleBookCompletion={toggleBookCompletion} />}
       {selectingCategoryId && <BookSelectorModal jumpToBook={jumpToBook} toggleBookCompletion={toggleBookCompletion} />}
