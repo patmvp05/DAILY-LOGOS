@@ -13,3 +13,8 @@ __pycache__/
 *.pyc
 
 testsprite_tests/
+
+# Firebase emulator debug output
+firestore-debug.log
+firebase-debug.log
+ui-debug.log

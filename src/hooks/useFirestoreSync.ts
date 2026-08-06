@@ -21,14 +21,15 @@ import {
   getHistoryCollection,
   getJournalsCollection,
   getDevotionalsCollection,
-  getCompletedBooksCollection
+  getCompletedBooksCollection,
+  getSprintsCollection
 } from '../lib/firebase';
 import { AppAction, resolveProgressConflict } from '../state/appReducer';
-import { Progress, HistoryEntry, ProverbJournal, Devotional, AppState, UserSettings } from '../types';
+import { Progress, HistoryEntry, ProverbJournal, Devotional, AppState, UserSettings, ScriptureSprint, SprintHour } from '../types';
 import { logDiagnostic } from '../lib/diagnostics';
-import { writeActionBatch } from '../lib/sync';
+import { writeActionBatch, writeSprintHour } from '../lib/sync';
 
-const COLLECTION_COUNT = 6;
+const COLLECTION_COUNT = 7;
 
 /**
  * Attaches realtime listeners for the signed-in user's data.
@@ -70,23 +71,37 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
       }, RETRY_DELAY_MS);
     };
 
+    const markFired = (name: string) => {
+      firstFire.add(name);
+      if (firstFire.size >= COLLECTION_COUNT) {
+        setSyncStatus('synced');
+        logDiagnostic('sync', 'info', 'Cloud sync established');
+      }
+    };
+
     const listen = <S extends DocumentSnapshot | QuerySnapshot>(
       name: string,
       ref: DocumentReference | CollectionReference | Query,
-      onSnap: (snap: S) => void
+      onSnap: (snap: S) => void,
+      // `optional` collections carry secondary features. If one fails (e.g. its
+      // security rules haven't rolled out yet) we log it and move on rather
+      // than flipping the whole app to "Sync Error" and re-subscribing every
+      // listener on a loop — the core reading data is unaffected.
+      opts: { optional?: boolean } = {}
     ) => {
       unsubs.push(onSnapshot(ref as Query, (snap) => {
         if (!isActive) return;
         onSnap(snap as S);
-        firstFire.add(name);
-        if (firstFire.size >= COLLECTION_COUNT) {
-          setSyncStatus('synced');
-          logDiagnostic('sync', 'info', 'Cloud sync established');
-        }
+        markFired(name);
       }, (err: Error) => {
         if (!isActive) return;
         console.error(`${name} sync error:`, err);
         logDiagnostic('sync', 'error', `${name} listener error`, err);
+        if (opts.optional) {
+          // Still counts as settled so the badge can reach "synced".
+          markFired(name);
+          return;
+        }
         setSyncStatus('error');
         scheduleRetry();
       }));
@@ -204,6 +219,35 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
         });
       }
     });
+
+    // 7. 24-hour sprints (one doc per calendar date)
+    listen<QuerySnapshot>('Sprints', getSprintsCollection(user.uid), (snap) => {
+      const sprints: ScriptureSprint[] = snap.docs.map((d) => {
+        const data = d.data() as { date?: string; hours?: Record<string, { done?: boolean; reference?: string }> };
+        const hours: Record<string, SprintHour> = {};
+        for (const [k, v] of Object.entries(data.hours ?? {})) {
+          hours[k] = { done: !!v?.done, reference: v?.reference || undefined };
+        }
+        return { date: data.date || d.id, hours };
+      });
+      dispatch({ type: 'CLOUD_SYNC_SPRINTS', sprints });
+
+      // Same recovery as Progress/History: re-push any locally-ticked hour the
+      // cloud is missing, so a write that silently failed isn't lost. Writes are
+      // per-hour and field-merged, so this can never clobber another device.
+      const cloudByDate = new Map(sprints.map(s => [s.date, s]));
+      stateRef.current.scriptureSprints?.forEach((localSprint) => {
+        const cloudSprint = cloudByDate.get(localSprint.date);
+        for (const [hourKey, slot] of Object.entries(localSprint.hours)) {
+          if (cloudSprint && hourKey in cloudSprint.hours) continue;
+          // An untouched, empty slot is not worth a write.
+          if (!slot.done && !slot.reference) continue;
+          writeSprintHour(user.uid, localSprint.date, Number(hourKey), slot).catch((err) => {
+            logDiagnostic('sync', 'error', 'Sprint reconciliation write failed', err);
+          });
+        }
+      });
+    }, { optional: true });
 
     return () => {
       isActive = false;

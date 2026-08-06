@@ -11,7 +11,6 @@ import { format, parseISO } from 'date-fns';
 import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
-import { triggerHaptic } from '../../lib/haptic';
 import { cn } from '../../lib/utils';
 
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
@@ -26,10 +25,19 @@ function hourLabel(h: number): string {
 interface ScriptureSprintModalProps {
   /** Today's local date, 'yyyy-MM-dd'. Kept fresh by useToday upstream. */
   todayStr: string;
+  /** Cloud-syncing actions from useReadingActions (wired with the signed-in user). */
+  toggleSprintHour: (date: string, hour: number) => void;
+  setSprintReference: (date: string, hour: number, reference: string) => void;
+  clearSprint: (date: string) => void;
 }
 
-function ScriptureSprintModal({ todayStr }: ScriptureSprintModalProps) {
-  const { state, dispatch } = useApp();
+function ScriptureSprintModal({
+  todayStr,
+  toggleSprintHour,
+  setSprintReference,
+  clearSprint,
+}: ScriptureSprintModalProps) {
+  const { state } = useApp();
   const { setShowSprintModal, setConfirmDialog, showToast } = useUi();
 
   const onClose = () => setShowSprintModal(false);
@@ -61,22 +69,17 @@ function ScriptureSprintModal({ todayStr }: ScriptureSprintModalProps) {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  const toggle = (hour: number) => {
-    triggerHaptic(sprint?.hours[String(hour)]?.done ? 'light' : 'medium');
-    dispatch({ type: 'TOGGLE_SPRINT_HOUR', date: todayStr, hour });
-  };
-
-  const setReference = (hour: number, reference: string) => {
-    dispatch({ type: 'SET_SPRINT_REFERENCE', date: todayStr, hour, reference });
-  };
+  const toggle = (hour: number) => toggleSprintHour(todayStr, hour);
+  const setReference = (hour: number, reference: string) =>
+    setSprintReference(todayStr, hour, reference);
 
   const onClear = () => {
     setConfirmDialog({
       isOpen: true,
       title: 'Clear this sprint',
-      message: `This clears all ${completed} checked hour${completed === 1 ? '' : 's'} for today. Your reading plan and stats are untouched.`,
+      message: `This clears all ${completed} checked hour${completed === 1 ? '' : 's'} for today, on every device. Your reading plan and stats are untouched.`,
       onConfirm: () => {
-        dispatch({ type: 'CLEAR_SPRINT', date: todayStr });
+        clearSprint(todayStr);
         showToast('Sprint cleared', 'success');
       },
     });

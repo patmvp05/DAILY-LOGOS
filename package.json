@@ -11,6 +11,8 @@
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "test": "tsx scripts/test-conflict.mts && tsx scripts/sim-sync.mts && tsx scripts/test-chapter-text.mts && tsx scripts/test-chapter-fetch.mts && tsx scripts/test-prefetch-bible.mts && tsx scripts/test-verse-copy.mts && tsx scripts/test-devotional-content.mts && tsx scripts/test-progress-stats.mts && tsx scripts/test-resume-reading.mts && tsx scripts/test-sprint.mts",
+    "test:rules": "firebase emulators:exec --only firestore --project daily-logos-rules-test \"tsx scripts/test-rules-sprints.mts\"",
+    "test:rules-merge": "firebase emulators:exec --only firestore --project daily-logos-merge-test \"tsx scripts/test-sprint-merge.mts\"",
     "test:sim": "tsx scripts/sim-sync.mts",
     "fuzz:ui": "vite build && node scripts/fuzz-ui.mjs",
     "emulators": "firebase emulators:start --only auth,firestore",
@@ -35,6 +37,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@firebase/eslint-plugin-security-rules": "^0.0.2",
+    "@firebase/rules-unit-testing": "^5.0.1",
     "@tailwindcss/vite": "^4.1.14",
     "@types/node": "^22.14.0",
     "@types/react": "^19.2.14",

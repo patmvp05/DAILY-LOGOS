@@ -30,6 +30,7 @@ export type AppAction =
   | { type: 'TOGGLE_SPRINT_HOUR', date: string, hour: number }
   | { type: 'SET_SPRINT_REFERENCE', date: string, hour: number, reference: string }
   | { type: 'CLEAR_SPRINT', date: string }
+  | { type: 'CLOUD_SYNC_SPRINTS', sprints: ScriptureSprint[] }
   | { type: 'SET_START_DATE', date: string };
 
 export const HISTORY_CAP = 2000; // Increased from 50 to ensure year-long streak accuracy
@@ -413,6 +414,32 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const sprints = state.scriptureSprints ?? [];
       if (!sprints.some(s => s.date === action.date)) return state;
       return { ...state, scriptureSprints: sprints.filter(s => s.date !== action.date) };
+    }
+    case 'CLOUD_SYNC_SPRINTS': {
+      // The cloud doc is already the union of every device's hours (writes are
+      // field-merged per hour), so it is the base. Local hours the cloud has
+      // not seen yet are kept on top — they are un-uploaded ticks, and the
+      // listener pushes them up. A key present in BOTH sides takes the cloud's
+      // value, so un-ticking an hour on another device propagates here.
+      const local = state.scriptureSprints ?? [];
+      const localByDate = new Map(local.map(s => [s.date, s]));
+      const merged: ScriptureSprint[] = action.sprints.map(cloud => {
+        const mine = localByDate.get(cloud.date);
+        localByDate.delete(cloud.date);
+        if (!mine) return cloud;
+        const hours: Record<string, SprintHour> = { ...cloud.hours };
+        for (const [k, v] of Object.entries(mine.hours)) {
+          if (!(k in hours)) hours[k] = v;
+        }
+        return { date: cloud.date, hours };
+      });
+      // Dates that exist only locally (never uploaded) survive.
+      for (const leftover of localByDate.values()) merged.push(leftover);
+      merged.sort((a, b) => b.date.localeCompare(a.date));
+      const capped = merged.slice(0, SPRINT_CAP);
+
+      if (JSON.stringify(capped) === JSON.stringify(local)) return state;
+      return { ...state, scriptureSprints: capped };
     }
     case 'UPSERT_JOURNAL': {
       const existingJournal = state.proverbJournals.find(j => j.id === action.journal.id);

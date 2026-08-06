@@ -148,3 +148,5 @@ export const getHistoryCollection = (userId: string) => collection(db, 'users', 
 export const getJournalsCollection = (userId: string) => collection(db, 'users', userId, 'journals');
 export const getDevotionalsCollection = (userId: string) => collection(db, 'users', userId, 'devotionals');
 export const getCompletedBooksCollection = (userId: string) => collection(db, 'users', userId, 'completedBooks');
+// 24-hour sprints, one doc per calendar date (doc id = 'yyyy-MM-dd').
+export const getSprintsCollection = (userId: string) => collection(db, 'users', userId, 'sprints');

@@ -79,6 +79,17 @@ service cloud.firestore {
              data.completedAt is string;
     }
 
+    // A 24-hour sprint: one doc per calendar date, `hours` is a map keyed
+    // '0'..'23'. Rules can't inspect nested map values, so we bound the shape
+    // (at most 24 entries) and let the client own per-slot structure.
+    function isValidSprint(data) {
+      return data.keys().hasAll(['date', 'hours']) &&
+             data.date is string &&
+             data.date.size() <= 10 &&
+             data.hours is map &&
+             data.hours.size() <= 24;
+    }
+
     function isValidClientLog(data) {
       return data.keys().hasAll(['ts', 'clientTs', 'level', 'category', 'message', 'appVersion', 'device']) &&
              data.level in ['info', 'warn', 'error'] &&
@@ -139,6 +150,12 @@ service cloud.firestore {
       match /completedBooks/{bookKey} {
         allow list, get: if isOwner(userId);
         allow create, update: if isOwner(userId) && isValidCompletedBook(incoming()) && isValidId(bookKey);
+        allow delete: if isOwner(userId);
+      }
+
+      match /sprints/{sprintDate} {
+        allow list, get: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidSprint(incoming()) && isValidId(sprintDate);
         allow delete: if isOwner(userId);
       }
     }

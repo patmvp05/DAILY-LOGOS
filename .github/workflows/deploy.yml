@@ -16,6 +16,23 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+
+      # Firestore security rules must ship BEFORE the hosting bundle that
+      # depends on them. The hosting action deploys hosting only, so without
+      # this a client using a new collection goes live against rules that still
+      # deny it — the request fails, the listener errors, and the app shows a
+      # sync error. Deploying rules first means a rules failure aborts the run
+      # and the previous (working) build stays live.
+      - name: Deploy Firestore rules
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-sa.json"
+          npx --yes firebase-tools@13 deploy --only firestore:rules \
+            --project gen-lang-client-0538747272 --non-interactive
+          rm -f "$RUNNER_TEMP/firebase-sa.json"
+
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
