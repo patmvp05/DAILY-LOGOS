@@ -46,7 +46,7 @@ export const AppModals = memo(({
    } = useUi();
 
    const { user, loading: isAuthLoading, logout } = useAuth();
-   const { toggleBookCompletion, jumpToBook, saveProverbJournal, resetProgress, logProverbRead, logDevotionalRead, advanceChapter } = useReadingActions(state, dispatch, user);
+   const { toggleBookCompletion, jumpToBook, saveProverbJournal, resetProgress, logProverbRead, logDevotionalRead, advanceChapter, toggleSprintHour, setSprintReference, clearSprint } = useReadingActions(state, dispatch, user);
 
    // useToday keeps this fresh across midnight so the proverb modal opens on
    // the right chapter without a reload.
@@ -82,7 +82,14 @@ export const AppModals = memo(({
         />
       )}
 
-      {showSprintModal && <ScriptureSprintModal todayStr={todayStr} />}
+      {showSprintModal && (
+        <ScriptureSprintModal
+          todayStr={todayStr}
+          toggleSprintHour={toggleSprintHour}
+          setSprintReference={setSprintReference}
+          clearSprint={clearSprint}
+        />
+      )}
 
       {activePlanCategory && <CategoryPlanModal toggleBookCompletion={toggleBookCompletion} />}
       {selectingCategoryId && <BookSelectorModal jumpToBook={jumpToBook} toggleBookCompletion={toggleBookCompletion} />}

@@ -19,11 +19,12 @@ import {
   getJournalsCollection,
   getDevotionalsCollection,
   getCompletedBooksCollection,
+  getSprintsCollection,
   bookKeyToDocId,
   getDocsCacheFirst
 } from './firebase';
 import { type User } from 'firebase/auth';
-import { Progress, UserSettings, HistoryEntry, ProverbJournal } from '../types';
+import { Progress, UserSettings, HistoryEntry, ProverbJournal, SprintHour } from '../types';
 import { logDiagnostic } from './diagnostics';
 
 // Lightweight write-status tracker driving the navbar sync badge.
@@ -89,6 +90,35 @@ export const writeCompletedBook = track(async (uid: string, categoryId: string, 
 export const deleteCompletedBook = track(async (uid: string, categoryId: string, bookName: string) => {
   const docId = bookKeyToDocId(`${categoryId}:${bookName}`);
   await deleteDoc(doc(getCompletedBooksCollection(uid), docId));
+});
+
+/**
+ * Persist a single hour of a sprint.
+ *
+ * Writes ONLY the touched hour, with merge:true — Firestore deep-merges map
+ * fields, so two devices ticking different hours of the same day both survive.
+ * Writing the whole `hours` map instead would let the second writer clobber the
+ * first device's tick.
+ */
+export const writeSprintHour = track(async (
+  uid: string,
+  date: string,
+  hour: number,
+  slot: SprintHour
+) => {
+  await setDoc(
+    doc(getSprintsCollection(uid), date),
+    {
+      date,
+      hours: { [String(hour)]: { done: slot.done, reference: slot.reference ?? '' } },
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
+});
+
+export const deleteSprint = track(async (uid: string, date: string) => {
+  await deleteDoc(doc(getSprintsCollection(uid), date));
 });
 
 export const writeJournal = track(async (uid: string, journal: ProverbJournal) => {

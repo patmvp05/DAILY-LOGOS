@@ -17,7 +17,9 @@ import {
   writeCompletedBook, 
   writeJournal, 
   deleteJournal as deleteJournalFromCloud,
-  resetUserData
+  resetUserData,
+  writeSprintHour,
+  deleteSprint
 } from '../lib/sync';
 import { useUi } from '../state/UiContextCore';
 
@@ -383,9 +385,66 @@ export function useReadingActions(
     triggerHaptic('medium');
   }, [state.history, user, dispatch]);
 
+  // ── 24-hour sprint ────────────────────────────────────────────────────
+  // Each hour is written on its own with a field-level merge, so two devices
+  // ticking different hours of the same day never clobber one another.
+  const sprintRefTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const pushSprintHour = useCallback((date: string, hour: number) => {
+    const currentUser = userRef.current;
+    if (!currentUser) return;
+    const slot = stateRef.current.scriptureSprints
+      ?.find(s => s.date === date)?.hours[String(hour)];
+    writeSprintHour(currentUser.uid, date, hour, slot ?? { done: false })
+      .catch(err => console.error('Sprint sync failed:', err));
+  }, []);
+
+  const toggleSprintHour = useCallback((date: string, hour: number) => {
+    dispatch({ type: 'TOGGLE_SPRINT_HOUR', date, hour });
+    triggerHaptic('medium');
+    // Read back after the dispatch so we upload the resulting slot.
+    setTimeout(() => pushSprintHour(date, hour), 0);
+  }, [dispatch, pushSprintHour]);
+
+  const setSprintReference = useCallback((date: string, hour: number, reference: string) => {
+    dispatch({ type: 'SET_SPRINT_REFERENCE', date, hour, reference });
+    // Debounced: typing a reference shouldn't fire a write per keystroke.
+    const key = `${date}:${hour}`;
+    if (sprintRefTimers.current[key]) clearTimeout(sprintRefTimers.current[key]);
+    sprintRefTimers.current[key] = setTimeout(() => {
+      delete sprintRefTimers.current[key];
+      pushSprintHour(date, hour);
+    }, 700);
+  }, [dispatch, pushSprintHour]);
+
+  const clearSprint = useCallback((date: string) => {
+    dispatch({ type: 'CLEAR_SPRINT', date });
+    const currentUser = userRef.current;
+    if (currentUser) {
+      deleteSprint(currentUser.uid, date)
+        .catch(err => console.error('Sprint delete failed:', err));
+    }
+  }, [dispatch]);
+
+  // Flush any pending reference write on unmount so closing the modal (or the
+  // tab) mid-keystroke doesn't drop the last edit.
+  useEffect(() => {
+    const timers = sprintRefTimers.current;
+    return () => {
+      Object.entries(timers).forEach(([key, timer]) => {
+        clearTimeout(timer);
+        const sep = key.lastIndexOf(':');
+        pushSprintHour(key.slice(0, sep), Number(key.slice(sep + 1)));
+      });
+    };
+  }, [pushSprintHour]);
+
   return {
     advanceChapter,
     jumpToBook,
+    toggleSprintHour,
+    setSprintReference,
+    clearSprint,
     toggleBookCompletion,
     saveProverbJournal,
     deleteJournal,
