@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 /**
  * Guards a modal's backdrop-dismiss handler against the tap that opened it.
@@ -20,15 +20,16 @@ import { useCallback, useRef } from 'react';
  * the backdrop/overlay onClick — never to explicit Close/Done buttons.
  */
 export function useOverlayDismiss(onDismiss: () => void, graceMs = 450) {
-  // Seeded on first render (synchronously) so an early ghost click is guarded
-  // even before effects run.
-  const readyAtRef = useRef<number | null>(null);
-  if (readyAtRef.current === null) {
+  // Starts at Infinity so dismissal is blocked until the mount effect stamps a
+  // real deadline. (Reading the clock during render is impure — and the effect
+  // runs right after the first paint, long before any tap can land.)
+  const readyAtRef = useRef(Infinity);
+  useEffect(() => {
     readyAtRef.current = Date.now() + graceMs;
-  }
+  }, [graceMs]);
 
   return useCallback(() => {
-    if (readyAtRef.current !== null && Date.now() < readyAtRef.current) return;
+    if (Date.now() < readyAtRef.current) return;
     onDismiss();
   }, [onDismiss]);
 }
