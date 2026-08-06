@@ -237,10 +237,17 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const updatedProgress = state.progress.map(localProg => {
         const cloudProg = cloudMap.get(localProg.categoryId);
         if (cloudProg) {
-          const resolved = resolveProgressConflict(localProg, cloudProg);
-          if (resolved.bookIndex !== localProg.bookIndex || 
-              resolved.chapter !== localProg.chapter || 
-              resolved.updatedAtMillis !== localProg.updatedAtMillis) {
+          const base = resolveProgressConflict(localProg, cloudProg);
+          // serverMillis is a cloud-derived annotation, not part of the
+          // position conflict — always take the cloud's copy so the field stays
+          // populated even when the local side wins the position.
+          const resolved = cloudProg.serverMillis !== undefined && cloudProg.serverMillis !== base.serverMillis
+            ? { ...base, serverMillis: cloudProg.serverMillis }
+            : base;
+          if (resolved.bookIndex !== localProg.bookIndex ||
+              resolved.chapter !== localProg.chapter ||
+              resolved.updatedAtMillis !== localProg.updatedAtMillis ||
+              resolved.serverMillis !== localProg.serverMillis) {
             changed = true;
             return resolved;
           }

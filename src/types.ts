@@ -10,6 +10,13 @@ export interface Progress {
   lastReadAt?: string; // ISO string
   localDate?: string; // YYYY-MM-DD in local time
   updatedAtMillis?: number; // Server-side or precise local timestamp
+  // Firestore serverTimestamp() for this doc, in millis. Read-only: derived
+  // from the cloud snapshot, never written by a device. Unlike lastReadAt /
+  // updatedAtMillis (each device's own wall clock), every device's value comes
+  // from ONE clock, so it is the only sound way to compare "which category did
+  // I read most recently" across an iPad and a desktop. Undefined for guests
+  // and for legacy docs written before this field existed.
+  serverMillis?: number;
 }
 
 export interface UserSettings {

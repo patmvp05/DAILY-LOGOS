@@ -140,7 +140,10 @@ class Device {
       this.cloud.writeProgress(newProg);
       this.cloud.writeHistory(entries);
       newlyCompletedKeys.forEach(k => { const [, b] = k.split(':'); this.cloud.setCompleted(`${categoryId}:${b}`); });
-      revertedCompletedKeys.forEach(k => { const [, b] = k.split(':'); this.cloud.delCompleted(`${categoryId}:${b}`); });
+      // Mirrors useReadingActions.flush: a backward step un-completes the book
+      // LOCALLY only. Pushing that delete to the cloud orphaned finished books,
+      // because the backward step can lose the "furthest position wins" race
+      // while its delete still landed. The local set re-syncs from the cloud.
     });
   }
 
@@ -287,6 +290,104 @@ for (let seed = 1; seed <= 400; seed++) {
     for (const id of allIds) if (!cloud.history.has(id)) { survived = false; break; }
     check(`A[seed ${seed}] history survives in cloud`, survived);
   }
+}
+
+// Scenario D: mixed FORWARD and BACKWARD advances, no jumps/resets.
+//
+// ORPHAN invariant: with only +/- stepping, reading never skips a book, so
+// every book strictly before a category's final position must have been
+// crossed — and therefore must be marked complete. This is the invariant the
+// original suite lacked: a backward step on a device that was behind used to
+// delete a finished book's completion in the cloud while losing the position
+// race, so every device converged on the same WRONG state (past the book, book
+// not complete) and the existing "devices agree" checks stayed green while the
+// book's chapters silently vanished from the progress total.
+for (let seed = 1; seed <= 300; seed++) {
+  const r = rng(seed * 31 + 11);
+  const cloud = new Cloud();
+  const devices = [
+    new Device('iPad', 2 * 60 * 60 * 1000, cloud),
+    new Device('desktop', -45 * 60 * 1000, cloud),
+  ];
+
+  const ops = 40 + Math.floor(r() * 40);
+  for (let i = 0; i < ops; i++) {
+    simNow += 1000 + Math.floor(r() * 60_000);
+    const d = devices[Math.floor(r() * devices.length)];
+    const roll = r();
+    if (roll < 0.12) d.goOffline();
+    else if (roll < 0.26) d.goOnline();
+    else {
+      const cat = CATEGORIES[Math.floor(r() * CATEGORIES.length)].id;
+      // Mostly forward, sometimes a backward step — the orphaning trigger.
+      const amount = r() < 0.25 ? -1 : 1 + Math.floor(r() * 3);
+      d.advance(cat, amount);
+    }
+    if (r() < 0.5) settle(devices);
+  }
+  devices.forEach(d => d.goOnline());
+  settle(devices);
+
+  for (const d of devices) {
+    for (const cat of CATEGORIES) {
+      const fin = d.state.progress.find(p => p.categoryId === cat.id)!;
+      let intact = true;
+      for (let i = 0; i < fin.bookIndex; i++) {
+        if (!d.state.completedBooks.has(`${cat.id}:${cat.books[i].name}`)) { intact = false; break; }
+      }
+      check(`D[seed ${seed}] no orphaned completion ${cat.id} on ${d.name}`, intact);
+    }
+  }
+}
+
+// Scenario E: the orphaned-completion regression, deterministically.
+//
+// Both devices sit at Gospels/John 1 with Matthew, Mark and Luke complete.
+// The iPad reads ahead to John 6. The desktop — which has not yet seen that —
+// taps "−" once, stepping back across the boundary into Luke 24.
+//
+// Position resolution is "furthest wins", so both devices correctly converge on
+// John 6 and the desktop's backward step loses. But the backward step used to
+// ALSO push an unconditional cloud delete of Luke's completion, which did not
+// lose the race. Both devices then agreed on: past Luke, Luke not complete —
+// silently dropping Luke's 24 chapters from the progress total, permanently.
+// Every pre-existing invariant (converge / no-revert / history) stayed green.
+{
+  const cloud = new Cloud();
+  const ipad = new Device('iPad', 0, cloud);
+  const desktop = new Device('desktop', 0, cloud);
+  const devices = [ipad, desktop];
+
+  const gospels = CATEGORIES_BY_ID.get('gospels')!;
+  const upToJohn = gospels.books[0].chapters + gospels.books[1].chapters + gospels.books[2].chapters;
+
+  simNow += 60_000;
+  ipad.advance('gospels', upToJohn); // → John 1, Matthew+Mark+Luke complete
+  settle(devices);
+
+  const lukeKey = `gospels:${gospels.books[2].name}`;
+  check('E precondition: Luke complete on both devices',
+    devices.every(d => d.state.completedBooks.has(lukeKey)));
+  check('E precondition: both at John 1',
+    devices.every(d => {
+      const p = d.state.progress.find(x => x.categoryId === 'gospels')!;
+      return p.bookIndex === 3 && p.chapter === 1;
+    }));
+
+  // iPad reads ahead; desktop has not received that snapshot yet.
+  simNow += 60_000;
+  ipad.advance('gospels', 5); // → John 6
+  simNow += 60_000;
+  desktop.advance('gospels', -1); // steps back into Luke 24, un-completes Luke
+  settle(devices);
+
+  for (const d of devices) {
+    const p = d.state.progress.find(x => x.categoryId === 'gospels')!;
+    check(`E ${d.name} converged past Luke (John 6)`, p.bookIndex === 3 && p.chapter === 6);
+    check(`E ${d.name} Luke still complete after losing the position race`,
+      d.state.completedBooks.has(lukeKey));
+  }
+  check('E cloud still has Luke complete', cloud.completed.has(lukeKey));
 }
 
 // Scenario B: include backward jumps + resets; only CONVERGENCE is required

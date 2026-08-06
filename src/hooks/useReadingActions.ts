@@ -102,11 +102,18 @@ export function useReadingActions(
         completedBooks: newlyCompletedKeys.map(k => {
           const [catId, bookName] = k.split(':');
           return { categoryId: catId, bookName };
-        }),
-        deletedBooks: revertedCompletedKeys.map(k => {
-          const [catId, bookName] = k.split(':');
-          return { categoryId: catId, bookName };
         })
+        // NOTE: revertedCompletedKeys is deliberately NOT pushed as
+        // deletedBooks. Stepping back over a book boundary un-completes that
+        // book locally (so re-advancing behaves), but position resolution is
+        // "furthest wins" — so on a device that is BEHIND another one, the
+        // backward step loses the position race while its cloud delete still
+        // applied, permanently orphaning a finished book: every device ended up
+        // past the book with the book no longer marked complete, silently
+        // dropping all of its chapters from the progress total. The local
+        // un-complete is re-synced from the cloud on the next snapshot.
+        // Deliberate un-marking still propagates via toggleBookCompletion →
+        // deleteCompletedBook, which is a separate, explicit path.
       }).catch(err => console.error("Sync failed:", err));
     }
   }, []);

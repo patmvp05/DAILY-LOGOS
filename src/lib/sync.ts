@@ -115,8 +115,12 @@ export const writeActionBatch = track(async (uid: string, actions: {
 
   if (actions.progress) {
     const ref = doc(getProgressCollection(uid), actions.progress.categoryId);
+    // serverMillis is derived from this doc's own updatedAt on read; persisting
+    // a device's copy would let a stale value survive a pending write.
+    const { serverMillis: _ignored, ...progressDoc } = actions.progress;
+    void _ignored;
     batch.set(ref, {
-      ...actions.progress,
+      ...progressDoc,
       updatedAtMillis: actions.progress.updatedAtMillis || Date.now(),
       updatedAt: serverTimestamp()
     });
