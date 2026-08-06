@@ -72,6 +72,48 @@ for (let i = 0; i < 24; i++) await writeHour(i % 2 ? deviceA : deviceB, i, true)
 await deleteDoc(ref(deviceA));
 ok('clear deletes the day for all devices', !(await getDoc(ref(deviceB))).exists());
 
+// ── Full round trip through the real reducer: device A ticks, device B sees it.
+// This is the symptom the user reported — a tick on the phone never appearing
+// on the iPad. It failed when the write path re-read state to discover what to
+// upload and got the pre-toggle value (done:false), so the cloud contradicted
+// the screen and B received an un-ticked hour.
+{
+  const { appReducer, getSprintHour } = await import('../src/state/appReducer');
+  const blank = () => ({
+    progress: [], settings: { theme: 'system' as const, startDate: '' }, history: [],
+    proverbJournals: [], customDevotionals: [], scriptureSprints: [],
+    completedBooks: new Set<string>(),
+  });
+  const DAY = '2026-09-09';
+  const dref = doc(deviceA, 'users', UID, 'sprints', DAY);
+
+  // Device A: exactly what useReadingActions.toggleSprintHour does.
+  let a = blank();
+  const prev = getSprintHour(a.scriptureSprints, DAY, 8);
+  const uploaded = { ...prev, done: !prev.done, reference: 'Isaiah 8' };
+  a = appReducer(a, { type: 'SET_SPRINT_HOUR', date: DAY, hour: 8, slot: uploaded });
+  await setDoc(dref, { date: DAY, hours: { '8': { done: uploaded.done, reference: uploaded.reference ?? '' } } }, { merge: true });
+
+  ok('A shows the hour ticked', getSprintHour(a.scriptureSprints, DAY, 8).done === true);
+
+  // Device B: read the cloud and run it through CLOUD_SYNC_SPRINTS.
+  const snap = await getDoc(doc(deviceB, 'users', UID, 'sprints', DAY));
+  const raw = snap.data() as { date: string; hours: Record<string, { done?: boolean; reference?: string }> };
+  const hours: Record<string, { done: boolean; reference?: string }> = {};
+  for (const [k, v] of Object.entries(raw.hours)) hours[k] = { done: !!v?.done, reference: v?.reference || undefined };
+  let b = blank();
+  b = appReducer(b, { type: 'CLOUD_SYNC_SPRINTS', sprints: [{ date: raw.date, hours }] });
+
+  ok('B receives the tick from A', getSprintHour(b.scriptureSprints, DAY, 8).done === true,
+     JSON.stringify(b.scriptureSprints));
+  ok('B receives the reference too', getSprintHour(b.scriptureSprints, DAY, 8).reference === 'Isaiah 8');
+
+  // And A must not be reverted when its own snapshot echoes back.
+  a = appReducer(a, { type: 'CLOUD_SYNC_SPRINTS', sprints: [{ date: raw.date, hours }] });
+  ok('A is not reverted by the echo of its own write',
+     getSprintHour(a.scriptureSprints, DAY, 8).done === true);
+}
+
 await env.cleanup();
 console.log('');
 if (fail === 0) console.log(`SPRINT-MERGE PASS ${pass} / ${pass}`);
