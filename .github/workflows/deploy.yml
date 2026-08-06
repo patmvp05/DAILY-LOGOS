@@ -17,13 +17,21 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      # Firestore security rules must ship BEFORE the hosting bundle that
-      # depends on them. The hosting action deploys hosting only, so without
-      # this a client using a new collection goes live against rules that still
-      # deny it — the request fails, the listener errors, and the app shows a
-      # sync error. Deploying rules first means a rules failure aborts the run
-      # and the previous (working) build stays live.
+      # Firestore security rules ship BEFORE the hosting bundle that depends on
+      # them: the hosting action deploys hosting only, so without this a client
+      # using a new collection goes live against rules that still deny it.
+      #
+      # Non-blocking on purpose. The service account may lack the Firebase Rules
+      # role (403), and a hard failure here would (a) leave hosting permanently
+      # undeployed while the daily-devotional workflow ships the same commit
+      # anyway, and (b) hide unrelated app fixes behind an IAM issue. Every
+      # collection whose rules might lag is registered as an `optional` listener
+      # in useFirestoreSync, so the app degrades to "that one feature doesn't
+      # sync yet" instead of erroring. Rule *correctness* is already proven
+      # pre-merge by the emulator suites (npm run test:rules).
       - name: Deploy Firestore rules
+        id: rules
+        continue-on-error: true
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
@@ -31,7 +39,18 @@ jobs:
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-sa.json"
           npx --yes firebase-tools@13 deploy --only firestore:rules \
             --project gen-lang-client-0538747272 --non-interactive
+          status=$?
           rm -f "$RUNNER_TEMP/firebase-sa.json"
+          exit $status
+
+      - name: Warn if rules did not deploy
+        if: steps.rules.outcome == 'failure'
+        run: |
+          echo "::warning title=Firestore rules were NOT deployed::Cloud sync for any \
+          new collection stays disabled until this succeeds. If the log shows HTTP 403 \
+          'The caller does not have permission', grant the service account in \
+          FIREBASE_SERVICE_ACCOUNT the 'Firebase Rules Admin' role \
+          (roles/firebaserules.admin) in Google Cloud IAM, then re-run this workflow."
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
