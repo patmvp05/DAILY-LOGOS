@@ -4,7 +4,7 @@
  */
 
 import { format } from 'date-fns';
-import { AppState, Progress as ProgressType, HistoryEntry, ProverbJournal, Devotional, UserSettings } from '../types';
+import { AppState, Progress as ProgressType, HistoryEntry, ProverbJournal, Devotional, UserSettings, ScriptureSprint, SprintHour } from '../types';
 
 export type AppAction = 
   | { type: 'REPLACE_STATE', state: AppState }
@@ -27,9 +27,36 @@ export type AppAction =
   | { type: 'DELETE_DEVOTIONAL', id: string }
   | { type: 'LOG_HISTORY', entry: HistoryEntry }
   | { type: 'CLEAR_HISTORY' }
+  | { type: 'TOGGLE_SPRINT_HOUR', date: string, hour: number }
+  | { type: 'SET_SPRINT_REFERENCE', date: string, hour: number, reference: string }
+  | { type: 'CLEAR_SPRINT', date: string }
   | { type: 'SET_START_DATE', date: string };
 
 export const HISTORY_CAP = 2000; // Increased from 50 to ensure year-long streak accuracy
+// A sprint is an occasional discipline (a few times a year); keeping the last
+// dozen is plenty of history and keeps the locally-persisted state small.
+export const SPRINT_CAP = 12;
+
+/**
+ * Apply a change to one hour of the sprint for `date`, creating the sprint if
+ * this is the first tick of the day. Sprints are newest-first and capped.
+ */
+function updateSprint(
+  sprints: ScriptureSprint[],
+  date: string,
+  hour: number,
+  change: (prev: SprintHour) => SprintHour
+): ScriptureSprint[] {
+  const key = String(hour);
+  const existing = sprints.find((s) => s.date === date);
+  const prevHour: SprintHour = existing?.hours[key] ?? { done: false };
+  const nextSprint: ScriptureSprint = {
+    date,
+    hours: { ...(existing?.hours ?? {}), [key]: change(prevHour) },
+  };
+  const rest = sprints.filter((s) => s.date !== date);
+  return [nextSprint, ...rest].slice(0, SPRINT_CAP);
+}
 
 /**
  * Order-insensitive deep equality for id-keyed lists. Unlike a length +
@@ -149,6 +176,12 @@ function mergeAppState(current: AppState, incoming: Partial<AppState>): AppState
   }
   if (incoming.customDevotionals && !(incoming.customDevotionals.length === 0 && current.customDevotionals.length > 0)) {
     next.customDevotionals = incoming.customDevotionals;
+  }
+  // Sprints are local-only (never synced), so the stored copy is authoritative
+  // unless we already have unsaved ones in memory.
+  if (incoming.scriptureSprints &&
+      !(incoming.scriptureSprints.length === 0 && (current.scriptureSprints?.length ?? 0) > 0)) {
+    next.scriptureSprints = incoming.scriptureSprints;
   }
 
   // Settings
@@ -358,6 +391,28 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           p.categoryId === action.categoryId ? { ...p, bookIndex: action.bookIndex, chapter: 1, lastReadAt: now, localDate, updatedAtMillis: nowMillis } : p
         )
       };
+    }
+    case 'TOGGLE_SPRINT_HOUR': {
+      const sprints = state.scriptureSprints ?? [];
+      return {
+        ...state,
+        scriptureSprints: updateSprint(sprints, action.date, action.hour,
+          (prev) => ({ ...prev, done: !prev.done })),
+      };
+    }
+    case 'SET_SPRINT_REFERENCE': {
+      const sprints = state.scriptureSprints ?? [];
+      const reference = action.reference.slice(0, 120);
+      return {
+        ...state,
+        scriptureSprints: updateSprint(sprints, action.date, action.hour,
+          (prev) => ({ ...prev, reference })),
+      };
+    }
+    case 'CLEAR_SPRINT': {
+      const sprints = state.scriptureSprints ?? [];
+      if (!sprints.some(s => s.date === action.date)) return state;
+      return { ...state, scriptureSprints: sprints.filter(s => s.date !== action.date) };
     }
     case 'UPSERT_JOURNAL': {
       const existingJournal = state.proverbJournals.find(j => j.id === action.journal.id);

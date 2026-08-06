@@ -94,6 +94,7 @@ class Device {
       history: [],
       proverbJournals: [],
       customDevotionals: [],
+      scriptureSprints: [],
       completedBooks: new Set<string>(),
     };
   }

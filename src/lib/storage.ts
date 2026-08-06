@@ -60,6 +60,7 @@ export const loadState = (): AppState => {
     history: [],
     proverbJournals: [],
     customDevotionals: DEFAULT_DEVOTIONALS,
+    scriptureSprints: [],
     completedBooks: new Set<string>(),
   };
 
@@ -73,6 +74,7 @@ export const loadState = (): AppState => {
       history: parsed.history || defaultState.history,
       proverbJournals: parsed.proverbJournals || defaultState.proverbJournals,
       customDevotionals: parsed.customDevotionals || defaultState.customDevotionals,
+      scriptureSprints: parsed.scriptureSprints || defaultState.scriptureSprints,
       completedBooks: parsed.completedBooks ? new Set(parsed.completedBooks) : defaultState.completedBooks,
     };
   } catch (error) {

@@ -50,6 +50,8 @@ export interface UiContextType {
   setActiveInternalDevotional: (dev: { id: string, slug: string, name: string } | null) => void;
   showProverbModal: boolean;
   setShowProverbModal: (val: boolean) => void;
+  showSprintModal: boolean;
+  setShowSprintModal: (val: boolean) => void;
   isStartMenuOpen: boolean;
   setIsStartMenuOpen: (val: boolean) => void;
   journalDraft: JournalDraftState;
