@@ -5,8 +5,8 @@
 
 import { useCallback, useRef, Dispatch, useEffect } from 'react';
 import { format, isToday, parseISO } from 'date-fns';
-import { AppState, HistoryEntry, ProverbJournal } from '../types';
-import { AppAction } from '../state/appReducer';
+import { AppState, HistoryEntry, ProverbJournal, SprintHour } from '../types';
+import { AppAction, getSprintHour } from '../state/appReducer';
 import { CATEGORIES_BY_ID, CATEGORIES, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
 import { triggerHaptic } from '../lib/haptic';
 import { calculateNextProgress, isBackwardJump } from '../lib/bible';
@@ -388,34 +388,63 @@ export function useReadingActions(
   // ── 24-hour sprint ────────────────────────────────────────────────────
   // Each hour is written on its own with a field-level merge, so two devices
   // ticking different hours of the same day never clobber one another.
-  const sprintRefTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  // Pending debounced reference writes, holding the exact slot to upload so the
+  // flush never has to re-read state.
+  const sprintPending = useRef<Record<string, {
+    date: string; hour: number; slot: SprintHour; timer: ReturnType<typeof setTimeout>;
+  }>>({});
 
-  const pushSprintHour = useCallback((date: string, hour: number) => {
+  const pushSprintHour = useCallback((date: string, hour: number, slot: SprintHour) => {
     const currentUser = userRef.current;
     if (!currentUser) return;
-    const slot = stateRef.current.scriptureSprints
-      ?.find(s => s.date === date)?.hours[String(hour)];
-    writeSprintHour(currentUser.uid, date, hour, slot ?? { done: false })
+    writeSprintHour(currentUser.uid, date, hour, slot)
       .catch(err => console.error('Sprint sync failed:', err));
   }, []);
 
+  /**
+   * Apply one hour of the sprint.
+   *
+   * The resulting slot is computed ONCE here and handed to both the reducer and
+   * Firestore, so local state and the cloud are identical by construction.
+   * (Previously the write path re-read state on a setTimeout to discover what
+   * the reducer had done. stateRef is refreshed in an effect, so that read
+   * could land first and upload the PRE-toggle value — the cloud then said
+   * done:false, the listener treats the cloud as authoritative for a key it
+   * already has, and the tick silently reverted and never reached other
+   * devices.)
+   */
+  const applySprintHour = useCallback((date: string, hour: number, slot: SprintHour) => {
+    dispatch({ type: 'SET_SPRINT_HOUR', date, hour, slot });
+    return slot;
+  }, [dispatch]);
+
   const toggleSprintHour = useCallback((date: string, hour: number) => {
-    dispatch({ type: 'TOGGLE_SPRINT_HOUR', date, hour });
+    const prev = getSprintHour(stateRef.current.scriptureSprints, date, hour);
+    const next: SprintHour = { ...prev, done: !prev.done };
+    applySprintHour(date, hour, next);
     triggerHaptic('medium');
-    // Read back after the dispatch so we upload the resulting slot.
-    setTimeout(() => pushSprintHour(date, hour), 0);
-  }, [dispatch, pushSprintHour]);
+    pushSprintHour(date, hour, next);
+  }, [applySprintHour, pushSprintHour]);
 
   const setSprintReference = useCallback((date: string, hour: number, reference: string) => {
-    dispatch({ type: 'SET_SPRINT_REFERENCE', date, hour, reference });
-    // Debounced: typing a reference shouldn't fire a write per keystroke.
+    const prev = getSprintHour(stateRef.current.scriptureSprints, date, hour);
+    const next: SprintHour = { ...prev, reference };
+    applySprintHour(date, hour, next);
+
+    // Debounced: typing shouldn't fire a write per keystroke. The pending entry
+    // carries the value, so the flush never re-reads state.
     const key = `${date}:${hour}`;
-    if (sprintRefTimers.current[key]) clearTimeout(sprintRefTimers.current[key]);
-    sprintRefTimers.current[key] = setTimeout(() => {
-      delete sprintRefTimers.current[key];
-      pushSprintHour(date, hour);
-    }, 700);
-  }, [dispatch, pushSprintHour]);
+    const existing = sprintPending.current[key];
+    if (existing) clearTimeout(existing.timer);
+    sprintPending.current[key] = {
+      date, hour, slot: next,
+      timer: setTimeout(() => {
+        const pending = sprintPending.current[key];
+        delete sprintPending.current[key];
+        if (pending) pushSprintHour(pending.date, pending.hour, pending.slot);
+      }, 700),
+    };
+  }, [applySprintHour, pushSprintHour]);
 
   const clearSprint = useCallback((date: string) => {
     dispatch({ type: 'CLEAR_SPRINT', date });
@@ -429,12 +458,11 @@ export function useReadingActions(
   // Flush any pending reference write on unmount so closing the modal (or the
   // tab) mid-keystroke doesn't drop the last edit.
   useEffect(() => {
-    const timers = sprintRefTimers.current;
+    const pending = sprintPending.current;
     return () => {
-      Object.entries(timers).forEach(([key, timer]) => {
+      Object.values(pending).forEach(({ date, hour, slot, timer }) => {
         clearTimeout(timer);
-        const sep = key.lastIndexOf(':');
-        pushSprintHour(key.slice(0, sep), Number(key.slice(sep + 1)));
+        pushSprintHour(date, hour, slot);
       });
     };
   }, [pushSprintHour]);

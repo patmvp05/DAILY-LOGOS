@@ -27,8 +27,10 @@ export type AppAction =
   | { type: 'DELETE_DEVOTIONAL', id: string }
   | { type: 'LOG_HISTORY', entry: HistoryEntry }
   | { type: 'CLEAR_HISTORY' }
-  | { type: 'TOGGLE_SPRINT_HOUR', date: string, hour: number }
-  | { type: 'SET_SPRINT_REFERENCE', date: string, hour: number, reference: string }
+  // Carries the FULL resulting slot rather than a "toggle" instruction, so the
+  // caller can write the identical object to Firestore. Deriving the new value
+  // separately in the write path let a stale read upload the pre-toggle value.
+  | { type: 'SET_SPRINT_HOUR', date: string, hour: number, slot: SprintHour }
   | { type: 'CLEAR_SPRINT', date: string }
   | { type: 'CLOUD_SYNC_SPRINTS', sprints: ScriptureSprint[] }
   | { type: 'SET_START_DATE', date: string };
@@ -39,21 +41,32 @@ export const HISTORY_CAP = 2000; // Increased from 50 to ensure year-long streak
 export const SPRINT_CAP = 12;
 
 /**
- * Apply a change to one hour of the sprint for `date`, creating the sprint if
- * this is the first tick of the day. Sprints are newest-first and capped.
+ * The current value of one hour of a sprint (a blank slot if untouched).
+ * Callers use this to compute the NEXT value, then hand that exact object to
+ * both the reducer and the Firestore write so the two can never disagree.
  */
-function updateSprint(
+export function getSprintHour(
+  sprints: ScriptureSprint[] | undefined,
+  date: string,
+  hour: number
+): SprintHour {
+  return sprints?.find((s) => s.date === date)?.hours[String(hour)] ?? { done: false };
+}
+
+/**
+ * Set one hour of the sprint for `date`, creating the sprint if this is the
+ * first tick of the day. Sprints are newest-first and capped.
+ */
+function setSprintHour(
   sprints: ScriptureSprint[],
   date: string,
   hour: number,
-  change: (prev: SprintHour) => SprintHour
+  slot: SprintHour
 ): ScriptureSprint[] {
-  const key = String(hour);
   const existing = sprints.find((s) => s.date === date);
-  const prevHour: SprintHour = existing?.hours[key] ?? { done: false };
   const nextSprint: ScriptureSprint = {
     date,
-    hours: { ...(existing?.hours ?? {}), [key]: change(prevHour) },
+    hours: { ...(existing?.hours ?? {}), [String(hour)]: slot },
   };
   const rest = sprints.filter((s) => s.date !== date);
   return [nextSprint, ...rest].slice(0, SPRINT_CAP);
@@ -393,21 +406,15 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         )
       };
     }
-    case 'TOGGLE_SPRINT_HOUR': {
+    case 'SET_SPRINT_HOUR': {
       const sprints = state.scriptureSprints ?? [];
-      return {
-        ...state,
-        scriptureSprints: updateSprint(sprints, action.date, action.hour,
-          (prev) => ({ ...prev, done: !prev.done })),
+      const slot: SprintHour = {
+        done: action.slot.done,
+        reference: action.slot.reference?.slice(0, 120),
       };
-    }
-    case 'SET_SPRINT_REFERENCE': {
-      const sprints = state.scriptureSprints ?? [];
-      const reference = action.reference.slice(0, 120);
       return {
         ...state,
-        scriptureSprints: updateSprint(sprints, action.date, action.hour,
-          (prev) => ({ ...prev, reference })),
+        scriptureSprints: setSprintHour(sprints, action.date, action.hour, slot),
       };
     }
     case 'CLEAR_SPRINT': {
