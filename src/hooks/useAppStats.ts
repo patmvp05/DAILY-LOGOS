@@ -6,7 +6,7 @@
 import { useMemo } from 'react';
 import { format, differenceInCalendarDays, parseISO, subDays } from 'date-fns';
 import { AppState } from '../types';
-import { computeProgressStats } from '../lib/utils';
+import { computeProgressStats, pickLastReadProgress } from '../lib/utils';
 import { useToday } from './useToday';
 
 export function useAppStats(state: AppState) {
@@ -90,11 +90,10 @@ export function useAppStats(state: AppState) {
     computeProgressStats(state.progress, state.completedBooks),
   [state.progress, state.completedBooks]);
 
-  const lastReadProgress = useMemo(() => {
-    return [...state.progress]
-      .filter(p => p.lastReadAt && !isNaN(new Date(p.lastReadAt).getTime()))
-      .sort((a, b) => new Date(b.lastReadAt!).getTime() - new Date(a.lastReadAt!).getTime())[0];
-  }, [state.progress]);
+  const lastReadProgress = useMemo(
+    () => pickLastReadProgress(state.progress),
+    [state.progress]
+  );
 
   return {
     streak,

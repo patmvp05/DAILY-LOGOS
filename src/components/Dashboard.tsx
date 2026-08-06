@@ -22,7 +22,7 @@ import {
 import { format, parseISO, subDays } from 'date-fns';
 import { CATEGORIES, CATEGORIES_BY_ID, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
 import { Progress } from '../types';
-import { cn, computeProgressStats } from '../lib/utils';
+import { cn, computeProgressStats, formatLastRead } from '../lib/utils';
 
 import { getChapterInfo, getCachedReadTime } from '../lib/bibleCache';
 
@@ -239,7 +239,7 @@ function DashboardComponent({
                       })()}
                     </h4>
                     <p className="text-[11px] text-[var(--text-secondary)] font-medium mt-1">
-                      Last read {format(new Date(lastReadProgress.lastReadAt!), 'h:mm a')}
+                      Last read {formatLastRead(lastReadProgress.lastReadAt!, todayStr)}
                     </p>
                   </div>
                 </div>

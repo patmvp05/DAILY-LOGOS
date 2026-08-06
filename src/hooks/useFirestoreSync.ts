@@ -116,11 +116,14 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     // 2. Progress
     listen<QuerySnapshot>('Progress', getProgressCollection(user.uid), (snap) => {
       const progress = snap.docs.map((doc) => {
-        const data = doc.data() as Record<string, unknown>;
+        // 'estimate' resolves a still-pending serverTimestamp() to a local
+        // estimate instead of null, so this device's own un-acked write sorts
+        // as the most recent instead of dropping out of the ordering.
+        const data = doc.data({ serverTimestamps: 'estimate' }) as Record<string, unknown>;
         const cloudUpdatedAt = (data.updatedAt as { toMillis?: () => number })?.toMillis?.();
         const fallbackLastRead = data.lastReadAt ? new Date(data.lastReadAt as string).getTime() : 0;
         const updatedAtMillis = (data.updatedAtMillis as number) || cloudUpdatedAt || fallbackLastRead;
-        return { ...data, updatedAtMillis } as unknown as Progress;
+        return { ...data, updatedAtMillis, serverMillis: cloudUpdatedAt } as unknown as Progress;
       });
       dispatch({ type: 'CLOUD_SYNC_PROGRESS', progress });
 
