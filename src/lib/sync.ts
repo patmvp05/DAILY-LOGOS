@@ -61,24 +61,68 @@ export const syncTracker = {
   }
 };
 
+/**
+ * The most recent sync failure, so "Sync Error" can say WHY.
+ *
+ * The badge used to be a red dot with no explanation and no record of the
+ * cause anywhere — impossible to diagnose without the device in hand.
+ */
+export interface SyncFailure {
+  operation: string;
+  code: string;
+  message: string;
+  at: string; // ISO
+}
+
+let lastSyncError: SyncFailure | null = null;
+
+export const getLastSyncError = (): SyncFailure | null => lastSyncError;
+
+/** Record a failure from outside the write path (e.g. a snapshot listener). */
+export function recordSyncError(operation: string, e: unknown) {
+  const err = e as { code?: string; message?: string };
+  lastSyncError = {
+    operation,
+    code: err?.code || 'unknown',
+    message: String(err?.message || e).slice(0, 300),
+    at: new Date().toISOString(),
+  };
+}
+
+/** A human-readable one-liner for the badge tooltip / diagnostics report. */
+export function describeSyncError(f: SyncFailure | null): string {
+  if (!f) return '';
+  const hint =
+    f.code === 'permission-denied'
+      ? ' — the security rules rejected this write. If a feature was just added, its rules may not be published yet.'
+      : f.code === 'unavailable'
+        ? ' — could not reach Firestore. This usually clears itself when the connection returns.'
+        : f.code === 'unauthenticated'
+          ? ' — signed out. Sign in again to resume syncing.'
+          : '';
+  return `${f.operation} failed (${f.code})${hint}`;
+}
+
 // Wraps a write so the badge reflects in-flight state. Writes are durable
 // in Firestore's local cache immediately; the promise resolves on server ack.
-const track = <T extends unknown[]>(fn: (...args: T) => Promise<void>) => {
+const track = <T extends unknown[]>(operation: string, fn: (...args: T) => Promise<void>) => {
   return async (...args: T) => {
     syncTracker.begin();
     try {
       await fn(...args);
+      lastSyncError = null; // a success clears the last failure
       syncTracker.end(true);
     } catch (e) {
-      console.error('[Sync] Write failed:', e);
-      logDiagnostic('sync', 'error', 'Write failed', e);
+      recordSyncError(operation, e);
+      console.error(`[Sync] ${operation} failed:`, e);
+      logDiagnostic('sync', 'error', `${operation} failed`, e);
       syncTracker.end(false);
       throw e;
     }
   };
 };
 
-export const writeCompletedBook = track(async (uid: string, categoryId: string, bookName: string) => {
+export const writeCompletedBook = track('writeCompletedBook', async (uid: string, categoryId: string, bookName: string) => {
   const docId = bookKeyToDocId(`${categoryId}:${bookName}`);
   await setDoc(doc(getCompletedBooksCollection(uid), docId), {
     categoryId,
@@ -87,7 +131,7 @@ export const writeCompletedBook = track(async (uid: string, categoryId: string, 
   });
 });
 
-export const deleteCompletedBook = track(async (uid: string, categoryId: string, bookName: string) => {
+export const deleteCompletedBook = track('deleteCompletedBook', async (uid: string, categoryId: string, bookName: string) => {
   const docId = bookKeyToDocId(`${categoryId}:${bookName}`);
   await deleteDoc(doc(getCompletedBooksCollection(uid), docId));
 });
@@ -100,7 +144,7 @@ export const deleteCompletedBook = track(async (uid: string, categoryId: string,
  * Writing the whole `hours` map instead would let the second writer clobber the
  * first device's tick.
  */
-export const writeSprintHour = track(async (
+export const writeSprintHour = track('writeSprintHour', async (
   uid: string,
   date: string,
   hour: number,
@@ -117,19 +161,19 @@ export const writeSprintHour = track(async (
   );
 });
 
-export const deleteSprint = track(async (uid: string, date: string) => {
+export const deleteSprint = track('deleteSprint', async (uid: string, date: string) => {
   await deleteDoc(doc(getSprintsCollection(uid), date));
 });
 
-export const writeJournal = track(async (uid: string, journal: ProverbJournal) => {
+export const writeJournal = track('writeJournal', async (uid: string, journal: ProverbJournal) => {
   await setDoc(doc(getJournalsCollection(uid), journal.id), journal);
 });
 
-export const deleteJournal = track(async (uid: string, id: string) => {
+export const deleteJournal = track('deleteJournal', async (uid: string, id: string) => {
   await deleteDoc(doc(getJournalsCollection(uid), id));
 });
 
-export const writeActionBatch = track(async (uid: string, actions: {
+export const writeActionBatch = track('writeActionBatch', async (uid: string, actions: {
   progress?: Progress;
   history?: HistoryEntry | HistoryEntry[];
   completedBooks?: { categoryId: string; bookName: string }[];
@@ -177,7 +221,7 @@ export const writeActionBatch = track(async (uid: string, actions: {
   await batch.commit();
 });
 
-export const setUserSettings = track(async (uid: string, settings: Partial<UserSettings>) => {
+export const setUserSettings = track('setUserSettings', async (uid: string, settings: Partial<UserSettings>) => {
   await setDoc(getUserRef(uid), {
     ...settings,
     updatedAt: serverTimestamp()
@@ -200,7 +244,7 @@ export async function initializeUser(user: User) {
   }
 }
 
-export const resetUserData = track(async (uid: string) => {
+export const resetUserData = track('resetUserData', async (uid: string) => {
   const collections = [
     getProgressCollection(uid),
     getHistoryCollection(uid),

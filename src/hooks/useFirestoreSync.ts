@@ -27,7 +27,7 @@ import {
 import { AppAction, resolveProgressConflict } from '../state/appReducer';
 import { Progress, HistoryEntry, ProverbJournal, Devotional, AppState, UserSettings, ScriptureSprint, SprintHour } from '../types';
 import { logDiagnostic } from '../lib/diagnostics';
-import { writeActionBatch, writeSprintHour } from '../lib/sync';
+import { writeActionBatch, writeSprintHour, recordSyncError } from '../lib/sync';
 
 const COLLECTION_COUNT = 7;
 
@@ -96,6 +96,7 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
       }, (err: Error) => {
         if (!isActive) return;
         console.error(`${name} sync error:`, err);
+        recordSyncError(`${name} listener`, err);
         logDiagnostic('sync', 'error', `${name} listener error`, err);
         if (opts.optional) {
           // Still counts as settled so the badge can reach "synced".

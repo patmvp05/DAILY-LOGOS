@@ -79,8 +79,8 @@ ok('clear deletes the day for all devices', !(await getDoc(ref(deviceB))).exists
 // the screen and B received an un-ticked hour.
 {
   const { appReducer, getSprintHour } = await import('../src/state/appReducer');
-  const blank = () => ({
-    progress: [], settings: { theme: 'system' as const, startDate: '' }, history: [],
+  const blank = (): import('../src/types').AppState => ({
+    progress: [], settings: { theme: 'system', startDate: '' }, history: [],
     proverbJournals: [], customDevotionals: [], scriptureSprints: [],
     completedBooks: new Set<string>(),
   });

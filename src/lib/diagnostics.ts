@@ -13,6 +13,7 @@
 
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from './firebase';
+import { getLastSyncError, describeSyncError } from './sync';
 
 const STORAGE_KEY = 'logos_diagnostics_v1';
 const MAX_ENTRIES = 60;
@@ -111,6 +112,10 @@ export function getDiagnosticReport(): string {
     `Generated: ${new Date().toISOString()}`,
     `App version: ${__APP_VERSION__}`,
     `Signed in: ${auth.currentUser ? `yes (${auth.currentUser.uid.slice(0, 6)}…)` : 'no'}`,
+    `Last sync error: ${(() => {
+      const f = getLastSyncError();
+      return f ? `${describeSyncError(f)} [at ${f.at}] ${f.message}` : 'none';
+    })()}`,
     `Device: ${JSON.stringify(getDeviceInfo())}`,
     '',
     '--- Recent events (oldest first) ---',
