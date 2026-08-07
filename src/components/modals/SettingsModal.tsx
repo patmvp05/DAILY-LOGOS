@@ -211,7 +211,7 @@ interface SettingsModalProps {
                         const themeId = id as AppState['settings']['theme'];
                         dispatch({ type: 'SET_THEME', theme: themeId });
                         if (user) {
-                          setUserSettings(user.uid, { theme: themeId })
+                          setUserSettings(user.uid, { theme: themeId }, state.settings)
                             .catch(err => console.error("Theme sync failed:", err));
                         }
                       }}
@@ -253,7 +253,7 @@ interface SettingsModalProps {
                       
                       dispatch({ type: 'SET_START_DATE', date: isoDate });
                       if (user) {
-                        setUserSettings(user.uid, { startDate: isoDate })
+                        setUserSettings(user.uid, { startDate: isoDate }, state.settings)
                           .catch(err => console.error("Start date sync failed:", err));
                       }
                     }}

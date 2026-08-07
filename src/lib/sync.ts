@@ -148,9 +148,31 @@ export const writeActionBatch = track('writeActionBatch', async (uid: string, ac
   await batch.commit();
 });
 
-export const setUserSettings = track('setUserSettings', async (uid: string, settings: Partial<UserSettings>) => {
+/**
+ * Write the user's settings document.
+ *
+ * ALWAYS sends startDate + theme, never just the field that changed. With
+ * merge:true a write to a users/{uid} doc that does not exist yet is a CREATE,
+ * and the create rule runs isValidUser(), which requires
+ * hasAll(['startDate','theme','updatedAt']). A partial {theme} write therefore
+ * failed with permission-denied — a TERMINAL code, so the sync badge latched
+ * red — for any account whose cloud user doc had never been created (e.g. a
+ * start date chosen as a guest, then signing in: onboarding is gated on the
+ * LOCAL startDate, so the doc-creating path never ran). Sending all three
+ * fields still satisfies the update rule's
+ * affectedKeys().hasOnly(['theme','updatedAt','startDate']).
+ *
+ * `current` is the app's live settings, so an unchanged field is written back
+ * as-is rather than being invented.
+ */
+export const setUserSettings = track('setUserSettings', async (
+  uid: string,
+  settings: Partial<UserSettings>,
+  current?: Partial<UserSettings>
+) => {
   await setDoc(getUserRef(uid), {
-    ...settings,
+    startDate: settings.startDate ?? current?.startDate ?? new Date().toISOString(),
+    theme: settings.theme ?? current?.theme ?? 'system',
     updatedAt: serverTimestamp()
   }, { merge: true });
 });

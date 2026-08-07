@@ -43,18 +43,29 @@ jobs:
           rm -f "$RUNNER_TEMP/firebase-sa.json"
           exit $status
 
-      - name: Warn if rules did not deploy
-        if: steps.rules.outcome == 'failure'
-        run: |
-          echo "::warning title=Firestore rules were NOT deployed::Cloud sync for any \
-          new collection stays disabled until this succeeds. If the log shows HTTP 403 \
-          'The caller does not have permission', grant the service account in \
-          FIREBASE_SERVICE_ACCOUNT the 'Firebase Rules Admin' role \
-          (roles/firebaserules.admin) in Google Cloud IAM, then re-run this workflow."
-
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live
           projectId: gen-lang-client-0538747272
+
+      # Hosting has shipped by this point, so app fixes are never held hostage to
+      # an IAM problem — but the RUN MUST GO RED when rules did not publish.
+      #
+      # This previously only printed a ::warning:: and the job stayed green.
+      # `continue-on-error: true` also makes a failed step report
+      # conclusion=success (only `outcome` is failure), so the run looked
+      # entirely successful while every write to a newly-added collection was
+      # being denied in production. That is exactly how sprint sync shipped
+      # against rules that rejected it.
+      - name: Fail the run if Firestore rules did not deploy
+        if: steps.rules.outcome == 'failure'
+        run: |
+          echo "::error title=Firestore rules were NOT deployed::Hosting shipped, but the \
+          security rules did not. Cloud sync for any newly-added collection is DENIED in \
+          production until this succeeds. If the log above shows HTTP 403 'The caller does \
+          not have permission', grant the service account in FIREBASE_SERVICE_ACCOUNT the \
+          'Firebase Rules Admin' role (roles/firebaserules.admin) in Google Cloud IAM, then \
+          re-run this workflow."
+          exit 1
