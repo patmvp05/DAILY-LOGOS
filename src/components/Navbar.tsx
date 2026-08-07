@@ -19,7 +19,7 @@ import {
 import { format, parseISO } from 'date-fns';
 import { cn } from '../lib/utils';
 import { useStandaloneDetection } from '../hooks/useStandaloneDetection';
-import { getLastSyncError, describeSyncError } from '../lib/sync';
+import { getLastSyncError, describeSyncError } from '../lib/syncStatus';
 import { type User } from 'firebase/auth';
 
 const WeatherWidget = lazy(() => import('./WeatherWidget'));
