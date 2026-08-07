@@ -150,9 +150,9 @@ export default function App() {
     const newTheme = themes[(currentIndex + 1) % themes.length];
     dispatch({ type: 'SET_THEME', theme: newTheme });
     if (user) {
-      setUserSettings(user.uid, { theme: newTheme });
+      setUserSettings(user.uid, { theme: newTheme }, state.settings);
     }
-  }, [state.settings.theme, user, dispatch]);
+  }, [state.settings, user, dispatch]);
 
   return (
     <div className={cn("min-h-[100dvh] transition-colors duration-300", "bg-[var(--bg-secondary)] text-[var(--text-primary)]", state.settings.theme === 'dark' && "dark", state.settings.theme === 'system' && prefersDark && "dark")}>
