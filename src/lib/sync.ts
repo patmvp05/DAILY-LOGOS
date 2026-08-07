@@ -26,82 +26,10 @@ import {
 import { type User } from 'firebase/auth';
 import { Progress, UserSettings, HistoryEntry, ProverbJournal, SprintHour } from '../types';
 import { logDiagnostic } from './diagnostics';
+import { syncTracker, recordSyncError } from './syncStatus';
 
-// Lightweight write-status tracker driving the navbar sync badge.
-// Firestore itself handles offline queueing, durability, and retry —
-// this only reports whether writes are in flight.
-type Listener = (status: 'idle' | 'syncing' | 'synced' | 'error' | 'offline') => void;
-let inflight = 0;
-const listeners = new Set<Listener>();
-const notify = () => {
-  if (!navigator.onLine) {
-    listeners.forEach(l => l('offline'));
-    return;
-  }
-  const status = inflight > 0 ? 'syncing' : 'synced';
-  listeners.forEach(l => l(status));
-};
-
-if (typeof window !== 'undefined') {
-  window.addEventListener('online', notify);
-  window.addEventListener('offline', notify);
-}
-
-export const syncTracker = {
-  subscribe(l: Listener) {
-    listeners.add(l);
-    notify();
-    return () => { listeners.delete(l); };
-  },
-  begin() { inflight++; notify(); },
-  end(success: boolean) {
-    inflight = Math.max(0, inflight - 1);
-    if (!success) listeners.forEach(l => l('error'));
-    else notify();
-  }
-};
-
-/**
- * The most recent sync failure, so "Sync Error" can say WHY.
- *
- * The badge used to be a red dot with no explanation and no record of the
- * cause anywhere — impossible to diagnose without the device in hand.
- */
-export interface SyncFailure {
-  operation: string;
-  code: string;
-  message: string;
-  at: string; // ISO
-}
-
-let lastSyncError: SyncFailure | null = null;
-
-export const getLastSyncError = (): SyncFailure | null => lastSyncError;
-
-/** Record a failure from outside the write path (e.g. a snapshot listener). */
-export function recordSyncError(operation: string, e: unknown) {
-  const err = e as { code?: string; message?: string };
-  lastSyncError = {
-    operation,
-    code: err?.code || 'unknown',
-    message: String(err?.message || e).slice(0, 300),
-    at: new Date().toISOString(),
-  };
-}
-
-/** A human-readable one-liner for the badge tooltip / diagnostics report. */
-export function describeSyncError(f: SyncFailure | null): string {
-  if (!f) return '';
-  const hint =
-    f.code === 'permission-denied'
-      ? ' — the security rules rejected this write. If a feature was just added, its rules may not be published yet.'
-      : f.code === 'unavailable'
-        ? ' — could not reach Firestore. This usually clears itself when the connection returns.'
-        : f.code === 'unauthenticated'
-          ? ' — signed out. Sign in again to resume syncing.'
-          : '';
-  return `${f.operation} failed (${f.code})${hint}`;
-}
+export { syncTracker, recordSyncError, getLastSyncError, describeSyncError } from './syncStatus';
+export type { SyncFailure, SyncStatus } from './syncStatus';
 
 // Wraps a write so the badge reflects in-flight state. Writes are durable
 // in Firestore's local cache immediately; the promise resolves on server ack.
@@ -110,13 +38,12 @@ const track = <T extends unknown[]>(operation: string, fn: (...args: T) => Promi
     syncTracker.begin();
     try {
       await fn(...args);
-      lastSyncError = null; // a success clears the last failure
       syncTracker.end(true);
     } catch (e) {
       recordSyncError(operation, e);
       console.error(`[Sync] ${operation} failed:`, e);
       logDiagnostic('sync', 'error', `${operation} failed`, e);
-      syncTracker.end(false);
+      syncTracker.end(false, (e as { code?: string })?.code);
       throw e;
     }
   };

@@ -13,7 +13,7 @@
 
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from './firebase';
-import { getLastSyncError, describeSyncError } from './sync';
+import { getLastSyncError, describeSyncError } from './syncStatus';
 
 const STORAGE_KEY = 'logos_diagnostics_v1';
 const MAX_ENTRIES = 60;

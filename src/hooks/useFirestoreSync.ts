@@ -27,7 +27,7 @@ import {
 import { AppAction, resolveProgressConflict } from '../state/appReducer';
 import { Progress, HistoryEntry, ProverbJournal, Devotional, AppState, UserSettings, ScriptureSprint, SprintHour } from '../types';
 import { logDiagnostic } from '../lib/diagnostics';
-import { writeActionBatch, writeSprintHour, recordSyncError } from '../lib/sync';
+import { writeActionBatch, writeSprintHour, recordSyncError, syncTracker } from '../lib/sync';
 
 const COLLECTION_COUNT = 7;
 
@@ -91,6 +91,9 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     ) => {
       unsubs.push(onSnapshot(ref as Query, (snap) => {
         if (!isActive) return;
+        // A snapshot proves the connection is healthy, so a lingering
+        // transient write error can stop showing as a red badge.
+        syncTracker.noteHealthyTraffic();
         onSnap(snap as S);
         markFired(name);
       }, (err: Error) => {
