@@ -19,6 +19,7 @@ import {
 import { format, parseISO } from 'date-fns';
 import { cn } from '../lib/utils';
 import { useStandaloneDetection } from '../hooks/useStandaloneDetection';
+import { getLastSyncError, describeSyncError } from '../lib/sync';
 import { type User } from 'firebase/auth';
 
 const WeatherWidget = lazy(() => import('./WeatherWidget'));
@@ -128,6 +129,8 @@ const NavbarComponent = memo(({
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       className="flex items-center gap-2"
+                      // Name the actual failure instead of a bare red dot.
+                      title={describeSyncError(getLastSyncError()) || 'Sync failed. Open LOGS for details.'}
                     >
                       <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
                       <p className="text-[8px] font-black uppercase tracking-widest text-red-500">
