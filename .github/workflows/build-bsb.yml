@@ -1,0 +1,65 @@
+name: Build BSB (bereanbible.com bulk)
+
+# The Berean Standard Bible needs no scraping: bereanbible.com publishes the
+# whole text as ONE tab-separated file (~4.3 MB) dedicated to the public domain.
+# One request replaces 1,189, so this finishes in seconds with no rate limiting,
+# no partial runs and nothing to resume — unlike the BibleGateway scrapers.
+#
+# The builder refuses to write unless all 1,189 chapters parsed, so a truncated
+# download can never commit a half-Bible that the app would paper over with a
+# KJV fallback.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-bsb.yml'
+      - 'scripts/fetch-bsb-berean.mjs'
+      - 'scripts/lib/bibleBooks.mjs'
+  workflow_dispatch:
+
+concurrency:
+  group: scrape-bible
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build BSB static files
+        run: node scripts/fetch-bsb-berean.mjs
+
+      - name: Verify completeness before committing
+        run: |
+          HAVE=$(find public/bible/BSB -name '*.json' | wc -l | tr -d ' ')
+          echo "BSB chapters built: ${HAVE} / 1189"
+          [ "${HAVE}" -eq 1189 ] || { echo "::error::BSB incomplete (${HAVE}/1189)"; exit 1; }
+          echo "--- spot check: Genesis 1:1 ---"
+          head -c 300 public/bible/BSB/1/1.json; echo
+          echo "--- spot check: Psalms 23 (source calls it 'Psalm') ---"
+          head -c 300 public/bible/BSB/19/23.json; echo
+
+      - name: Commit BSB static files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/bible/BSB/
+          if git diff --cached --quiet; then
+            echo "BSB already up to date"
+          else
+            COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
+            git commit -m "Add BSB Bible text from bereanbible.com (${COUNT} chapter files)"
+            git pull --rebase origin main || true
+            git push origin main
+          fi

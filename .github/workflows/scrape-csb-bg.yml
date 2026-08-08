@@ -1,0 +1,82 @@
+name: Scrape CSB (BibleGateway)
+
+# bolls.life does NOT carry the Christian Standard Bible (get-text/CSB returns
+# []), so CSB comes from BibleGateway using the same parser as NCV — verified on
+# a runner: John 3 / Psalm 23 / 3 John 1 / Obadiah 1 all return verse spans in
+# the exact `text <Book>-<ch>-<v>` form the parser keys on.
+#
+# A fast SMOKE step fails in ~1 min if BibleGateway is unreachable. The full
+# scrape is resumable and always commits whatever it got, so re-running
+# converges to all 1,189 chapters.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/scrape-csb-bg.yml'
+  workflow_dispatch:
+
+# Shared with the other Bible scrapers: BibleGateway rate-limits, and two
+# concurrent scrapers would also race on committing public/bible/.
+concurrency:
+  group: scrape-bible
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install scraper deps
+        run: pip install requests beautifulsoup4
+
+      - name: Smoke test — CSB John 3 via BibleGateway
+        env:
+          SMOKE: '1'
+          BG_VERSION: CSB
+        run: python scripts/fetch-biblegateway.py
+
+      # Allowed to time out — partial progress is committed below; re-run resumes.
+      - name: Scrape CSB
+        id: scrape
+        continue-on-error: true
+        timeout-minutes: 50
+        env:
+          BG_VERSION: CSB
+        run: python scripts/fetch-biblegateway.py
+
+      - name: Commit CSB static files (even if incomplete)
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          [ -d public/bible ] && git add public/bible/ || echo "no public/bible yet"
+          if git diff --cached --quiet; then
+            echo "No new CSB files to commit"
+          else
+            COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
+            git commit -m "Add CSB Bible text via BibleGateway CI (+${COUNT} chapter files)"
+            git pull --rebase origin main || true
+            git push origin main
+          fi
+
+      - name: Report CSB completeness
+        if: always()
+        run: |
+          HAVE=$(find public/bible/CSB -name '*.json' 2>/dev/null | wc -l | tr -d ' ')
+          echo "CSB chapters present: ${HAVE} / 1189"
+          if [ "${HAVE}" -lt 1189 ]; then
+            echo "::warning::CSB incomplete (${HAVE}/1189). Re-run to fill the rest."
+          else
+            echo "CSB complete ✅"
+          fi

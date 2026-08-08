@@ -169,6 +169,13 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
   { id: 'esv',  name: 'English Standard Version',  source: 'bolls', code: 'ESV',  modern: true },
   { id: 'nkjv', name: 'New King James Version',    source: 'bolls', code: 'NKJV', modern: true },
   { id: 'ncv',  name: 'New Century Version',        source: 'bolls', code: 'NCV',  modern: true },
+  // Also static files, but NOT from bolls (it carries neither): CSB is scraped
+  // from BibleGateway (scripts/fetch-biblegateway.py, BG_VERSION=CSB) and BSB is
+  // built from bereanbible.com's single public-domain bulk file
+  // (scripts/fetch-bsb-berean.mjs). `source: 'bolls'` only means "served from
+  // public/bible/{CODE}/" — see AGENTS.md.
+  { id: 'csb',  name: 'Christian Standard Bible',  source: 'bolls', code: 'CSB',  modern: true },
+  { id: 'bsb',  name: 'Berean Standard Bible',     source: 'bolls', code: 'BSB',  modern: true },
   // Modern, public-domain — via bible-api.com (always reliable, cached, offline)
   { id: 'web',  name: 'World English Bible',       source: 'bibleapi', code: 'web', modern: true },
   // Classic, public-domain — via bible-api.com
