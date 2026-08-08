@@ -18,8 +18,16 @@ on:
       - 'scripts/lib/bibleBooks.mjs'
   workflow_dispatch:
 
+# Per-WORKFLOW concurrency, deliberately not a single shared group.
+#
+# GitHub keeps only ONE pending run per concurrency group: a newly queued run
+# cancels the previously-pending one rather than lining up behind it. With all
+# the scrapers sharing one group, dispatching a second scraper silently
+# CANCELLED the first instead of queuing it. Each scraper writes to its own
+# public/bible/{CODE}/ directory and its commit step rebase-retries, so they are
+# safe to run at the same time; only a workflow racing ITSELF needs serialising.
 concurrency:
-  group: scrape-bible
+  group: ${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:
@@ -60,6 +68,11 @@ jobs:
           else
             COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
             git commit -m "Add BSB Bible text from bereanbible.com (${COUNT} chapter files)"
-            git pull --rebase origin main || true
-            git push origin main
+            for attempt in 1 2 3 4 5; do
+              if git push origin main; then echo "pushed"; break; fi
+              echo "push rejected (attempt $attempt) — rebasing"
+              git pull --rebase origin main || true
+              [ "$attempt" = "5" ] && { echo "::error::could not push after 5 attempts"; exit 1; }
+              sleep $((attempt * 5))
+            done
           fi

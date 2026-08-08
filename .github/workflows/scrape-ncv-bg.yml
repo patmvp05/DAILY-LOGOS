@@ -14,8 +14,12 @@ on:
       - 'scripts/fetch-biblegateway.py'
   workflow_dispatch:
 
+# Per-workflow, not a shared group: GitHub keeps only ONE pending run per
+# group, so a shared group means a newly queued scraper CANCELS a waiting one
+# instead of lining up behind it. Each scraper owns its own public/bible/{CODE}/
+# directory, so only a workflow racing itself needs serialising.
 concurrency:
-  group: scrape-bible
+  group: ${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:

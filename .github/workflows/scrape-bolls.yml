@@ -22,10 +22,16 @@ on:
         required: false
         default: 'NIV,NLT,ESV,NKJV'
 
-# Shared with the other Bible scrapers so BSB/CSB/NCV runs can't interleave
-# their commits with these.
+# Per-WORKFLOW concurrency, deliberately not a single shared group.
+#
+# GitHub keeps only ONE pending run per concurrency group: a newly queued run
+# cancels the previously-pending one rather than lining up behind it. With all
+# the scrapers sharing one group, dispatching a second scraper silently
+# CANCELLED the first instead of queuing it. Each scraper writes to its own
+# public/bible/{CODE}/ directory and its commit step rebase-retries, so they are
+# safe to run at the same time; only a workflow racing ITSELF needs serialising.
 concurrency:
-  group: scrape-bible
+  group: ${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:
