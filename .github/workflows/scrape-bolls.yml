@@ -1,0 +1,113 @@
+name: Scrape bolls translations (NIV/NLT/ESV/NKJV)
+
+# These four are listed in BIBLE_VERSIONS but have never had static files
+# committed, so selecting one silently serves the KJV fallback. bolls.life does
+# carry all four (verified — see AGENTS.md), and scripts/fetch-bible-static.mjs
+# already knows how to fetch them; there was simply no workflow to run it.
+#
+# One job per version via a matrix with max-parallel: 1. Serialising matters:
+# every job commits to public/bible/ on main, and parallel jobs would race on
+# the push. Running one at a time means each job checks out the previous job's
+# commit, so there is nothing to reconcile.
+#
+# Each version is ~1189 requests at a 500 ms polite delay (~10-15 min). The
+# scrape is resumable — it skips chapters whose files already exist — so a job
+# that hits its timeout just needs a re-run to fill the remainder.
+
+on:
+  workflow_dispatch:
+    inputs:
+      versions:
+        description: 'Comma-separated codes to scrape (default: all four)'
+        required: false
+        default: 'NIV,NLT,ESV,NKJV'
+
+# Shared with the other Bible scrapers so BSB/CSB/NCV runs can't interleave
+# their commits with these.
+concurrency:
+  group: scrape-bible
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+    steps:
+      - id: build
+        run: |
+          RAW='${{ github.event.inputs.versions || ''NIV,NLT,ESV,NKJV'' }}'
+          JSON=$(echo "$RAW" | tr ',' '\n' | sed 's/[[:space:]]//g' | grep -v '^$' \
+                 | jq -R . | jq -sc .)
+          echo "matrix=$JSON" >> "$GITHUB_OUTPUT"
+          echo "Will scrape: $JSON"
+
+  scrape:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      max-parallel: 1        # see header — avoids racing on the push to main
+      fail-fast: false       # one unavailable version must not block the rest
+      matrix:
+        version: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # bolls answers 200 with `[]` for versions it doesn't carry, so without
+      # this a missing translation would look like a clean run that wrote nothing.
+      - name: Smoke test — ${{ matrix.version }} John 3
+        env:
+          SMOKE: '1'
+          ONLY_VERSION: ${{ matrix.version }}
+        run: node scripts/fetch-bible-static.mjs
+
+      - name: Scrape ${{ matrix.version }}
+        id: scrape
+        continue-on-error: true
+        timeout-minutes: 45
+        env:
+          ONLY_VERSION: ${{ matrix.version }}
+        run: node scripts/fetch-bible-static.mjs
+
+      - name: Commit ${{ matrix.version }} (even if incomplete)
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/bible/ || true
+          if git diff --cached --quiet; then
+            echo "No new ${{ matrix.version }} files to commit"
+            exit 0
+          fi
+          COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
+          git commit -m "Add ${{ matrix.version }} Bible text from bolls.life (+${COUNT} chapter files)"
+          # Serialised by max-parallel, but the daily devotional bot also pushes
+          # to main, so rebase-and-retry rather than fail on a lost race.
+          for attempt in 1 2 3 4 5; do
+            if git push origin main; then echo "pushed"; exit 0; fi
+            echo "push rejected (attempt $attempt) — rebasing"
+            git pull --rebase origin main || true
+            sleep $((attempt * 5))
+          done
+          echo "::error::Could not push ${{ matrix.version }} after 5 attempts"
+          exit 1
+
+      - name: Report ${{ matrix.version }} completeness
+        if: always()
+        run: |
+          HAVE=$(find "public/bible/${{ matrix.version }}" -name '*.json' 2>/dev/null | wc -l | tr -d ' ')
+          echo "${{ matrix.version }} chapters present: ${HAVE} / 1189"
+          if [ "${HAVE}" -lt 1189 ]; then
+            echo "::warning::${{ matrix.version }} incomplete (${HAVE}/1189). Re-run to fill the rest."
+          else
+            echo "${{ matrix.version }} complete ✅"
+          fi
