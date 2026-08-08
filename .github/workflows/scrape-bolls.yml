@@ -42,7 +42,10 @@ jobs:
     steps:
       - id: build
         run: |
-          RAW='${{ github.event.inputs.versions || ''NIV,NLT,ESV,NKJV'' }}'
+          # Read the input into bash first — quoting a GitHub expression inside
+          # a single-quoted bash string is what broke this workflow's parse.
+          RAW="${{ github.event.inputs.versions }}"
+          RAW="${RAW:-NIV,NLT,ESV,NKJV}"
           JSON=$(echo "$RAW" | tr ',' '\n' | sed 's/[[:space:]]//g' | grep -v '^$' \
                  | jq -R . | jq -sc .)
           echo "matrix=$JSON" >> "$GITHUB_OUTPUT"
