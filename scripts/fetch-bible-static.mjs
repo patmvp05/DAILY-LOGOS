@@ -31,6 +31,21 @@ const VERSIONS = ONLY.length
   ? ALL_VERSIONS.filter((v) => ONLY.includes(v.code))
   : ALL_VERSIONS;
 
+// A typo'd code would otherwise select nothing and exit 0 — a "successful" run
+// that scraped no chapters, and a smoke test that passed without testing.
+if (ONLY.length && VERSIONS.length === 0) {
+  console.error(
+    `ONLY_VERSION="${process.env.ONLY_VERSION}" matched no known version. ` +
+    `Known: ${ALL_VERSIONS.map((v) => v.code).join(', ')}`
+  );
+  process.exit(1);
+}
+const unknown = ONLY.filter((c) => !ALL_VERSIONS.some((v) => v.code === c));
+if (unknown.length) {
+  console.error(`Unknown version code(s) ignored: ${unknown.join(', ')}`);
+  process.exit(1);
+}
+
 const BOOKS = [
   { id: 1, name: 'Genesis', chapters: 50 },
   { id: 2, name: 'Exodus', chapters: 40 },
@@ -182,6 +197,27 @@ async function main() {
   const totalChapters = BOOKS.reduce((sum, b) => sum + b.chapters, 0);
   let fetched = 0;
   let errors = 0;
+
+  // SMOKE=1 fetches only John 3 per selected version and asserts it's real.
+  // bolls returns HTTP 200 with an empty array `[]` for versions it doesn't
+  // carry, so a missing translation looks like a successful run that quietly
+  // writes nothing — this turns that into an immediate, obvious failure.
+  if (process.env.SMOKE === '1') {
+    for (const ver of VERSIONS) {
+      const raw = await fetchChapter(ver.code, 43, 3);
+      const shaped = toChapterResponse(raw, 'John', 3, ver.code, ver.name);
+      if (!shaped || shaped.verses.length < 5) {
+        throw new Error(
+          `SMOKE FAILED [${ver.code}]: John 3 returned ` +
+          `${Array.isArray(raw) ? raw.length : 'non-array'} entries — bolls.life ` +
+          `likely does not carry this version.`
+        );
+      }
+      console.log(`SMOKE OK [${ver.code}]: John 3 -> ${shaped.verses.length} verses; ` +
+                  `v1: ${JSON.stringify(shaped.verses[0].text.slice(0, 80))}`);
+    }
+    return;
+  }
 
   for (const ver of VERSIONS) {
     console.log(`\n📖 Fetching ${ver.name} (${ver.code})...`);
