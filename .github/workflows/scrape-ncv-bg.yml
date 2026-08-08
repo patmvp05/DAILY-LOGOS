@@ -11,7 +11,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/scrape-ncv-bg.yml'
-      - 'scripts/fetch-ncv-biblegateway.py'
+      - 'scripts/fetch-biblegateway.py'
   workflow_dispatch:
 
 concurrency:
@@ -39,14 +39,17 @@ jobs:
       - name: Smoke test — NCV John 3 via BibleGateway
         env:
           SMOKE: '1'
-        run: python scripts/fetch-ncv-biblegateway.py
+          BG_VERSION: NCV
+        run: python scripts/fetch-biblegateway.py
 
       # Allowed to time out — partial progress is committed below; re-run resumes.
       - name: Scrape NCV
         id: scrape
         continue-on-error: true
         timeout-minutes: 50
-        run: python scripts/fetch-ncv-biblegateway.py
+        env:
+          BG_VERSION: NCV
+        run: python scripts/fetch-biblegateway.py
 
       - name: Commit NCV static files (even if incomplete)
         if: always()

@@ -18,8 +18,27 @@
   - bolls.life HAS: NIV, NIV2011, ESV, NLT, NKJV, NASB, AMP, NET → scrape with
     `scripts/fetch-bible-static.mjs` (clean JSON API). It does NOT have NCV/CSB/NRSV/NASB2020
     (its get-text endpoint returns `[]`).
-  - **NCV** → scraped from **BibleGateway** (`scripts/fetch-ncv-biblegateway.py`,
+  - **NCV** → scraped from **BibleGateway** (`scripts/fetch-biblegateway.py`,
     requests+BeautifulSoup). bolls lacks it and the `meaningless` lib rejects it. ✅ 1189/1189 committed.
+  - **CSB** → same BibleGateway scraper, `BG_VERSION=CSB`. bolls returns `[]` for it. The
+    verse-span classes are identical across versions (runner-verified: `text John-3-1`,
+    `text Ps-23-1`, `text 3John-1-1`, `text Obad-1-1`), so one parser serves both.
+  - **BSB** → NOT scraped. bereanbible.com publishes the whole text as ONE tab-separated
+    file (`https://bereanbible.com/bsb.txt`, ~4.3 MB, ~31k verses) dedicated to the **public
+    domain**, so `scripts/fetch-bsb-berean.mjs` does one request instead of 1189 — no rate
+    limiting, nothing to resume. Runner-verified quirks the parser handles: a 3-line
+    preamble, books named **"Psalm"** (singular → mapped to "Psalms"), single-chapter books
+    as `Obadiah 1:1`, and 16 intentionally empty verses (Matt 17:21, Mark 7:16, …) that are
+    skipped. It refuses to write unless all 1189 chapters parse, so a truncated download
+    can't commit a half-Bible. Parser is unit-tested offline (`scripts/test-bsb-parser.mts`).
+  - Probing a new translation: `.github/workflows/probe-translations.yml` dumps what each
+    candidate source actually returns. Established that bolls, getbible.net and
+    bible-api.com all 404 for BSB **and** CSB, and that BibleGateway serves no verse spans
+    for BSB — so don't retry those routes.
+  - ⚠️ **NIV / NLT / ESV / NKJV are declared in `BIBLE_VERSIONS` but have NO files in
+    `public/bible/`** — only NCV (and now CSB/BSB once their workflows run) are committed.
+    Selecting one of those four silently serves the KJV fallback. Run
+    `scripts/fetch-bible-static.mjs` with `ONLY_VERSION=` to fill them.
 - **Regenerating static text (no local machine needed):** GitHub Actions runs the scrapers
   ON GITHUB'S RUNNERS, which CAN reach bolls.life / BibleGateway (the sandbox can't).
   - NCV: `.github/workflows/scrape-ncv-bg.yml` (BibleGateway). Has a fail-fast smoke test,

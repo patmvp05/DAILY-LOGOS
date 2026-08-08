@@ -1,0 +1,62 @@
+name: Probe BSB / CSB sources
+
+# Fast diagnostic (seconds). The dev sandbox cannot reach any Bible source, so
+# this runs on GitHub's runner to establish — with evidence, not assumption —
+# exactly how BSB and CSB parse, before a scraper is written.
+#
+# Round 1 established:
+#   BSB -> bereanbible.com/bsb.txt  (HTTP 200, 4.3MB, 31105 lines, public domain)
+#          bolls / getbible / bible-api all 404; BibleGateway serves no verse spans.
+#   CSB -> BibleGateway (39 spans matched the existing NCV parser regex on John 3)
+# Round 2 (this file) nails the bsb.txt record format and the CSB markup.
+
+on:
+  push:
+    paths:
+      - '.github/workflows/probe-translations.yml'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: bsb.txt record format
+        run: |
+          curl -sS -m 60 -o /tmp/bsb.txt https://bereanbible.com/bsb.txt
+          echo "bytes: $(wc -c < /tmp/bsb.txt)   lines: $(wc -l < /tmp/bsb.txt)"
+          echo
+          echo "===== first 8 lines (cat -A to expose tabs/CRLF) ====="
+          head -8 /tmp/bsb.txt | cat -A | cut -c1-200
+          echo
+          echo "===== last 4 lines ====="
+          tail -4 /tmp/bsb.txt | cat -A | cut -c1-200
+          echo
+          echo "===== how many TAB-separated fields per line? ====="
+          awk -F'\t' 'NR>3 && NR<10 {print NR": fields="NF"  [1]="$1"  [2]="substr($2,1,90)}' /tmp/bsb.txt
+          echo
+          echo "===== reference formats across tricky books ====="
+          grep -nE $'^(Genesis 1:1|Psalm 23:1|Psalms 23:1|Song of Solomon 1:1|Song of Songs 1:1|3 John 1:1|Jude 1:1|Obadiah 1:1|Revelation 22:21)\t' /tmp/bsb.txt | cut -c1-160
+          echo
+          echo "===== distinct book names (first token group before chapter:verse) ====="
+          awk -F'\t' 'NR>3 {ref=$1; sub(/ [0-9]+:[0-9]+$/,"",ref); print ref}' /tmp/bsb.txt | uniq | tr '\n' '|'
+          echo
+          echo
+          echo "===== any verse text containing a tab or newline artifact? ====="
+          awk -F'\t' 'NR>3 && NF!=2 {c++} END {print "lines whose field count != 2: " (c+0)}' /tmp/bsb.txt
+          echo "===== verses that look empty ====="
+          awk -F'\t' 'NR>3 && length($2)<2 {c++; if(c<6) print "  "$1" -> ["$2"]"} END {print "empty-ish verses: " (c+0)}' /tmp/bsb.txt
+
+      - name: CSB markup on BibleGateway
+        run: |
+          UA='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
+          for ref in "John+3" "Psalm+23" "3+John+1" "Obadiah+1"; do
+            echo "===== CSB $ref ====="
+            curl -sS -m 30 -H "User-Agent: $UA" -o /tmp/csb.html \
+              "https://www.biblegateway.com/passage/?search=$ref&version=CSB"
+            echo "  bytes: $(wc -c < /tmp/csb.html)"
+            echo "  verse-span classes seen (sample):"
+            grep -oE 'class="text [A-Za-z0-9]+-[0-9]+-[0-9]+"' /tmp/csb.html | sort -u | head -5 | sed 's/^/    /'
+            echo "  total verse spans: $(grep -oE 'class="text [A-Za-z0-9]+-[0-9]+-[0-9]+"' /tmp/csb.html | wc -l)"
+            echo "  copyright line:"
+            grep -oiE 'Christian Standard Bible[^<]{0,120}' /tmp/csb.html | head -1 | sed 's/^/    /'
+          done

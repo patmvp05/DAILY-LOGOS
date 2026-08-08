@@ -1,19 +1,27 @@
 #!/usr/bin/env python3
 """
-Scrape the New Century Version (NCV) directly from BibleGateway and write it as
-static JSON under public/bible/NCV/{bookId}/{chapter}.json — the exact
-ChapterTextResponse shape the app's getChapterText() expects.
+Scrape a translation from BibleGateway and write it as static JSON under
+public/bible/{CODE}/{bookId}/{chapter}.json — the exact ChapterTextResponse
+shape the app's getChapterText() expects.
 
-Why direct (not the `meaningless` lib): bolls.life doesn't carry NCV at all, and
-`meaningless` rejects NCV via a hardcoded allowlist (UnsupportedTranslationError).
-BibleGateway DOES serve NCV, so we fetch its passage HTML and parse the verse
-spans ourselves with BeautifulSoup.
+Why direct (not the `meaningless` lib): bolls.life carries neither NCV nor CSB
+(its get-text endpoint returns []), and `meaningless` rejects them via a
+hardcoded allowlist. BibleGateway DOES serve both, so we fetch its passage HTML
+and parse the verse spans ourselves with BeautifulSoup. The span classes are
+identical across versions (verified on a runner: `text John-3-1`, `text Ps-23-1`,
+`text 3John-1-1`, `text Obad-1-1`), so one parser covers every version.
+
+Configured by env so one script serves every BibleGateway-sourced translation
+(defaults to NCV, which is what shipped first):
+  BG_VERSION  BibleGateway's version parameter   (default NCV)
+  BG_CODE     output dir + translationId          (default = BG_VERSION)
+  BG_NAME     translationName written into files  (default from KNOWN_NAMES)
 
 Resumable: skips chapters whose files already exist. Set SMOKE=1 to fetch just
 John 3 and assert it's non-empty (fast reachability/capability check). DELAY
 tunes the polite gap between requests.
 
-Run:  python scripts/fetch-ncv-biblegateway.py
+Run:  BG_VERSION=CSB python scripts/fetch-biblegateway.py
 """
 import os
 import re
@@ -46,7 +54,16 @@ BOOKS = [
     ("3 John", 64, 1), ("Jude", 65, 1), ("Revelation", 66, 22),
 ]
 
-OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "bible", "NCV")
+KNOWN_NAMES = {
+    "NCV": "New Century Version",
+    "CSB": "Christian Standard Bible",
+}
+
+VERSION = os.environ.get("BG_VERSION", "NCV").strip().upper()
+CODE = os.environ.get("BG_CODE", VERSION).strip().upper()
+NAME = os.environ.get("BG_NAME", KNOWN_NAMES.get(CODE, CODE))
+
+OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "bible", CODE)
 DELAY = float(os.environ.get("DELAY", "1.0"))
 MAX_RETRIES = 5
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
@@ -63,7 +80,7 @@ def fetch_chapter(book_name, chapter):
     """Return a list of {verse, text} for one chapter, or [] if nothing usable."""
     resp = session.get(
         "https://www.biblegateway.com/passage/",
-        params={"search": f"{book_name} {chapter}", "version": "NCV"},
+        params={"search": f"{book_name} {chapter}", "version": VERSION},
         timeout=30,
     )
     resp.raise_for_status()
@@ -101,8 +118,9 @@ def fetch_chapter(book_name, chapter):
 def main():
     if os.environ.get("SMOKE") == "1":
         verses = fetch_chapter("John", 3)
-        assert len(verses) > 5, f"NCV John 3 returned only {len(verses)} verses"
-        print(f"SMOKE OK: John 3 -> {len(verses)} verses; v1: {verses[0]['text'][:80]!r}", flush=True)
+        assert len(verses) > 5, f"{VERSION} John 3 returned only {len(verses)} verses"
+        print(f"SMOKE OK [{VERSION}]: John 3 -> {len(verses)} verses; "
+              f"v1: {verses[0]['text'][:80]!r}", flush=True)
         return
 
     total = sum(c for _, _, c in BOOKS)
@@ -128,13 +146,13 @@ def main():
                         json.dump({
                             "reference": f"{name} {ch}",
                             "verses": verses,
-                            "translationId": "NCV",
-                            "translationName": "New Century Version",
+                            "translationId": CODE,
+                            "translationName": NAME,
                         }, fh, ensure_ascii=False)
                     fetched += 1
                     ok = True
                     if fetched % 50 == 0:
-                        print(f"  NCV {fetched}/{total} ({name} {ch})", flush=True)
+                        print(f"  {CODE} {fetched}/{total} ({name} {ch})", flush=True)
                     time.sleep(DELAY)
                     break
                 except Exception as e:  # noqa: BLE001 - best effort, gap filled on re-run
@@ -142,9 +160,9 @@ def main():
                         time.sleep(min(2 * (2 ** attempt), 30))
                     else:
                         errors += 1
-                        print(f"  x NCV {name} {ch}: {e}", flush=True)
+                        print(f"  x {CODE} {name} {ch}: {e}", flush=True)
 
-    print(f"\nNCV done: {fetched}/{total} present, {errors} still missing", flush=True)
+    print(f"\n{CODE} done: {fetched}/{total} present, {errors} still missing", flush=True)
 
 
 if __name__ == "__main__":
