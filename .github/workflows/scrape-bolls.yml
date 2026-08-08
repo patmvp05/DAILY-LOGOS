@@ -21,6 +21,10 @@ on:
         description: 'Comma-separated codes to scrape (default: all four)'
         required: false
         default: 'NIV,NLT,ESV,NKJV'
+      force:
+        description: 'Re-fetch chapters already on disk (needed after a parser change)'
+        required: false
+        default: 'false'
 
 # Per-WORKFLOW concurrency, deliberately not a single shared group.
 #
@@ -85,6 +89,7 @@ jobs:
         timeout-minutes: 45
         env:
           ONLY_VERSION: ${{ matrix.version }}
+          FORCE: ${{ github.event.inputs.force == 'true' && '1' || '0' }}
         run: node scripts/fetch-bible-static.mjs
 
       - name: Commit ${{ matrix.version }} (even if incomplete)
