@@ -141,6 +141,50 @@ function cleanVerseText(raw) {
     .trim();
 }
 
+/**
+ * Strip bolls' embedded SECTION HEADINGS from the front of a verse.
+ *
+ * bolls puts a heading inline, separated by <br/>, so naively stripping tags
+ * glued it onto the text — committed NIV read "The Beginning In the beginning
+ * God created…" and "Psalm 23 A psalm of David. The Lord is my shepherd…".
+ * Verified raw shapes (runner probe):
+ *   NIV Ps 23:1   "Psalm 23<br/>A psalm of David.<br/>The Lord is my shepherd…"
+ *   NIV John 3:1  "Jesus Teaches Nicodemus<br/>Now there was a man…"
+ *
+ * <br/> is ALSO the poetry line break ("…green pastures,<br/>he leads me…"),
+ * so splitting on it blindly would delete scripture. A leading segment is only
+ * treated as a heading when it looks like one and cannot be prose:
+ *   - it is a LEADING segment (headings never appear mid-verse)
+ *   - it ends with NO sentence punctuation (prose and poetry lines do)
+ *   - it is short (<= 60 chars)
+ *   - it starts with a capital
+ * That keeps "A psalm of David." (superscription, ends with '.') and every
+ * poetry line, while removing "The Beginning" / "Jesus Teaches Nicodemus".
+ * At most 2 leading segments are dropped, so a mis-hit can never eat a verse.
+ *
+ * Returns { text, stripped[] } so every removal is auditable in the log
+ * rather than silently mutating scripture.
+ */
+export function stripLeadingHeadings(rawText) {
+  const parts = String(rawText).split(/<br\s*\/?>/i);
+  const stripped = [];
+  while (parts.length > 1 && stripped.length < 2) {
+    const seg = parts[0].replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    const looksLikeHeading =
+      seg.length > 0 &&
+      seg.length <= 60 &&
+      !/[.,;:!?"'\u201d\u2019)\u2014-]$/.test(seg) &&
+      /^[A-Z\u2018\u201c(]/.test(seg);
+    if (!looksLikeHeading) break;
+    // Never let stripping empty the verse: if everything after this segment is
+    // blank, the "heading" was the only content and must be kept.
+    if (!cleanVerseText(parts.slice(1).join(' '))) break;
+    stripped.push(seg);
+    parts.shift();
+  }
+  return { text: cleanVerseText(parts.join(' ')), stripped };
+}
+
 // Fetch one chapter, retrying with exponential backoff on throttling (429) and
 // transient 5xx/network errors. bolls.life rate-limits sustained scraping, so
 // backing off (rather than hammering) is what actually lets a full run finish
@@ -178,10 +222,16 @@ async function fetchChapter(version, bookId, chapter) {
  * shape getChapterText() returns, so the runtime can use the file verbatim with
  * no parsing/cleaning. (_cachedAt is stamped at fetch time on the client.)
  */
+const headingsStripped = [];
+
 function toChapterResponse(raw, bookName, chapter, code, displayName) {
   if (!Array.isArray(raw)) return null;
   const verses = raw
-    .map((v) => ({ verse: Number(v.verse), text: cleanVerseText(v.text || '') }))
+    .map((v) => {
+      const { text, stripped } = stripLeadingHeadings(v.text || '');
+      if (stripped.length) headingsStripped.push(`${bookName} ${chapter}:${v.verse} -> ${stripped.join(' | ')}`);
+      return { verse: Number(v.verse), text };
+    })
     .filter((v) => Number.isFinite(v.verse) && v.text.length > 0)
     .sort((a, b) => a.verse - b.verse);
   if (verses.length === 0) return null;
@@ -228,7 +278,10 @@ async function main() {
         const outDir = join(PUBLIC_DIR, ver.code, String(book.id));
         const outFile = join(outDir, `${ch}.json`);
 
-        if (existsSync(outFile)) {
+        // FORCE=1 re-fetches chapters already on disk. Needed when the parser
+        // itself changed (e.g. the heading fix) — resumability would otherwise
+        // keep serving the old, wrong text forever.
+        if (existsSync(outFile) && process.env.FORCE !== '1') {
           verFetched++;
           fetched++;
           continue;
@@ -255,6 +308,11 @@ async function main() {
       }
     }
     console.log(`  ${ver.code} done: ${verFetched}/${totalChapters} chapters`);
+    if (headingsStripped.length) {
+      console.log(`  ${ver.code}: removed ${headingsStripped.length} inline section headings, e.g.`);
+      headingsStripped.slice(0, 15).forEach((h) => console.log(`     ${h}`));
+      if (headingsStripped.length > 15) console.log(`     … and ${headingsStripped.length - 15} more`);
+    }
   }
 
   console.log(`\n✅ Complete: ${fetched} chapters fetched, ${errors} errors`);
@@ -268,4 +326,8 @@ async function main() {
   console.log(`  git push origin main`);
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+// Only run when executed directly. Without this, importing the module for
+// tests kicked off a real network scrape.
+if (process.argv[1] && process.argv[1].endsWith('fetch-bible-static.mjs')) {
+  main().catch((e) => { console.error(e); process.exit(1); });
+}
