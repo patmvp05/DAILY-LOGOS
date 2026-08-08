@@ -1,0 +1,84 @@
+name: Probe BSB / CSB sources
+
+# Fast diagnostic (seconds). The dev sandbox cannot reach any Bible source, so
+# this runs on GitHub's runner to establish — with evidence, not assumption —
+# where BSB and CSB can actually be fetched from, before a scraper is written.
+#
+# BSB (Berean Standard Bible) is public domain, so a BULK download is preferred
+# over 1189 HTTP requests. CSB is not on bolls.life (see AGENTS.md), so its only
+# likely route is BibleGateway, the same as NCV.
+
+on:
+  push:
+    paths:
+      - '.github/workflows/probe-translations.yml'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe every candidate source
+        run: |
+          UA='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
+          get() { curl -sS -m 30 -H "User-Agent: $UA" -H "Accept-Language: en-US,en;q=0.9" "$@"; }
+
+          echo "################ 1. bolls.life get-text (John 3 = book 43) ################"
+          for code in BSB CSB BSB2020 HCSB; do
+            body=$(get -H "Accept: application/json" -H "Referer: https://bolls.life/" \
+                     "https://bolls.life/get-text/$code/43/3/" || echo "REQUEST_FAILED")
+            n=$(printf '%s' "$body" | grep -oE '"verse"' | wc -l | tr -d ' ')
+            echo "---- $code : verses=$n"
+            printf '%s' "$body" | head -c 220; echo; echo
+          done
+
+          echo "################ 2. bolls translations list (does it name BSB/CSB?) ################"
+          get -o /tmp/langs.json -w 'HTTP %{http_code} bytes %{size_download}\n' \
+            "https://bolls.life/static/bolls/app/views/languages.json" || true
+          grep -ioE '"(BSB|CSB|HCSB|BSB2020)"|berean|christian standard|holman' /tmp/langs.json | sort -u | head -20 || echo "(no BSB/CSB mention)"
+
+          echo
+          echo "################ 3. bereanbible.com BULK downloads (BSB is public domain) ################"
+          for f in bsb.txt BSB.txt bsb_tables.xlsx berean.txt; do
+            echo "---- https://bereanbible.com/$f"
+            get -o /tmp/bulk -w '     HTTP %{http_code}  bytes %{size_download}  type %{content_type}\n' \
+              "https://bereanbible.com/$f" || true
+            if [ -s /tmp/bulk ] && head -c 4 /tmp/bulk | grep -qv 'PK'; then
+              echo "     first 3 lines:"; head -3 /tmp/bulk | sed 's/^/       /' || true
+              echo "     line count: $(wc -l < /tmp/bulk)"
+            fi
+          done
+
+          echo
+          echo "################ 4. getbible.net v2 (free API, many translations) ################"
+          get -o /tmp/gb.json -w 'translations.json HTTP %{http_code} bytes %{size_download}\n' \
+            "https://api.getbible.net/v2/translations.json" || true
+          grep -ioE '"[a-z0-9]*(bsb|berean|csb|christian standard)[a-z0-9]*"' /tmp/gb.json | sort -u | head -20 || echo "(no match)"
+          echo "-- try a chapter: /v2/bsb/43/3.json"
+          get -o /tmp/gbc.json -w '     HTTP %{http_code} bytes %{size_download}\n' \
+            "https://api.getbible.net/v2/bsb/43/3.json" || true
+          head -c 220 /tmp/gbc.json 2>/dev/null; echo
+
+          echo
+          echo "################ 5. bible-api.com (already used for WEB/KJV) ################"
+          for t in bsb csb; do
+            echo "---- translation=$t"
+            get -o /tmp/ba.json -w '     HTTP %{http_code}\n' "https://bible-api.com/John+3?translation=$t" || true
+            head -c 200 /tmp/ba.json 2>/dev/null; echo
+          done
+
+          echo
+          echo "################ 6. BibleGateway (the NCV route) ################"
+          for v in BSB CSB; do
+            echo "---- version=$v"
+            get -o /tmp/bg.html -w '     HTTP %{http_code}  bytes %{size_download}\n' \
+              "https://www.biblegateway.com/passage/?search=John+3&version=$v" || true
+            # NCV's parser keys on verse spans classed like "text John-3-16"
+            spans=$(grep -oE 'class="text John-3-[0-9]+"' /tmp/bg.html | wc -l | tr -d ' ')
+            echo "     verse spans matching the NCV parser: $spans"
+            grep -oiE '<title>[^<]{0,120}' /tmp/bg.html | head -1 | sed 's/^/     /' || true
+          done
+
+          echo
+          echo "################ SUMMARY ################"
+          echo "Read the sections above: any source with a non-zero verse/span count is viable."
