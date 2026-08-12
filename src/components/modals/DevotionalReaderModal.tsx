@@ -116,7 +116,9 @@ function DevotionalReaderModal({
 
         <div
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto bg-[var(--bg-primary)]"
+          // ios-scroll carries overscroll-behavior: contain, so reaching the end of
+          // the devotional does not chain the scroll to the page behind it.
+          className="flex-1 overflow-y-auto ios-scroll bg-[var(--bg-primary)]"
         >
           <div className="max-w-3xl mx-auto p-6 sm:p-8 lg:p-12">
             {isFetching ? (
