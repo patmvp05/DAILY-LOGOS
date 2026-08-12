@@ -10,7 +10,7 @@
     "clean": "rm -rf dist",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "test": "tsx scripts/test-conflict.mts && tsx scripts/sim-sync.mts && tsx scripts/test-chapter-text.mts && tsx scripts/test-chapter-fetch.mts && tsx scripts/test-prefetch-bible.mts && tsx scripts/test-verse-copy.mts && tsx scripts/test-devotional-content.mts && tsx scripts/test-progress-stats.mts && tsx scripts/test-resume-reading.mts && tsx scripts/test-sprint.mts && tsx scripts/test-sync-status.mts && tsx scripts/test-bsb-parser.mts && tsx scripts/test-heading-strip.mts",
+    "test": "tsx scripts/test-conflict.mts && tsx scripts/sim-sync.mts && tsx scripts/test-chapter-text.mts && tsx scripts/test-chapter-fetch.mts && tsx scripts/test-prefetch-bible.mts && tsx scripts/test-verse-copy.mts && tsx scripts/test-devotional-content.mts && tsx scripts/test-progress-stats.mts && tsx scripts/test-resume-reading.mts && tsx scripts/test-sprint.mts && tsx scripts/test-sync-status.mts && tsx scripts/test-bsb-parser.mts && tsx scripts/test-heading-strip.mts && tsx scripts/test-overlay-scroll-lock.mts",
     "test:rules": "firebase emulators:exec --only firestore --project daily-logos-rules-test \"tsx scripts/test-rules-sprints.mts\"",
     "test:rules-merge": "firebase emulators:exec --only firestore --project daily-logos-merge-test \"tsx scripts/test-sprint-merge.mts\"",
     "test:sim": "tsx scripts/sim-sync.mts",

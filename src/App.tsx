@@ -17,6 +17,7 @@ import { useAuth } from './hooks/useAuth';
 import { useTheme } from './hooks/useTheme';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useScrollLock } from './hooks/useScrollLock';
+import { isAnyOverlayOpen } from './lib/overlayState';
 import { useSyncState } from './hooks/useSyncState';
 import { usePrefersDark } from './hooks/usePrefersDark';
 
@@ -36,6 +37,7 @@ export default function App() {
     activePlanCategory, setActivePlanCategory, 
     selectingCategoryId, setSelectingCategoryId, 
     activeDevotion, setActiveDevotion,
+    readerCategoryId, activeInternalDevotional,
     showProverbModal, setShowProverbModal, showSprintModal, setShowSprintModal,
     isStartMenuOpen, setIsStartMenuOpen, confirmDialog, setConfirmDialog,
     closeConfirmDialog, toast, setToast, showToast, setJournalDraft,
@@ -136,7 +138,15 @@ export default function App() {
     }
   });
 
-  useScrollLock(showSettings || showHistory || !!activePlanCategory || !!selectingCategoryId || !!activeDevotion || showProverbModal || showSprintModal || isStartMenuOpen);
+  // Every full-screen overlay must lock body scroll. The Bible reader and the
+  // devotional reader were missing here, so opening a chapter on a phone left
+  // the page scrolling behind the modal. Routed through isAnyOverlayOpen so the
+  // list is one tested place rather than an inline chain that's easy to forget.
+  useScrollLock(isAnyOverlayOpen({
+    showSettings, showHistory, activePlanCategory, selectingCategoryId,
+    activeDevotion, readerCategoryId, activeInternalDevotional,
+    showProverbModal, showSprintModal, isStartMenuOpen,
+  }));
   
   const toggleTheme = useCallback(() => {
     // Only the three themes that produce a distinct, defined appearance are in
