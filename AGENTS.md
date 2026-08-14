@@ -118,3 +118,52 @@
   user push) to deploy the new static files.
 - **Offline Mode:** a local sync queue in IndexedDB caches reading progress when offline and
   syncs to Firebase on reconnection.
+
+## reMarkable "7-day pack"
+
+Daily Logos as an EPUB for a reMarkable Paper Pro, built and delivered every morning.
+
+- **Why a document and not the app:** reMarkable ships no web browser at any OS version,
+  and the on-device ecosystem (Toltec — archived Aug 2026, superseded by Vellum — rmkit,
+  Oxide) targets rM1/rM2 and needs physical access; on a Paper Pro, enabling developer mode
+  performs a **factory reset**. The cloud API is the only mechanism that works from a
+  stateless runner. So the port carries the *content and navigation*, not the React SPA.
+- **What's in it:** for each of the seven parts, the next 7 chapters from wherever the
+  Firestore pointer actually is; the daily proverb ×7 (chapter = day of month, the app's
+  rule); every internal devotional that has that day on disk; a ruled handwriting page per
+  day; and a progress summary from `computeProgressStats()`.
+- **Insight for Living is structurally absent.** It is a rolling window of *recent* days, so
+  a forward-looking pack has none of it. The builder reports which archives had no future
+  days rather than hard-coding an exclusion — if that scrape ever looks forward, it appears
+  on its own.
+- **`scripts/build-remarkable-pack.mts`** — reads `users/{uid}/progress` and
+  `users/{uid}/completedBooks` via `firebase-admin` (dynamically imported, so `--from-start`
+  needs no credentials). It must read the **named** database (`firestoreDatabaseId` in
+  `firebase-applet-config.json`); reading `(default)` returns zero docs, which looks exactly
+  like "never started reading". The forward walk is ported from `prefetchBible.ts:32-63`.
+  The builder **validates its own output and exits non-zero** rather than writing a bad pack.
+- **Deterministic by construction:** every zip entry gets a fixed timestamp and
+  `dcterms:modified` comes from the pack's date, never the clock. Same `--date` → identical
+  bytes. Don't reintroduce `new Date()` into `scripts/lib/epub.mts`.
+- **`scripts/upload-remarkable.mts`** — uses `rmapi-js` (current with sync 1.5 / schema 4;
+  `juruen/rmapi`, `rmapy`, `rmcl` and `reMarkable-typescript` are all archived or pre-1.5).
+  Uploads with `uploadEpub` + `move`, **not** `putEpub({parent})`: the library's own docs call
+  `uploadEpub` the simpler path that "works even with schema version 4" while `putEpub` is
+  "a little more finicky".
+- **A new dated document each morning, never an overwrite.** Overwriting one fixed document
+  would be tidier but would destroy whatever was handwritten on the note pages. Old packs are
+  pruned instead — `selectStalePacks()` only ever matches the exact `Daily Logos YYYY-MM-DD`
+  shape inside the target folder, never the pack just uploaded, and bails out entirely if an
+  implausible number look stale.
+- **Secrets:** `DAILY_LOGOS_UID` (the Firebase UID — not derivable from the repo) and
+  `REMARKABLE_TOKEN` (a device token from a one-time pairing at
+  `my.remarkable.com/device/desktop/connect`; the device-token TTL is undocumented, so expect
+  to re-pair eventually). Optional repo *variables*: `REMARKABLE_FOLDER`, `REMARKABLE_KEEP_DAYS`.
+- **Workflows:** run `probe-remarkable.yml` by hand ONCE first — it round-trips a throwaway
+  document (auth → folder → upload → verify → delete) because this sandbox cannot reach
+  reMarkable's cloud to test any of it. Then `daily-remarkable.yml` runs at `30 22 * * *`,
+  deliberately 30 minutes after the 22:00 devotional refresh so the pack picks up that
+  morning's content. The EPUB is never committed — it's a build artifact only.
+- **Tests:** `scripts/test-remarkable-pack.mts` (in `npm test`) runs fully offline against
+  the committed static files — the forward walk, boundary crossing, chapter-to-day mapping,
+  EPUB structure, reproducibility, and the prune guards.

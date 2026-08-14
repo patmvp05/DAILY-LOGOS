@@ -1,0 +1,50 @@
+name: Probe reMarkable cloud
+
+# Run this ONCE by hand before trusting the daily job.
+#
+# The sandbox this repo is developed in cannot reach reMarkable's cloud at all
+# (same as bolls.life and BibleGateway), so the only way to know the client,
+# the token and the upload path actually work is to try them on a runner. This
+# does the whole round trip with a throwaway document: authenticate, find or
+# create the folder, upload a tiny EPUB, confirm it appears in a fresh listing
+# in the right folder, then delete it again.
+#
+# Nothing here touches Firestore, the real pack, or any existing document.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Fail early if the token is missing
+        env:
+          REMARKABLE_TOKEN: ${{ secrets.REMARKABLE_TOKEN }}
+        run: |
+          if [ -z "${REMARKABLE_TOKEN}" ]; then
+            echo "::error::REMARKABLE_TOKEN is not set. Pair once at https://my.remarkable.com/device/desktop/connect,"
+            echo "::error::exchange the 8-character code for a device token, and add it as a repository secret."
+            exit 1
+          fi
+          echo "REMARKABLE_TOKEN is present (${#REMARKABLE_TOKEN} characters)"
+
+      - name: Round-trip a throwaway document
+        env:
+          REMARKABLE_TOKEN: ${{ secrets.REMARKABLE_TOKEN }}
+          REMARKABLE_FOLDER: ${{ vars.REMARKABLE_FOLDER || 'Daily Logos' }}
+        run: npx tsx scripts/upload-remarkable.mts --probe

@@ -10,6 +10,7 @@ type DevotionalKind = 'internal' | 'external';
 interface InternalDevotionalMeta {
   kind: 'internal';
   slug: string;
+  name: string;
   author: string;
 }
 
@@ -25,10 +26,10 @@ type DevotionalMeta = InternalDevotionalMeta | ExternalDevotionalMeta;
 // browser at the day's reading.
 //
 const CATALOG: Record<string, DevotionalMeta> = {
-  spurgeon: { kind: 'internal', slug: 'morning-evening', author: 'Charles H. Spurgeon' },
-  utmost: { kind: 'internal', slug: 'my-utmost', author: 'Oswald Chambers' },
-  streams: { kind: 'internal', slug: 'streams-in-the-desert', author: 'L.B. Cowman' },
-  insight: { kind: 'internal', slug: 'insight-for-living', author: 'Charles R. Swindoll' },
+  spurgeon: { kind: 'internal', slug: 'morning-evening', name: 'Morning and Evening', author: 'Charles H. Spurgeon' },
+  utmost: { kind: 'internal', slug: 'my-utmost', name: 'My Utmost for His Highest', author: 'Oswald Chambers' },
+  streams: { kind: 'internal', slug: 'streams-in-the-desert', name: 'Streams in the Desert', author: 'L.B. Cowman' },
+  insight: { kind: 'internal', slug: 'insight-for-living', name: 'Insight for Living', author: 'Charles R. Swindoll' },
 };
 
 export function resolveDevotionalKind(id: string): DevotionalKind {
@@ -45,9 +46,16 @@ export function getDevotionalAuthor(id: string): string | null {
   return meta?.kind === 'internal' ? meta.author : null;
 }
 
-export const INTERNAL_DEVOTIONAL_SLUGS = Object.values(CATALOG)
-  .filter((m): m is InternalDevotionalMeta => m.kind === 'internal')
-  .map(m => m.slug);
+export function getDevotionalName(id: string): string | null {
+  const meta = CATALOG[id];
+  return meta?.kind === 'internal' ? meta.name : null;
+}
+
+/** Every devotional with an on-disk archive, in the order they should be read. */
+export const INTERNAL_DEVOTIONALS: readonly InternalDevotionalMeta[] = Object.values(CATALOG)
+  .filter((m): m is InternalDevotionalMeta => m.kind === 'internal');
+
+export const INTERNAL_DEVOTIONAL_SLUGS = INTERNAL_DEVOTIONALS.map(m => m.slug);
 
 export function getLocalMonthDay(d: Date = new Date()): string {
   return format(d, 'MM-dd');
