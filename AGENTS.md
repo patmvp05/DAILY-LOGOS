@@ -155,10 +155,13 @@ Daily Logos as an EPUB for a reMarkable Paper Pro, built and delivered every mor
   pruned instead — `selectStalePacks()` only ever matches the exact `Daily Logos YYYY-MM-DD`
   shape inside the target folder, never the pack just uploaded, and bails out entirely if an
   implausible number look stale.
-- **Secrets:** `DAILY_LOGOS_UID` (the Firebase UID — not derivable from the repo) and
-  `REMARKABLE_TOKEN` (a device token from a one-time pairing at
-  `my.remarkable.com/device/desktop/connect`; the device-token TTL is undocumented, so expect
-  to re-pair eventually). Optional repo *variables*: `REMARKABLE_FOLDER`, `REMARKABLE_KEEP_DAYS`.
+- **Secrets:** `DAILY_LOGOS_UID` (the Firebase UID — not derivable from the repo; read it from
+  Firebase Console → Authentication → Users) and `REMARKABLE_TOKEN`. Get the token by pairing
+  once at `my.remarkable.com/device/desktop/connect` and running
+  `npx tsx scripts/upload-remarkable.mts --register <8-char code>` **locally** — it refuses to
+  run when `CI` is set, because the thing it prints is the credential. The device-token TTL is
+  undocumented, so expect to re-pair eventually. Optional repo *variables*:
+  `REMARKABLE_FOLDER`, `REMARKABLE_KEEP_DAYS`.
 - **Workflows:** run `probe-remarkable.yml` by hand ONCE first — it round-trips a throwaway
   document (auth → folder → upload → verify → delete) because this sandbox cannot reach
   reMarkable's cloud to test any of it. Then `daily-remarkable.yml` runs at `30 22 * * *`,

@@ -26,6 +26,7 @@
  * Packs older than the keep window are deleted instead.
  *
  * Usage:
+ *   npx tsx scripts/upload-remarkable.mts --register ABCDEFGH   # one time, on your machine
  *   npx tsx scripts/upload-remarkable.mts --probe
  *   npx tsx scripts/upload-remarkable.mts --file dist-remarkable/daily-logos-2026-08-14.epub
  *
@@ -48,6 +49,7 @@ interface Options {
   file: string | null;
   name: string | null;
   probe: boolean;
+  register: string | null;
   keepDays: number;
   dryRun: boolean;
 }
@@ -57,6 +59,7 @@ function parseArgs(argv: string[]): Options {
     file: null,
     name: null,
     probe: false,
+    register: null,
     keepDays: Number(process.env.REMARKABLE_KEEP_DAYS ?? 10),
     dryRun: false,
   };
@@ -71,6 +74,7 @@ function parseArgs(argv: string[]): Options {
       case '--file': opts.file = next(); break;
       case '--name': opts.name = next(); break;
       case '--probe': opts.probe = true; break;
+      case '--register': opts.register = next().trim(); break;
       case '--keep-days': opts.keepDays = Number(next()); break;
       case '--dry-run': opts.dryRun = true; break;
       default: throw new Error(`unknown argument "${arg}"`);
@@ -79,8 +83,35 @@ function parseArgs(argv: string[]): Options {
   if (!Number.isInteger(opts.keepDays) || opts.keepDays < 1) {
     throw new Error('keep-days must be a positive integer');
   }
-  if (!opts.probe && !opts.file) throw new Error('pass --file <path> or --probe');
+  if (!opts.probe && !opts.register && !opts.file) {
+    throw new Error('pass --file <path>, --probe, or --register <code>');
+  }
   return opts;
+}
+
+/**
+ * Exchange an 8-character pairing code for a long-lived device token.
+ *
+ * Run this once, on your own machine. It refuses to run in CI on purpose: the
+ * token it prints is the credential itself, and CI logs are the last place it
+ * should ever be written. Paste the output straight into the REMARKABLE_TOKEN
+ * repository secret — not into a file, a commit, or a chat window.
+ */
+async function registerDevice(code: string): Promise<void> {
+  if (process.env.CI) {
+    throw new Error('--register prints a credential; refusing to run in CI. Do this locally.');
+  }
+  if (!/^[a-z0-9]{8}$/i.test(code)) {
+    throw new Error(`"${code}" is not an 8-character pairing code from my.remarkable.com`);
+  }
+  const { register } = await import('rmapi-js');
+  const token = await register(code);
+  console.log('');
+  console.log('Device token (store as the REMARKABLE_TOKEN repository secret, then clear your terminal):');
+  console.log('');
+  console.log(token);
+  console.log('');
+  console.log('The pairing code is now spent — a second run needs a fresh one.');
 }
 
 /**
@@ -188,6 +219,12 @@ async function tinyProbeEpub(stamp: string): Promise<Buffer> {
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
+
+  if (opts.register) {
+    await registerDevice(opts.register);
+    return;
+  }
+
   const token = process.env.REMARKABLE_TOKEN;
   if (!token) {
     throw new Error(
