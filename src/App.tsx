@@ -18,6 +18,7 @@ import { useTheme } from './hooks/useTheme';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useScrollLock } from './hooks/useScrollLock';
 import { isAnyOverlayOpen } from './lib/overlayState';
+import { useDeferredAppUpdate } from './hooks/useDeferredAppUpdate';
 import { useSyncState } from './hooks/useSyncState';
 import { usePrefersDark } from './hooks/usePrefersDark';
 
@@ -37,7 +38,8 @@ export default function App() {
     activePlanCategory, setActivePlanCategory, 
     selectingCategoryId, setSelectingCategoryId, 
     activeDevotion, setActiveDevotion,
-    readerCategoryId, activeInternalDevotional,
+    readerCategoryId, setReaderCategoryId,
+    activeInternalDevotional, setActiveInternalDevotional,
     showProverbModal, setShowProverbModal, showSprintModal, setShowSprintModal,
     isStartMenuOpen, setIsStartMenuOpen, confirmDialog, setConfirmDialog,
     closeConfirmDialog, toast, setToast, showToast, setJournalDraft,
@@ -135,6 +137,10 @@ export default function App() {
     onClose: () => {
       setShowSettings(false); setShowHistory(false); setActivePlanCategory(null); setSelectingCategoryId(null);
       setActiveDevotion(null); setShowProverbModal(false); setShowSprintModal(false); setIsStartMenuOpen(false);
+      // The Bible reader and the devotional reader were missing here, so Escape
+      // could not close either one — the same omission that once left them
+      // scrolling the page behind them.
+      setReaderCategoryId(null); setActiveInternalDevotional(null);
     }
   });
 
@@ -142,11 +148,22 @@ export default function App() {
   // devotional reader were missing here, so opening a chapter on a phone left
   // the page scrolling behind the modal. Routed through isAnyOverlayOpen so the
   // list is one tested place rather than an inline chain that's easy to forget.
-  useScrollLock(isAnyOverlayOpen({
+  const anyOverlayOpen = isAnyOverlayOpen({
     showSettings, showHistory, activePlanCategory, selectingCategoryId,
     activeDevotion, readerCategoryId, activeInternalDevotional,
     showProverbModal, showSprintModal, isStartMenuOpen,
-  }));
+  });
+  useScrollLock(anyOverlayOpen);
+
+  // Same signal, second job: never reload the app for a new version while one of
+  // these is open. If a surface matters enough to freeze the page behind it, it
+  // matters enough not to be yanked away mid-chapter.
+  useDeferredAppUpdate({
+    overlayOpen: anyOverlayOpen,
+    // Rendered outside the overlay list, and it gates destructive actions.
+    confirmOpen: confirmDialog.isOpen,
+    isSigningIn,
+  });
   
   const toggleTheme = useCallback(() => {
     // Only the three themes that produce a distinct, defined appearance are in

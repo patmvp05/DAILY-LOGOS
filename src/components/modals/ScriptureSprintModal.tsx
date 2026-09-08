@@ -10,7 +10,7 @@ import { format, parseISO } from 'date-fns';
 
 import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
-import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
+import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 import { cn } from '../../lib/utils';
 
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
@@ -85,6 +85,11 @@ function ScriptureSprintModal({
     });
   };
 
+  // inset-0 on a phone, so the ghost click lands inside this window rather than
+  // on the guarded backdrop — and Clear is destructive.
+  const guardedClose = useTapGuard(onClose);
+  const guardedClear = useTapGuard(onClear);
+
   const pct = Math.round((completed / 24) * 100);
 
   return (
@@ -126,7 +131,7 @@ function ScriptureSprintModal({
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={guardedClose}
             aria-label="Close sprint"
             className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:scale-105 transition-transform bg-[var(--text-primary)] text-[var(--bg-primary)] shrink-0"
           >
@@ -241,7 +246,7 @@ function ScriptureSprintModal({
           style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))' }}
         >
           <button
-            onClick={onClear}
+            onClick={guardedClear}
             disabled={!sprint}
             className="min-h-[52px] px-5 font-bold uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-[18px] active:scale-[0.98] shrink-0 disabled:opacity-40"
           >
@@ -249,7 +254,7 @@ function ScriptureSprintModal({
             Clear
           </button>
           <button
-            onClick={onClose}
+            onClick={guardedClose}
             className="flex-1 min-h-[52px] font-bold uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-[18px] shadow-sm hover:opacity-90 active:scale-[0.98]"
           >
             Done

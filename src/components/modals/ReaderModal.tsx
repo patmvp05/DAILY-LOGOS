@@ -13,7 +13,8 @@ import { CATEGORIES_BY_ID, DEFAULT_BIBLE_VERSION } from '../../constants';
 import { calculateNextProgress } from '../../lib/bible';
 import { getChapterText, type ChapterTextResponse } from '../../lib/chapterText';
 import { triggerHaptic } from '../../lib/haptic';
-import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
+import { READER_END_SLOP_PX, READER_TAIL_CSS } from '../../lib/readerLayout';
+import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 import VerseCopyPopup from '../VerseCopyPopup';
 
 interface ReaderModalProps {
@@ -55,8 +56,11 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
 
   const handleScroll = () => {
     const el = scrollRef.current;
-    if (!el) return;
-    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 24) setAtEnd(true);
+    // result.key !== reqKey means we are looking at the spinner for the NEXT
+    // chapter; latching atEnd off that would reveal the action bar over a
+    // chapter nobody has read yet.
+    if (!el || result.key !== reqKey) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - READER_END_SLOP_PX) setAtEnd(true);
   };
 
   const onClose = () => setReaderCategoryId(null);
@@ -69,6 +73,24 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
     const next = calculateNextProgress(readerCategoryId, 1, progress, state.completedBooks).progress;
     return !(next.bookIndex === progress.bookIndex && next.chapter === progress.chapter);
   }, [readerCategoryId, progress, state.completedBooks]);
+
+  const onPrimary = () => {
+    if (hasNext) {
+      // Advancing updates global progress (debounced), which re-renders this
+      // modal onto the next chapter and refetches automatically.
+      advanceChapter(readerCategoryId!, 1);
+    } else {
+      onClose();
+    }
+  };
+
+  // On a phone this window is inset-0, so the backdrop guard above never sees
+  // the ghost click — it lands in here instead. Both of these sit in strips a
+  // dashboard card can occupy, and on a short chapter the action bar is already
+  // on screen inside the ghost-click window, where a stray click would advance a
+  // chapter that was never read.
+  const guardedClose = useTapGuard(onClose);
+  const guardedPrimary = useTapGuard(onPrimary);
 
   useEffect(() => {
     if (!reqKey || !book || !chapter) return;
@@ -89,10 +111,14 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
     const raf = requestAnimationFrame(() => {
       const el = scrollRef.current;
       if (!el) return;
-      setAtEnd(el.scrollHeight <= el.clientHeight + 24);
+      // Only a settled chapter can already be read to the end. Measuring during
+      // the loading pass measures the SPINNER — which always "fits" — and would
+      // flash the action bar over the next chapter on every advance.
+      setAtEnd(result.key === reqKey && el.scrollHeight <= el.clientHeight + READER_END_SLOP_PX);
     });
     return () => cancelAnimationFrame(raf);
-  }, [result, book?.name, chapter]);
+  }, [result, reqKey, book?.name, chapter]);
+
 
   if (!category || !progress || !book || !chapter) return null;
 
@@ -105,16 +131,6 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
   const lastVerse = content && content.verses.length > 0
     ? content.verses[content.verses.length - 1].verse
     : null;
-
-  const onPrimary = () => {
-    if (hasNext) {
-      // Advancing updates global progress (debounced), which re-renders this
-      // modal onto the next chapter and refetches automatically.
-      advanceChapter(readerCategoryId!, 1);
-    } else {
-      onClose();
-    }
-  };
 
   return (
     <>
@@ -162,7 +178,7 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
           </div>
           {/* 44×44 minimum tap target for iPhone accessibility */}
           <button
-            onClick={onClose}
+            onClick={guardedClose}
             aria-label="Close reader"
             className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:scale-105 transition-transform bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] shrink-0"
           >
@@ -227,53 +243,57 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
                     </div>
                   ))}
                 </div>
-                {/* Spacer so the last verse isn't hidden behind the revealed action bar */}
-                <div className="h-6" />
+                {/* Reserved tail. The action bar is a flex sibling of the scroller,
+                    so revealing it shortens the scroller by its own height. Nothing
+                    moves when that happens, but the bottom of the viewport becomes
+                    bar instead of text — and without this the last line or two would
+                    drop out of sight exactly as you finished reading it. Keeping the
+                    tail >= bar + slop means the bar can only ever appear over blank
+                    space. Don't shrink it without re-checking readerLayout.ts. */}
+                <div aria-hidden style={{ height: READER_TAIL_CSS }} />
               </>
             )}
           </div>
         </div>
 
-        {/* Bottom bar — Close is always visible so users can exit at any time.
-            Next Chapter / Done slides in alongside it once the chapter is read. */}
-        <div
-          className="px-5 sm:px-8 py-4 sm:py-5 border-t border-[var(--border-color)] bg-[var(--bg-primary)] shrink-0 flex items-center gap-3"
-          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))' }}
-        >
-          <button
-            onClick={onClose}
-            aria-label="Close reader"
-            className="min-h-[52px] px-5 font-bold uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-[18px] active:scale-[0.98] shrink-0"
+        {/* Action bar. Deliberately absent while you are reading.
+            It used to be permanent, and on a phone that spent ~100px of screen
+            (16px pad + a 52px button + the home-indicator inset) on a Close
+            button duplicating the X in the header — so a chunk of the chapter
+            you were trying to read was chrome. Now it appears only once the
+            chapter has been read, over the reserved tail so it covers no text.
+            Closing is the header X, which is always present.
+
+            No exit animation on purpose: AnimatePresence would keep the bar
+            mounted, and the scroller short, through the exit — corrupting the
+            rAF measurement that decides whether the NEXT chapter shows it. */}
+        {status === 'ready' && atEnd && (
+          <motion.div
+            key="reader-action-bar"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22 }}
+            className="px-5 sm:px-8 py-4 sm:py-5 border-t border-[var(--border-color)] bg-[var(--bg-primary)] shrink-0"
+            style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))' }}
           >
-            <X size={15} />
-            Close
-          </button>
-          <AnimatePresence>
-            {status === 'ready' && atEnd && (
-              <motion.button
-                key="primary-action"
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 16 }}
-                transition={{ duration: 0.22 }}
-                onClick={onPrimary}
-                className="flex-1 min-h-[52px] font-bold uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-[18px] shadow-sm hover:opacity-90 active:scale-[0.98]"
-              >
-                {hasNext ? (
-                  <>
-                    Next Chapter
-                    <ArrowRight size={16} />
-                  </>
-                ) : (
-                  <>
-                    Done
-                    <Check size={16} />
-                  </>
-                )}
-              </motion.button>
-            )}
-          </AnimatePresence>
-        </div>
+            <button
+              onClick={guardedPrimary}
+              className="w-full min-h-[52px] font-bold uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-[18px] shadow-sm hover:opacity-90 active:scale-[0.98]"
+            >
+              {hasNext ? (
+                <>
+                  Next Chapter
+                  <ArrowRight size={16} />
+                </>
+              ) : (
+                <>
+                  Done
+                  <Check size={16} />
+                </>
+              )}
+            </button>
+          </motion.div>
+        )}
 
         {/* Verse copy popup */}
         <AnimatePresence>

@@ -118,6 +118,27 @@
   user push) to deploy the new static files.
 - **Offline Mode:** a local sync queue in IndexedDB caches reading progress when offline and
   syncs to Firebase on reconnection.
+- **App updates must never reload mid-read.** The service worker is `registerType: 'prompt'`
+  and `vite.config.ts` must NOT set `workbox.skipWaiting`. `autoUpdate` hard-reloads the page
+  the instant a new worker activates (`wb.on('activated', () => location.reload())`, no hook
+  to intercept) and `main.tsx` checks for updates on every foreground — so a deploy reloaded
+  the app a second after launch, right as you tapped into a chapter. It read as the reader
+  closing itself. Now the worker parks in `waiting`, `onNeedRefresh` hands the activate
+  function to `src/lib/appUpdate.ts`, and `useDeferredAppUpdate` applies it when no overlay is
+  open or the app is backgrounded. Re-adding `skipWaiting: true` breaks this **silently** (the
+  worker never waits, so `onNeedRefresh` never fires) — `scripts/test-app-update.mts` guards it.
+- **The reader reserves space for its action bar** (`src/lib/readerLayout.ts`). The bar is a
+  flex sibling of the scroller, so revealing it shortens the scroller. Nothing moves (shrinking
+  a scroller RAISES max scrollTop), but the bottom strip becomes bar instead of text — so the
+  tail below the last verse is kept >= bar height + scroll-end slop, proved for every safe-area
+  inset by `scripts/test-tap-guard.mts`. Do not "fix" this by scrolling the text out of the
+  way instead; that is a visible ~100px jump and fights iOS momentum scrolling.
+- **Full-bleed modals must guard their own close buttons.** `useOverlayDismiss` only guards the
+  backdrop, which assumes the iOS ghost click lands there. That holds for an `inset-4` modal;
+  it does not for the reader or sprint sheet, which are `fixed inset-0` on a phone — the ghost
+  click lands *inside* the window, on whatever was under the tap. Those use `useTapGuard` on
+  every handler that closes the modal or moves progress. `scripts/test-tap-guard.mts` detects
+  full-bleed modals from their container class, so a new one that forgets fails the suite.
 
 ## reMarkable "7-day pack"
 

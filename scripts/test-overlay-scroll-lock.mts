@@ -53,17 +53,38 @@ function ok(name: string, cond: boolean, detail = '') {
 {
   const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
 
-  ok('App.tsx uses isAnyOverlayOpen (not an ad-hoc inline chain)',
-     app.includes('useScrollLock(isAnyOverlayOpen('),
-     'useScrollLock must be driven by the shared predicate');
+  ok('App.tsx derives overlay state from isAnyOverlayOpen (not an ad-hoc inline chain)',
+     app.includes('const anyOverlayOpen = isAnyOverlayOpen({'),
+     'the shared predicate must produce one value App.tsx reuses');
+
+  ok('useScrollLock is driven by that shared value',
+     app.includes('useScrollLock(anyOverlayOpen)'));
+
+  // The same value must gate the app-update reload, or a new deploy can reload
+  // the page out from under an open reader (see scripts/test-app-update.mts).
+  ok('the app-update deferral uses the same value',
+     /useDeferredAppUpdate\(\{[\s\S]*?overlayOpen: anyOverlayOpen/.test(app),
+     'an overlay worth locking scroll for is worth not reloading over');
 
   // Grab the argument object passed to isAnyOverlayOpen.
-  const m = /useScrollLock\(isAnyOverlayOpen\(\{([\s\S]*?)\}\)\)/.exec(app);
+  const m = /const anyOverlayOpen = isAnyOverlayOpen\(\{([\s\S]*?)\}\);/.exec(app);
   ok('the lock call is parseable', !!m);
   const passed = m ? m[1] : '';
   for (const key of SCROLL_LOCKING_SURFACES) {
     ok(`App.tsx passes "${key}" into the lock`, passed.includes(key),
-       'add it to the useScrollLock(isAnyOverlayOpen({...})) call');
+       'add it to the isAnyOverlayOpen({...}) call in App.tsx');
+  }
+
+  // Escape must close every surface too. This is the third bug in the same
+  // family — the two readers were forgotten in the scroll lock, and forgotten
+  // again here, so Escape silently couldn't close them. Deriving the setter name
+  // from the surface name means a new surface is covered the day it is added.
+  const escBody = /onClose:\s*\(\)\s*=>\s*\{([\s\S]*?)\n\s*\}\n\s*\}\);/.exec(app)?.[1] ?? '';
+  ok('the Escape handler is parseable', escBody.length > 0);
+  for (const key of SCROLL_LOCKING_SURFACES) {
+    const setter = 'set' + key[0].toUpperCase() + key.slice(1);
+    ok(`Escape closes "${key}"`, escBody.includes(setter),
+       `add ${setter}(...) to the useKeyboardShortcuts onClose handler`);
   }
 
   // And each one must actually be destructured from useUi, or it'd be undefined.

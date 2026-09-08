@@ -11,6 +11,7 @@ import { useUi } from '../state/UiContextCore';
 import { BOOK_ABBREVIATIONS } from '../constants';
 import { getChapterText, type ChapterVerse } from '../lib/chapterText';
 import { triggerHaptic } from '../lib/haptic';
+import { useOverlayDismiss, useTapGuard } from '../hooks/useOverlayDismiss';
 
 interface VerseCopyPopupProps {
   anchorVerse: number;
@@ -32,6 +33,15 @@ function VerseCopyPopup({
   onClose,
 }: VerseCopyPopupProps) {
   const { showToast } = useUi();
+
+  // This sheet opens from tapping a verse NUMBER inside the reader, and its
+  // backdrop covers the whole reader window — so the iOS ghost click from that
+  // very tap lands on the backdrop and closes the sheet on the tap that opened
+  // it. Same bug the modals had; this one was never wired up.
+  const dismissBackdrop = useOverlayDismiss(onClose);
+  // The sheet is bottom-anchored and up to 65vh tall, so its header sits mid-
+  // screen — right where the tapped verse number plausibly was.
+  const guardedClose = useTapGuard(onClose);
 
   const [rangeEndVerse, setRangeEndVerse] = useState(anchorVerse);
   const [rangeEndChapter, setRangeEndChapter] = useState(chapter);
@@ -183,7 +193,7 @@ function VerseCopyPopup({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={dismissBackdrop}
         className="absolute inset-0 bg-black/40 z-[10]"
       />
       <motion.div
@@ -223,7 +233,7 @@ function VerseCopyPopup({
             </button>
           </div>
           <button
-            onClick={onClose}
+            onClick={guardedClose}
             aria-label="Close verse copy"
             className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] hover:scale-105 transition-transform"
           >
