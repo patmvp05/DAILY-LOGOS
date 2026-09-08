@@ -133,6 +133,14 @@
   tail below the last verse is kept >= bar height + scroll-end slop, proved for every safe-area
   inset by `scripts/test-tap-guard.mts`. Do not "fix" this by scrolling the text out of the
   way instead; that is a visible ~100px jump and fights iOS momentum scrolling.
+- **There is an ErrorBoundary now** (`src/components/ErrorBoundary.tsx`), around each lazy
+  `Suspense` in App.tsx and the whole tree in main.tsx. React unmounts everything on an
+  uncaught render error, so before this a lazy chunk deleted by a deploy was a white screen
+  with no way back. A stale chunk self-heals: `src/lib/chunkRecovery.ts` reloads once per tab
+  session (a loop is worse than the error), re-armed 10s after a good boot. Do NOT call
+  `preventDefault()` on `vite:preloadError` — that makes Vite continue, so the import resolves
+  `undefined` and the failure resurfaces as an unrecognisable `Cannot read properties of
+  undefined`; `scripts/test-chunk-recovery.mts` asserts it stays out.
 - **Full-bleed modals must guard their own close buttons.** `useOverlayDismiss` only guards the
   backdrop, which assumes the iOS ghost click lands there. That holds for an `inset-4` modal;
   it does not for the reader or sprint sheet, which are `fixed inset-0` on a phone — the ghost

@@ -8,6 +8,8 @@ import { UiContextProvider } from './state/UiContext';
 import { registerSW } from 'virtual:pwa-register';
 import { logDiagnostic, getDeviceInfo } from './lib/diagnostics';
 import { setPendingUpdate } from './lib/appUpdate';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { armChunkRecoveryReset, attemptChunkReload } from './lib/chunkRecovery';
 
 logDiagnostic('lifecycle', 'info', 'App boot', getDeviceInfo());
 
@@ -16,6 +18,23 @@ window.addEventListener('error', (e) => {
 });
 window.addEventListener('unhandledrejection', (e) => {
   logDiagnostic('unhandled-rejection', 'error', String(e.reason?.message || e.reason), e.reason);
+});
+
+// Vite fires this when a dynamic import's preload fails — which after a deploy
+// means this tab is asking for chunk hashes that no longer exist on Hosting.
+// Catching it here recovers before React ever sees a render error; the
+// ErrorBoundary is the backstop for the cases that get past it. Both share one
+// once-per-session reload guard, so they cannot loop against each other.
+window.addEventListener('vite:preloadError', () => {
+  // Deliberately NOT preventDefault(): that tells Vite to carry on, so the
+  // import resolves undefined and the failure surfaces later as an unrelated
+  // "Cannot read properties of undefined" — unrecognisable as a stale chunk, and
+  // so neither self-healed nor explained. Letting it reject keeps the real
+  // "Failed to fetch dynamically imported module" for the boundary to act on.
+  const reloading = attemptChunkReload();
+  logDiagnostic('chunk', 'warn', reloading
+    ? 'Preload failed; reloading for the current build'
+    : 'Preload failed again; already reloaded once this session');
 });
 
 // Register the service worker.
@@ -58,13 +77,20 @@ const updateSW = registerSW({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AppContextProvider>
-      <UiContextProvider>
-        <App />
-      </UiContextProvider>
-    </AppContextProvider>
+    <ErrorBoundary label="App">
+      <AppContextProvider>
+        <UiContextProvider>
+          <App />
+        </UiContextProvider>
+      </AppContextProvider>
+    </ErrorBoundary>
   </StrictMode>
 );
+
+// The app rendered. Re-arm the one-shot chunk reload so a tab left open across
+// several deploys can heal more than once — a reload loop would have recurred
+// long before this fires.
+armChunkRecoveryReset();
 
 if ('storage' in navigator && 'persist' in navigator.storage) {
   navigator.storage.persist().catch(() => {});

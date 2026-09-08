@@ -38,7 +38,18 @@ function ok(name: string, cond: boolean, detail = '') {
 
 const MODAL_DIR = new URL('../src/components/modals/', import.meta.url);
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), 'utf8');
-const modalFiles = readdirSync(MODAL_DIR).filter((f) => f.endsWith('.tsx')).sort();
+
+/**
+ * Every dismissable overlay in the app, not just src/components/modals/.
+ * VerseCopyPopup and ConfirmDialog live a directory up but are exactly the same
+ * hazard — and ConfirmDialog is the one guarding Reset Progress.
+ */
+const OVERLAYS: string[] = [
+  ...readdirSync(MODAL_DIR).filter((f) => f.endsWith('.tsx')).sort()
+    .map((f) => `../src/components/modals/${f}`),
+  '../src/components/VerseCopyPopup.tsx',
+  '../src/components/ConfirmDialog.tsx',
+];
 
 /**
  * A modal is full-bleed when its WINDOW is `fixed inset-0` — i.e. it covers the
@@ -58,8 +69,8 @@ function isFullBleed(src: string): boolean {
   ok('useOverlayDismiss still exists for backdrops',
      hook.includes('export function useOverlayDismiss'));
   ok('both share one grace window',
-     (hook.match(/GRACE_MS/g) ?? []).length >= 3,
-     'a guard shorter than the ~300ms ghost click would not catch it');
+     (hook.match(/GRACE_MS/g) ?? []).length >= 2 && !/graceMs\s*=\s*\d/.test(hook),
+     'per-call-site grace values would drift from the ghost-click latency');
   ok('the grace is longer than the ghost-click latency',
      /const GRACE_MS = (\d+)/.test(hook) && Number(/const GRACE_MS = (\d+)/.exec(hook)![1]) >= 350,
      `found ${/const GRACE_MS = (\d+)/.exec(hook)?.[1]}`);
@@ -69,41 +80,49 @@ function isFullBleed(src: string): boolean {
 
 // ── Every full-bleed modal must guard its in-window close handlers
 {
-  const fullBleed: string[] = [];
-  const inset: string[] = [];
+  let fullBleedCount = 0;
 
-  for (const file of modalFiles) {
-    const src = readFileSync(new URL(file, MODAL_DIR), 'utf8');
-    (isFullBleed(src) ? fullBleed : inset).push(file);
+  for (const rel of OVERLAYS) {
+    const file = rel.split('/').pop()!;
+    const src = read(rel);
+    if (isFullBleed(src)) fullBleedCount++;
 
-    // Every modal, full-bleed or not, still needs its backdrop guarded.
     ok(`${file} guards its backdrop`, src.includes('useOverlayDismiss('),
-       'a modal with a dismissable backdrop needs the mount grace');
+       'a dismissable backdrop needs the mount grace');
 
-    if (!isFullBleed(src)) continue;
+    // The rule is NOT "full-bleed only". Even at inset-4 the window covers all
+    // but a 16px frame, so a ghost click at the launching control's coordinates
+    // lands inside it — the backdrop guard only ever protected that thin border.
+    ok(`${file} imports useTapGuard`, src.includes('useTapGuard'),
+       'the ghost click lands INSIDE the window, where the close controls are');
 
-    ok(`${file} is full-bleed, so it imports useTapGuard`,
-       src.includes('useTapGuard'),
-       'inset-0 means the ghost click lands INSIDE the window, not on the backdrop');
-
-    // The invariant: no bare close handler survives in a full-bleed modal.
-    const bare = [...src.matchAll(/onClick=\{(onClose|onClear|onPrimary)\}/g)].map((m) => m[1]);
+    // The invariant: no bare close or destructive handler survives anywhere.
+    const bare = [...src.matchAll(/onClick=\{(onClose|handleClose|onClear|onPrimary|onConfirm)\}/g)]
+      .map((m) => m[1]);
     ok(`${file} has no unguarded close/destructive handler`, bare.length === 0,
-       `unguarded: ${[...new Set(bare)].join(', ')} — wrap with guard(...)`);
+       `unguarded: ${[...new Set(bare)].join(', ')} — wrap with useTapGuard`);
 
-    ok(`${file} actually applies the guard`, /onClick=\{guarded\w+\}/.test(src),
+    ok(`${file} actually applies the guard`, /onClick=\{(guarded\w+|dismiss\w*)\}/.test(src),
        'importing useTapGuard without using it guards nothing');
   }
 
-  // Sanity: the classifier must not be matching everything or nothing.
-  ok('the reader is detected as full-bleed', fullBleed.includes('ReaderModal.tsx'),
-     `full-bleed: ${fullBleed.join(', ')}`);
+  // Sanity: the full-bleed classifier must not match everything or nothing.
+  ok('the reader is detected as full-bleed',
+     isFullBleed(read('../src/components/modals/ReaderModal.tsx')));
   ok('the sprint sheet is detected as full-bleed',
-     fullBleed.includes('ScriptureSprintModal.tsx'));
-  ok('inset modals are not misclassified',
-     inset.includes('ProverbModal.tsx') && inset.includes('DevotionalReaderModal.tsx'),
-     `inset: ${inset.join(', ')}`);
-  ok('every modal was classified', fullBleed.length + inset.length === modalFiles.length);
+     isFullBleed(read('../src/components/modals/ScriptureSprintModal.tsx')));
+  ok('an inset modal is not', !isFullBleed(read('../src/components/modals/ProverbModal.tsx')));
+  ok('the classifier matches some but not all', fullBleedCount > 0 && fullBleedCount < OVERLAYS.length,
+     String(fullBleedCount));
+
+  // ConfirmDialog is the exception that the mount-grace alone cannot protect: it
+  // stays mounted and toggles on isOpen, so its grace must re-arm from that.
+  const cd = read('../src/components/ConfirmDialog.tsx');
+  ok('ConfirmDialog re-arms its grace on every open, not just on mount',
+     /useTapGuard\([^)]*,\s*isOpen\)/.test(cd) && /useOverlayDismiss\(onClose,\s*isOpen\)/.test(cd),
+     'it never unmounts, so a mount-only grace would expire once at app boot');
+  ok('the confirm action itself is guarded', /guardedConfirm/.test(cd),
+     'this dialog is what stands in front of Reset Progress');
 }
 
 // ── The reader's chrome

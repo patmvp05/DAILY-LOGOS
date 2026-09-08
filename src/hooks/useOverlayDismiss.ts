@@ -20,11 +20,11 @@ const GRACE_MS = 450;
  * impure — and the effect runs right after the first paint, long before any
  * tap can land.)
  */
-function useGraceGuard(fn: () => void, graceMs: number): () => void {
+function useGraceGuard(fn: () => void, resetKey: unknown): () => void {
   const readyAtRef = useRef(Infinity);
   useEffect(() => {
-    readyAtRef.current = Date.now() + graceMs;
-  }, [graceMs]);
+    readyAtRef.current = Date.now() + GRACE_MS;
+  }, [resetKey]);
 
   return useCallback(() => {
     if (Date.now() < readyAtRef.current) return;
@@ -48,8 +48,8 @@ function useGraceGuard(fn: () => void, graceMs: number): () => void {
  * This covers the backdrop ONLY. For a modal that is full-bleed on a phone,
  * the backdrop is not what's under the finger — see useTapGuard.
  */
-export function useOverlayDismiss(onDismiss: () => void, graceMs = GRACE_MS) {
-  return useGraceGuard(onDismiss, graceMs);
+export function useOverlayDismiss(onDismiss: () => void, resetKey?: unknown) {
+  return useGraceGuard(onDismiss, resetKey);
 }
 
 /**
@@ -77,10 +77,16 @@ export function useOverlayDismiss(onDismiss: () => void, graceMs = GRACE_MS) {
  * function call in the render body reads, to React's lint, as calling it during
  * render — and DevotionalReaderModal's close handler does read a ref.
  *
+ * `resetKey` re-arms the grace whenever it changes. Most overlays are mounted
+ * fresh each time they open, so mounting IS opening and the key is unnecessary.
+ * ConfirmDialog is the exception: it stays mounted and toggles on `isOpen`, so
+ * without passing that key its grace would expire once, seconds after app boot,
+ * and never protect anything.
+ *
  * Do NOT wrap ordinary in-modal interactions — tapping a verse, switching a
  * tab. Those are harmless if they fire early, and blocking them would just make
  * the first tap feel dead.
  */
-export function useTapGuard(onTap: () => void, graceMs = GRACE_MS) {
-  return useGraceGuard(onTap, graceMs);
+export function useTapGuard(onTap: () => void, resetKey?: unknown) {
+  return useGraceGuard(onTap, resetKey);
 }

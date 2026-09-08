@@ -13,7 +13,7 @@ import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 import { useStandaloneDetection } from '../../hooks/useStandaloneDetection';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
-import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
+import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 
 const HistoryModal: React.FC = () => {
   const { state, dispatch } = useApp();
@@ -23,6 +23,10 @@ const HistoryModal: React.FC = () => {
 
   const onClose = () => setShowHistory(false);
   const dismissOverlay = useOverlayDismiss(onClose);
+  // The backdrop guard only covers the backdrop, and this window leaves at
+  // most a thin frame of it — the ghost click from the tap that opened this
+  // lands inside, where the close controls are. See useTapGuard.
+  const guardedClose = useTapGuard(onClose);
 
   const springConfig = { stiffness: 380, damping: 30, mass: 0.8 };
 
@@ -62,7 +66,7 @@ const HistoryModal: React.FC = () => {
             </div>
             <motion.button 
               whileTap={{ scale: 0.95 }}
-              onClick={onClose} 
+              onClick={guardedClose} 
               className="p-3 rounded-full flex items-center justify-center min-w-[44px] min-h-[44px] text-[var(--text-secondary)] hover:text-brand bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-color)]"
             >
               <Check size={24} />

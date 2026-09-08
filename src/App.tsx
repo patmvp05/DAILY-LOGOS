@@ -27,6 +27,7 @@ import { Navbar } from './components/Navbar';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { Toast } from './components/Toast';
 import { Onboarding } from './components/Onboarding';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const Dashboard = React.lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
 const AppModals = React.lazy(() => import('./components/AppModals').then(m => ({ default: m.AppModals })));
@@ -188,14 +189,20 @@ export default function App() {
         {needsOnboarding ? (
           <Onboarding onComplete={handleSetInitialDate} />
         ) : (
-          <React.Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><div className="w-8 h-8 border-4 border-evernote border-t-transparent rounded-full animate-spin" /></div>}>
-            <Dashboard handleLogin={handleLoginLocal} isSigningIn={isSigningIn} user={user} isAuthLoading={isAuthLoading} />
-          </React.Suspense>
+          <ErrorBoundary label="Dashboard">
+            <React.Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><div className="w-8 h-8 border-4 border-evernote border-t-transparent rounded-full animate-spin" /></div>}>
+              <Dashboard handleLogin={handleLoginLocal} isSigningIn={isSigningIn} user={user} isAuthLoading={isAuthLoading} />
+            </React.Suspense>
+          </ErrorBoundary>
         )}
       </main>
-      <React.Suspense fallback={null}>
-        <AppModals isSigningIn={isSigningIn} handleLogin={handleLoginLocal} />
-      </React.Suspense>
+      {/* Separate boundary: a modal chunk that fails to load must not take the
+          dashboard down with it. */}
+      <ErrorBoundary label="Modals" banner>
+        <React.Suspense fallback={null}>
+          <AppModals isSigningIn={isSigningIn} handleLogin={handleLoginLocal} />
+        </React.Suspense>
+      </ErrorBoundary>
       <ConfirmDialog isOpen={confirmDialog.isOpen} title={confirmDialog.title} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onClose={closeConfirmDialog} confirmLabel={confirmDialog.confirmLabel} cancelLabel={confirmDialog.cancelLabel} type={confirmDialog.type} confirmHref={confirmDialog.confirmHref} />
       <Toast message={toast?.message || null} type={toast?.type} onClear={() => setToast(null)} />
     </div>

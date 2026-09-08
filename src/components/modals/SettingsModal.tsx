@@ -34,7 +34,7 @@ import { getDiagnosticReport } from '../../lib/diagnostics';
 import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 import { useAuth } from '../../hooks/useAuth';
-import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
+import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 import { AppState } from '../../types';
 
 interface SettingsModalProps {
@@ -68,6 +68,10 @@ interface SettingsModalProps {
 
   const onClose = () => setShowSettings(false);
   const dismissOverlay = useOverlayDismiss(onClose);
+  // The backdrop guard only covers the backdrop, and this window leaves at
+  // most a thin frame of it — the ghost click from the tap that opened this
+  // lands inside, where the close controls are. See useTapGuard.
+  const guardedClose = useTapGuard(onClose);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   const handleForceRefresh = async () => {
@@ -116,7 +120,7 @@ interface SettingsModalProps {
               </p>
             )}
           </div>
-          <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-brand p-2 transition-colors">
+          <button onClick={guardedClose} className="text-[var(--text-secondary)] hover:text-brand p-2 transition-colors">
             <Check size={28} strokeWidth={2.5} />
           </button>
         </div>
@@ -492,7 +496,7 @@ interface SettingsModalProps {
         </div>
 
         <button 
-          onClick={onClose}
+          onClick={guardedClose}
           className="w-full p-4 font-bold uppercase tracking-widest text-[11px] transition-all bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-[20px] active:scale-95 hover:opacity-90 mt-4"
         >
           Close Panel

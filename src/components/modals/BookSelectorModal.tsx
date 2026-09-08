@@ -12,7 +12,7 @@ import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 import { useStandaloneDetection } from '../../hooks/useStandaloneDetection';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
-import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
+import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 
 interface BookSelectorModalProps {
   jumpToBook: (catId: string, bookIndex: number) => void;
@@ -30,6 +30,10 @@ const BookSelectorModal: React.FC<BookSelectorModalProps> = ({
 
   const onClose = () => setSelectingCategoryId(null);
   const dismissOverlay = useOverlayDismiss(onClose);
+  // The backdrop guard only covers the backdrop, and this window leaves at
+  // most a thin frame of it — the ghost click from the tap that opened this
+  // lands inside, where the close controls are. See useTapGuard.
+  const guardedClose = useTapGuard(onClose);
   const springConfig = { stiffness: 380, damping: 30, mass: 0.8 };
 
   if (!selectingCategoryId) return null;
@@ -64,7 +68,7 @@ const BookSelectorModal: React.FC<BookSelectorModalProps> = ({
           </div>
           <motion.button 
             whileTap={{ scale: 0.9 }}
-            onClick={onClose} 
+            onClick={guardedClose} 
             className="text-zinc-400 hover:text-black dark:hover:text-white p-3 min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
           >
             <Check size={28} />

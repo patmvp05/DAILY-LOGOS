@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { useOverlayDismiss, useTapGuard } from '../hooks/useOverlayDismiss';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trash2, AlertCircle } from 'lucide-react';
 
@@ -30,6 +31,15 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   type = 'danger',
   confirmHref
 }) => {
+  // Unlike every other overlay this one stays mounted and toggles on isOpen, so
+  // the grace is re-armed from that rather than from mount. Guarding onConfirm
+  // matters most: this dialog is what stands in front of Reset Progress, and a
+  // ghost click that confirms is not recoverable.
+  const dismissBackdrop = useOverlayDismiss(onClose, isOpen);
+  const guardedCancel = useTapGuard(onClose, isOpen);
+  const guardedConfirm = useTapGuard(() => { onConfirm(); onClose(); }, isOpen);
+  const guardedHrefConfirm = useTapGuard(onClose, isOpen);
+
   const isDanger = type === 'danger';
   const Icon = isDanger ? Trash2 : AlertCircle;
   
@@ -54,7 +64,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={dismissBackdrop}
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
           />
           <motion.div
@@ -79,7 +89,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               
               <div className="flex gap-3">
                 <button
-                  onClick={onClose}
+                  onClick={guardedCancel}
                   className="flex-1 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-sm transition-colors border border-white/5 cursor-pointer"
                 >
                   {cancelLabel}
@@ -89,17 +99,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                     href={confirmHref}
                     target="_blank"
                     rel="noreferrer"
-                    onClick={onClose}
+                    onClick={guardedHrefConfirm}
                     className={`flex-1 py-3 px-4 rounded-xl text-center font-bold text-sm transition-all focus:outline-none text-white cursor-pointer select-none flex items-center justify-center ${bgClass}`}
                   >
                     {confirmLabel}
                   </a>
                 ) : (
                   <button
-                    onClick={() => {
-                      onConfirm();
-                      onClose();
-                    }}
+                    onClick={guardedConfirm}
                     className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all focus:outline-none text-white cursor-pointer select-none ${bgClass}`}
                   >
                     {confirmLabel}
