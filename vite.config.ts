@@ -25,7 +25,14 @@ export default defineConfig(() => {
       react(), 
       tailwindcss(),
       VitePWA({
-        registerType: 'autoUpdate',
+        // 'prompt', not 'autoUpdate'. autoUpdate's generated register code does
+        // `wb.on('activated', () => location.reload())` with no way to intercept,
+        // so a new deploy reloaded the page out from under whatever you were
+        // reading. 'prompt' parks the new worker in `waiting` and hands us the
+        // activate function; src/lib/appUpdate.ts applies it once no full-screen
+        // surface is open (or the app is backgrounded). Still automatic - there
+        // is no prompt - it just never interrupts.
+        registerType: 'prompt',
         injectRegister: 'auto',
         includeAssets: ['icons/logo.svg'],
         manifestFilename: 'manifest.json',
@@ -47,7 +54,12 @@ export default defineConfig(() => {
           ]
         },
         workbox: {
-          skipWaiting: true,
+          // NO skipWaiting. It must stay absent for the deferral above to work at
+          // all: skipWaiting activates the new worker at install time, so it never
+          // enters `waiting`, the `waiting` event never fires, onNeedRefresh is
+          // never called - and the new worker would claim the running page while
+          // it still holds old chunk URLs that Firebase Hosting has already
+          // deleted. clientsClaim is fine; it only applies once we do activate.
           clientsClaim: true,
           // Firebase Auth's sign-in pages (/__/auth/handler, /__/auth/iframe) are
           // served by Firebase Hosting on this same origin. Without this denylist

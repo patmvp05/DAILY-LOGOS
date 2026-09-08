@@ -1,0 +1,116 @@
+name: Daily reMarkable Pack
+
+# Builds the 7-day pack and puts it on the reMarkable, every morning.
+#
+# 22:30 UTC = 05:30 Vietnam, deliberately 30 minutes AFTER the 22:00 devotional
+# refresh so the pack picks up that morning's freshly-scraped devotional content
+# rather than yesterday's. Bot pushes don't trigger other workflows, so this
+# cannot be chained off that run — the offset is the coordination.
+#
+# The EPUB is never committed: a daily binary would grow the repo forever, and
+# the pack is fully reproducible from the committed static files. It is attached
+# as a build artifact so a bad morning can be diagnosed after the fact.
+
+on:
+  schedule:
+    - cron: '30 22 * * *'
+  workflow_dispatch:
+    inputs:
+      from_start:
+        description: 'Ignore Firestore and build from chapter 1 (test build only)'
+        type: boolean
+        default: false
+      skip_upload:
+        description: 'Build and validate, but do not touch the device'
+        type: boolean
+        default: false
+
+# Per-WORKFLOW concurrency. GitHub keeps only ONE pending run per group, so a
+# shared group makes a newly queued run CANCEL the pending one instead of lining
+# up behind it — that has already bitten the scrapers here.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check the secrets this job needs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          DAILY_LOGOS_UID: ${{ secrets.DAILY_LOGOS_UID }}
+          REMARKABLE_TOKEN: ${{ secrets.REMARKABLE_TOKEN }}
+          FROM_START: ${{ inputs.from_start }}
+          SKIP_UPLOAD: ${{ inputs.skip_upload }}
+        run: |
+          missing=0
+          if [ "${FROM_START}" != "true" ]; then
+            [ -n "${FIREBASE_SERVICE_ACCOUNT}" ] || { echo "::error::FIREBASE_SERVICE_ACCOUNT is not set"; missing=1; }
+            [ -n "${DAILY_LOGOS_UID}" ] || { echo "::error::DAILY_LOGOS_UID is not set — add your Firebase UID as a repository secret"; missing=1; }
+          fi
+          if [ "${SKIP_UPLOAD}" != "true" ]; then
+            [ -n "${REMARKABLE_TOKEN}" ] || { echo "::error::REMARKABLE_TOKEN is not set — run the 'Probe reMarkable cloud' workflow first"; missing=1; }
+          fi
+          [ "${missing}" -eq 0 ] || exit 1
+          echo "all required secrets are present"
+
+      # The builder validates its own output and exits non-zero rather than
+      # writing an EPUB that is structurally broken or has the wrong number of
+      # chapters, so a failure here means nothing was produced to upload.
+      - name: Build the pack
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          DAILY_LOGOS_UID: ${{ secrets.DAILY_LOGOS_UID }}
+        run: |
+          if [ "${{ inputs.from_start }}" = "true" ]; then
+            npx tsx scripts/build-remarkable-pack.mts --from-start
+          else
+            npx tsx scripts/build-remarkable-pack.mts
+          fi
+
+      - name: Gate on what was built
+        id: pack
+        run: |
+          SUMMARY=dist-remarkable/pack-summary.json
+          [ -f "${SUMMARY}" ] || { echo "::error::the builder produced no summary"; exit 1; }
+          cat "${SUMMARY}"
+          FILE=$(node -p "require('./${SUMMARY}').filename")
+          CHAPTERS=$(node -p "require('./${SUMMARY}').chapters")
+          BYTES=$(node -p "require('./${SUMMARY}').bytes")
+          PATH_OUT="dist-remarkable/${FILE}"
+          [ -f "${PATH_OUT}" ] || { echo "::error::${PATH_OUT} does not exist"; exit 1; }
+          # A pack with almost nothing in it is a failure, not a quiet success:
+          # 7 parts x 7 days = 49, minus however many parts you have finished.
+          [ "${CHAPTERS}" -ge 21 ] || { echo "::error::only ${CHAPTERS} chapters in the pack"; exit 1; }
+          [ "${BYTES}" -ge 40000 ] || { echo "::error::pack is only ${BYTES} bytes"; exit 1; }
+          echo "path=${PATH_OUT}" >> "$GITHUB_OUTPUT"
+          echo "Built ${FILE}: ${CHAPTERS} chapters, ${BYTES} bytes"
+
+      - name: Upload to the reMarkable
+        if: inputs.skip_upload != true
+        env:
+          REMARKABLE_TOKEN: ${{ secrets.REMARKABLE_TOKEN }}
+          REMARKABLE_FOLDER: ${{ vars.REMARKABLE_FOLDER || 'Daily Logos' }}
+          REMARKABLE_KEEP_DAYS: ${{ vars.REMARKABLE_KEEP_DAYS || '10' }}
+        run: npx tsx scripts/upload-remarkable.mts --file "${{ steps.pack.outputs.path }}"
+
+      - name: Keep the pack as an artifact
+        if: always() && steps.pack.outputs.path != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: remarkable-pack
+          path: dist-remarkable/
+          retention-days: 7

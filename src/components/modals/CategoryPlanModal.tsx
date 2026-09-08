@@ -13,7 +13,7 @@ import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 import { useStandaloneDetection } from '../../hooks/useStandaloneDetection';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
-import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
+import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 
 interface CategoryPlanModalProps {
   toggleBookCompletion: (catId: string, bookName: string) => void;
@@ -29,6 +29,10 @@ const CategoryPlanModal: React.FC<CategoryPlanModalProps> = ({
 
   const onClose = () => setActivePlanCategory(null);
   const dismissOverlay = useOverlayDismiss(onClose);
+  // The backdrop guard only covers the backdrop, and this window leaves at
+  // most a thin frame of it — the ghost click from the tap that opened this
+  // lands inside, where the close controls are. See useTapGuard.
+  const guardedClose = useTapGuard(onClose);
   const springConfig = { stiffness: 380, damping: 30, mass: 0.8 };
 
   return (
@@ -58,7 +62,7 @@ const CategoryPlanModal: React.FC<CategoryPlanModalProps> = ({
             </div>
             <motion.button 
               whileTap={{ scale: 0.95 }}
-              onClick={onClose} 
+              onClick={guardedClose} 
               className="p-3 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--text-secondary)] hover:text-brand bg-[var(--bg-secondary)] border border-[var(--border-color)] shadow-sm"
             >
               <Check size={24} />
@@ -120,7 +124,7 @@ const CategoryPlanModal: React.FC<CategoryPlanModalProps> = ({
             <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] tabular-nums">Total Books: 66</p>
             <motion.button 
               whileTap={{ scale: 0.97 }}
-              onClick={onClose}
+              onClick={guardedClose}
               className="px-8 py-4 font-bold uppercase tracking-widest text-[11px] rounded-[16px] transition-all bg-[var(--text-primary)] text-[var(--bg-primary)] shadow-sm hover:opacity-90 active:scale-95"
             >
               Close Plan

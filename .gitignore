@@ -1,6 +1,9 @@
 node_modules/
 build/
 dist/
+# Generated reMarkable packs. A new EPUB every morning would grow the repo
+# forever, and the pack is fully reproducible from the committed static files.
+dist-remarkable/
 coverage/
 .DS_Store
 *.log

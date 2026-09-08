@@ -118,3 +118,84 @@
   user push) to deploy the new static files.
 - **Offline Mode:** a local sync queue in IndexedDB caches reading progress when offline and
   syncs to Firebase on reconnection.
+- **App updates must never reload mid-read.** The service worker is `registerType: 'prompt'`
+  and `vite.config.ts` must NOT set `workbox.skipWaiting`. `autoUpdate` hard-reloads the page
+  the instant a new worker activates (`wb.on('activated', () => location.reload())`, no hook
+  to intercept) and `main.tsx` checks for updates on every foreground — so a deploy reloaded
+  the app a second after launch, right as you tapped into a chapter. It read as the reader
+  closing itself. Now the worker parks in `waiting`, `onNeedRefresh` hands the activate
+  function to `src/lib/appUpdate.ts`, and `useDeferredAppUpdate` applies it when no overlay is
+  open or the app is backgrounded. Re-adding `skipWaiting: true` breaks this **silently** (the
+  worker never waits, so `onNeedRefresh` never fires) — `scripts/test-app-update.mts` guards it.
+- **The reader reserves space for its action bar** (`src/lib/readerLayout.ts`). The bar is a
+  flex sibling of the scroller, so revealing it shortens the scroller. Nothing moves (shrinking
+  a scroller RAISES max scrollTop), but the bottom strip becomes bar instead of text — so the
+  tail below the last verse is kept >= bar height + scroll-end slop, proved for every safe-area
+  inset by `scripts/test-tap-guard.mts`. Do not "fix" this by scrolling the text out of the
+  way instead; that is a visible ~100px jump and fights iOS momentum scrolling.
+- **There is an ErrorBoundary now** (`src/components/ErrorBoundary.tsx`), around each lazy
+  `Suspense` in App.tsx and the whole tree in main.tsx. React unmounts everything on an
+  uncaught render error, so before this a lazy chunk deleted by a deploy was a white screen
+  with no way back. A stale chunk self-heals: `src/lib/chunkRecovery.ts` reloads once per tab
+  session (a loop is worse than the error), re-armed 10s after a good boot. Do NOT call
+  `preventDefault()` on `vite:preloadError` — that makes Vite continue, so the import resolves
+  `undefined` and the failure resurfaces as an unrecognisable `Cannot read properties of
+  undefined`; `scripts/test-chunk-recovery.mts` asserts it stays out.
+- **Full-bleed modals must guard their own close buttons.** `useOverlayDismiss` only guards the
+  backdrop, which assumes the iOS ghost click lands there. That holds for an `inset-4` modal;
+  it does not for the reader or sprint sheet, which are `fixed inset-0` on a phone — the ghost
+  click lands *inside* the window, on whatever was under the tap. Those use `useTapGuard` on
+  every handler that closes the modal or moves progress. `scripts/test-tap-guard.mts` detects
+  full-bleed modals from their container class, so a new one that forgets fails the suite.
+
+## reMarkable "7-day pack"
+
+Daily Logos as an EPUB for a reMarkable Paper Pro, built and delivered every morning.
+
+- **Why a document and not the app:** reMarkable ships no web browser at any OS version,
+  and the on-device ecosystem (Toltec — archived Aug 2026, superseded by Vellum — rmkit,
+  Oxide) targets rM1/rM2 and needs physical access; on a Paper Pro, enabling developer mode
+  performs a **factory reset**. The cloud API is the only mechanism that works from a
+  stateless runner. So the port carries the *content and navigation*, not the React SPA.
+- **What's in it:** for each of the seven parts, the next 7 chapters from wherever the
+  Firestore pointer actually is; the daily proverb ×7 (chapter = day of month, the app's
+  rule); every internal devotional that has that day on disk; a ruled handwriting page per
+  day; and a progress summary from `computeProgressStats()`.
+- **Insight for Living is structurally absent.** It is a rolling window of *recent* days, so
+  a forward-looking pack has none of it. The builder reports which archives had no future
+  days rather than hard-coding an exclusion — if that scrape ever looks forward, it appears
+  on its own.
+- **`scripts/build-remarkable-pack.mts`** — reads `users/{uid}/progress` and
+  `users/{uid}/completedBooks` via `firebase-admin` (dynamically imported, so `--from-start`
+  needs no credentials). It must read the **named** database (`firestoreDatabaseId` in
+  `firebase-applet-config.json`); reading `(default)` returns zero docs, which looks exactly
+  like "never started reading". The forward walk is ported from `prefetchBible.ts:32-63`.
+  The builder **validates its own output and exits non-zero** rather than writing a bad pack.
+- **Deterministic by construction:** every zip entry gets a fixed timestamp and
+  `dcterms:modified` comes from the pack's date, never the clock. Same `--date` → identical
+  bytes. Don't reintroduce `new Date()` into `scripts/lib/epub.mts`.
+- **`scripts/upload-remarkable.mts`** — uses `rmapi-js` (current with sync 1.5 / schema 4;
+  `juruen/rmapi`, `rmapy`, `rmcl` and `reMarkable-typescript` are all archived or pre-1.5).
+  Uploads with `uploadEpub` + `move`, **not** `putEpub({parent})`: the library's own docs call
+  `uploadEpub` the simpler path that "works even with schema version 4" while `putEpub` is
+  "a little more finicky".
+- **A new dated document each morning, never an overwrite.** Overwriting one fixed document
+  would be tidier but would destroy whatever was handwritten on the note pages. Old packs are
+  pruned instead — `selectStalePacks()` only ever matches the exact `Daily Logos YYYY-MM-DD`
+  shape inside the target folder, never the pack just uploaded, and bails out entirely if an
+  implausible number look stale.
+- **Secrets:** `DAILY_LOGOS_UID` (the Firebase UID — not derivable from the repo; read it from
+  Firebase Console → Authentication → Users) and `REMARKABLE_TOKEN`. Get the token by pairing
+  once at `my.remarkable.com/device/desktop/connect` and running
+  `npx tsx scripts/upload-remarkable.mts --register <8-char code>` **locally** — it refuses to
+  run when `CI` is set, because the thing it prints is the credential. The device-token TTL is
+  undocumented, so expect to re-pair eventually. Optional repo *variables*:
+  `REMARKABLE_FOLDER`, `REMARKABLE_KEEP_DAYS`.
+- **Workflows:** run `probe-remarkable.yml` by hand ONCE first — it round-trips a throwaway
+  document (auth → folder → upload → verify → delete) because this sandbox cannot reach
+  reMarkable's cloud to test any of it. Then `daily-remarkable.yml` runs at `30 22 * * *`,
+  deliberately 30 minutes after the 22:00 devotional refresh so the pack picks up that
+  morning's content. The EPUB is never committed — it's a build artifact only.
+- **Tests:** `scripts/test-remarkable-pack.mts` (in `npm test`) runs fully offline against
+  the committed static files — the forward walk, boundary crossing, chapter-to-day mapping,
+  EPUB structure, reproducibility, and the prune guards.

@@ -7,13 +7,17 @@ import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ExternalLink, Check } from 'lucide-react';
 import { useUi } from '../../state/UiContextCore';
-import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
+import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 
 const DevotionalModal: React.FC = () => {
   const { activeDevotion, setActiveDevotion } = useUi();
 
   const onClose = () => setActiveDevotion(null);
   const dismissOverlay = useOverlayDismiss(onClose);
+  // The backdrop guard only covers the backdrop, and this window leaves at
+  // most a thin frame of it — the ghost click from the tap that opened this
+  // lands inside, where the close controls are. See useTapGuard.
+  const guardedClose = useTapGuard(onClose);
 
   useEffect(() => {
     if (activeDevotion?.url) {
@@ -56,7 +60,7 @@ const DevotionalModal: React.FC = () => {
             Open in Browser
           </a>
           <button
-            onClick={onClose}
+            onClick={guardedClose}
             className="w-full p-4 font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 rounded-[16px] bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm hover:bg-[var(--bg-tertiary)] active:scale-95"
           >
             <Check size={14} />

@@ -18,6 +18,7 @@ import { useTheme } from './hooks/useTheme';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useScrollLock } from './hooks/useScrollLock';
 import { isAnyOverlayOpen } from './lib/overlayState';
+import { useDeferredAppUpdate } from './hooks/useDeferredAppUpdate';
 import { useSyncState } from './hooks/useSyncState';
 import { usePrefersDark } from './hooks/usePrefersDark';
 
@@ -26,6 +27,7 @@ import { Navbar } from './components/Navbar';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { Toast } from './components/Toast';
 import { Onboarding } from './components/Onboarding';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const Dashboard = React.lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
 const AppModals = React.lazy(() => import('./components/AppModals').then(m => ({ default: m.AppModals })));
@@ -37,7 +39,8 @@ export default function App() {
     activePlanCategory, setActivePlanCategory, 
     selectingCategoryId, setSelectingCategoryId, 
     activeDevotion, setActiveDevotion,
-    readerCategoryId, activeInternalDevotional,
+    readerCategoryId, setReaderCategoryId,
+    activeInternalDevotional, setActiveInternalDevotional,
     showProverbModal, setShowProverbModal, showSprintModal, setShowSprintModal,
     isStartMenuOpen, setIsStartMenuOpen, confirmDialog, setConfirmDialog,
     closeConfirmDialog, toast, setToast, showToast, setJournalDraft,
@@ -135,6 +138,10 @@ export default function App() {
     onClose: () => {
       setShowSettings(false); setShowHistory(false); setActivePlanCategory(null); setSelectingCategoryId(null);
       setActiveDevotion(null); setShowProverbModal(false); setShowSprintModal(false); setIsStartMenuOpen(false);
+      // The Bible reader and the devotional reader were missing here, so Escape
+      // could not close either one — the same omission that once left them
+      // scrolling the page behind them.
+      setReaderCategoryId(null); setActiveInternalDevotional(null);
     }
   });
 
@@ -142,11 +149,22 @@ export default function App() {
   // devotional reader were missing here, so opening a chapter on a phone left
   // the page scrolling behind the modal. Routed through isAnyOverlayOpen so the
   // list is one tested place rather than an inline chain that's easy to forget.
-  useScrollLock(isAnyOverlayOpen({
+  const anyOverlayOpen = isAnyOverlayOpen({
     showSettings, showHistory, activePlanCategory, selectingCategoryId,
     activeDevotion, readerCategoryId, activeInternalDevotional,
     showProverbModal, showSprintModal, isStartMenuOpen,
-  }));
+  });
+  useScrollLock(anyOverlayOpen);
+
+  // Same signal, second job: never reload the app for a new version while one of
+  // these is open. If a surface matters enough to freeze the page behind it, it
+  // matters enough not to be yanked away mid-chapter.
+  useDeferredAppUpdate({
+    overlayOpen: anyOverlayOpen,
+    // Rendered outside the overlay list, and it gates destructive actions.
+    confirmOpen: confirmDialog.isOpen,
+    isSigningIn,
+  });
   
   const toggleTheme = useCallback(() => {
     // Only the three themes that produce a distinct, defined appearance are in
@@ -171,14 +189,20 @@ export default function App() {
         {needsOnboarding ? (
           <Onboarding onComplete={handleSetInitialDate} />
         ) : (
-          <React.Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><div className="w-8 h-8 border-4 border-evernote border-t-transparent rounded-full animate-spin" /></div>}>
-            <Dashboard handleLogin={handleLoginLocal} isSigningIn={isSigningIn} user={user} isAuthLoading={isAuthLoading} />
-          </React.Suspense>
+          <ErrorBoundary label="Dashboard">
+            <React.Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><div className="w-8 h-8 border-4 border-evernote border-t-transparent rounded-full animate-spin" /></div>}>
+              <Dashboard handleLogin={handleLoginLocal} isSigningIn={isSigningIn} user={user} isAuthLoading={isAuthLoading} />
+            </React.Suspense>
+          </ErrorBoundary>
         )}
       </main>
-      <React.Suspense fallback={null}>
-        <AppModals isSigningIn={isSigningIn} handleLogin={handleLoginLocal} />
-      </React.Suspense>
+      {/* Separate boundary: a modal chunk that fails to load must not take the
+          dashboard down with it. */}
+      <ErrorBoundary label="Modals" banner>
+        <React.Suspense fallback={null}>
+          <AppModals isSigningIn={isSigningIn} handleLogin={handleLoginLocal} />
+        </React.Suspense>
+      </ErrorBoundary>
       <ConfirmDialog isOpen={confirmDialog.isOpen} title={confirmDialog.title} message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onClose={closeConfirmDialog} confirmLabel={confirmDialog.confirmLabel} cancelLabel={confirmDialog.cancelLabel} type={confirmDialog.type} confirmHref={confirmDialog.confirmHref} />
       <Toast message={toast?.message || null} type={toast?.type} onClear={() => setToast(null)} />
     </div>

@@ -8,7 +8,7 @@ import { motion } from 'motion/react';
 import { BookOpen, Check, Sparkles } from 'lucide-react';
 import { format, parse, isValid } from 'date-fns';
 import type { DevotionalContent } from '../../lib/devotionalContent';
-import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
+import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 
 /**
  * Format a devotional's own 'MM-dd' date for the header, resolving it to its
@@ -72,6 +72,12 @@ function DevotionalReaderModal({
   };
   // Ignore the ghost click from the tap that opened this modal (see hook).
   const dismissOverlay = useOverlayDismiss(handleClose);
+  // The backdrop guard alone is not enough even at inset-4: the window still
+  // covers all but a 16px frame, so a ghost click at the devotional card's
+  // coordinates lands inside — and the full-width "Done Reading" button sits in
+  // the bottom strip where a card can easily be. Closing here also LOGS a read,
+  // so a stray click would record a devotional that was never opened.
+  const guardedClose = useTapGuard(handleClose);
 
   return (
     <>
@@ -106,7 +112,7 @@ function DevotionalReaderModal({
             </div>
           </div>
           <button
-            onClick={handleClose}
+            onClick={guardedClose}
             className="p-2 sm:p-3 rounded-full hover:scale-105 transition-transform bg-[var(--text-primary)] text-[var(--bg-primary)]"
           >
             <Check size={20} className="sm:hidden" />
@@ -181,7 +187,7 @@ function DevotionalReaderModal({
 
         <div className="px-4 sm:px-8 py-4 bg-[var(--bg-primary)] border-t border-[var(--border-color)] shrink-0">
           <button
-            onClick={handleClose}
+            onClick={guardedClose}
             className="w-full p-4 font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 rounded-[16px] bg-[var(--text-primary)] text-[var(--bg-primary)] shadow-sm hover:opacity-90 active:scale-95"
           >
             Done Reading

@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 
 import { useUi } from '../../state/UiContextCore';
 import { triggerHaptic } from '../../lib/haptic';
-import { useOverlayDismiss } from '../../hooks/useOverlayDismiss';
+import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 import VerseCopyPopup from '../VerseCopyPopup';
 
 interface ProverbContent {
@@ -63,6 +63,10 @@ function ProverbModal({
   // Ignore the delayed "ghost click" from the tap that opened this modal so it
   // doesn't close itself immediately (see useOverlayDismiss).
   const dismissOverlay = useOverlayDismiss(onClose);
+  // The backdrop guard only covers the backdrop, and this window leaves at
+  // most a thin frame of it — the ghost click from the tap that opened this
+  // lands inside, where the close controls are. See useTapGuard.
+  const guardedClose = useTapGuard(onClose);
 
   return (
     <>
@@ -93,7 +97,7 @@ function ProverbModal({
             </div>
           </div>
           <button 
-            onClick={onClose}
+            onClick={guardedClose}
             className="p-2 sm:p-3 rounded-full hover:scale-105 transition-transform bg-[var(--text-primary)] text-[var(--bg-primary)]"
           >
             <Check size={20} className="sm:hidden" />
@@ -198,7 +202,7 @@ function ProverbModal({
               </button>
 
               <button 
-                onClick={onClose}
+                onClick={guardedClose}
                 className="w-full p-4 font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 rounded-[16px] bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm hover:bg-[var(--bg-tertiary)] active:scale-95 text-center mt-4"
               >
                 Done Reading
