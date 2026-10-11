@@ -1,6 +1,16 @@
 name: Daily reMarkable Pack
 
-# Builds the 7-day pack and puts it on the reMarkable, every morning.
+# Builds the 7-day pack and puts it on the reMarkable.
+#
+# PAUSED: the nightly schedule is switched off. It fired every night and failed
+# every night (no DAILY_LOGOS_UID / REMARKABLE_TOKEN secrets yet), which meant a
+# failure email per day. It can still be run by hand from the Actions tab.
+#
+# To turn the nightly run back on, once both secrets exist and
+# probe-remarkable.yml has passed, restore this under `on:`:
+#
+#   schedule:
+#     - cron: '30 22 * * *'
 #
 # 22:30 UTC = 05:30 Vietnam, deliberately 30 minutes AFTER the 22:00 devotional
 # refresh so the pack picks up that morning's freshly-scraped devotional content
@@ -12,8 +22,6 @@ name: Daily reMarkable Pack
 # as a build artifact so a bad morning can be diagnosed after the fact.
 
 on:
-  schedule:
-    - cron: '30 22 * * *'
   workflow_dispatch:
     inputs:
       from_start:

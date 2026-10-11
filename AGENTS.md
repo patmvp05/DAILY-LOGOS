@@ -193,7 +193,9 @@ Daily Logos as an EPUB for a reMarkable Paper Pro, built and delivered every mor
   `REMARKABLE_FOLDER`, `REMARKABLE_KEEP_DAYS`.
 - **Workflows:** run `probe-remarkable.yml` by hand ONCE first — it round-trips a throwaway
   document (auth → folder → upload → verify → delete) because this sandbox cannot reach
-  reMarkable's cloud to test any of it. Then `daily-remarkable.yml` runs at `30 22 * * *`,
+  reMarkable's cloud to test any of it. Then `daily-remarkable.yml` is meant to run at `30 22 * * *` — **currently PAUSED** (the
+  schedule is removed; manual `workflow_dispatch` only, because it failed nightly and emailed
+  daily before the secrets existed; the cron to restore is in that file's header comment) —
   deliberately 30 minutes after the 22:00 devotional refresh so the pack picks up that
   morning's content. The EPUB is never committed — it's a build artifact only.
 - **Tests:** `scripts/test-remarkable-pack.mts` (in `npm test`) runs fully offline against
