@@ -5,9 +5,23 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sun, CloudSun, Cloud, CloudFog, CloudRain, CloudSnow, CloudLightning, Pencil } from 'lucide-react';
-import { fetchWeather, getCachedWeather, WeatherSnapshot } from '../lib/weather';
+import {
+  fetchWeather,
+  getCachedWeather,
+  resolveWeatherLocation,
+  setManualLocation,
+  WeatherSnapshot,
+} from '../lib/weather';
 import { cn } from '../lib/utils';
-import { get, set } from 'idb-keyval';
+
+/** Returning to the app within this window reuses the forecast already shown. */
+const WEATHER_FRESH_MS = 30 * 60 * 1000;
+
+interface RefreshOptions {
+  /** Ask the device for its position. Only ever set by a tap on the weather. */
+  locate?: boolean;
+  manual?: { lat: number; lng: number; city: string };
+}
 
 const WeatherIcon = ({ code, className }: { code: number; className?: string }) => {
   if (code === 0 || code === 1) return <Sun className={cn("text-amber-500", className)} size={28} />;
@@ -32,72 +46,27 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
   const [isEditing, setIsEditing] = useState(false);
   const [tempCity, setTempCity] = useState('');
 
-  const refresh = useCallback(async (manualLat?: number, manualLng?: number, manualName?: string) => {
+  // Launch and return-to-app refreshes reuse the saved location, so they never
+  // show the location prompt. Only a tap on the weather passes `locate: true`
+  // (see resolveWeatherLocation in lib/weather.ts for why).
+  const refresh = useCallback(async ({ locate = false, manual }: RefreshOptions = {}) => {
     if (!navigator.onLine) return;
     setIsRefreshing(true);
-    
+
     try {
-      let lat: number;
-      let lng: number;
-      let city: string = '';
-      let source: 'geolocation' | 'cache' | 'fallback' = 'fallback';
+      const loc = manual
+        ? setManualLocation(manual.lat, manual.lng, manual.city)
+        : await resolveWeatherLocation({ locate });
 
-      // a) Load cached coords
-      const cached = await get<{ lat: number, lng: number, city: string, timestamp: number }>('weather-coords');
-      const oneHour = 3600000;
-
-      if (manualLat !== undefined && manualLng !== undefined) {
-        lat = manualLat;
-        lng = manualLng;
-        city = manualName || '';
-        source = 'cache';
-      } else if (cached && cached.timestamp && (Date.now() - cached.timestamp < oneHour)) {
-        // b) Use fresh cache
-        lat = cached.lat;
-        lng = cached.lng;
-        city = cached.city || '';
-        source = 'cache';
-      } else {
-        // c) Request geolocation
-        try {
-          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, { 
-              timeout: 5000, 
-              maximumAge: 3600000 
-            });
-          });
-          lat = pos.coords.latitude;
-          lng = pos.coords.longitude;
-          source = 'geolocation';
-        } catch (err) {
-          console.warn('[DL-DEBUG] Geolocation failed:', (err as Error).message);
-          // Fallback to cached coords if available, otherwise HCMC defaults
-          const fallback = cached || { lat: 10.8231, lng: 106.6297, city: 'Ho Chi Minh City' };
-          lat = fallback.lat;
-          lng = fallback.lng;
-          city = fallback.city || 'Ho Chi Minh City';
-          source = cached ? 'cache' : 'fallback';
-        }
+      // Coming back to the app doesn't need a new forecast every time.
+      const cached = getCachedWeather();
+      if (!locate && !manual && cached && cached.city === loc.city
+          && Date.now() - cached.fetchedAt < WEATHER_FRESH_MS) {
+        setWeather(cached);
+        return;
       }
 
-      // d) Reverse geocoding
-      if (!city || source === 'geolocation') {
-        try {
-          const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
-          const geoData = await geoRes.json();
-          city = geoData.city || geoData.locality || 'Unknown';
-        } catch {
-          city = city || 'Unknown';
-        }
-      }
-
-      // Update cache with fresh timestamp and city
-      await set('weather-coords', { lat, lng, city, timestamp: Date.now() });
-
-      // e) Debug log
-      console.log('[DL-DEBUG] Weather coords:', { lat, lng, source });
-
-      const fresh = await fetchWeather(lat, lng, city);
+      const fresh = await fetchWeather(loc.lat, loc.lng, loc.city);
       setWeather(fresh);
     } catch (e) {
       console.error('Weather refresh failed', e);
@@ -105,6 +74,11 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
       setIsRefreshing(false);
     }
   }, []);
+
+  // A deliberate tap: the one place a location prompt is expected.
+  const updateLocation = () => {
+    if (!isRefreshing) refresh({ locate: true });
+  };
 
   const handleManualLocation = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,7 +90,9 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
       const data = await res.json();
       if (data && data.length > 0) {
         const item = data[0];
-        await refresh(parseFloat(item.lat), parseFloat(item.lon), item.display_name.split(',')[0]);
+        await refresh({
+          manual: { lat: parseFloat(item.lat), lng: parseFloat(item.lon), city: item.display_name.split(',')[0] },
+        });
       } else {
         alert("Location not found. Please try a city name.");
       }
@@ -163,13 +139,19 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
 
   return (
     <div className="flex items-center gap-3 px-3 py-1.5 transition-all hover:bg-[var(--bg-secondary)] rounded-xl ml-4">
-      <div className="relative">
+      <button
+        type="button"
+        onClick={updateLocation}
+        aria-label="Update weather to my current location"
+        title="Update weather to my current location"
+        className="relative active:scale-95 transition-transform"
+      >
         <WeatherIcon code={weather.conditionCode} className="shrink-0" />
         {isRefreshing && (
-          <div className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-brand rounded-full dot-pulse" />
+          <span className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-brand rounded-full dot-pulse" />
         )}
-      </div>
-      
+      </button>
+
       <div className="hidden lg:flex flex-col leading-tight">
         <div className="flex items-baseline gap-2">
           <span className="text-base font-bold tracking-tighter text-[var(--text-primary)]">
@@ -204,19 +186,25 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
         </span>
       </div>
 
-      <div className="flex lg:hidden flex-col leading-tight">
-        <div className="flex items-baseline gap-1">
+      {/* On a phone there's no pencil, so the whole reading is the tap target. */}
+      <button
+        type="button"
+        onClick={updateLocation}
+        aria-label="Update weather to my current location"
+        className="flex lg:hidden flex-col leading-tight text-left"
+      >
+        <span className="flex items-baseline gap-1">
           <span className="text-sm font-bold tracking-tighter text-[var(--text-primary)]">
             {weather.tempF}°F
           </span>
           <span className="text-[9px] uppercase font-bold tracking-tight opacity-60 truncate max-w-[50px] text-[var(--text-secondary)]">
             {weather.city}
           </span>
-        </div>
+        </span>
         <span className="text-[11px] font-bold tracking-tight opacity-70 text-[var(--text-secondary)]">
           {weather.conditionLabel}
         </span>
-      </div>
+      </button>
     </div>
   );
 }

@@ -111,7 +111,11 @@ function isFullBleed(src: string): boolean {
      isFullBleed(read('../src/components/modals/ReaderModal.tsx')));
   ok('the sprint sheet is detected as full-bleed',
      isFullBleed(read('../src/components/modals/ScriptureSprintModal.tsx')));
-  ok('an inset modal is not', !isFullBleed(read('../src/components/modals/ProverbModal.tsx')));
+  // The daily proverb went full-bleed (reader layout) so its header clears the
+  // iPhone status bar — which puts its close controls under the ghost click.
+  ok('the daily proverb is detected as full-bleed',
+     isFullBleed(read('../src/components/modals/ProverbModal.tsx')));
+  ok('an inset modal is not', !isFullBleed(read('../src/components/modals/DevotionalReaderModal.tsx')));
   ok('the classifier matches some but not all', fullBleedCount > 0 && fullBleedCount < OVERLAYS.length,
      String(fullBleedCount));
 
@@ -183,6 +187,22 @@ function isFullBleed(src: string): boolean {
   // exit — corrupting the very measurement that decides the next chapter.
   ok('the action bar has no exit animation',
      !/reader-action-bar[\s\S]{0,400}exit=\{/.test(src));
+}
+
+// ── The daily proverb clears the iPhone status bar and home indicator
+{
+  // It was an inset-4 card with a plain py-6 header: in the home-screen app the
+  // title and Done button sat under the clock and Dynamic Island.
+  const src = read('../src/components/modals/ProverbModal.tsx');
+  ok('the proverb header pads for the status bar / Dynamic Island',
+     /proverb-window[\s\S]*?paddingTop: 'calc\(env\(safe-area-inset-top/.test(src),
+     'without it the title renders under the status bar in standalone mode');
+  ok('the end of the proverb scroller clears the home indicator',
+     src.includes("env(safe-area-inset-bottom, 0px))' }}"));
+  ok('the proverb text uses the reader\'s centered column',
+     src.includes('max-w-[680px] mx-auto'));
+  ok('the proverb Done button is guarded', src.includes('useTapGuard(onClose)')
+     && (src.match(/onClick=\{guardedClose\}/g) ?? []).length === 2);
 }
 
 // ── The reserved-tail invariant, across every plausible device

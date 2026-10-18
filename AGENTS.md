@@ -147,6 +147,20 @@
   click lands *inside* the window, on whatever was under the tap. Those use `useTapGuard` on
   every handler that closes the modal or moves progress. `scripts/test-tap-guard.mts` detects
   full-bleed modals from their container class, so a new one that forgets fails the suite.
+- **The daily proverb uses the Bible reader's layout** (`ProverbModal.tsx`): full-bleed on a
+  phone, header padded with `env(safe-area-inset-top)`, text in the reader's centered
+  `max-w-[680px]` column, scroller tail padded for the home indicator. It was an `inset-4` card
+  with a plain `py-6` header, and in the home-screen app (`black-translucent` status bar) the
+  title and Done button sat under the clock and Dynamic Island — "off-centered, top cut off."
+  Any new overlay needs the same top padding; a 16px inset does not clear the status bar.
+- **Weather never asks for location on launch** (`resolveWeatherLocation` in
+  `src/lib/weather.ts`). The location is saved once (localStorage `dl_weather_location_v1`,
+  migrated from the old IndexedDB `weather-coords`) with **no expiry**; the browser is asked
+  only on the very first run or when the user taps the weather. The old code re-requested
+  geolocation whenever the coords were over an hour old, and an iOS home-screen app forgets
+  the grant every time it closes — so it prompted on nearly every open. Do not add an age
+  limit or a launch/visibility-time geolocation call back; `scripts/test-weather-location.mts`
+  fails if you do.
 
 ## reMarkable "7-day pack"
 
