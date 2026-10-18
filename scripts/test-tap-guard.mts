@@ -111,11 +111,14 @@ function isFullBleed(src: string): boolean {
      isFullBleed(read('../src/components/modals/ReaderModal.tsx')));
   ok('the sprint sheet is detected as full-bleed',
      isFullBleed(read('../src/components/modals/ScriptureSprintModal.tsx')));
-  // The daily proverb went full-bleed (reader layout) so its header clears the
-  // iPhone status bar — which puts its close controls under the ghost click.
+  // The daily proverb and the devotional reader went full-bleed (reader layout)
+  // so their headers clear the iPhone status bar — which puts their close
+  // controls under the ghost click.
   ok('the daily proverb is detected as full-bleed',
      isFullBleed(read('../src/components/modals/ProverbModal.tsx')));
-  ok('an inset modal is not', !isFullBleed(read('../src/components/modals/DevotionalReaderModal.tsx')));
+  ok('the devotional reader is detected as full-bleed',
+     isFullBleed(read('../src/components/modals/DevotionalReaderModal.tsx')));
+  ok('an inset modal is not', !isFullBleed(read('../src/components/modals/DevotionalModal.tsx')));
   ok('the classifier matches some but not all', fullBleedCount > 0 && fullBleedCount < OVERLAYS.length,
      String(fullBleedCount));
 
@@ -189,20 +192,33 @@ function isFullBleed(src: string): boolean {
      !/reader-action-bar[\s\S]{0,400}exit=\{/.test(src));
 }
 
-// ── The daily proverb clears the iPhone status bar and home indicator
+// ── The daily proverb and devotional reader clear the status bar and home indicator
 {
-  // It was an inset-4 card with a plain py-6 header: in the home-screen app the
+  // Both were inset-4 cards with a plain py-6 header: in the home-screen app the
   // title and Done button sat under the clock and Dynamic Island.
-  const src = read('../src/components/modals/ProverbModal.tsx');
-  ok('the proverb header pads for the status bar / Dynamic Island',
-     /proverb-window[\s\S]*?paddingTop: 'calc\(env\(safe-area-inset-top/.test(src),
-     'without it the title renders under the status bar in standalone mode');
-  ok('the end of the proverb scroller clears the home indicator',
-     src.includes("env(safe-area-inset-bottom, 0px))' }}"));
-  ok('the proverb text uses the reader\'s centered column',
-     src.includes('max-w-[680px] mx-auto'));
-  ok('the proverb Done button is guarded', src.includes('useTapGuard(onClose)')
-     && (src.match(/onClick=\{guardedClose\}/g) ?? []).length === 2);
+  for (const [label, file, windowKey] of [
+    ['proverb', 'ProverbModal.tsx', 'proverb-window'],
+    ['devotional', 'DevotionalReaderModal.tsx', 'devotional-window'],
+  ] as const) {
+    const src = read(`../src/components/modals/${file}`);
+    ok(`the ${label} header pads for the status bar / Dynamic Island`,
+       new RegExp(`${windowKey}[\\s\\S]*?paddingTop: 'calc\\(env\\(safe-area-inset-top`).test(src),
+       'without it the title renders under the status bar in standalone mode');
+    ok(`the end of the ${label} scroller clears the home indicator`,
+       src.includes("env(safe-area-inset-bottom, 0px))' }}"));
+    ok(`the ${label} text uses the reader's centered column`,
+       src.includes('max-w-[680px] mx-auto'));
+  }
+
+  const proverb = read('../src/components/modals/ProverbModal.tsx');
+  ok('the proverb Done button is guarded', proverb.includes('useTapGuard(onClose)')
+     && (proverb.match(/onClick=\{guardedClose\}/g) ?? []).length === 2);
+
+  // Like the Bible reader, no permanent bottom bar duplicating the header ✓.
+  const dev = read('../src/components/modals/DevotionalReaderModal.tsx');
+  ok('the devotional has no permanent Done bar under the scroller',
+     !/<\/div>\s*<div className="[^"]*border-t[^"]*shrink-0">\s*<button/.test(dev),
+     'a fixed bar costs ~100px of every phone screen; Done sits at the end of the reading');
 }
 
 // ── The reserved-tail invariant, across every plausible device
@@ -222,12 +238,13 @@ function isFullBleed(src: string): boolean {
 
 // ── The two sites the full-bleed rule misses
 {
-  // An inset-4 window still covers all but a 16px frame, so the ghost click
-  // lands inside it too — the backdrop guard was never the whole story.
+  // Now full-bleed on a phone, but it was an inset-4 window when this was found:
+  // even that covers all but a 16px frame, so the ghost click lands inside — the
+  // backdrop guard was never the whole story.
   const dev = read('../src/components/modals/DevotionalReaderModal.tsx');
   ok('the devotional reader guards its close buttons', dev.includes('useTapGuard(handleClose)')
      && (dev.match(/onClick=\{guardedClose\}/g) ?? []).length === 2,
-     'its full-width Done button sits in the bottom strip, and closing LOGS a read');
+     'both the header ✓ and the Done button close, and closing LOGS a read');
   ok('no bare close handler survives there', !/onClick=\{handleClose\}/.test(dev));
 
   // This one opens from a verse number INSIDE the reader, and its backdrop

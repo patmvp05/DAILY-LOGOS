@@ -147,12 +147,16 @@
   click lands *inside* the window, on whatever was under the tap. Those use `useTapGuard` on
   every handler that closes the modal or moves progress. `scripts/test-tap-guard.mts` detects
   full-bleed modals from their container class, so a new one that forgets fails the suite.
-- **The daily proverb uses the Bible reader's layout** (`ProverbModal.tsx`): full-bleed on a
-  phone, header padded with `env(safe-area-inset-top)`, text in the reader's centered
-  `max-w-[680px]` column, scroller tail padded for the home indicator. It was an `inset-4` card
-  with a plain `py-6` header, and in the home-screen app (`black-translucent` status bar) the
-  title and Done button sat under the clock and Dynamic Island — "off-centered, top cut off."
-  Any new overlay needs the same top padding; a 16px inset does not clear the status bar.
+- **The daily proverb and devotional reader use the Bible reader's layout** (`ProverbModal.tsx`,
+  `DevotionalReaderModal.tsx`): full-bleed on a phone, header padded with
+  `env(safe-area-inset-top)`, text in the reader's centered `max-w-[680px]` column and type,
+  scroller tail padded for the home indicator. Both were `inset-4` cards with a plain `py-6`
+  header, and in the home-screen app (`black-translucent` status bar) the title and Done button
+  sat under the clock and Dynamic Island — "off-centered, top cut off." Any new overlay needs
+  the same top padding; a 16px inset does not clear the status bar. The devotional's Done
+  button sits at the end of the reading, not in a permanent bottom bar (same reasoning as the
+  reader's action bar). Its heading is the day's own title (My Utmost, Insight); titles that
+  are just a date (Morning & Evening, Streams) are skipped since the header shows the date.
 - **Weather never asks for location on launch** (`resolveWeatherLocation` in
   `src/lib/weather.ts`). The location is saved once (localStorage `dl_weather_location_v1`,
   migrated from the old IndexedDB `weather-coords`) with **no expiry**; the browser is asked

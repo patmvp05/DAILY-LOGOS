@@ -28,6 +28,19 @@ function formatDevotionalDate(monthDay: string): string {
   return isValid(leapRef) ? format(leapRef, 'MMMM do') : format(now, 'EEEE, MMMM do');
 }
 
+const MONTH_DAY = /(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}/;
+
+/**
+ * The day's own title, shown as the heading the way the Bible reader shows
+ * "John 3". My Utmost and Insight for Living have real ones ("The Unheeded
+ * Secret"); Morning & Evening and Streams only carry the date ("October 19",
+ * "Streams in the Desert - October 19"), which the header already shows.
+ */
+function dayTitle(content: DevotionalContent | null): string | null {
+  const title = content?.title?.trim();
+  return title && !MONTH_DAY.test(title) ? title : null;
+}
+
 interface DevotionalReaderModalProps {
   name: string;
   author: string | null;
@@ -72,12 +85,13 @@ function DevotionalReaderModal({
   };
   // Ignore the ghost click from the tap that opened this modal (see hook).
   const dismissOverlay = useOverlayDismiss(handleClose);
-  // The backdrop guard alone is not enough even at inset-4: the window still
-  // covers all but a 16px frame, so a ghost click at the devotional card's
-  // coordinates lands inside — and the full-width "Done Reading" button sits in
-  // the bottom strip where a card can easily be. Closing here also LOGS a read,
-  // so a stray click would record a devotional that was never opened.
+  // On a phone this window is full-bleed, so the ghost click from the tap that
+  // opened it lands INSIDE, on whatever sits at the devotional card's
+  // coordinates. Closing here also LOGS a read, so a stray click would record a
+  // devotional that was never opened.
   const guardedClose = useTapGuard(handleClose);
+
+  const title = dayTitle(content);
 
   return (
     <>
@@ -89,34 +103,48 @@ function DevotionalReaderModal({
         onClick={dismissOverlay}
         className="fixed inset-0 bg-black/80 backdrop-blur-md z-[500]"
       />
+      {/* The Bible reader's window (ReaderModal). This used to be an `inset-4`
+          card with a plain `py-6` header, which in the iPhone home-screen app put
+          the title and Done button under the status bar and Dynamic Island. Now
+          it fills a phone screen, pads the header for the safe area, and is a
+          centered column on tablet and desktop. */}
       <motion.div
         key="devotional-window"
-        initial={{ scale: 0.9, opacity: 0 }}
+        data-testid="devotional-modal"
+        initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="fixed inset-4 md:inset-10 bg-[var(--bg-primary)] z-[510] flex flex-col border border-[var(--border-color)] shadow-2xl rounded-[24px] overflow-hidden"
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="fixed inset-0 sm:inset-4 md:inset-x-auto md:inset-y-8 md:left-1/2 md:-translate-x-1/2 md:w-[760px] md:max-w-[calc(100vw-4rem)] bg-[var(--bg-primary)] z-[510] flex flex-col border border-[var(--border-color)] shadow-2xl sm:rounded-[24px] overflow-hidden"
       >
-        <div className="flex justify-between items-center px-4 sm:px-8 py-6 bg-[var(--bg-primary)] border-b border-[var(--border-color)] shrink-0">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white bg-brand shadow-sm">
-              <BookOpen size={20} className="sm:hidden" />
-              <BookOpen size={24} className="hidden sm:block" />
+        {/* Header — padded for iPhone notch/Dynamic Island */}
+        <div
+          className="flex justify-between items-center gap-3 px-5 sm:px-8 bg-[var(--bg-primary)] border-b border-[var(--border-color)] shrink-0"
+          style={{
+            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.25rem)',
+            paddingBottom: '1.25rem',
+          }}
+        >
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white bg-brand shadow-sm shrink-0">
+              <BookOpen size={22} />
             </div>
-            <div>
-              <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tighter text-[var(--text-primary)]">{name}</h3>
-              <p className="text-[11px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">
+            <div className="min-w-0">
+              {/* Wraps instead of truncating: "My Utmost for His Highest" is long. */}
+              <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tighter leading-tight text-[var(--text-primary)]">{name}</h3>
+              <p className="text-[11px] text-[var(--text-secondary)] font-bold uppercase tracking-widest truncate">
                 {content?.date
                   ? formatDevotionalDate(content.date)
                   : format(new Date(), 'EEEE, MMMM do')}
               </p>
             </div>
           </div>
+          {/* 44×44 minimum tap target for iPhone accessibility */}
           <button
             onClick={guardedClose}
-            className="p-2 sm:p-3 rounded-full hover:scale-105 transition-transform bg-[var(--text-primary)] text-[var(--bg-primary)]"
+            aria-label="Done reading"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:scale-105 transition-transform bg-[var(--text-primary)] text-[var(--bg-primary)] shrink-0"
           >
-            <Check size={20} className="sm:hidden" />
-            <Check size={24} className="hidden sm:block" />
+            <Check size={20} />
           </button>
         </div>
 
@@ -126,7 +154,12 @@ function DevotionalReaderModal({
           // the devotional does not chain the scroll to the page behind it.
           className="flex-1 overflow-y-auto ios-scroll bg-[var(--bg-primary)]"
         >
-          <div className="max-w-3xl mx-auto p-6 sm:p-8 lg:p-12">
+          {/* The reader's centered column. The bottom pad keeps the Done button
+              clear of the iPhone home indicator. */}
+          <div
+            className="px-6 sm:px-12 pt-8 sm:pt-12 max-w-[680px] mx-auto"
+            style={{ paddingBottom: 'calc(2.5rem + env(safe-area-inset-bottom, 0px))' }}
+          >
             {isFetching ? (
               <div className="py-24 flex flex-col items-center justify-center text-center">
                 <motion.div
@@ -142,11 +175,16 @@ function DevotionalReaderModal({
                 <p className="text-sm text-[var(--text-secondary)]">{error}</p>
               </div>
             ) : content ? (
-              <div className="prose dark:prose-invert max-w-none">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-brand mb-8 flex items-center gap-2">
+              <>
+                <p className={`text-[11px] font-bold uppercase tracking-widest text-brand flex items-center gap-2 ${title ? 'mb-2' : 'mb-8'}`}>
                   <Sparkles size={12} />
                   {author || content.author}
                 </p>
+                {title && (
+                  <h2 className="font-serif text-[28px] sm:text-[32px] font-semibold tracking-tight leading-tight text-[var(--text-primary)] mb-8">
+                    {title}
+                  </h2>
+                )}
 
                 {content.entries.map((entry, i) => (
                   <div key={i} className={i > 0 ? 'mt-12 pt-12 border-t border-[var(--border-color)]' : ''}>
@@ -157,8 +195,8 @@ function DevotionalReaderModal({
                     )}
 
                     {entry.scripture && (
-                      <blockquote className="border-l-4 border-brand pl-6 mb-6">
-                        <p className="text-lg sm:text-xl font-serif italic text-[var(--text-primary)] leading-relaxed">
+                      <blockquote className="border-l-4 border-brand pl-5 mb-8">
+                        <p className="font-serif italic text-[19px] sm:text-[20px] leading-[1.7] text-[var(--text-primary)]">
                           &ldquo;{entry.scripture}&rdquo;
                         </p>
                         {entry.reference && (
@@ -169,29 +207,31 @@ function DevotionalReaderModal({
                       </blockquote>
                     )}
 
-                    <div className="space-y-6 text-xl leading-relaxed text-gray-800 dark:text-gray-200 font-serif">
+                    <div className="reader-prose font-serif text-[19px] sm:text-[20px] leading-[1.9] text-[var(--text-primary)]">
                       {entry.body.map((paragraph, j) => (
-                        <p key={j}>{paragraph}</p>
+                        <p key={j} className="mb-[1.1em]">{paragraph}</p>
                       ))}
                     </div>
                   </div>
                 ))}
-              </div>
+
+                {/* At the end of the reading rather than a permanent bottom bar:
+                    the bar spent ~100px of every phone screen on a button the
+                    header ✓ already provides (the same call the Bible reader made). */}
+                <button
+                  onClick={guardedClose}
+                  className="w-full mt-8 min-h-[52px] font-bold uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-[18px] shadow-sm hover:opacity-90 active:scale-[0.98]"
+                >
+                  Done Reading
+                  <Check size={16} />
+                </button>
+              </>
             ) : (
               <div className="py-24 flex flex-col items-center justify-center text-center">
-                <p className="text-gray-400 italic text-sm">No devotional content available for today.</p>
+                <p className="text-sm italic text-[var(--text-secondary)]">No devotional content available for today.</p>
               </div>
             )}
           </div>
-        </div>
-
-        <div className="px-4 sm:px-8 py-4 bg-[var(--bg-primary)] border-t border-[var(--border-color)] shrink-0">
-          <button
-            onClick={guardedClose}
-            className="w-full p-4 font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 rounded-[16px] bg-[var(--text-primary)] text-[var(--bg-primary)] shadow-sm hover:opacity-90 active:scale-95"
-          >
-            Done Reading
-          </button>
         </div>
       </motion.div>
     </>
