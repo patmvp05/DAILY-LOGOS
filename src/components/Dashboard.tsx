@@ -107,6 +107,15 @@ function DashboardComponent({
     [state.progress, todayStr]
   );
 
+  // Today's proverb counts as read once logProverbRead has logged it — the same
+  // test it uses to avoid logging twice: a Proverbs entry for today's chapter.
+  // On a phone the proverb leads the page until then, and drops below the
+  // reading parts once it's read. Display only; nothing here logs anything.
+  const proverbReadToday = useMemo(
+    () => state.history.some(h => h.bookName === 'Proverbs' && h.chapter === dayOfMonth && h.localDate === todayStr),
+    [state.history, dayOfMonth, todayStr]
+  );
+
   const { catProgress } = useMemo(() =>
     computeProgressStats(state.progress, state.completedBooks),
   [state.progress, state.completedBooks]);
@@ -192,14 +201,15 @@ function DashboardComponent({
   return (
     // Below lg (phones, iPad upright) the page is one column, and it used to
     // open with the title, Resume Reading, the proverb, today's minutes and the
-    // sprint — so the seven reading parts started about two screens down. Now a
-    // compact summary strip leads, then the parts, then everything else. The two
-    // column wrappers are `display: contents` below lg so their children can be
-    // reordered with `order-*`; every lg: class reproduces the desktop layout
-    // exactly as it was.
+    // sprint — so the seven reading parts started about two screens down. Phone
+    // order now: today's proverb (until it's read), Resume Reading, the summary
+    // strip, the seven parts, then the proverb once read, today's minutes, the
+    // sprint and Plan Status. The two column wrappers are `display: contents`
+    // below lg so their children can be reordered with `order-*`; every lg:
+    // class reproduces the desktop layout exactly as it was.
     <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6 lg:py-12 flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:gap-12 transition-opacity duration-300">
       {/* Phone / tablet summary strip (the big title block is desktop-only) */}
-      <section className="order-1 lg:hidden cb-card" aria-label="Today at a glance">
+      <section className="order-3 lg:hidden cb-card" aria-label="Today at a glance">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-[11px] uppercase tracking-widest font-bold text-brand mb-2">Day {dayNumber}</p>
@@ -258,7 +268,7 @@ function DashboardComponent({
           {/* Resume Reading Card (Audible Mini-Player style) */}
           {lastReadProgress && (
             <div className={cn(
-              "order-3 lg:order-none lg:mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700"
+              "order-2 lg:order-none lg:mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700"
             )}>
               <div className="flex justify-between items-center mb-3">
                 <p className="text-[11px] uppercase font-bold tracking-widest text-brand">Resume Reading</p>
@@ -313,7 +323,10 @@ function DashboardComponent({
           {/* Proverb of the Day */}
           <button
             onClick={() => handleShowProverbModal(true)}
-            className="order-4 lg:order-none w-full lg:mb-6 relative overflow-hidden group text-left block cb-card-interactive"
+            className={cn(
+              proverbReadToday ? "order-5" : "order-1",
+              "lg:order-none w-full lg:mb-6 relative overflow-hidden group text-left block cb-card-interactive"
+            )}
           >
             <div className="relative">
               <Sparkles className="absolute top-0 right-0 group-hover:scale-110 transition-transform text-brand/20 dark:text-brand/40" size={48} />
@@ -337,7 +350,7 @@ function DashboardComponent({
             </div>
           </button>
 
-          <div className="order-5 lg:order-none cb-card lg:mb-10 overflow-hidden relative group">
+          <div className="order-6 lg:order-none cb-card lg:mb-10 overflow-hidden relative group">
             <div className="relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16 blur-xl" />
               <div className="flex items-baseline justify-between mb-1">
@@ -383,7 +396,7 @@ function DashboardComponent({
               quietly at the bottom rather than competing with the daily plan. */}
           <button
             onClick={() => setShowSprintModal(true)}
-            className="order-6 lg:order-none w-full lg:mb-6 relative overflow-hidden group text-left block cb-card-interactive"
+            className="order-7 lg:order-none w-full lg:mb-6 relative overflow-hidden group text-left block cb-card-interactive"
           >
             <div className="relative">
               <Flame
@@ -430,7 +443,7 @@ function DashboardComponent({
 
       {/* Right Grid Area: The 7 Sections */}
       <div className="contents lg:block lg:col-span-8">
-        <div className="order-2 lg:order-none grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div className="order-4 lg:order-none grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {!user && !isAuthLoading && (
             <div 
               className={cn(
@@ -505,7 +518,7 @@ function DashboardComponent({
           })}
         </div>
 
-        <div className="order-7 lg:order-none cb-card lg:mt-6 overflow-hidden relative group">
+        <div className="order-8 lg:order-none cb-card lg:mt-6 overflow-hidden relative group">
           <div className="relative">
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16 blur-xl" />
             <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-4">Plan Status</p>
