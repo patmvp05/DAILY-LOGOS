@@ -170,6 +170,13 @@
   the grant every time it closes — so it prompted on nearly every open. Do not add an age
   limit or a launch/visibility-time geolocation call back; `scripts/test-weather-location.mts`
   fails if you do.
+- **The phone dashboard order is set with `order-*`** (`src/components/Dashboard.tsx`). Below
+  `lg` the page is one column: the summary strip (`order-1`, phone only), the seven parts
+  (`order-2`), then Resume Reading, the proverb, Today's Reading, the sprint and Plan Status
+  (`order-3` to `order-7`). The two column wrappers are `display: contents` below `lg` so their
+  children can be reordered, and every `lg:` class reproduces the desktop layout unchanged. A
+  new block in either column needs its own `order-*` plus `lg:order-none`, or on a phone it
+  lands at order 0, above everything.
 
 ## reMarkable "7-day pack"
 

@@ -46,7 +46,7 @@ export const AppModals = memo(({
    } = useUi();
 
    const { user, loading: isAuthLoading, logout } = useAuth();
-   const { toggleBookCompletion, jumpToBook, saveProverbJournal, resetProgress, logProverbRead, logDevotionalRead, advanceChapter, toggleSprintHour, setSprintReference, clearSprint } = useReadingActions(state, dispatch, user);
+   const { toggleBookCompletion, jumpToBook, saveProverbJournal, deleteJournal, resetProgress, logProverbRead, logDevotionalRead, advanceChapter, toggleSprintHour, setSprintReference, clearSprint } = useReadingActions(state, dispatch, user);
 
    // useToday keeps this fresh across midnight so the proverb modal opens on
    // the right chapter without a reload.
@@ -62,6 +62,7 @@ export const AppModals = memo(({
            onLogout={logout}
            handleLogin={handleLogin}
            onExportJournals={() => exportJournalsAsMarkdown(state.proverbJournals)}
+           onDeleteJournal={deleteJournal}
            onResetProgress={resetProgress}
            syncStatus={syncStatus}
            lastSyncTime={lastSyncTime}

@@ -74,15 +74,19 @@ const NavbarComponent = memo(({
       "fixed top-0 left-0 right-0 h-16 bg-[var(--nav-bg)] backdrop-blur-md border-b border-[var(--border-color)] z-50 flex items-center justify-between px-4 sm:px-10 transition-colors duration-300",
       isStandalone && "h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)]"
     )}>
-      <div className="flex items-center gap-4 lg:gap-8">
-        <div className="flex items-center gap-3">
+      {/* At phone widths the bar's contents are wider than the screen. The
+          logo used to be what gave way (an img with max-width:100% can shrink
+          to nothing in a flex row): squeezed at 390-393pt, gone at 375pt. Now
+          the logo and the buttons keep their size and the weather text yields. */}
+      <div className="flex items-center gap-4 lg:gap-8 min-w-0">
+        <div className="flex items-center gap-3 shrink-0">
           <div className="relative group">
             <img
               src="/icons/logo.svg"
               alt="The Daily Logos"
               width={32}
               height={32}
-              className="relative w-8 h-8 transition-transform duration-300 group-hover:scale-105 active:scale-95"
+              className="relative w-8 h-8 max-w-none transition-transform duration-300 group-hover:scale-105 active:scale-95"
             />
           </div>
           <span className="text-xl font-bold tracking-tighter hidden sm:block">
@@ -93,15 +97,17 @@ const NavbarComponent = memo(({
           <WeatherWidget />
         </Suspense>
       </div>
-      <div className="flex items-center gap-1 sm:gap-6">
+      <div className="flex items-center gap-1 sm:gap-6 shrink-0">
         {!user && (
-          <motion.button 
+          <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => handleLogin()}
-            className="flex items-center gap-2 px-4 h-10 bg-brand/10 text-brand rounded-full border border-brand/20 md:hidden"
+            aria-label="Sign in to sync"
+            className="flex items-center gap-2 px-3 min-[420px]:px-4 h-10 bg-brand/10 text-brand rounded-full border border-brand/20 md:hidden"
           >
             <LogIn size={16} />
-            <span className="text-[11px] font-bold tracking-wide">Sync</span>
+            {/* Icon-only on narrow phones so the signed-out bar still fits. */}
+            <span className="hidden min-[420px]:inline text-[11px] font-bold tracking-wide">Sync</span>
           </motion.button>
         )}
 

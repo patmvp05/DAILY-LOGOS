@@ -41,6 +41,10 @@ interface SettingsModalProps {
   onLogout: () => void;
   handleLogin: (useRedirect?: boolean) => void;
   onExportJournals: () => void;
+  // useReadingActions.deleteJournal: confirms, then deletes locally AND in the
+  // cloud. A bare DELETE_JOURNAL dispatch only removed the local copy, so the
+  // entry came back with the next journals snapshot.
+  onDeleteJournal: (id: string) => void;
   onResetProgress: () => void;
   syncStatus: string;
   lastSyncTime: Date | null;
@@ -53,6 +57,7 @@ interface SettingsModalProps {
    onLogout,
    handleLogin,
    onExportJournals,
+   onDeleteJournal,
    onResetProgress,
    syncStatus,
    lastSyncTime,
@@ -390,9 +395,12 @@ interface SettingsModalProps {
                         <p className="text-[10px] font-black uppercase tracking-[0.12em] text-brand">Proverbs {entry.chapter}</p>
                         <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[var(--audible-text-secondary)]">{format(parseISO(entry.date), 'MMM dd, yyyy')}</p>
                       </div>
-                      <button 
-                        onClick={() => dispatch({ type: 'DELETE_JOURNAL', id: entry.id })}
-                        className="p-2 opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-600"
+                      {/* Hover-revealed with a mouse; always shown on a touch screen,
+                          which has no hover to reveal it. */}
+                      <button
+                        onClick={() => onDeleteJournal(entry.id)}
+                        aria-label="Delete journal entry"
+                        className="p-2 opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100 transition-opacity text-red-500 hover:text-red-600"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -482,9 +490,10 @@ interface SettingsModalProps {
                       <h4 className="text-sm font-black uppercase truncate max-w-[200px] text-[var(--audible-text-primary)]">{dev.name}</h4>
                       <p className="text-[10px] text-[var(--audible-text-secondary)] font-bold uppercase tracking-[0.12em]">{dev.description}</p>
                     </div>
-                    <button 
+                    <button
                       onClick={() => dispatch({ type: 'DELETE_DEVOTIONAL', id: dev.id })}
-                      className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full"
+                      aria-label={`Remove ${dev.name}`}
+                      className="text-red-500 opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100 transition-opacity p-2 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full"
                     >
                       <Trash2 size={16} />
                     </button>

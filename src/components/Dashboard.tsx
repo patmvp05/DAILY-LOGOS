@@ -100,6 +100,13 @@ function DashboardComponent({
     return Object.values(sprint.hours).filter(h => h.done).length;
   }, [state.scriptureSprints, todayStr]);
 
+  // Reading-plan parts touched today (same "done" signal the card order uses),
+  // for the phone summary strip. Display only.
+  const partsDoneToday = useMemo(
+    () => new Set(state.progress.filter(p => p.localDate === todayStr).map(p => p.categoryId)),
+    [state.progress, todayStr]
+  );
+
   const { catProgress } = useMemo(() =>
     computeProgressStats(state.progress, state.completedBooks),
   [state.progress, state.completedBooks]);
@@ -183,11 +190,57 @@ function DashboardComponent({
   }, [state.progress, chapterInfos, bibleVersion]);
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-8 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 transition-opacity duration-300">
+    // Below lg (phones, iPad upright) the page is one column, and it used to
+    // open with the title, Resume Reading, the proverb, today's minutes and the
+    // sprint — so the seven reading parts started about two screens down. Now a
+    // compact summary strip leads, then the parts, then everything else. The two
+    // column wrappers are `display: contents` below lg so their children can be
+    // reordered with `order-*`; every lg: class reproduces the desktop layout
+    // exactly as it was.
+    <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6 lg:py-12 flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:gap-12 transition-opacity duration-300">
+      {/* Phone / tablet summary strip (the big title block is desktop-only) */}
+      <section className="order-1 lg:hidden cb-card" aria-label="Today at a glance">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-widest font-bold text-brand mb-2">Day {dayNumber}</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-[40px] leading-none font-bold tracking-tighter tabular-nums text-[var(--text-primary)]">
+                {partsDoneToday.size}
+              </span>
+              <span className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">
+                of {CATEGORIES.length} parts today
+              </span>
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <div className="flex items-center justify-end gap-1.5">
+              <Flame size={18} className="text-brand" />
+              <span className="text-[28px] leading-none font-bold tracking-tighter tabular-nums text-[var(--text-primary)]">{streak}</span>
+            </div>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--text-secondary)] mt-2">Day streak</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-7 gap-1.5 mt-5" aria-hidden="true">
+          {CATEGORIES.map(cat => (
+            <div
+              key={cat.id}
+              className={cn("h-1.5 rounded-full", partsDoneToday.has(cat.id) ? "bg-brand" : "bg-[var(--bg-tertiary)]")}
+            />
+          ))}
+        </div>
+        <button
+          onClick={() => setActivePlanCategory('_all')}
+          className="mt-5 w-full flex items-center justify-center gap-2 py-3 rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] text-[13px] font-semibold text-[var(--text-primary)] active:scale-[0.98] transition-transform"
+        >
+          <Layers size={14} />
+          View Full Plan
+        </button>
+      </section>
+
       {/* Left Control Panel */}
-      <div className="lg:col-span-4 flex flex-col justify-between py-2 space-y-12">
-        <section>
-          <div className="mb-10 text-center lg:text-left">
+      <div className="contents lg:flex lg:col-span-4 lg:flex-col lg:justify-between lg:py-2 lg:space-y-12">
+        <section className="contents lg:block">
+          <div className="hidden lg:block mb-10 text-center lg:text-left">
             <p className="text-[11px] uppercase tracking-widest font-bold text-brand mb-2">{"λóγος"}</p>
             <h1 className="text-5xl sm:text-6xl font-black leading-none mb-4 tracking-tighter text-[var(--text-primary)]">The Daily<br />Logos</h1>
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-6">
@@ -205,7 +258,7 @@ function DashboardComponent({
           {/* Resume Reading Card (Audible Mini-Player style) */}
           {lastReadProgress && (
             <div className={cn(
-              "mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700"
+              "order-3 lg:order-none lg:mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700"
             )}>
               <div className="flex justify-between items-center mb-3">
                 <p className="text-[11px] uppercase font-bold tracking-widest text-brand">Resume Reading</p>
@@ -258,9 +311,9 @@ function DashboardComponent({
           )}
 
           {/* Proverb of the Day */}
-          <button 
+          <button
             onClick={() => handleShowProverbModal(true)}
-            className="w-full mb-6 relative overflow-hidden group text-left block cb-card-interactive"
+            className="order-4 lg:order-none w-full lg:mb-6 relative overflow-hidden group text-left block cb-card-interactive"
           >
             <div className="relative">
               <Sparkles className="absolute top-0 right-0 group-hover:scale-110 transition-transform text-brand/20 dark:text-brand/40" size={48} />
@@ -284,7 +337,7 @@ function DashboardComponent({
             </div>
           </button>
 
-          <div className="cb-card mb-10 overflow-hidden relative group">
+          <div className="order-5 lg:order-none cb-card lg:mb-10 overflow-hidden relative group">
             <div className="relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16 blur-xl" />
               <div className="flex items-baseline justify-between mb-1">
@@ -330,7 +383,7 @@ function DashboardComponent({
               quietly at the bottom rather than competing with the daily plan. */}
           <button
             onClick={() => setShowSprintModal(true)}
-            className="w-full mb-6 relative overflow-hidden group text-left block cb-card-interactive"
+            className="order-6 lg:order-none w-full lg:mb-6 relative overflow-hidden group text-left block cb-card-interactive"
           >
             <div className="relative">
               <Flame
@@ -376,8 +429,8 @@ function DashboardComponent({
       </div>
 
       {/* Right Grid Area: The 7 Sections */}
-      <div className="lg:col-span-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+      <div className="contents lg:block lg:col-span-8">
+        <div className="order-2 lg:order-none grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {!user && !isAuthLoading && (
             <div 
               className={cn(
@@ -452,7 +505,7 @@ function DashboardComponent({
           })}
         </div>
 
-        <div className="cb-card mt-6 overflow-hidden relative group">
+        <div className="order-7 lg:order-none cb-card lg:mt-6 overflow-hidden relative group">
           <div className="relative">
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16 blur-xl" />
             <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-4">Plan Status</p>

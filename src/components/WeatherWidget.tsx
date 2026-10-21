@@ -13,6 +13,7 @@ import {
   WeatherSnapshot,
 } from '../lib/weather';
 import { cn } from '../lib/utils';
+import { useUi } from '../state/UiContextCore';
 
 /** Returning to the app within this window reuses the forecast already shown. */
 const WEATHER_FRESH_MS = 30 * 60 * 1000;
@@ -45,6 +46,7 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [tempCity, setTempCity] = useState('');
+  const { showToast } = useUi();
 
   // Launch and return-to-app refreshes reuse the saved location, so they never
   // show the location prompt. Only a tap on the weather passes `locate: true`
@@ -86,6 +88,8 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
     
     setIsRefreshing(true);
     try {
+      // nominatim.openstreetmap.org must stay in index.html's CSP connect-src;
+      // it was missing, so the browser blocked this lookup before it was sent.
       const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(tempCity)}&limit=1`);
       const data = await res.json();
       if (data && data.length > 0) {
@@ -94,10 +98,11 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
           manual: { lat: parseFloat(item.lat), lng: parseFloat(item.lon), city: item.display_name.split(',')[0] },
         });
       } else {
-        alert("Location not found. Please try a city name.");
+        showToast("Couldn't find that place. Try a city name.", 'error');
       }
     } catch (err) {
       console.error("Manual location failed", err);
+      showToast("Couldn't look up that place right now.", 'error');
     } finally {
       setIsEditing(false);
       setIsRefreshing(false);
@@ -138,13 +143,15 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
   }
 
   return (
-    <div className="flex items-center gap-3 px-3 py-1.5 transition-all hover:bg-[var(--bg-secondary)] rounded-xl ml-4">
+    // min-w-0 + the truncating text below: on a narrow phone the weather is the
+    // part of the top bar that gives way, never the logo or the buttons.
+    <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 transition-all hover:bg-[var(--bg-secondary)] rounded-xl ml-1 sm:ml-4 min-w-0">
       <button
         type="button"
         onClick={updateLocation}
         aria-label="Update weather to my current location"
         title="Update weather to my current location"
-        className="relative active:scale-95 transition-transform"
+        className="relative shrink-0 active:scale-95 transition-transform"
       >
         <WeatherIcon code={weather.conditionCode} className="shrink-0" />
         {isRefreshing && (
@@ -191,17 +198,17 @@ export default function WeatherWidget({ compact = false }: { compact?: boolean }
         type="button"
         onClick={updateLocation}
         aria-label="Update weather to my current location"
-        className="flex lg:hidden flex-col leading-tight text-left"
+        className="flex lg:hidden flex-col leading-tight text-left min-w-0 overflow-hidden"
       >
-        <span className="flex items-baseline gap-1">
-          <span className="text-sm font-bold tracking-tighter text-[var(--text-primary)]">
+        <span className="flex items-baseline gap-1 min-w-0">
+          <span className="text-sm font-bold tracking-tighter text-[var(--text-primary)] shrink-0">
             {weather.tempF}°F
           </span>
           <span className="text-[9px] uppercase font-bold tracking-tight opacity-60 truncate max-w-[50px] text-[var(--text-secondary)]">
             {weather.city}
           </span>
         </span>
-        <span className="text-[11px] font-bold tracking-tight opacity-70 text-[var(--text-secondary)]">
+        <span className="text-[11px] font-bold tracking-tight opacity-70 text-[var(--text-secondary)] truncate">
           {weather.conditionLabel}
         </span>
       </button>
