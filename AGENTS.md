@@ -35,16 +35,17 @@
     candidate source actually returns. Established that bolls, getbible.net and
     bible-api.com all 404 for BSB **and** CSB, and that BibleGateway serves no verse spans
     for BSB — so don't retry those routes.
-  - ⚠️ **NIV / NLT / ESV / NKJV are declared in `BIBLE_VERSIONS` but have NO files in
-    `public/bible/`** — only NCV (and now CSB/BSB once their workflows run) are committed.
-    Selecting one of those four silently serves the KJV fallback. Run
-    `scripts/fetch-bible-static.mjs` with `ONLY_VERSION=` to fill them.
+  - **NIV / NLT / ESV / NKJV** → scraped from bolls.life by `.github/workflows/scrape-bolls.yml`
+    (runs `scripts/fetch-bible-static.mjs`). ✅ All four are committed, 1189/1189 each, as are
+    NCV, CSB and BSB, so every `source: 'bolls'` version in `BIBLE_VERSIONS` has its full
+    static set (verified Oct 2026). None of them falls back to KJV for want of files.
 - **Regenerating static text (no local machine needed):** GitHub Actions runs the scrapers
   ON GITHUB'S RUNNERS, which CAN reach bolls.life / BibleGateway (the sandbox can't).
   - NCV: `.github/workflows/scrape-ncv-bg.yml` (BibleGateway). Has a fail-fast smoke test,
     is time-bounded + always-commits + resumable (re-run fills gaps), reports completeness.
-  - bolls versions: `scripts/fetch-bible-static.mjs` honors `ONLY_VERSION=NIV,ESV,...`; add a
-    workflow like scrape-ncv-bg to run it. Resumable (skips existing files).
+  - bolls versions: `.github/workflows/scrape-bolls.yml` runs `scripts/fetch-bible-static.mjs`
+    (honors `ONLY_VERSION=NIV,ESV,...`), one version per job. Resumable (skips existing files);
+    its `force` input re-fetches chapters already on disk after a parser change.
 - **Honest fallback:** if a chapter fails to load, `getChapterText()` falls back to
   public-domain KJV but labels it "King James Version" (never mislabeled) and flags the
   result `_fallback`. **Fallbacks are memory-only — NEVER persisted to IndexedDB/localStorage**
@@ -110,7 +111,11 @@
 
 ## Deployment & Syncing
 - Firebase Hosting auto-deploys on push to `main` (the `dist/` build). Cloud Functions do
-  NOT auto-deploy.
+  NOT auto-deploy. `.github/workflows/deploy.yml` is the ONLY push-triggered deploy, and it
+  publishes the Firestore rules before hosting. A duplicate `firebase-hosting-deploy.yml`
+  ran alongside it on every push (Node 20, no rules step) until it was removed in Oct 2026;
+  don't add another. `daily-devotional-deploy.yml` also builds and deploys whenever its
+  morning refresh commits new devotional files.
 - **IMPORTANT — scraper commits don't auto-deploy:** when a scrape workflow commits
   `public/bible/**` to `main`, that push uses `GITHUB_TOKEN`, and GitHub does NOT trigger
   workflows for `GITHUB_TOKEN` pushes (anti-recursion). So the Firebase deploy does NOT fire

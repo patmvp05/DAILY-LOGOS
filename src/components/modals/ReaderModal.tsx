@@ -107,6 +107,9 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
   // off the effect body (never a synchronous setState-in-effect).
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
+    // Intentional: the old chapter's verse selection must clear as the chapter
+    // changes, not a frame later in the rAF below. One extra render per turn.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedVerse(null);
     const raf = requestAnimationFrame(() => {
       const el = scrollRef.current;

@@ -14,6 +14,9 @@ export function useDevotional(slug: string | null, monthDay?: string) {
 
   useEffect(() => {
     if (!slug) {
+      // Intentional reset when the devotional closes (slug cleared). It costs one
+      // extra render, only on close.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDevotionalContent(null);
       setError(null);
       return;

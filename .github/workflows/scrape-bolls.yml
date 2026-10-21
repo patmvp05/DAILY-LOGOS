@@ -1,9 +1,10 @@
 name: Scrape bolls translations (NIV/NLT/ESV/NKJV)
 
-# These four are listed in BIBLE_VERSIONS but have never had static files
-# committed, so selecting one silently serves the KJV fallback. bolls.life does
-# carry all four (verified — see AGENTS.md), and scripts/fetch-bible-static.mjs
-# already knows how to fetch them; there was simply no workflow to run it.
+# These four are listed in BIBLE_VERSIONS. Before this workflow existed they had
+# no static files, so selecting one silently served the KJV fallback. bolls.life
+# carries all four (verified, see AGENTS.md) and scripts/fetch-bible-static.mjs
+# fetches them. All four are now committed (1189/1189 each), so re-run this
+# only to refresh the text or fill gaps.
 #
 # One job per version via a matrix with max-parallel: 1. Serialising matters:
 # every job commits to public/bible/ on main, and parallel jobs would race on
