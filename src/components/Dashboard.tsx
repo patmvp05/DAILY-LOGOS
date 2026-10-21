@@ -291,8 +291,12 @@ function DashboardComponent({
                   </span>
                 )}
               </div>
-              <button 
-                onClick={() => setActivePlanCategory(lastReadProgress.categoryId)}
+              {/* Opens that chapter in the reader (it used to open the Plan
+                  Breakdown). The reader's Next Chapter is the same
+                  advanceChapter the dashboard + button uses. */}
+              <button
+                onClick={() => setReaderCategoryId(lastReadProgress.categoryId)}
+                aria-label={`Resume reading ${CATEGORIES_BY_ID.get(lastReadProgress.categoryId)?.books[lastReadProgress.bookIndex]?.name ?? ''} ${lastReadProgress.chapter}`}
                 className="w-full group relative flex items-center justify-between cb-card-interactive"
               >
                 <div className="flex items-center gap-5">
