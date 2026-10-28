@@ -49,6 +49,7 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live
           projectId: gen-lang-client-0538747272
+          firebaseToolsVersion: '15.34.0'
 
       # Hosting has shipped by this point, so app fixes are never held hostage to
       # an IAM problem — but the RUN MUST GO RED when rules did not publish.

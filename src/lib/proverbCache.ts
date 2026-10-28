@@ -5,6 +5,7 @@
 
 import { addDays, subDays } from 'date-fns';
 import { getChapterText } from './chapterText';
+import { seedChapterInfoFromText } from './bibleCache';
 import { resolveBibleVersion } from '../constants';
 
 export interface ProverbResponse {
@@ -35,6 +36,7 @@ export async function getProverb(chapter: number, version?: string): Promise<Pro
   if (memCached) return memCached;
 
   const ct = await getChapterText('Proverbs', chapter, id);
+  seedChapterInfoFromText('Proverbs', chapter, id, ct.verses, ct._fallback);
 
   const result: ProverbResponse = {
     reference: ct.reference,

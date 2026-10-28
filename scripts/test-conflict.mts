@@ -235,56 +235,76 @@ function expect(name: string, cond: boolean) {
   expect('advance: progress → ch2', r.progress.bookIndex === 0 && r.progress.chapter === 2);
   expect('advance: nothing completed', r.newlyCompletedKeys.length === 0);
 }
-// Cross a book boundary: log Job 42, complete Job, roll to Proverbs 1.
+// Cross a book boundary: log Job 42, complete Job, roll to Ecclesiastes 1 (Proverbs at idx 1 is dailyOnly).
 {
   const r = calculateNextProgress('wisdom', 1, { categoryId: 'wisdom', bookIndex: 0, chapter: 42 }, new Set());
   expect('boundary: logs Job 42', r.historySteps.length === 1 && r.historySteps[0].chapter === 42);
   expect('boundary: Job completed', r.newlyCompletedKeys.includes('wisdom:Job'));
-  expect('boundary: → Proverbs 1', r.progress.bookIndex === 1 && r.progress.chapter === 1);
+  expect('boundary: → Ecclesiastes 1 (skips dailyOnly Proverbs)', r.progress.bookIndex === 2 && r.progress.chapter === 1);
 }
-// Terminal first tap: at Song of Solomon (idx3) ch8 → log once, complete once.
+// Terminal first tap: at Song of Solomon (idx3) ch8 (when Job & Ecclesiastes are done) → log once, complete once.
 {
-  const r = calculateNextProgress('wisdom', 1, { categoryId: 'wisdom', bookIndex: 3, chapter: 8 }, new Set());
+  const done = new Set(['wisdom:Job', 'wisdom:Ecclesiastes']);
+  const r = calculateNextProgress('wisdom', 1, { categoryId: 'wisdom', bookIndex: 3, chapter: 8 }, done);
   expect('terminal first: logs ch8 once', r.historySteps.length === 1 && r.historySteps[0].chapter === 8);
   expect('terminal first: completes Song', r.newlyCompletedKeys.includes('wisdom:Song of Solomon'));
   expect('terminal first: stays at ch8', r.progress.bookIndex === 3 && r.progress.chapter === 8);
 }
 // Terminal repeat tap (book already complete): NO new history, NO re-complete.
 {
-  const done = new Set(['wisdom:Song of Solomon']);
+  const done = new Set(['wisdom:Job', 'wisdom:Ecclesiastes', 'wisdom:Song of Solomon']);
   const r = calculateNextProgress('wisdom', 1, { categoryId: 'wisdom', bookIndex: 3, chapter: 8 }, done);
   expect('terminal repeat: no re-log', r.historySteps.length === 0);
   expect('terminal repeat: no re-complete', r.newlyCompletedKeys.length === 0);
 }
 // Multi-tap overshoot at terminal: amount=5 from Song ch6 logs 6,7,8 then stops.
 {
-  const r = calculateNextProgress('wisdom', 5, { categoryId: 'wisdom', bookIndex: 3, chapter: 6 }, new Set());
+  const done = new Set(['wisdom:Job', 'wisdom:Ecclesiastes']);
+  const r = calculateNextProgress('wisdom', 5, { categoryId: 'wisdom', bookIndex: 3, chapter: 6 }, done);
   expect('overshoot: logs 6,7,8 only', r.historySteps.map(s => s.chapter).join(',') === '6,7,8');
   expect('overshoot: completes Song once', r.newlyCompletedKeys.filter(k => k === 'wisdom:Song of Solomon').length === 1);
 }
 
-// ── Round 5b: stepping back across a book boundary un-completes it ─────
-// Forward across Job→Proverbs marks Job complete; stepping back into Job
-// (chapter 42) must revert that completion so completedBooks stays
-// consistent with the "current chapter" position, and re-advancing from
-// there behaves exactly like the original forward cross (no stale "already
-// completed" skip).
+// ── Round 5b: minus stays inside current book; UNDO_FINISH_BOOK reverts finished book ─────
 {
   const fwd = calculateNextProgress('wisdom', 1, { categoryId: 'wisdom', bookIndex: 0, chapter: 42 }, new Set());
   expect('back-nav setup: Job completed on forward cross', fwd.newlyCompletedKeys.includes('wisdom:Job'));
 
   const completedAfterFwd = new Set(fwd.newlyCompletedKeys);
   const back = calculateNextProgress('wisdom', -1, fwd.progress, completedAfterFwd);
-  expect('back-nav: returns to Job ch42', back.progress.bookIndex === 0 && back.progress.chapter === 42);
+  expect('back-nav: minus stays at Ecclesiastes ch1', back.progress.bookIndex === 2 && back.progress.chapter === 1);
   expect('back-nav: no history logged', back.historySteps.length === 0);
-  expect('back-nav: Job reverted from completed', back.revertedCompletedKeys.includes('wisdom:Job'));
+  expect('back-nav: Job stays completed on minus', back.revertedCompletedKeys.length === 0);
 
-  const completedAfterBack = new Set([...completedAfterFwd].filter(k => !back.revertedCompletedKeys.includes(k)));
-  expect('back-nav: completedBooks no longer has Job', !completedAfterBack.has('wisdom:Job'));
+  // Explicit Undo via UNDO_FINISH_BOOK puts user back on Job 42 and un-marks Job
+  const stateAfterFwd = baseState([fwd.progress]);
+  stateAfterFwd.completedBooks = completedAfterFwd;
+  stateAfterFwd.history = [hist('job42-log', T)];
+  const undone = appReducer(stateAfterFwd, {
+    type: 'UNDO_FINISH_BOOK',
+    categoryId: 'wisdom',
+    bookIndex: 0,
+    chapter: 42,
+    bookName: 'Job',
+    historyId: 'job42-log',
+  });
+  expect('undo-finish: returns to Job ch42', undone.progress[0].bookIndex === 0 && undone.progress[0].chapter === 42);
+  expect('undo-finish: removes wisdom:Job completion', !undone.completedBooks.has('wisdom:Job'));
+  expect('undo-finish: removes just-logged history entry', undone.history.length === 0);
 
-  const fwdAgain = calculateNextProgress('wisdom', 1, back.progress, completedAfterBack);
-  expect('back-nav: re-advance logs Job 42', fwdAgain.historySteps.length === 1 && fwdAgain.historySteps[0].chapter === 42);
-  expect('back-nav: re-advance re-completes Job', fwdAgain.newlyCompletedKeys.includes('wisdom:Job'));
+  const fwdAgain = calculateNextProgress('wisdom', 1, undone.progress[0], undone.completedBooks);
+  expect('undo-finish: re-advance logs Job 42', fwdAgain.historySteps.length === 1 && fwdAgain.historySteps[0].chapter === 42);
+  expect('undo-finish: re-advance re-completes Job', fwdAgain.newlyCompletedKeys.includes('wisdom:Job'));
+}
+
+// ── Round 5c: revision-based conflict resolution ───────────────────────
+{
+  const staleAhead: Progress = { categoryId: 'history', bookIndex: 3, chapter: 10, revision: 2 };
+  const chosenEarlier: Progress = { categoryId: 'history', bookIndex: 1, chapter: 1, revision: 3 };
+  const win1 = resolveProgressConflict(staleAhead, chosenEarlier);
+  expect('revision: higher cloud revision wins even at earlier bookIndex', win1.bookIndex === 1 && win1.chapter === 1 && win1.revision === 3);
+  const win2 = resolveProgressConflict(chosenEarlier, staleAhead);
+  expect('revision: higher local revision wins even at earlier bookIndex', win2.bookIndex === 1 && win2.chapter === 1 && win2.revision === 3);
 }
 
 // ── Round 6: HISTORY_CAP enforcement ──────────────────────────────────

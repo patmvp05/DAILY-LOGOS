@@ -25,7 +25,7 @@ interface ProverbModalProps {
   isFetchingProverb: boolean;
   proverbContent: ProverbContent | null;
   saveProverbJournal: (content: string, verse: string, id: string | null) => void;
-  logProverbRead: (chapter: number) => void;
+  logProverbRead: (chapter: number, readTime?: number) => void;
 }
 
 function ProverbModal({
@@ -52,7 +52,12 @@ function ProverbModal({
     // If within 50px of bottom, count as read
     if (scrollTop + clientHeight >= scrollHeight - 50) {
       hasLoggedRef.current = true;
-      logProverbRead(dayOfMonth);
+      const wordCount = (proverbContent.verses ?? []).reduce(
+        (acc, v) => acc + (v.text ? v.text.trim().split(/\s+/).filter(Boolean).length : 0),
+        0
+      );
+      const readTime = wordCount > 0 ? Math.max(1, Math.round(wordCount / 225)) : undefined;
+      logProverbRead(dayOfMonth, readTime);
     }
   };
 

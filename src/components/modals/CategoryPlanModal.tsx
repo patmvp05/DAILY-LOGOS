@@ -6,7 +6,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Check } from 'lucide-react';
-import { CATEGORIES } from '../../constants';
+import { CATEGORIES, TOTAL_PLAN_BOOKS } from '../../constants';
 import { cn } from '../../lib/utils';
 
 import { useApp } from '../../state/AppContextCore';
@@ -70,7 +70,9 @@ const CategoryPlanModal: React.FC<CategoryPlanModalProps> = ({
           </div>
 
           <div className="space-y-12 flex-1 overflow-y-auto ios-scroll pr-2">
-            {CATEGORIES.map((cat, i) => (
+            {CATEGORIES.map((cat, i) => {
+              const planBooks = cat.books.filter(b => !b.dailyOnly);
+              return (
               <motion.div 
                 key={cat.id} 
                 initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
@@ -82,7 +84,7 @@ const CategoryPlanModal: React.FC<CategoryPlanModalProps> = ({
                 <span className="text-[11px] uppercase font-bold tracking-widest text-[var(--text-secondary)]">Section {i + 1}</span>
                 <h4 className="text-xl sm:text-2xl font-bold tracking-tight mb-4 text-[var(--text-primary)]">{cat.name}</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
-                  {cat.books.map(book => {
+                  {planBooks.map(book => {
                     const isCompleted = state.completedBooks.has(`${cat.id}:${book.name}`);
                     // Progress may be absent during cloud hydration or for a
                     // newly added category — guard rather than crash the modal.
@@ -114,14 +116,23 @@ const CategoryPlanModal: React.FC<CategoryPlanModalProps> = ({
                   })}
                 </div>
               </motion.div>
-            ))}
+              );
+            })}
+
+            <div className="relative pl-8 border-l-2 border-[var(--border-color)] py-2">
+              <div className="absolute -left-[5px] top-4 w-2 h-2 rounded-full bg-brand" />
+              <span className="text-[11px] uppercase font-bold tracking-widest text-[var(--text-secondary)]">Daily Rhythm</span>
+              <p className="text-sm font-bold tracking-tight mt-1 text-[var(--text-primary)]">
+                Proverbs, read daily (31 chapters)
+              </p>
+            </div>
           </div>
 
           <div className={cn(
             "mt-12 pt-8 border-t border-[var(--border-color)] flex justify-between items-center shrink-0",
             isStandalone && "pb-[env(safe-area-inset-bottom)]"
           )}>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] tabular-nums">Total Books: 66</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] tabular-nums">Total Books: {TOTAL_PLAN_BOOKS}</p>
             <motion.button 
               whileTap={{ scale: 0.97 }}
               onClick={guardedClose}

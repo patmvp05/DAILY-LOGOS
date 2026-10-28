@@ -38,6 +38,7 @@ export default function App() {
     showSettings, setShowSettings, showHistory, setShowHistory, 
     activePlanCategory, setActivePlanCategory, 
     selectingCategoryId, setSelectingCategoryId, 
+    bookFinishedPrompt, setBookFinishedPrompt,
     activeDevotion, setActiveDevotion,
     readerCategoryId, setReaderCategoryId,
     activeInternalDevotional, setActiveInternalDevotional,
@@ -137,6 +138,7 @@ export default function App() {
     onNewJournal: () => { setJournalDraft({ id: null, content: '', verse: '' }); setShowProverbModal(true); },
     onClose: () => {
       setShowSettings(false); setShowHistory(false); setActivePlanCategory(null); setSelectingCategoryId(null);
+      setBookFinishedPrompt(null);
       setActiveDevotion(null); setShowProverbModal(false); setShowSprintModal(false); setIsStartMenuOpen(false);
       // The Bible reader and the devotional reader were missing here, so Escape
       // could not close either one — the same omission that once left them
@@ -151,6 +153,7 @@ export default function App() {
   // list is one tested place rather than an inline chain that's easy to forget.
   const anyOverlayOpen = isAnyOverlayOpen({
     showSettings, showHistory, activePlanCategory, selectingCategoryId,
+    bookFinishedPrompt,
     activeDevotion, readerCategoryId, activeInternalDevotional,
     showProverbModal, showSprintModal, isStartMenuOpen,
   });

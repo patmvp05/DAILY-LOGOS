@@ -5,9 +5,18 @@
 
 import { AppState, Progress, UserSettings } from '../types';
 import { CATEGORIES } from '../constants';
+import { normalizeProgressPosition } from './bible';
 import { get, set } from 'idb-keyval';
 
 const STORAGE_KEY = 'seven_seals_bible_progress';
+
+export function hasStoredStateSync(): boolean {
+  try {
+    return !!localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return false;
+  }
+}
 
 const DEFAULT_PROGRESS: Progress[] = CATEGORIES.map((cat) => ({
   categoryId: cat.id,
@@ -68,14 +77,16 @@ export const loadState = (): AppState => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return defaultState;
     const parsed = JSON.parse(stored);
+    const rawProgress: Progress[] = Array.isArray(parsed.progress) ? parsed.progress : defaultState.progress;
     return {
-      progress: parsed.progress || defaultState.progress,
+      progress: rawProgress.map(p => normalizeProgressPosition(p)),
       settings: parsed.settings || defaultState.settings,
       history: parsed.history || defaultState.history,
       proverbJournals: parsed.proverbJournals || defaultState.proverbJournals,
       customDevotionals: parsed.customDevotionals || defaultState.customDevotionals,
       scriptureSprints: parsed.scriptureSprints || defaultState.scriptureSprints,
       completedBooks: parsed.completedBooks ? new Set(parsed.completedBooks) : defaultState.completedBooks,
+      signedOutCompletedBooks: parsed.signedOutCompletedBooks ? new Set(parsed.signedOutCompletedBooks) : undefined,
     };
   } catch (error) {
     console.warn("Storage load failed:", error);
@@ -95,8 +106,14 @@ export const loadStateAsync = async (): Promise<Partial<AppState> | null> => {
         console.log("[Migration] Migrated planStartDate to startDate in IndexedDB.");
       }
 
+      if (idbState.progress && Array.isArray(idbState.progress)) {
+        idbState.progress = idbState.progress.map((p: Progress) => normalizeProgressPosition(p));
+      }
       if (idbState.completedBooks && Array.isArray(idbState.completedBooks)) {
         idbState.completedBooks = new Set(idbState.completedBooks);
+      }
+      if (idbState.signedOutCompletedBooks && Array.isArray(idbState.signedOutCompletedBooks)) {
+        idbState.signedOutCompletedBooks = new Set(idbState.signedOutCompletedBooks);
       }
       return idbState;
     }
@@ -108,12 +125,21 @@ export const loadStateAsync = async (): Promise<Partial<AppState> | null> => {
 
 let lastSavedJson = '';
 
+function serializeStateForStorage(state: AppState) {
+  const { isCloudHydrated: _ignored, ...rest } = state;
+  void _ignored;
+  return {
+    ...rest,
+    completedBooks: Array.from(state.completedBooks),
+    signedOutCompletedBooks: state.signedOutCompletedBooks
+      ? Array.from(state.signedOutCompletedBooks)
+      : undefined,
+  };
+}
+
 export const saveStateSync = (state: AppState) => {
   try {
-    const toSave = {
-      ...state,
-      completedBooks: Array.from(state.completedBooks)
-    };
+    const toSave = serializeStateForStorage(state);
     const json = JSON.stringify(toSave);
 
     if (json === lastSavedJson) {
@@ -131,31 +157,7 @@ export const saveStateSync = (state: AppState) => {
 };
 
 export const saveState = async (state: AppState) => {
-  // Move processing off the immediate render cycle to avoid blocking the main thread
-  return new Promise<void>((resolve) => {
-    setTimeout(async () => {
-      try {
-        const toSave = {
-          ...state,
-          completedBooks: Array.from(state.completedBooks)
-        };
-        const json = JSON.stringify(toSave);
-        
-        // Skip write if nothing changed
-        if (json === lastSavedJson) {
-          resolve();
-          return;
-        }
-        lastSavedJson = json;
-
-        // Write to both
-        localStorage.setItem(STORAGE_KEY, json);
-        await set(STORAGE_KEY, toSave).catch(e => console.warn("IDB write failed:", e));
-        resolve();
-      } catch (error) {
-        console.error("Storage save failed:", error);
-        resolve();
-      }
-    }, 0);
-  });
+  // Persist synchronously to localStorage so first paint on next launch always
+  // has the latest state, then mirror to IndexedDB asynchronously.
+  saveStateSync(state);
 };

@@ -17,6 +17,18 @@ export interface Progress {
   // I read most recently" across an iPad and a desktop. Undefined for guests
   // and for legacy docs written before this field existed.
   serverMillis?: number;
+  /**
+   * Monotonic revision counter per category progress doc. Every intentional
+   * progress change sets revision = highestRevisionSeen + 1 so backward book
+   * choices and Undos win over stale positions on other devices without
+   * trusting device clocks.
+   */
+  revision?: number;
+  /**
+   * Saved chapter positions (1-indexed next chapter to read, >= 2) for books
+   * the user switched away from partway through, keyed by book name.
+   */
+  partialChapters?: Record<string, number>;
 }
 
 export interface UserSettings {
@@ -84,5 +96,12 @@ export interface AppState {
   customDevotionals: Devotional[];
   scriptureSprints: ScriptureSprint[]; // newest first; local-only, capped
   completedBooks: Set<string>; // "categoryId:bookName"
+  /**
+   * Book keys ("categoryId:bookName") marked completed while signed out.
+   * Only these are uploaded on the first CompletedBooks snapshot after sign-in,
+   * so an Undo made on another device is never resurrected from stale local
+   * completedBooks on launch.
+   */
+  signedOutCompletedBooks?: Set<string>;
   isCloudHydrated?: boolean; // UI flag for cloud sync completion
 }

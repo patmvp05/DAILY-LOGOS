@@ -1,6 +1,7 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { execSync } from 'child_process';
+import { createHash } from 'crypto';
+import { readdirSync, readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { defineConfig } from 'vite';
@@ -8,9 +9,34 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Stamp __APP_VERSION__ from a deterministic hash of the app's own source files
+// rather than `git rev-parse --short HEAD`. Daily devotional commits touch only
+// `public/devotionals/`, so hashing app files keeps the version stable across
+// content-only deploys and prevents unnecessary reloads on open.
 const appVersion = (() => {
   try {
-    return execSync('git rev-parse --short HEAD', { cwd: __dirname }).toString().trim();
+    const hash = createHash('sha256');
+    const walk = (dir: string) => {
+      const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
+      for (const entry of entries) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          walk(full);
+        } else if (entry.isFile()) {
+          hash.update(path.relative(__dirname, full));
+          hash.update(readFileSync(full));
+        }
+      }
+    };
+    walk(path.join(__dirname, 'src'));
+    for (const file of ['index.html', 'package.json', 'vite.config.ts']) {
+      const full = path.join(__dirname, file);
+      hash.update(file);
+      hash.update(readFileSync(full));
+    }
+    return hash.digest('hex').slice(0, 7);
   } catch {
     return 'dev';
   }

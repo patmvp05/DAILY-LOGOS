@@ -115,7 +115,13 @@
   publishes the Firestore rules before hosting. A duplicate `firebase-hosting-deploy.yml`
   ran alongside it on every push (Node 20, no rules step) until it was removed in Oct 2026;
   don't add another. `daily-devotional-deploy.yml` also builds and deploys whenever its
-  morning refresh commits new devotional files.
+  morning refresh commits new devotional files (or on manual `workflow_dispatch`).
+- **Pin `firebaseToolsVersion: '15.34.0'` in `FirebaseExtended/action-hosting-deploy@v0`:**
+  `firebase-tools@15.34.1` added a mandatory `serviceusage.services.get` preflight check on
+  `firebasehosting.googleapis.com` that fails with `403 PERMISSION_DENIED` unless the CI
+  service account has `roles/serviceusage.serviceUsageViewer`. Keep `firebaseToolsVersion`
+  pinned to `'15.34.0'` in both `deploy.yml` and `daily-devotional-deploy.yml` unless that
+  IAM role has been granted.
 - **IMPORTANT — scraper commits don't auto-deploy:** when a scrape workflow commits
   `public/bible/**` to `main`, that push uses `GITHUB_TOKEN`, and GitHub does NOT trigger
   workflows for `GITHUB_TOKEN` pushes (anti-recursion). So the Firebase deploy does NOT fire
@@ -123,7 +129,8 @@
   user push) to deploy the new static files.
 - **Offline Mode:** a local sync queue in IndexedDB caches reading progress when offline and
   syncs to Firebase on reconnection.
-- **App updates must never reload mid-read.** The service worker is `registerType: 'prompt'`
+- **App updates must never reload mid-read, and devotional-only commits must not trigger app reloads.**
+  The service worker is `registerType: 'prompt'`
   and `vite.config.ts` must NOT set `workbox.skipWaiting`. `autoUpdate` hard-reloads the page
   the instant a new worker activates (`wb.on('activated', () => location.reload())`, no hook
   to intercept) and `main.tsx` checks for updates on every foreground — so a deploy reloaded
@@ -132,6 +139,70 @@
   function to `src/lib/appUpdate.ts`, and `useDeferredAppUpdate` applies it when no overlay is
   open or the app is backgrounded. Re-adding `skipWaiting: true` breaks this **silently** (the
   worker never waits, so `onNeedRefresh` never fires) — `scripts/test-app-update.mts` guards it.
+  Furthermore, `vite.config.ts` stamps `__APP_VERSION__` from a SHA-256 hash of the app's own
+  source files (`src/`, `index.html`, `package.json`, `vite.config.ts`) rather than
+  `git rev-parse --short HEAD`, so morning devotional refreshes under `public/devotionals/`
+  don't alter `index.html` or trigger an app update prompt.
+- **Launch stability & single auth/sync state:**
+  - `useAuth()` (`src/hooks/useAuth.ts`) uses a module-level singleton store so all callers
+    (`App.tsx`, `AppModals.tsx`, `SettingsModal.tsx`) share one `onAuthStateChanged` subscription,
+    never block `setUser` on `initializeUser()`, and keep `isAuthLoading` true until Firebase Auth
+    settles so signed-out UI ("Sync Your Progress" card / "Sign in" button) never flashes while
+    restoring a session.
+  - `"Syncing..."` (`src/hooks/useSyncState.ts`) is only shown for user-initiated writes (not
+    listener startup or `background: true` launch reconciliation writes) and only if a write
+    remains pending for > 1 second.
+  - `saveState` (`src/lib/storage.ts`) writes synchronously to `localStorage` on every state
+    change so first paint always has the latest progress, completed books, and history without
+    waiting for IndexedDB hydration.
+
+## Reading Plan, Book Completion & Multi-Device Sync Rules
+- **Proverbs is `dailyOnly: true` at `wisdom.books[1]` (never delete from the array):**
+  - Each category's progress in Firestore (`users/{uid}/progress/{partId}`) stores `bookIndex`
+    (position in `category.books`). Removing Proverbs from `wisdom.books` in `src/constants.ts`
+    would shift Ecclesiastes (`bookIndex: 2`) and Song of Solomon (`bookIndex: 3`) down by one
+    and corrupt saved positions across devices.
+  - Keep Proverbs at `wisdom.books[1]` with `dailyOnly: true` and skip `dailyOnly` books
+    everywhere (`isPlanBook`, `getPlanBooks`, `computeProgressStats`, `calculateNextProgress`,
+    `BookSelectorModal`, `CategoryPlanModal`, `prefetchBible`, `build-remarkable-pack`).
+  - Plan totals are **65 books** and **1,158 chapters** (`TOTAL_PLAN_BOOKS = 65`,
+    `TOTAL_PLAN_CHAPTERS = 1158`; Wisdom = Job 42 + Ecclesiastes 12 + Song of Solomon 8 = 62).
+  - If a saved Wisdom position ever points at `bookIndex: 1` (Proverbs), `normalizeProgressPosition`
+    normalizes it to Ecclesiastes chapter 1 (`bookIndex: 2, chapter: 1`). Legacy
+    `wisdom:Proverbs` completion docs and old history entries remain untouched in storage/cloud
+    and are ignored by plan progress math.
+  - Daily Proverb reads (`logProverbRead`) record `categoryName: 'Daily Proverb'`, keep
+    `bookName: 'Proverbs'`, and store the real chapter `readTime`.
+- **Finishing a book, switching books & completed parts:**
+  - Finishing a book's last chapter (via card `+` or reader primary button) logs that chapter
+    **once**, marks the book completed, advances the part to the recommended next unread book
+    (first unread plan book after the finished book, or wrapping to the first unread plan book
+    from the start of the part), and opens `BookFinishedModal` (`"You finished X. Up next: Y
+    (recommended)."` with unread book choices and `"Undo, I'm not done with X"`).
+  - Switching away from a book partway (`switchBookInProgress` / `JUMP_TO_BOOK`) saves the
+    current chapter in `progress.partialChapters[bookName]` so read chapters continue to count
+    in `computeProgressStats` and resuming that book later starts at the saved chapter.
+  - Stepping backward with `-` stays inside the current book (stops at chapter 1). Undoing a
+    finished book goes through `BookFinishedModal`'s Undo action (`UNDO_FINISH_BOOK`) or
+    Full Plan (`CategoryPlanModal`, which requires confirmation before toggling completion).
+  - When all plan books in a part are completed (`isCategoryComplete`), its card shows `100%
+    Complete`, hides `"Next to Read"`, sorts below active parts, and the mobile summary strip
+    counts only active parts (`"X of 6 parts today"`).
+- **Revision-aware conflict resolution & signed-out completion tracking:**
+  - `Progress` docs carry a monotonic `revision` integer. Every user progress change sets
+    `revision` to `(current.revision ?? 0) + 1`. In `resolveProgressConflict`, higher
+    `revision` wins (allowing deliberate backward book choices and Undo to hold across devices
+    without trusting wall clocks); on a tie or when either side lacks `revision`, it falls back
+    to the furthest-position rule. `partialChapters` are preserved across merges even if an
+    older app version writes a doc without `partialChapters`.
+  - `AppState.signedOutCompletedBooks` tracks book completions made while signed out. On the
+    first `CompletedBooks` snapshot after launch, `useFirestoreSync` only uploads completions
+    present in `signedOutCompletedBooks`, so an Undo made on another device is never
+    re-uploaded from stale local state.
+- **Per-book reading time fallback table (`BOOK_READ_MINUTES`):**
+  - Generated from the committed NCV Bible text (`public/bible/NCV/{bookId}/{chapter}.json`) at
+    225 words per minute by `scripts/compute-read-minutes.mts` and verified in
+    `scripts/test-accurate-numbers.mts`.
 - **The reader reserves space for its action bar** (`src/lib/readerLayout.ts`). The bar is a
   flex sibling of the scroller, so revealing it shortens the scroller. Nothing moves (shrinking
   a scroller RAISES max scrollTop), but the bottom strip becomes bar instead of text — so the

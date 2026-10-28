@@ -72,6 +72,21 @@ async function run() {
   await prefetchBibleChapters([{ categoryId: 'wisdom', bookIndex: 3, chapter: 8 }], 'esv');
   ok('stops at end of category (single chapter)', fetchedChapters().join(',') === '22/8', fetchedChapters().join(','));
 
+  // 2b. Wisdom skips Proverbs (bookIndex 1, dailyOnly) when crossing out of Job
+  //     (id 18, 42 ch) into Ecclesiastes (id 21, 12 ch), and when starting at a
+  //     legacy Proverbs pointer.
+  installFetch();
+  await prefetchBibleChapters([{ categoryId: 'wisdom', bookIndex: 0, chapter: 41 }], 'ncv', 4);
+  ok('wisdom skips Proverbs when crossing from Job 42 to Ecclesiastes 1',
+    fetchedChapters().join(',') === '18/41,18/42,21/1,21/2',
+    fetchedChapters().join(','));
+
+  installFetch();
+  await prefetchBibleChapters([{ categoryId: 'wisdom', bookIndex: 1, chapter: 10 }], 'csb', 2);
+  ok('wisdom skips legacy Proverbs pointer and warms Ecclesiastes 1..2',
+    fetchedChapters().join(',') === '21/1,21/2',
+    fetchedChapters().join(','));
+
   // 3. Out-of-range stored chapter is handled gracefully (no throw, no fetch).
   installFetch();
   await prefetchBibleChapters([{ categoryId: 'gospels', bookIndex: 0, chapter: 999 }], 'nkjv');

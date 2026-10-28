@@ -23,7 +23,8 @@
  *   COMPLETE completedBooks is identical across devices and the cloud
  */
 import { appReducer, resolveProgressConflict, HISTORY_CAP } from '../src/state/appReducer';
-import { calculateNextProgress } from '../src/lib/bible';
+import { calculateNextProgress, switchBookInProgress, normalizeProgressPosition } from '../src/lib/bible';
+import { computeProgressStats } from '../src/lib/utils';
 import { CATEGORIES, CATEGORIES_BY_ID } from '../src/constants';
 import type { AppState, Progress, HistoryEntry } from '../src/types';
 
@@ -74,6 +75,7 @@ class Cloud {
     });
   }
   writeHistory(entries: HistoryEntry[]) { entries.forEach(h => this.history.set(h.id, h)); }
+  delHistory(id: string) { this.history.delete(id); }
   setCompleted(key: string) { this.completed.add(key); }
   delCompleted(key: string) { this.completed.delete(key); }
 }
@@ -114,11 +116,19 @@ class Device {
   advance(categoryId: string, amount: number) {
     activeOffset = this.clockOffset;
     const prog = this.state.progress.find(p => p.categoryId === categoryId)!;
-    const { progress, newlyCompletedKeys, revertedCompletedKeys, historySteps } =
+    const { progress, newlyCompletedKeys, revertedCompletedKeys, historySteps, finishedBook } =
       calculateNextProgress(categoryId, amount, prog, this.state.completedBooks);
     activeOffset = 0;
 
-    this.dispatch({ type: 'UPDATE_PROGRESS', categoryId, bookIndex: progress.bookIndex, chapter: progress.chapter });
+    const revisionDelta = Math.max(1, historySteps.length);
+    this.dispatch({
+      type: 'UPDATE_PROGRESS',
+      categoryId,
+      bookIndex: progress.bookIndex,
+      chapter: progress.chapter,
+      partialChapters: progress.partialChapters,
+      revisionDelta,
+    });
     newlyCompletedKeys.forEach(key => this.dispatch({ type: 'TOGGLE_BOOK', key }));
     revertedCompletedKeys.forEach(key => this.dispatch({ type: 'TOGGLE_BOOK', key }));
 
@@ -141,10 +151,53 @@ class Device {
       this.cloud.writeProgress(newProg);
       this.cloud.writeHistory(entries);
       newlyCompletedKeys.forEach(k => { const [, b] = k.split(':'); this.cloud.setCompleted(`${categoryId}:${b}`); });
-      // Mirrors useReadingActions.flush: a backward step un-completes the book
-      // LOCALLY only. Pushing that delete to the cloud orphaned finished books,
-      // because the backward step can lose the "furthest position wins" race
-      // while its delete still landed. The local set re-syncs from the cloud.
+    });
+
+    return { entries, finishedBook };
+  }
+
+  // Faithful copy of useReadingActions.jumpToBook.
+  jumpToBook(categoryId: string, bookIndex: number) {
+    const currentProg = this.state.progress.find(p => p.categoryId === categoryId)!;
+    const switched = switchBookInProgress(currentProg, bookIndex, this.state.completedBooks);
+    const normalized = normalizeProgressPosition(currentProg);
+    if (
+      switched.bookIndex === normalized.bookIndex &&
+      switched.chapter === normalized.chapter &&
+      JSON.stringify(switched.partialChapters || {}) === JSON.stringify(normalized.partialChapters || {})
+    ) {
+      return;
+    }
+    this.dispatch({ type: 'JUMP_TO_BOOK', categoryId, bookIndex });
+    const newProg = this.state.progress.find(p => p.categoryId === categoryId)!;
+    this.write(() => {
+      this.cloud.writeProgress(newProg);
+    });
+  }
+
+  // Faithful copy of useReadingActions.undoFinishBook.
+  undoFinishBook(
+    categoryId: string,
+    bookIndex: number,
+    chapter: number,
+    bookName: string,
+    historyId?: string,
+    previousPartialChapters?: Record<string, number>
+  ) {
+    this.dispatch({
+      type: 'UNDO_FINISH_BOOK',
+      categoryId,
+      bookIndex,
+      chapter,
+      bookName,
+      historyId,
+      previousPartialChapters,
+    });
+    const newProg = this.state.progress.find(p => p.categoryId === categoryId)!;
+    this.write(() => {
+      this.cloud.writeProgress(newProg);
+      this.cloud.delCompleted(`${categoryId}:${bookName}`);
+      if (historyId) this.cloud.delHistory(historyId);
     });
   }
 
@@ -157,6 +210,8 @@ class Device {
       categoryId: d.categoryId,
       bookIndex: d.bookIndex,
       chapter: d.chapter,
+      revision: d.revision,
+      partialChapters: d.partialChapters,
       lastReadAt: d.lastReadAt,
       localDate: d.localDate,
       updatedAtMillis: d.updatedAtMillis || d.serverMillis,
@@ -169,17 +224,23 @@ class Device {
       const cloudProg = cloudMap.get(localProg.categoryId);
       const winner = cloudProg ? resolveProgressConflict(localProg, cloudProg) : localProg;
       const cloudReflectsWinner = cloudProg &&
-        winner.bookIndex === cloudProg.bookIndex && winner.chapter === cloudProg.chapter;
+        winner.bookIndex === cloudProg.bookIndex &&
+        winner.chapter === cloudProg.chapter &&
+        (winner.revision ?? 0) === (cloudProg.revision ?? 0) &&
+        JSON.stringify(winner.partialChapters || {}) === JSON.stringify(cloudProg.partialChapters || {});
       if (!cloudReflectsWinner) this.write(() => this.cloud.writeProgress(winner));
     });
 
-    // Completed books (with first-fire migration push-up, mirroring the hook).
+    // Completed books (with first-fire migration of signed-out completions only).
     const cloudCompleted = [...this.cloud.completed];
     let effectiveCompleted = cloudCompleted;
     if (this.firstCompletedFire) {
       this.firstCompletedFire = false;
       const cloudSet = new Set(cloudCompleted);
-      const missing = [...this.state.completedBooks].filter(k => !cloudSet.has(k));
+      const signedOutSet = this.state.signedOutCompletedBooks;
+      const missing = signedOutSet
+        ? [...signedOutSet].filter(k => this.state.completedBooks.has(k) && !cloudSet.has(k))
+        : [];
       if (missing.length) {
         effectiveCompleted = [...cloudCompleted, ...missing];
         this.write(() => missing.forEach(k => this.cloud.setCompleted(k)));
@@ -334,6 +395,7 @@ for (let seed = 1; seed <= 300; seed++) {
       const fin = d.state.progress.find(p => p.categoryId === cat.id)!;
       let intact = true;
       for (let i = 0; i < fin.bookIndex; i++) {
+        if (cat.books[i].dailyOnly) continue;
         if (!d.state.completedBooks.has(`${cat.id}:${cat.books[i].name}`)) { intact = false; break; }
       }
       check(`D[seed ${seed}] no orphaned completion ${cat.id} on ${d.name}`, intact);
@@ -428,6 +490,106 @@ for (let seed = 1; seed <= 300; seed++) {
   const ca = [...devices[0].state.completedBooks].sort().join(',');
   const cb = [...devices[1].state.completedBooks].sort().join(',');
   check(`B[seed ${seed}] completedBooks agree`, ca === cb);
+}
+
+// Scenario F: backward book choice and Undo on Device A survive Device B
+// opening later with stale data, and no chapter is lost or counted twice.
+{
+  const cloud = new Cloud();
+  const deviceA = new Device('deviceA', -30 * 60 * 1000, cloud);
+  const deviceB = new Device('deviceB', 45 * 60 * 1000, cloud);
+  const devices = [deviceA, deviceB];
+
+  // ── Part 1: Backward book choice + partial-book preservation ──
+  // Both devices finish Joshua (24 ch), jump to 1 Samuel (bookIndex 3), and
+  // read 9 chapters into 1 Samuel (now at 1 Samuel 10).
+  simNow += 60_000;
+  deviceA.advance('history', 24); // finishes Joshua (24 ch) -> Judges 1
+  deviceA.jumpToBook('history', 3); // -> 1 Samuel 1
+  deviceA.advance('history', 9); // reads 1 Samuel 1..9 -> 1 Samuel 10
+  settle(devices);
+
+  // Device B closes with stale state at 1 Samuel 10 (bookIndex 3, chapter 10).
+  deviceB.goOffline();
+
+  // On Device A, user switches back to unread Judges (bookIndex 1) and reads
+  // Judges 1..3 (now at Judges 4). 1 Samuel's place (ch 10) is saved in partialChapters.
+  simNow += 60_000;
+  deviceA.jumpToBook('history', 1); // -> Judges 1, partialChapters: { '1 Samuel': 10 }
+  deviceA.advance('history', 3); // reads Judges 1..3 -> Judges 4
+
+  // Device B opens later with its stale 1 Samuel 10 position and syncs.
+  simNow += 60_000;
+  deviceB.goOnline();
+  settle(devices);
+
+  for (const d of devices) {
+    const p = d.state.progress.find(x => x.categoryId === 'history')!;
+    check(`F1 ${d.name} keeps Device A's book choice (Judges 4)`,
+      p.bookIndex === 1 && p.chapter === 4);
+    check(`F1 ${d.name} preserves partialChapters for 1 Samuel (ch 10)`,
+      p.partialChapters?.['1 Samuel'] === 10);
+    const stats = computeProgressStats(d.state.progress, d.state.completedBooks);
+    // 24 (Joshua) + 9 (1 Samuel 1..9) + 3 (Judges 1..3) = 36 chapters
+    check(`F1 ${d.name} counts all 36 read chapters without loss or double-count`,
+      stats.catProgress['history'].chaptersRead === 36);
+  }
+  const histEntries = [...cloud.history.values()].filter(h => h.categoryId === 'history');
+  check('F1 cloud history has exactly 36 unique chapter entries', histEntries.length === 36);
+
+  // ── Part 2: Undo of a finished book survives Device B opening with stale completion ──
+  // Advance Wisdom through Job 1..41 -> now at Job 42 (last chapter of Job).
+  simNow += 60_000;
+  deviceA.advance('wisdom', 41);
+  settle(devices);
+
+  // Device A finishes Job 42 -> marks wisdom:Job finished, moves to Ecclesiastes 1
+  // (bookIndex 2, skipping dailyOnly Proverbs at index 1).
+  simNow += 60_000;
+  const finishRes = deviceA.advance('wisdom', 1);
+  settle(devices);
+
+  // Simulate Device B closing and reopening fresh with stale local state where
+  // wisdom:Job is completed and pointer is at Ecclesiastes 1.
+  const deviceBReopened = new Device('deviceBReopened', 60 * 60 * 1000, cloud);
+  deviceBReopened.state = {
+    ...deviceB.state,
+    progress: deviceB.state.progress.map(p => ({ ...p })),
+    completedBooks: new Set(deviceB.state.completedBooks),
+  };
+  deviceBReopened.goOffline();
+
+  // Meanwhile on Device A, user taps "Undo, I'm not done with Job".
+  simNow += 60_000;
+  const job42EntryId = finishRes.entries[0]?.id;
+  deviceA.undoFinishBook('wisdom', 0, 42, 'Job', job42EntryId);
+
+  // Now Device B opens (first snapshot fire with stale wisdom:Job in local completedBooks).
+  simNow += 60_000;
+  deviceBReopened.goOnline();
+  settle([deviceA, deviceBReopened]);
+
+  for (const d of [deviceA, deviceBReopened]) {
+    const p = d.state.progress.find(x => x.categoryId === 'wisdom')!;
+    check(`F2 ${d.name} keeps Undo position (Job 42)`,
+      p.bookIndex === 0 && p.chapter === 42);
+    check(`F2 ${d.name} keeps wisdom:Job un-completed after Device B opens`,
+      !d.state.completedBooks.has('wisdom:Job'));
+    const stats = computeProgressStats(d.state.progress, d.state.completedBooks);
+    check(`F2 ${d.name} counts 41 chapters in Wisdom after Undo`,
+      stats.catProgress['wisdom'].chaptersRead === 41);
+  }
+
+  // Now Device A finishes Job 42 for real -> Job 42 is logged once, total is 42.
+  simNow += 60_000;
+  deviceA.advance('wisdom', 1);
+  settle([deviceA, deviceBReopened]);
+
+  const wisdomEntries = [...cloud.history.values()].filter(h => h.categoryId === 'wisdom');
+  const job42Entries = wisdomEntries.filter(h => h.bookName === 'Job' && h.chapter === 42);
+  check('F2 Job 42 is recorded in history exactly once after Undo + re-finish',
+    job42Entries.length === 1);
+  check('F2 Wisdom has exactly 42 history entries total', wisdomEntries.length === 42);
 }
 
 restoreClock();

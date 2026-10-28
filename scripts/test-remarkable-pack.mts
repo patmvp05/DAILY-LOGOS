@@ -67,6 +67,13 @@ const at = (categoryId: string, bookIndex: number, chapter: number): Progress =>
      'Genesis 48, Genesis 49, Genesis 50, Exodus 1, Exodus 2, Exodus 3, Exodus 4',
      cross.map((r) => `${r.bookName} ${r.chapter}`).join(', '));
 
+  // Wisdom skips dailyOnly Proverbs (index 1) when crossing out of Job 42.
+  const wisdomCross = walkChapters(at('wisdom', 0, 41), 5);
+  ok('wisdom: skips Proverbs and rolls from Job 42 into Ecclesiastes 1',
+     wisdomCross.map((r) => `${r.bookName} ${r.chapter}`).join(', ') ===
+     'Job 41, Job 42, Ecclesiastes 1, Ecclesiastes 2, Ecclesiastes 3',
+     wisdomCross.map((r) => `${r.bookName} ${r.chapter}`).join(', '));
+
   // Crossing two boundaries in one week: Obadiah and Jonah are 1 and 4 chapters.
   const prophecy = CATEGORIES_BY_ID.get('prophecy')!;
   const obadiah = prophecy.books.findIndex((b) => b.name === 'Obadiah');
@@ -260,7 +267,7 @@ const fromStart: Progress[] = CATEGORIES.map((c) => ({ categoryId: c.id, bookInd
      (await Promise.all([1, 2, 3, 4, 5, 6, 7].map((d) => read(`d${d}-notes.xhtml`))))
        .every((h) => h?.includes('rule-line')));
   ok('the progress page is present',
-     (await read('progress.xhtml'))?.includes('of 1189 chapters') === true);
+     (await read('progress.xhtml'))?.includes('of 1158 chapters') === true);
   ok('the week index links to today', (await read('week.xhtml'))?.includes('d1-law.xhtml') === true);
   ok('scripture text made it in',
      (await read('d1-law.xhtml'))?.includes('In the beginning God created') === true);

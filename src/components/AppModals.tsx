@@ -17,6 +17,7 @@ const HistoryModal = lazy(() => import('./modals/HistoryModal'));
 const ProverbModal = lazy(() => import('./modals/ProverbModal'));
 const CategoryPlanModal = lazy(() => import('./modals/CategoryPlanModal'));
 const BookSelectorModal = lazy(() => import('./modals/BookSelectorModal'));
+const BookFinishedModal = lazy(() => import('./modals/BookFinishedModal'));
 const DevotionalModal = lazy(() => import('./modals/DevotionalModal'));
 const DevotionalReaderModal = lazy(() => import('./modals/DevotionalReaderModal'));
 const ReaderModal = lazy(() => import('./modals/ReaderModal'));
@@ -40,13 +41,14 @@ export const AppModals = memo(({
    const { state, dispatch } = useApp();
    const {
      showSettings, showHistory, activePlanCategory, selectingCategoryId,
+     bookFinishedPrompt,
      readerCategoryId, activeDevotion, activeInternalDevotional, setActiveInternalDevotional,
      showProverbModal, showSprintModal,
      syncStatus, lastSyncTime, showSyncCheck
    } = useUi();
 
    const { user, loading: isAuthLoading, logout } = useAuth();
-   const { toggleBookCompletion, jumpToBook, saveProverbJournal, deleteJournal, resetProgress, logProverbRead, logDevotionalRead, advanceChapter, toggleSprintHour, setSprintReference, clearSprint } = useReadingActions(state, dispatch, user);
+   const { requestToggleBookCompletion, jumpToBook, undoFinishBook, saveProverbJournal, deleteJournal, resetProgress, logProverbRead, logDevotionalRead, advanceChapter, toggleSprintHour, setSprintReference, clearSprint } = useReadingActions(state, dispatch, user);
 
    // useToday keeps this fresh across midnight so the proverb modal opens on
    // the right chapter without a reload.
@@ -92,8 +94,9 @@ export const AppModals = memo(({
         />
       )}
 
-      {activePlanCategory && <CategoryPlanModal toggleBookCompletion={toggleBookCompletion} />}
-      {selectingCategoryId && <BookSelectorModal jumpToBook={jumpToBook} toggleBookCompletion={toggleBookCompletion} />}
+      {activePlanCategory && <CategoryPlanModal toggleBookCompletion={requestToggleBookCompletion} />}
+      {selectingCategoryId && <BookSelectorModal jumpToBook={jumpToBook} />}
+      {bookFinishedPrompt && <BookFinishedModal jumpToBook={jumpToBook} undoFinishBook={undoFinishBook} />}
       {readerCategoryId && <ReaderModal advanceChapter={advanceChapter} />}
       {activeDevotion && <DevotionalModal />}
       {activeInternalDevotional && (

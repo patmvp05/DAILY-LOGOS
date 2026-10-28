@@ -5,19 +5,45 @@
 
 import { format } from 'date-fns';
 import { AppState, Progress as ProgressType, HistoryEntry, ProverbJournal, Devotional, UserSettings, ScriptureSprint, SprintHour } from '../types';
+import { CATEGORIES_BY_ID } from '../constants';
+import {
+  normalizeProgressPosition,
+  switchBookInProgress,
+  findNextUnreadBookIndex,
+  getResumeChapterForBook,
+  isChapterUnreadInPlan,
+} from '../lib/bible';
 
 export type AppAction = 
   | { type: 'REPLACE_STATE', state: AppState }
   | { type: 'HYDRATE_STATE', state: Partial<AppState> }
+  | { type: 'CLOUD_HYDRATED' }
   | { type: 'CLOUD_SYNC_PROGRESS', progress: ProgressType[] }
   | { type: 'CLOUD_SYNC_COMPLETED', completed: string[] }
   | { type: 'CLOUD_SYNC_JOURNALS', journals: ProverbJournal[] }
   | { type: 'CLOUD_SYNC_DEVOTIONALS', devotionals: Devotional[] }
   | { type: 'CLOUD_SYNC_HISTORY', history: HistoryEntry[] }
   | { type: 'CLOUD_SYNC_USER_DATA', data: { startDate?: string; theme?: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook'; updatedAt?: string } }
-  | { type: 'UPDATE_PROGRESS', categoryId: string, bookIndex: number, chapter: number, localDate?: string }
-  | { type: 'TOGGLE_BOOK', key: string }
-  | { type: 'JUMP_TO_BOOK', categoryId: string, bookIndex: number, key: string }
+  | {
+      type: 'UPDATE_PROGRESS';
+      categoryId: string;
+      bookIndex: number;
+      chapter: number;
+      localDate?: string;
+      partialChapters?: Record<string, number>;
+      revisionDelta?: number;
+    }
+  | { type: 'TOGGLE_BOOK', key: string, signedOut?: boolean }
+  | { type: 'JUMP_TO_BOOK', categoryId: string, bookIndex: number, key?: string }
+  | {
+      type: 'UNDO_FINISH_BOOK';
+      categoryId: string;
+      bookIndex: number;
+      chapter: number;
+      bookName: string;
+      historyId?: string;
+      previousPartialChapters?: Record<string, number>;
+    }
   | { type: 'UPSERT_JOURNAL', journal: ProverbJournal }
   | { type: 'DELETE_JOURNAL', id: string }
   | { type: 'SET_THEME', theme: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook' }
@@ -26,6 +52,7 @@ export type AppAction =
   | { type: 'ADD_DEVOTIONAL', devotional: Devotional }
   | { type: 'DELETE_DEVOTIONAL', id: string }
   | { type: 'LOG_HISTORY', entry: HistoryEntry }
+  | { type: 'DELETE_HISTORY_ENTRY', id: string }
   | { type: 'CLEAR_HISTORY' }
   // Carries the FULL resulting slot rather than a "toggle" instruction, so the
   // caller can write the identical object to Firestore. Deriving the new value
@@ -112,21 +139,73 @@ function listContentEqual<T extends { id: string }>(a: T[], b: T[]): boolean {
  * rare, separately-tracked case. We never trade away a chapter the user
  * actually read in order to support it.
  */
-export function resolveProgressConflict(localp: ProgressType, cloudp: ProgressType): ProgressType {
-  // Different book → the later book wins.
-  if (localp.bookIndex !== cloudp.bookIndex) {
-    return cloudp.bookIndex > localp.bookIndex ? cloudp : localp;
+export function resolveProgressConflict(rawLocal: ProgressType, rawCloud: ProgressType): ProgressType {
+  const localp = normalizeProgressPosition(rawLocal);
+  const cloudp = normalizeProgressPosition(rawCloud);
+
+  let cloudWins: boolean;
+
+  // Higher revision wins when both sides carry a revision and they differ.
+  // On a tie, or when either side has no revision (old docs, older app versions),
+  // fall back to the furthest-position rule.
+  if (
+    typeof localp.revision === 'number' &&
+    typeof cloudp.revision === 'number' &&
+    localp.revision !== cloudp.revision
+  ) {
+    cloudWins = cloudp.revision > localp.revision;
+  } else if (localp.bookIndex !== cloudp.bookIndex) {
+    // Different book → the later book wins.
+    cloudWins = cloudp.bookIndex > localp.bookIndex;
+  } else if (localp.chapter !== cloudp.chapter) {
+    // Same book, different chapter → the later chapter wins.
+    cloudWins = cloudp.chapter > localp.chapter;
+  } else {
+    // Identical position → keep whichever carries the fresher read metadata
+    // (lastReadAt / localDate) so the displayed "last read" stays accurate.
+    // The position is identical either way, so this branch can never revert.
+    const localTime = localp.updatedAtMillis || (localp.lastReadAt ? new Date(localp.lastReadAt).getTime() : 0);
+    const cloudTime = cloudp.updatedAtMillis || (cloudp.lastReadAt ? new Date(cloudp.lastReadAt).getTime() : 0);
+    cloudWins = cloudTime > localTime;
   }
-  // Same book, different chapter → the later chapter wins.
-  if (localp.chapter !== cloudp.chapter) {
-    return cloudp.chapter > localp.chapter ? cloudp : localp;
+
+  const rawWinner = cloudWins ? rawCloud : rawLocal;
+  const winner = cloudWins ? cloudp : localp;
+  const loser = cloudWins ? localp : cloudp;
+
+  const hasRevision = typeof localp.revision === 'number' || typeof cloudp.revision === 'number';
+  const maxRevision = hasRevision
+    ? Math.max(localp.revision ?? 0, cloudp.revision ?? 0)
+    : undefined;
+
+  // Older app versions rewrite the whole progress doc without partialChapters,
+  // so a write arriving without that field must not erase saved partial progress.
+  const mergedPartials: Record<string, number> = {
+    ...(loser.partialChapters || {}),
+    ...(winner.partialChapters || {}),
+  };
+  const category = CATEGORIES_BY_ID.get(winner.categoryId);
+  const winnerBookName = category?.books[winner.bookIndex]?.name;
+  if (winnerBookName && winnerBookName in mergedPartials) {
+    delete mergedPartials[winnerBookName];
   }
-  // Identical position → keep whichever carries the fresher read metadata
-  // (lastReadAt / localDate) so the displayed "last read" stays accurate.
-  // The position is identical either way, so this branch can never revert.
-  const localTime = localp.updatedAtMillis || (localp.lastReadAt ? new Date(localp.lastReadAt).getTime() : 0);
-  const cloudTime = cloudp.updatedAtMillis || (cloudp.lastReadAt ? new Date(cloudp.lastReadAt).getTime() : 0);
-  return cloudTime > localTime ? cloudp : localp;
+  const finalPartials = Object.keys(mergedPartials).length > 0 ? mergedPartials : undefined;
+
+  // Preserve reference identity when no normalization, revision bump, or
+  // partialChapters merge changes the winning input.
+  if (
+    winner === rawWinner &&
+    rawWinner.revision === maxRevision &&
+    JSON.stringify(rawWinner.partialChapters ?? null) === JSON.stringify(finalPartials ?? null)
+  ) {
+    return rawWinner;
+  }
+
+  return {
+    ...winner,
+    ...(maxRevision !== undefined ? { revision: maxRevision } : {}),
+    ...(finalPartials !== undefined ? { partialChapters: finalPartials } : {}),
+  };
 }
 
 /**
@@ -171,17 +250,28 @@ function mergeAppState(current: AppState, incoming: Partial<AppState>): AppState
     }
   }
 
-  // CompletedBooks: union
-  if (incoming.completedBooks) {
+  // CompletedBooks: only adopt from IndexedDB if cloud hasn't already settled
+  // and localStorage was empty, so an async IDB read can't resurrect a book
+  // that was just un-completed.
+  if (incoming.completedBooks && !current.isCloudHydrated) {
     const incomingSet = incoming.completedBooks instanceof Set 
       ? incoming.completedBooks 
       : new Set(incoming.completedBooks as string[]);
     
     if (incomingSet.size === 0 && current.completedBooks.size > 0) {
       // Don't overwrite
-    } else {
-      next.completedBooks = new Set([...current.completedBooks, ...(incomingSet as Set<string>)]);
+    } else if (current.completedBooks.size === 0) {
+      next.completedBooks = new Set(incomingSet as Set<string>);
     }
+  }
+  if (incoming.signedOutCompletedBooks) {
+    const incomingSignedOut = incoming.signedOutCompletedBooks instanceof Set
+      ? incoming.signedOutCompletedBooks
+      : new Set(incoming.signedOutCompletedBooks as string[]);
+    next.signedOutCompletedBooks = new Set([
+      ...(current.signedOutCompletedBooks ?? []),
+      ...incomingSignedOut,
+    ]);
   }
 
   // Collections: don't overwrite non-empty with empty
@@ -245,6 +335,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'HYDRATE_STATE': {
       return mergeAppState(state, action.state);
     }
+    case 'CLOUD_HYDRATED': {
+      return state.isCloudHydrated ? state : { ...state, isCloudHydrated: true };
+    }
     case 'CLOUD_SYNC_USER_DATA': {
       const inc = action.data as Partial<UserSettings>;
       const newUpdatedAt = inc.updatedAt || '';
@@ -293,6 +386,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
             : base;
           if (resolved.bookIndex !== localProg.bookIndex ||
               resolved.chapter !== localProg.chapter ||
+              resolved.revision !== localProg.revision ||
+              JSON.stringify(resolved.partialChapters || {}) !== JSON.stringify(localProg.partialChapters || {}) ||
               resolved.updatedAtMillis !== localProg.updatedAtMillis ||
               resolved.serverMillis !== localProg.serverMillis) {
             changed = true;
@@ -307,7 +402,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const newFromCloud: ProgressType[] = [];
       action.progress.forEach(cloudProg => {
         if (!localCatIds.has(cloudProg.categoryId)) {
-          newFromCloud.push(cloudProg);
+          newFromCloud.push(normalizeProgressPosition(cloudProg));
           changed = true;
         }
       });
@@ -317,16 +412,25 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'CLOUD_SYNC_COMPLETED': {
       // The cloud completed-books collection is authoritative, including the
-      // empty set: adopting it is how un-completing a book — e.g. stepping
-      // back across a book boundary, or un-marking one in the Full Plan — gets
-      // propagated to other devices. (The old "never overwrite with empty"
-      // guard left a stale completion stuck forever once the cloud reached
-      // zero.) Guest/offline completions are migrated up by the listener's
-      // first-fire push-back in useFirestoreSync, so adopting the cloud set
-      // can never silently drop a completion that simply hadn't synced yet.
-      if (state.completedBooks.size === action.completed.length &&
-          action.completed.every(k => state.completedBooks.has(k))) return state;
-      return { ...state, completedBooks: new Set(action.completed) };
+      // empty set: adopting it is how un-completing a book — e.g. Undoing a
+      // finished book, or un-marking one in the Full Plan — gets propagated to
+      // other devices. Guest/offline completions are migrated up by the
+      // listener's first-fire push-back in useFirestoreSync.
+      const cloudSet = new Set(action.completed);
+      const nextSignedOut = state.signedOutCompletedBooks
+        ? new Set([...state.signedOutCompletedBooks].filter(k => !cloudSet.has(k)))
+        : undefined;
+      const sameCompleted =
+        state.completedBooks.size === action.completed.length &&
+        action.completed.every(k => state.completedBooks.has(k));
+      const sameSignedOut =
+        (state.signedOutCompletedBooks?.size ?? 0) === (nextSignedOut?.size ?? 0);
+      if (sameCompleted && sameSignedOut) return state;
+      return {
+        ...state,
+        completedBooks: cloudSet,
+        signedOutCompletedBooks: nextSignedOut,
+      };
     }
     case 'CLOUD_SYNC_JOURNALS': {
       if (action.journals.length === 0 && state.proverbJournals.length > 0) return state;
@@ -345,9 +449,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       // Cloud entries are authoritative for their IDs
       action.history.forEach(h => mergedMap.set(h.id, h));
       
-      // Preserve local entries that haven't reached cloud yet
+      // Preserve local entries that haven't reached cloud yet, except any
+      // entry whose chapter was explicitly undone in the cloud.
       state.history.forEach(h => {
-        if (!mergedMap.has(h.id)) {
+        if (!mergedMap.has(h.id) && !isChapterUnreadInPlan(h, state.progress, state.completedBooks)) {
           mergedMap.set(h.id, h);
         }
       });
@@ -369,11 +474,29 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const now = new Date().toISOString();
       const nowMillis = Date.now();
       const localDate = action.localDate || format(new Date(), 'yyyy-MM-dd');
-      const updatedProgress = state.progress.map(p => 
-        p.categoryId === action.categoryId 
-          ? { ...p, bookIndex: action.bookIndex, chapter: action.chapter, lastReadAt: now, localDate, updatedAtMillis: nowMillis } 
-          : p
-      );
+      const updatedProgress = state.progress.map(p => {
+        if (p.categoryId !== action.categoryId) return p;
+        const nextCandidate = normalizeProgressPosition({
+          ...p,
+          bookIndex: action.bookIndex,
+          chapter: action.chapter,
+          partialChapters: action.partialChapters !== undefined ? action.partialChapters : p.partialChapters,
+        });
+        const posChanged =
+          nextCandidate.bookIndex !== p.bookIndex ||
+          nextCandidate.chapter !== p.chapter ||
+          JSON.stringify(nextCandidate.partialChapters || {}) !== JSON.stringify(p.partialChapters || {});
+        const nextRevision = posChanged
+          ? (p.revision ?? 0) + Math.max(1, action.revisionDelta ?? 1)
+          : p.revision;
+        return {
+          ...nextCandidate,
+          revision: nextRevision,
+          lastReadAt: now,
+          localDate,
+          updatedAtMillis: nowMillis,
+        };
+      });
       
       return {
         ...state,
@@ -382,28 +505,144 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'TOGGLE_BOOK': {
       const newCompleted = new Set(state.completedBooks);
+      const nextSignedOut = new Set(state.signedOutCompletedBooks ?? []);
       if (newCompleted.has(action.key)) {
         newCompleted.delete(action.key);
+        nextSignedOut.delete(action.key);
       } else {
         newCompleted.add(action.key);
+        if (action.signedOut) {
+          nextSignedOut.add(action.key);
+        }
       }
+
+      const [catId, toggledBookName] = action.key.split(':');
+      const now = new Date().toISOString();
+      const nowMillis = Date.now();
+      const localDate = format(new Date(), 'yyyy-MM-dd');
+
+      const updatedProgress = state.progress.map(p => {
+        if (p.categoryId !== catId) return p;
+        const category = CATEGORIES_BY_ID.get(catId);
+        if (!category) return p;
+
+        const normalized = normalizeProgressPosition(p);
+        const partialChapters = { ...(normalized.partialChapters || {}) };
+        let partialsChanged = false;
+        if (newCompleted.has(action.key) && toggledBookName in partialChapters) {
+          delete partialChapters[toggledBookName];
+          partialsChanged = true;
+        }
+
+        const currentBook = category.books[normalized.bookIndex];
+        if (newCompleted.has(action.key) && currentBook?.name === toggledBookName) {
+          const nextUnreadIdx = findNextUnreadBookIndex(catId, normalized.bookIndex, newCompleted);
+          if (nextUnreadIdx !== null && nextUnreadIdx !== normalized.bookIndex) {
+            const nextBook = category.books[nextUnreadIdx];
+            const nextChapter = getResumeChapterForBook(
+              { ...normalized, partialChapters },
+              nextBook.name,
+              nextBook.chapters
+            );
+            delete partialChapters[nextBook.name];
+            return {
+              ...normalized,
+              bookIndex: nextUnreadIdx,
+              chapter: nextChapter,
+              partialChapters: Object.keys(partialChapters).length > 0 ? partialChapters : undefined,
+              revision: (normalized.revision ?? 0) + 1,
+              lastReadAt: now,
+              localDate,
+              updatedAtMillis: nowMillis,
+            };
+          }
+        }
+
+        if (partialsChanged) {
+          return {
+            ...normalized,
+            partialChapters: Object.keys(partialChapters).length > 0 ? partialChapters : undefined,
+            revision: (normalized.revision ?? 0) + 1,
+          };
+        }
+        return p;
+      });
+
       return {
         ...state,
-        completedBooks: newCompleted
+        completedBooks: newCompleted,
+        signedOutCompletedBooks: nextSignedOut.size > 0 ? nextSignedOut : undefined,
+        progress: updatedProgress,
       };
     }
     case 'JUMP_TO_BOOK': {
       const now = new Date().toISOString();
       const nowMillis = Date.now();
       const localDate = format(new Date(), 'yyyy-MM-dd');
+      let changed = false;
+      const updatedProgress = state.progress.map(p => {
+        if (p.categoryId !== action.categoryId) return p;
+        const switched = switchBookInProgress(p, action.bookIndex, state.completedBooks);
+        if (
+          switched.bookIndex === p.bookIndex &&
+          switched.chapter === p.chapter &&
+          JSON.stringify(switched.partialChapters || {}) === JSON.stringify(p.partialChapters || {})
+        ) {
+          return p;
+        }
+        changed = true;
+        return {
+          ...switched,
+          revision: (p.revision ?? 0) + 1,
+          lastReadAt: now,
+          localDate,
+          updatedAtMillis: nowMillis,
+        };
+      });
+      if (!changed) return state;
+      return {
+        ...state,
+        progress: updatedProgress,
+      };
+    }
+    case 'UNDO_FINISH_BOOK': {
+      const now = new Date().toISOString();
+      const nowMillis = Date.now();
+      const localDate = format(new Date(), 'yyyy-MM-dd');
+      const key = `${action.categoryId}:${action.bookName}`;
       const newCompleted = new Set(state.completedBooks);
-      newCompleted.delete(action.key);
+      newCompleted.delete(key);
+      const nextSignedOut = new Set(state.signedOutCompletedBooks ?? []);
+      nextSignedOut.delete(key);
+
+      const updatedProgress = state.progress.map(p => {
+        if (p.categoryId !== action.categoryId) return p;
+        const partialChapters = action.previousPartialChapters
+          ? { ...action.previousPartialChapters }
+          : { ...(p.partialChapters || {}) };
+        delete partialChapters[action.bookName];
+        return {
+          ...p,
+          bookIndex: action.bookIndex,
+          chapter: action.chapter,
+          partialChapters: Object.keys(partialChapters).length > 0 ? partialChapters : undefined,
+          revision: (p.revision ?? 0) + 1,
+          lastReadAt: now,
+          localDate,
+          updatedAtMillis: nowMillis,
+        };
+      });
+
+      const updatedHistory = action.historyId
+        ? state.history.filter(h => h.id !== action.historyId)
+        : state.history;
+
       return {
         ...state,
         completedBooks: newCompleted,
-        progress: state.progress.map(p => 
-          p.categoryId === action.categoryId ? { ...p, bookIndex: action.bookIndex, chapter: 1, lastReadAt: now, localDate, updatedAtMillis: nowMillis } : p
-        )
+        signedOutCompletedBooks: nextSignedOut.size > 0 ? nextSignedOut : undefined,
+        progress: updatedProgress,
+        history: updatedHistory,
       };
     }
     case 'SET_SPRINT_HOUR': {
@@ -515,6 +754,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       if (updatedHistory.length > HISTORY_CAP) updatedHistory.length = HISTORY_CAP;
 
       return { ...state, history: updatedHistory };
+    }
+    case 'DELETE_HISTORY_ENTRY': {
+      return { ...state, history: state.history.filter(h => h.id !== action.id) };
     }
     case 'CLEAR_HISTORY': {
       return { ...state, history: [] };

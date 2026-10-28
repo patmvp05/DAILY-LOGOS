@@ -26,15 +26,37 @@ export function useSyncState(user: User | null, dispatch: React.Dispatch<AppActi
   }, [writeSyncStatus, cloudSyncStatus]);
 
   useEffect(() => {
+    let syncingTimer: ReturnType<typeof setTimeout> | null = null;
+    let checkTimer: ReturnType<typeof setTimeout> | null = null;
+
     const unsub = syncTracker.subscribe((status) => {
+      if (syncingTimer) {
+        clearTimeout(syncingTimer);
+        syncingTimer = null;
+      }
+
+      if (status === 'syncing') {
+        // Show "Syncing..." only when a user write takes longer than ~1 second.
+        syncingTimer = setTimeout(() => {
+          setWriteSyncStatus('syncing');
+        }, 1000);
+        return;
+      }
+
       setWriteSyncStatus(status);
       if (status === 'synced') {
         setLastSyncTime(new Date());
         setShowSyncCheck(true);
-        setTimeout(() => setShowSyncCheck(false), 3000);
+        if (checkTimer) clearTimeout(checkTimer);
+        checkTimer = setTimeout(() => setShowSyncCheck(false), 3000);
       }
     });
-    return unsub;
+
+    return () => {
+      unsub();
+      if (syncingTimer) clearTimeout(syncingTimer);
+      if (checkTimer) clearTimeout(checkTimer);
+    };
   }, []);
 
   const onFirestoreSyncStatusChange = useCallback((status: 'idle' | 'syncing' | 'synced' | 'error') => {

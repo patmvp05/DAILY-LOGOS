@@ -105,6 +105,34 @@ function histRead(progress: Progress[], completed: string[]): number {
      `got ${stats.overallProgress}`);
 }
 
+// --- Scenario 6: Wisdom excludes Proverbs (62 chapters) and normalizes legacy Proverbs pointer ---
+{
+  const stats = statsFor(
+    [{ categoryId: 'wisdom', bookIndex: 1, chapter: 18 }], // legacy Proverbs pointer -> Ecclesiastes 1
+    ['wisdom:Job', 'wisdom:Proverbs']
+  );
+  ok('Wisdom totalChapters is 62 (Job 42 + Ecclesiastes 12 + Song of Solomon 8)',
+     stats.catProgress['wisdom'].totalChapters === 62,
+     `got ${stats.catProgress['wisdom'].totalChapters}`);
+  ok('legacy Proverbs pointer normalizes to Ecclesiastes 1 and old wisdom:Proverbs doc is ignored',
+     stats.catProgress['wisdom'].chaptersRead === 42,
+     `got ${stats.catProgress['wisdom'].chaptersRead}`);
+  ok('total plan chapters is 1,158',
+     stats.totalChaptersCount === 1158,
+     `got ${stats.totalChaptersCount}`);
+}
+
+// --- Scenario 7: switching away from a book partway preserves its read chapters via partialChapters ---
+{
+  const progress: Progress[] = [
+    { categoryId: 'history', bookIndex: 1, chapter: 3, partialChapters: { '1 Samuel': 10 } },
+  ];
+  const read = histRead(progress, ['history:Joshua']);
+  const expected = joshua.chapters + (3 - 1) + (10 - 1); // 24 + 2 + 9 = 35
+  ok('partialChapters on non-current unread book counts toward chaptersRead',
+     read === expected, `expected ${expected}, got ${read}`);
+}
+
 console.log('');
 if (fail === 0) {
   console.log(`PROGRESS-STATS PASS ${pass} / ${pass}`);

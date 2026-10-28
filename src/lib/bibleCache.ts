@@ -51,6 +51,35 @@ export function getCachedReadTime(bookName: string, chapter: number, version?: s
 }
 
 /**
+ * Seed the chapter info cache from already-fetched verses so synchronous
+ * `getCachedReadTime` callers (e.g. Daily Proverb logging) have the real
+ * 225-wpm reading time without an extra fetch.
+ */
+export function seedChapterInfoFromText(
+  bookName: string,
+  chapter: number,
+  version: string | undefined,
+  verses: Array<{ text: string }>,
+  isFallback?: boolean
+): number {
+  const id = resolveBibleVersion(version);
+  const key = cacheKey(id, bookName, chapter);
+  const firstVerse = verses[0]?.text?.trim() || 'Text not available';
+  const wordCount = verses.reduce((acc, v) => acc + (v.text ? v.text.trim().split(/\s+/).filter(Boolean).length : 0), 0);
+  const readTime = Math.max(1, Math.round(wordCount / 225));
+  const result: ChapterInfo = { firstVerse, readTime };
+  memoryCache.set(key, result);
+  if (!isFallback) {
+    try {
+      localStorage.setItem(key, JSON.stringify(result));
+    } catch {
+      // ignore storage errors
+    }
+  }
+  return readTime;
+}
+
+/**
  * Fetch the first-verse preview + estimated read time for a chapter in the
  * user's selected version. Delegates to getChapterText (the single source of
  * truth) so the card preview always matches the version shown in the reader.

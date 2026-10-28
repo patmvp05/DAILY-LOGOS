@@ -9,7 +9,13 @@ import { AppState, HistoryEntry, ProverbJournal, SprintHour } from '../types';
 import { AppAction, getSprintHour } from '../state/appReducer';
 import { CATEGORIES_BY_ID, CATEGORIES, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
 import { triggerHaptic } from '../lib/haptic';
-import { calculateNextProgress, isBackwardJump } from '../lib/bible';
+import {
+  calculateNextProgress,
+  switchBookInProgress,
+  normalizeProgressPosition,
+  findNextUnreadBookIndex,
+  getResumeChapterForBook,
+} from '../lib/bible';
 import { getCachedReadTime } from '../lib/bibleCache';
 import { 
   writeActionBatch, 
@@ -21,7 +27,7 @@ import {
   writeSprintHour,
   deleteSprint
 } from '../lib/sync';
-import { useUi } from '../state/UiContextCore';
+import { useUi, BookFinishedPromptState } from '../state/UiContextCore';
 
 import { type User } from 'firebase/auth';
 
@@ -30,7 +36,14 @@ export function useReadingActions(
   dispatch: Dispatch<AppAction>, 
   user: User | null
 ) {
-  const { showToast, setConfirmDialog, setJournalDraft, setShowProverbModal, setSelectingCategoryId } = useUi();
+  const {
+    showToast,
+    setConfirmDialog,
+    setJournalDraft,
+    setShowProverbModal,
+    setSelectingCategoryId,
+    setBookFinishedPrompt,
+  } = useUi();
   
   // Latest refs to ensure flush always has access to current state/deps without callback churn
   const stateRef = useRef(state);
@@ -59,7 +72,7 @@ export function useReadingActions(
     const currentProgress = currentState.progress.find(p => p.categoryId === categoryId);
     if (!currentProgress) return;
 
-    const { progress, newlyCompletedKeys, revertedCompletedKeys, historySteps } = calculateNextProgress(
+    const { progress, newlyCompletedKeys, revertedCompletedKeys, historySteps, finishedBook } = calculateNextProgress(
       categoryId,
       amount,
       currentProgress,
@@ -68,16 +81,27 @@ export function useReadingActions(
 
     const now = new Date();
     const localDate = format(now, 'yyyy-MM-dd');
+    const normalizedCurrent = normalizeProgressPosition(currentProgress);
+    const posChanged =
+      progress.bookIndex !== normalizedCurrent.bookIndex ||
+      progress.chapter !== normalizedCurrent.chapter ||
+      JSON.stringify(progress.partialChapters || {}) !== JSON.stringify(normalizedCurrent.partialChapters || {});
+    const revisionDelta = Math.max(1, historySteps.length);
+    const nextRevision = posChanged
+      ? (normalizedCurrent.revision ?? 0) + revisionDelta
+      : normalizedCurrent.revision;
 
     currentDispatch({
       type: 'UPDATE_PROGRESS',
       categoryId,
       bookIndex: progress.bookIndex,
       chapter: progress.chapter,
+      partialChapters: progress.partialChapters,
+      revisionDelta,
       localDate
     });
-    newlyCompletedKeys.forEach(key => currentDispatch({ type: 'TOGGLE_BOOK', key }));
-    revertedCompletedKeys.forEach(key => currentDispatch({ type: 'TOGGLE_BOOK', key }));
+    newlyCompletedKeys.forEach(key => currentDispatch({ type: 'TOGGLE_BOOK', key, signedOut: !currentUser }));
+    revertedCompletedKeys.forEach(key => currentDispatch({ type: 'TOGGLE_BOOK', key, signedOut: !currentUser }));
     
     const category = CATEGORIES_BY_ID.get(categoryId)!;
     const historyEntries: HistoryEntry[] = historySteps.map((step, index) => {
@@ -96,29 +120,34 @@ export function useReadingActions(
     });
 
     historyEntries.forEach(entry => currentDispatch({ type: 'LOG_HISTORY', entry }));
+
+    if (finishedBook) {
+      const finishedEntry = [...historyEntries]
+        .reverse()
+        .find(h => h.bookName === finishedBook.finishedBookName && h.chapter === finishedBook.lastChapter);
+      setBookFinishedPrompt({
+        ...finishedBook,
+        loggedHistoryId: finishedEntry?.id,
+        previousPartialChapters: normalizedCurrent.partialChapters,
+      });
+    }
     
     if (currentUser) {
       writeActionBatch(currentUser.uid, {
-        progress,
+        progress: {
+          ...progress,
+          revision: nextRevision,
+          localDate,
+          updatedAtMillis: Date.now(),
+        },
         history: historyEntries,
         completedBooks: newlyCompletedKeys.map(k => {
           const [catId, bookName] = k.split(':');
           return { categoryId: catId, bookName };
         })
-        // NOTE: revertedCompletedKeys is deliberately NOT pushed as
-        // deletedBooks. Stepping back over a book boundary un-completes that
-        // book locally (so re-advancing behaves), but position resolution is
-        // "furthest wins" — so on a device that is BEHIND another one, the
-        // backward step loses the position race while its cloud delete still
-        // applied, permanently orphaning a finished book: every device ended up
-        // past the book with the book no longer marked complete, silently
-        // dropping all of its chapters from the progress total. The local
-        // un-complete is re-synced from the cloud on the next snapshot.
-        // Deliberate un-marking still propagates via toggleBookCompletion →
-        // deleteCompletedBook, which is a separate, explicit path.
       }).catch(err => console.error("Sync failed:", err));
     }
-  }, []);
+  }, [setBookFinishedPrompt]);
 
   // Cleanup pending flushes on unmount & flush immediately if needed
   useEffect(() => {
@@ -186,57 +215,149 @@ export function useReadingActions(
   }, [flush]);
 
   const jumpToBook = useCallback((categoryId: string, bookIndex: number) => {
-    const category = CATEGORIES_BY_ID.get(categoryId)!;
-    const book = category.books[bookIndex];
-    const currentProgress = state.progress.find(p => p.categoryId === categoryId);
-    
-    const performJump = () => {
-      const key = `${categoryId}:${book.name}`;
-      dispatch({ type: 'JUMP_TO_BOOK', categoryId, bookIndex, key });
-      
-      if (user) {
-        writeActionBatch(user.uid, {
-          progress: {
-            categoryId,
-            bookIndex,
-            chapter: 1,
-            lastReadAt: new Date().toISOString(),
-            localDate: format(new Date(), 'yyyy-MM-dd')
-          },
-          deletedBooks: [{ categoryId, bookName: book.name }],
-          forceProgressOverwrite: true
-        }).catch(e => console.error("Jump sync failed:", e));
-      }
+    const currentProgress = stateRef.current.progress.find(p => p.categoryId === categoryId);
+    if (!currentProgress) {
       setSelectingCategoryId(null);
-    };
-
-    if (isBackwardJump(currentProgress, bookIndex)) {
-      setConfirmDialog({
-        isOpen: true,
-        title: "Change Progress",
-        message: `This will move your reading progress back to the start of ${book.name}. Are you sure?`,
-        onConfirm: performJump
-      });
-    } else {
-      performJump();
+      return;
     }
-  }, [state.progress, user, dispatch, setConfirmDialog, setSelectingCategoryId]);
+
+    const switched = switchBookInProgress(currentProgress, bookIndex, stateRef.current.completedBooks);
+    const normalized = normalizeProgressPosition(currentProgress);
+    if (
+      switched.bookIndex === normalized.bookIndex &&
+      switched.chapter === normalized.chapter &&
+      JSON.stringify(switched.partialChapters || {}) === JSON.stringify(normalized.partialChapters || {})
+    ) {
+      // Picking the book we're already in is a no-op (never resets to chapter 1).
+      setSelectingCategoryId(null);
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const localDate = format(new Date(), 'yyyy-MM-dd');
+    const nextRevision = (normalized.revision ?? 0) + 1;
+
+    dispatch({ type: 'JUMP_TO_BOOK', categoryId, bookIndex });
+    triggerHaptic('light');
+
+    if (userRef.current) {
+      writeActionBatch(userRef.current.uid, {
+        progress: {
+          ...switched,
+          revision: nextRevision,
+          lastReadAt: now,
+          localDate,
+          updatedAtMillis: Date.now(),
+        },
+      }).catch(e => console.error("Jump sync failed:", e));
+    }
+    setSelectingCategoryId(null);
+  }, [dispatch, setSelectingCategoryId]);
+
+  const undoFinishBook = useCallback((prompt: BookFinishedPromptState) => {
+    const currentProgress = stateRef.current.progress.find(p => p.categoryId === prompt.categoryId);
+    const nextRevision = (currentProgress?.revision ?? 0) + 1;
+    const partialChapters = prompt.previousPartialChapters
+      ? { ...prompt.previousPartialChapters }
+      : { ...(currentProgress?.partialChapters || {}) };
+    delete partialChapters[prompt.finishedBookName];
+    const finalPartials = Object.keys(partialChapters).length > 0 ? partialChapters : undefined;
+
+    dispatch({
+      type: 'UNDO_FINISH_BOOK',
+      categoryId: prompt.categoryId,
+      bookIndex: prompt.finishedBookIndex,
+      chapter: prompt.lastChapter,
+      bookName: prompt.finishedBookName,
+      historyId: prompt.loggedHistoryId,
+      previousPartialChapters: finalPartials,
+    });
+
+    if (userRef.current) {
+      writeActionBatch(userRef.current.uid, {
+        progress: {
+          categoryId: prompt.categoryId,
+          bookIndex: prompt.finishedBookIndex,
+          chapter: prompt.lastChapter,
+          partialChapters: finalPartials,
+          revision: nextRevision,
+          lastReadAt: new Date().toISOString(),
+          localDate: format(new Date(), 'yyyy-MM-dd'),
+          updatedAtMillis: Date.now(),
+        },
+        deletedBooks: [{ categoryId: prompt.categoryId, bookName: prompt.finishedBookName }],
+        deletedHistoryIds: prompt.loggedHistoryId ? [prompt.loggedHistoryId] : undefined,
+      }).catch(e => console.error("Undo finish book sync failed:", e));
+    }
+    setBookFinishedPrompt(null);
+    triggerHaptic('light');
+  }, [dispatch, setBookFinishedPrompt]);
 
   const toggleBookCompletion = useCallback((categoryId: string, bookName: string) => {
     const key = `${categoryId}:${bookName}`;
-    const isCompleted = state.completedBooks.has(key);
+    const isCompleted = stateRef.current.completedBooks.has(key);
     
-    dispatch({ type: 'TOGGLE_BOOK', key });
+    dispatch({ type: 'TOGGLE_BOOK', key, signedOut: !userRef.current });
     triggerHaptic(isCompleted ? 'light' : 'heavy');
     
-    if (user) {
+    if (userRef.current) {
       if (isCompleted) {
-        deleteCompletedBook(user.uid, categoryId, bookName);
+        deleteCompletedBook(userRef.current.uid, categoryId, bookName);
       } else {
-        writeCompletedBook(user.uid, categoryId, bookName);
+        const currentProgress = stateRef.current.progress.find(p => p.categoryId === categoryId);
+        const category = CATEGORIES_BY_ID.get(categoryId);
+        const normalized = currentProgress ? normalizeProgressPosition(currentProgress) : undefined;
+        const currentBook = normalized && category ? category.books[normalized.bookIndex] : undefined;
+        const nextCompleted = new Set(stateRef.current.completedBooks);
+        nextCompleted.add(key);
+
+        if (normalized && category && currentBook?.name === bookName) {
+          const nextUnreadIdx = findNextUnreadBookIndex(categoryId, normalized.bookIndex, nextCompleted);
+          const partialChapters = { ...(normalized.partialChapters || {}) };
+          delete partialChapters[bookName];
+          if (nextUnreadIdx !== null && nextUnreadIdx !== normalized.bookIndex) {
+            const nextBook = category.books[nextUnreadIdx];
+            const nextChapter = getResumeChapterForBook(
+              { ...normalized, partialChapters },
+              nextBook.name,
+              nextBook.chapters
+            );
+            delete partialChapters[nextBook.name];
+            writeActionBatch(userRef.current.uid, {
+              progress: {
+                ...normalized,
+                bookIndex: nextUnreadIdx,
+                chapter: nextChapter,
+                partialChapters: Object.keys(partialChapters).length > 0 ? partialChapters : undefined,
+                revision: (normalized.revision ?? 0) + 1,
+                lastReadAt: new Date().toISOString(),
+                localDate: format(new Date(), 'yyyy-MM-dd'),
+                updatedAtMillis: Date.now(),
+              },
+              completedBooks: [{ categoryId, bookName }],
+            }).catch(e => console.error("Toggle completion batch failed:", e));
+            return;
+          }
+        }
+        writeCompletedBook(userRef.current.uid, categoryId, bookName);
       }
     }
-  }, [state.completedBooks, user, dispatch]);
+  }, [dispatch]);
+
+  const requestToggleBookCompletion = useCallback((categoryId: string, bookName: string) => {
+    const key = `${categoryId}:${bookName}`;
+    const isCompleted = stateRef.current.completedBooks.has(key);
+    setConfirmDialog({
+      isOpen: true,
+      title: isCompleted ? `Mark ${bookName} Unread?` : `Mark ${bookName} Finished?`,
+      message: isCompleted
+        ? `This will un-mark ${bookName} as finished and remove its chapters from your completed total.`
+        : `This will mark all chapters of ${bookName} as finished in your reading plan.`,
+      confirmLabel: isCompleted ? 'Mark Unread' : 'Mark Finished',
+      type: isCompleted ? 'danger' : 'info',
+      onConfirm: () => toggleBookCompletion(categoryId, bookName),
+    });
+  }, [setConfirmDialog, toggleBookCompletion]);
 
   const saveProverbJournal = useCallback(async (content: string, verse: string, id: string | null) => {
     if (!content.trim()) return;
@@ -314,7 +435,7 @@ export function useReadingActions(
     });
   }, [state, user, dispatch, setConfirmDialog, showToast]);
 
-  const logProverbRead = useCallback((chapter: number) => {
+  const logProverbRead = useCallback((chapter: number, explicitReadTime?: number) => {
     // Check if already logged today
     const alreadyLogged = state.history.some(h => 
       h.bookName === 'Proverbs' && 
@@ -330,15 +451,19 @@ export function useReadingActions(
 
     if (alreadyLogged) return;
 
+    const cached = getCachedReadTime('Proverbs', chapter, state.settings.bibleVersion);
+    const readTime = explicitReadTime || cached || BOOK_READ_MINUTES['Proverbs'] || DEFAULT_BOOK_MINUTES;
+
     const entry: HistoryEntry = {
       id: `proverb_${Date.now()}`,
       timestamp: new Date().toISOString(),
       timestampMillis: Date.now(),
       localDate: format(new Date(), 'yyyy-MM-dd'),
       categoryId: 'wisdom',
-      categoryName: 'Wisdom',
+      categoryName: 'Daily Proverb',
       bookName: 'Proverbs',
       chapter,
+      readTime,
     };
 
     dispatch({ type: 'LOG_HISTORY', entry });
@@ -348,7 +473,7 @@ export function useReadingActions(
       }).catch(err => console.error("Proverb sync failed:", err));
     }
     triggerHaptic('medium');
-  }, [state.history, user, dispatch]);
+  }, [state.history, state.settings.bibleVersion, user, dispatch]);
 
   const logDevotionalRead = useCallback((slug: string, name: string) => {
     const alreadyLogged = state.history.some(h =>
@@ -470,10 +595,12 @@ export function useReadingActions(
   return {
     advanceChapter,
     jumpToBook,
+    undoFinishBook,
     toggleSprintHour,
     setSprintReference,
     clearSprint,
     toggleBookCompletion,
+    requestToggleBookCompletion,
     saveProverbJournal,
     deleteJournal,
     resetProgress,

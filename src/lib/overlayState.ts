@@ -17,6 +17,7 @@ export interface ModalOpenState {
   showHistory?: boolean;
   activePlanCategory?: unknown;
   selectingCategoryId?: unknown;
+  bookFinishedPrompt?: unknown;
   activeDevotion?: unknown;
   /** Bible chapter reader. */
   readerCategoryId?: unknown;
@@ -33,6 +34,7 @@ export const SCROLL_LOCKING_SURFACES = [
   'showHistory',
   'activePlanCategory',
   'selectingCategoryId',
+  'bookFinishedPrompt',
   'activeDevotion',
   'readerCategoryId',
   'activeInternalDevotional',

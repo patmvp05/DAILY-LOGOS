@@ -16,12 +16,10 @@ import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 
 interface BookSelectorModalProps {
   jumpToBook: (catId: string, bookIndex: number) => void;
-  toggleBookCompletion: (catId: string, bookName: string) => void;
 }
 
 const BookSelectorModal: React.FC<BookSelectorModalProps> = ({
   jumpToBook,
-  toggleBookCompletion
 }) => {
   const { state } = useApp();
   const { selectingCategoryId, setSelectingCategoryId } = useUi();
@@ -39,6 +37,10 @@ const BookSelectorModal: React.FC<BookSelectorModalProps> = ({
   if (!selectingCategoryId) return null;
 
   const category = CATEGORIES_BY_ID.get(selectingCategoryId);
+  const prog = state.progress.find(p => p.categoryId === selectingCategoryId);
+  const planBooks = (category?.books ?? [])
+    .map((book, rawIndex) => ({ book, rawIndex }))
+    .filter(({ book }) => !book.dailyOnly);
 
   return (
     <>
@@ -50,6 +52,7 @@ const BookSelectorModal: React.FC<BookSelectorModalProps> = ({
         className="fixed inset-0 bg-black/40 backdrop-blur-md sm:backdrop-blur-xl z-[200]"
       />
       <motion.div 
+        data-testid="book-selector-modal"
         initial={prefersReducedMotion ? { opacity: 0 } : { y: "100%" }}
         animate={prefersReducedMotion ? { opacity: 1 } : { y: 0 }}
         exit={prefersReducedMotion ? { opacity: 0 } : { y: "100%" }}
@@ -76,57 +79,64 @@ const BookSelectorModal: React.FC<BookSelectorModalProps> = ({
         </div>
 
         <div className="overflow-y-auto ios-scroll grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 pr-1">
-          {category?.books.map((book, idx) => {
-            const isCurrent = state.progress.find(p => p.categoryId === selectingCategoryId)?.bookIndex === idx;
+          {planBooks.map(({ book, rawIndex }, planIdx) => {
+            const isCurrent = prog?.bookIndex === rawIndex;
             const isCompleted = state.completedBooks.has(`${selectingCategoryId}:${book.name}`);
+            const savedPartial = prog?.partialChapters?.[book.name];
             
             return (
               <motion.div 
                 key={book.name} 
                 initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: idx * 0.02 }}
-                className="relative group"
+                transition={{ delay: planIdx * 0.02 }}
+                className="relative"
               >
                 <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => jumpToBook(selectingCategoryId!, idx)}
+                  type="button"
+                  disabled={isCompleted}
+                  whileTap={isCompleted ? undefined : { scale: 0.97 }}
+                  onClick={() => {
+                    if (isCompleted) return;
+                    jumpToBook(selectingCategoryId!, rawIndex);
+                  }}
                   className={cn(
                     "w-full p-4 sm:p-5 border text-left transition-all flex flex-col justify-between h-28 sm:h-32 rounded-2xl shadow-sm",
-                    isCompleted ? "bg-brand border-brand text-white shadow-evernote/20" :
-                    isCurrent 
-                      ? "border-brand bg-brand/5 text-brand font-black" 
-                      : "bg-white dark:bg-[#1A1A1A] border-[var(--audible-border)] hover:border-brand text-[var(--audible-text-primary)]"
+                    isCompleted
+                      ? "bg-zinc-100 dark:bg-zinc-900/70 border-[var(--audible-border)] text-zinc-400 dark:text-zinc-500 cursor-not-allowed opacity-75"
+                      : isCurrent 
+                        ? "border-brand bg-brand/5 text-brand font-black" 
+                        : "bg-white dark:bg-[#1A1A1A] border-[var(--audible-border)] hover:border-brand text-[var(--audible-text-primary)]"
                   )}
                 >
                   <div className="space-y-1">
-                    <p className={cn(
-                      "text-[9px] font-black uppercase tracking-[0.12em]",
-                      (isCurrent || isCompleted) ? "text-current opacity-70" : "text-zinc-400 dark:text-zinc-500"
-                    )}>
-                      Book {idx + 1}
-                    </p>
+                    <div className="flex items-center justify-between gap-1">
+                      <p className={cn(
+                        "text-[9px] font-black uppercase tracking-[0.12em]",
+                        isCurrent ? "text-current opacity-70" : "text-zinc-400 dark:text-zinc-500"
+                      )}>
+                        Book {planIdx + 1}
+                      </p>
+                      {isCompleted && (
+                        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand/15 text-brand">
+                          <Check size={12} strokeWidth={3} />
+                        </span>
+                      )}
+                    </div>
                     <h4 className="font-black uppercase tracking-tight text-xs sm:text-sm leading-tight line-clamp-2">{book.name}</h4>
                   </div>
                   <div className="flex justify-between items-center w-full">
-                    <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest tabular-nums">{book.chapters} CH.</p>
+                    <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest tabular-nums">
+                      {isCompleted
+                        ? 'Finished'
+                        : isCurrent
+                          ? `Current · Ch. ${prog?.chapter ?? 1}`
+                          : savedPartial && savedPartial > 1
+                            ? `Resume Ch. ${savedPartial}`
+                            : `${book.chapters} CH.`}
+                    </p>
                   </div>
                 </motion.button>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleBookCompletion(selectingCategoryId!, book.name);
-                  }}
-                  className={cn(
-                    "absolute top-2 right-2 sm:top-3 sm:right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 border shadow-md z-10",
-                    isCompleted 
-                      ? "bg-white text-brand border-white" 
-                      : "bg-[var(--audible-text-primary)] dark:bg-white text-white dark:text-black border-transparent"
-                  )}
-                  title={isCompleted ? "Mark as unread" : "Mark as completed"}
-                >
-                  <Check size={14} strokeWidth={isCompleted ? 4 : 2} />
-                </button>
               </motion.div>
             );
           })}

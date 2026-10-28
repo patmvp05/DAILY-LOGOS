@@ -42,6 +42,7 @@ import { join } from 'node:path';
 import { addDays, format, parseISO, isValid } from 'date-fns';
 
 import { CATEGORIES, CATEGORIES_BY_ID, BOLLS_BIBLE_BOOK_IDS } from '../src/constants';
+import { normalizeProgressPosition } from '../src/lib/bible';
 import { computeProgressStats } from '../src/lib/utils';
 import { INTERNAL_DEVOTIONALS } from '../src/lib/devotionalCatalog';
 import type { Progress } from '../src/types';
@@ -227,6 +228,13 @@ export function walkChapters(prog: Progress, count: number): ChapterRef[] {
     // Guard against an out-of-range stored chapter.
     if (chapter < 1 || chapter > book.chapters) break;
 
+    // Skip books read outside the category plan (e.g. Daily Proverb).
+    if (book.dailyOnly) {
+      bookIdx++;
+      chapter = 1;
+      continue;
+    }
+
     out.push({ categoryId: category.id, bookIndex: bookIdx, bookName: book.name, chapter });
     remaining--;
 
@@ -235,6 +243,9 @@ export function walkChapters(prog: Progress, count: number): ChapterRef[] {
       chapter++;
     } else if (bookIdx < category.books.length - 1) {
       bookIdx++;
+      while (bookIdx < category.books.length && category.books[bookIdx]?.dailyOnly) {
+        bookIdx++;
+      }
       chapter = 1;
     } else {
       break; // end of the part — nothing more to include
@@ -545,7 +556,8 @@ function renderProgress(progress: Progress[], completedBooks: Set<string>): stri
   const stats = computeProgressStats(progress, completedBooks);
   const rows = CATEGORIES.map((c) => {
     const s = stats.catProgress[c.id];
-    const prog = progress.find((p) => p.categoryId === c.id);
+    const rawProg = progress.find((p) => p.categoryId === c.id);
+    const prog = rawProg ? normalizeProgressPosition(rawProg) : undefined;
     const book = prog ? c.books[prog.bookIndex] : undefined;
     const at = book ? escapeXml(`${book.name} ${prog!.chapter}`) : '&#8212;';
     return `<li>

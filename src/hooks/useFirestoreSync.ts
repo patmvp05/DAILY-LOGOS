@@ -25,6 +25,7 @@ import {
   getSprintsCollection
 } from '../lib/firebase';
 import { AppAction, resolveProgressConflict } from '../state/appReducer';
+import { isChapterUnreadInPlan } from '../lib/bible';
 import { Progress, HistoryEntry, ProverbJournal, Devotional, AppState, UserSettings, ScriptureSprint, SprintHour } from '../types';
 import { logDiagnostic } from '../lib/diagnostics';
 import { writeActionBatch, writeSprintHour, recordSyncError, syncTracker } from '../lib/sync';
@@ -59,7 +60,6 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
     const unsubs: (() => void)[] = [];
     const firstFire = new Set<string>();
 
-    setSyncStatus('syncing');
     logDiagnostic('sync', 'info', 'Starting cloud sync', { uid: user.uid.slice(0, 6), attempt: retryCount + 1 });
 
     let retryScheduled = false;
@@ -75,6 +75,7 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
       firstFire.add(name);
       if (firstFire.size >= COLLECTION_COUNT) {
         setSyncStatus('synced');
+        dispatch({ type: 'CLOUD_HYDRATED' });
         logDiagnostic('sync', 'info', 'Cloud sync established');
       }
     };
@@ -157,10 +158,12 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
         const winner = cloudProg ? resolveProgressConflict(localProg, cloudProg) : localProg;
         const cloudReflectsWinner = cloudProg &&
           winner.bookIndex === cloudProg.bookIndex &&
-          winner.chapter === cloudProg.chapter;
+          winner.chapter === cloudProg.chapter &&
+          (winner.revision ?? 0) === (cloudProg.revision ?? 0) &&
+          JSON.stringify(winner.partialChapters || {}) === JSON.stringify(cloudProg.partialChapters || {});
 
         if (!cloudReflectsWinner) {
-          writeActionBatch(user.uid, { progress: winner }).catch((err) => {
+          writeActionBatch(user.uid, { progress: winner, background: true }).catch((err) => {
             logDiagnostic('sync', 'error', 'Progress reconciliation write failed', err);
           });
         }
@@ -175,15 +178,18 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
         return d.key as string;
       }).filter((k: string): k is string => !!k);
 
-      // The reducer now treats the cloud set as authoritative (so un-completions
-      // propagate). On the FIRST snapshot only, migrate any local guest/offline
-      // completions the cloud doesn't yet have, so making it authoritative can't
-      // silently drop a completion that simply hadn't been uploaded. After the
-      // first fire the cloud is trusted as-is.
+      // The reducer treats the cloud set as authoritative (so un-completions
+      // and Undos propagate across devices). On the FIRST snapshot only, upload
+      // completions that were explicitly recorded while signed out on this
+      // device, so an Undo made on another device is never re-uploaded from
+      // stale local state.
       let effective = completed;
       if (!firstFire.has('CompletedBooks')) {
         const cloudSet = new Set(completed);
-        const missing = [...stateRef.current.completedBooks].filter((k) => !cloudSet.has(k));
+        const signedOutSet = stateRef.current.signedOutCompletedBooks;
+        const missing = signedOutSet
+          ? [...signedOutSet].filter((k) => stateRef.current.completedBooks.has(k) && !cloudSet.has(k))
+          : [];
         if (missing.length) {
           effective = [...completed, ...missing];
           writeActionBatch(user.uid, {
@@ -191,6 +197,7 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
               const [categoryId, bookName] = k.split(':');
               return { categoryId, bookName };
             }),
+            background: true,
           }).catch((err) => logDiagnostic('sync', 'error', 'Completed-books migration write failed', err));
         }
       }
@@ -216,9 +223,11 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
       // Same recovery as Progress: push any local entries that never made it
       // to Firestore (e.g. a write that silently failed) back up.
       const cloudIds = new Set(history.map(h => h.id));
-      const missing = stateRef.current.history.filter(h => !cloudIds.has(h.id));
+      const missing = stateRef.current.history.filter(
+        h => !cloudIds.has(h.id) && !isChapterUnreadInPlan(h, stateRef.current.progress, stateRef.current.completedBooks)
+      );
       if (missing.length > 0) {
-        writeActionBatch(user.uid, { history: missing }).catch((err) => {
+        writeActionBatch(user.uid, { history: missing, background: true }).catch((err) => {
           logDiagnostic('sync', 'error', 'History reconciliation write failed', err);
         });
       }
@@ -246,7 +255,7 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
           if (cloudSprint && hourKey in cloudSprint.hours) continue;
           // An untouched, empty slot is not worth a write.
           if (!slot.done && !slot.reference) continue;
-          writeSprintHour(user.uid, localSprint.date, Number(hourKey), slot).catch((err) => {
+          writeSprintHour(user.uid, localSprint.date, Number(hourKey), slot, { background: true }).catch((err) => {
             logDiagnostic('sync', 'error', 'Sprint reconciliation write failed', err);
           });
         }

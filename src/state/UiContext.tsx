@@ -10,7 +10,8 @@ import {
   UiContext, 
   JournalDraftState, 
   ToastState, 
-  ConfirmDialogState 
+  ConfirmDialogState,
+  BookFinishedPromptState
 } from './UiContextCore';
 
 export function UiContextProvider({ children }: { children: ReactNode }) {
@@ -18,6 +19,7 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
   const [showHistory, setShowHistory] = React.useState(false);
   const [activePlanCategory, setActivePlanCategory] = React.useState<string | null>(null);
   const [selectingCategoryId, setSelectingCategoryId] = React.useState<string | null>(null);
+  const [bookFinishedPrompt, setBookFinishedPrompt] = React.useState<BookFinishedPromptState | null>(null);
   const [readerCategoryId, setReaderCategoryId] = React.useState<string | null>(null);
   const [activeDevotion, setActiveDevotion] = React.useState<{ name: string, url: string } | null>(null);
   const [activeInternalDevotional, setActiveInternalDevotional] = React.useState<{ id: string, slug: string, name: string } | null>(null);
@@ -53,6 +55,7 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
     showHistory, setShowHistory,
     activePlanCategory, setActivePlanCategory,
     selectingCategoryId, setSelectingCategoryId,
+    bookFinishedPrompt, setBookFinishedPrompt,
     readerCategoryId, setReaderCategoryId,
     activeDevotion, setActiveDevotion,
     activeInternalDevotional, setActiveInternalDevotional,
@@ -67,6 +70,7 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
     showSyncCheck, setShowSyncCheck
   }), [
     showSettings, showHistory, activePlanCategory, selectingCategoryId,
+    bookFinishedPrompt,
     readerCategoryId,
     activeDevotion, activeInternalDevotional, showProverbModal, showSprintModal, isStartMenuOpen, confirmDialog,
     toast, journalDraft, syncStatus, lastSyncTime, showSyncCheck

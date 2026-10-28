@@ -71,22 +71,34 @@ export const deleteCompletedBook = track('deleteCompletedBook', async (uid: stri
  * Writing the whole `hours` map instead would let the second writer clobber the
  * first device's tick.
  */
-export const writeSprintHour = track('writeSprintHour', async (
+export const writeSprintHour = async (
   uid: string,
   date: string,
   hour: number,
-  slot: SprintHour
+  slot: SprintHour,
+  opts?: { background?: boolean }
 ) => {
-  await setDoc(
-    doc(getSprintsCollection(uid), date),
-    {
-      date,
-      hours: { [String(hour)]: { done: slot.done, reference: slot.reference ?? '' } },
-      updatedAt: serverTimestamp(),
-    },
-    { merge: true }
-  );
-});
+  const isBg = !!opts?.background;
+  if (!isBg) syncTracker.begin();
+  try {
+    await setDoc(
+      doc(getSprintsCollection(uid), date),
+      {
+        date,
+        hours: { [String(hour)]: { done: slot.done, reference: slot.reference ?? '' } },
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+    if (!isBg) syncTracker.end(true);
+  } catch (e) {
+    recordSyncError('writeSprintHour', e);
+    console.error('[Sync] writeSprintHour failed:', e);
+    logDiagnostic('sync', 'error', 'writeSprintHour failed', e);
+    if (!isBg) syncTracker.end(false, (e as { code?: string })?.code);
+    throw e;
+  }
+};
 
 export const deleteSprint = track('deleteSprint', async (uid: string, date: string) => {
   await deleteDoc(doc(getSprintsCollection(uid), date));
@@ -100,53 +112,79 @@ export const deleteJournal = track('deleteJournal', async (uid: string, id: stri
   await deleteDoc(doc(getJournalsCollection(uid), id));
 });
 
-export const writeActionBatch = track('writeActionBatch', async (uid: string, actions: {
+export const writeActionBatch = async (uid: string, actions: {
   progress?: Progress;
   history?: HistoryEntry | HistoryEntry[];
+  deletedHistoryIds?: string[];
   completedBooks?: { categoryId: string; bookName: string }[];
   deletedBooks?: { categoryId: string; bookName: string }[];
   forceProgressOverwrite?: boolean;
+  background?: boolean;
 }) => {
-  const batch = writeBatch(db);
+  const isBg = !!actions.background;
+  if (!isBg) syncTracker.begin();
+  try {
+    const batch = writeBatch(db);
 
-  if (actions.history) {
-    const entries = Array.isArray(actions.history) ? actions.history : [actions.history];
-    entries.forEach(h => batch.set(doc(getHistoryCollection(uid), h.id), h));
-  }
+    if (actions.history) {
+      const entries = Array.isArray(actions.history) ? actions.history : [actions.history];
+      entries.forEach(h => batch.set(doc(getHistoryCollection(uid), h.id), h));
+    }
 
-  if (actions.progress) {
-    const ref = doc(getProgressCollection(uid), actions.progress.categoryId);
-    // serverMillis is derived from this doc's own updatedAt on read; persisting
-    // a device's copy would let a stale value survive a pending write.
-    const { serverMillis: _ignored, ...progressDoc } = actions.progress;
-    void _ignored;
-    batch.set(ref, {
-      ...progressDoc,
-      updatedAtMillis: actions.progress.updatedAtMillis || Date.now(),
-      updatedAt: serverTimestamp()
-    });
-  }
-
-  if (actions.completedBooks) {
-    actions.completedBooks.forEach(b => {
-      const docId = bookKeyToDocId(`${b.categoryId}:${b.bookName}`);
-      batch.set(doc(getCompletedBooksCollection(uid), docId), {
-        categoryId: b.categoryId,
-        bookName: b.bookName,
-        completedAt: new Date().toISOString()
+    if (actions.deletedHistoryIds) {
+      actions.deletedHistoryIds.forEach(id => {
+        batch.delete(doc(getHistoryCollection(uid), id));
       });
-    });
-  }
+    }
 
-  if (actions.deletedBooks) {
-    actions.deletedBooks.forEach(b => {
-      const docId = bookKeyToDocId(`${b.categoryId}:${b.bookName}`);
-      batch.delete(doc(getCompletedBooksCollection(uid), docId));
-    });
-  }
+    if (actions.progress) {
+      const ref = doc(getProgressCollection(uid), actions.progress.categoryId);
+      // serverMillis is derived from this doc's own updatedAt on read; persisting
+      // a device's copy would let a stale value survive a pending write.
+      // Strip undefined fields so Firestore batch.set never rejects the document.
+      const { serverMillis: _ignored, ...rawProgressDoc } = actions.progress;
+      void _ignored;
+      const cleanProgressDoc: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(rawProgressDoc)) {
+        if (v !== undefined) {
+          cleanProgressDoc[k] = v;
+        }
+      }
+      batch.set(ref, {
+        ...cleanProgressDoc,
+        updatedAtMillis: actions.progress.updatedAtMillis || Date.now(),
+        updatedAt: serverTimestamp()
+      });
+    }
 
-  await batch.commit();
-});
+    if (actions.completedBooks) {
+      actions.completedBooks.forEach(b => {
+        const docId = bookKeyToDocId(`${b.categoryId}:${b.bookName}`);
+        batch.set(doc(getCompletedBooksCollection(uid), docId), {
+          categoryId: b.categoryId,
+          bookName: b.bookName,
+          completedAt: new Date().toISOString()
+        });
+      });
+    }
+
+    if (actions.deletedBooks) {
+      actions.deletedBooks.forEach(b => {
+        const docId = bookKeyToDocId(`${b.categoryId}:${b.bookName}`);
+        batch.delete(doc(getCompletedBooksCollection(uid), docId));
+      });
+    }
+
+    await batch.commit();
+    if (!isBg) syncTracker.end(true);
+  } catch (e) {
+    recordSyncError('writeActionBatch', e);
+    console.error('[Sync] writeActionBatch failed:', e);
+    logDiagnostic('sync', 'error', 'writeActionBatch failed', e);
+    if (!isBg) syncTracker.end(false, (e as { code?: string })?.code);
+    throw e;
+  }
+};
 
 /**
  * Write the user's settings document.

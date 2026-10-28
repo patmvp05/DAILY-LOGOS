@@ -6,17 +6,17 @@
 import React, { useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { appReducer } from './appReducer';
-import { saveState, loadState, loadStateAsync, saveStateSync } from '../lib/storage';
+import { saveState, loadState, loadStateAsync, saveStateSync, hasStoredStateSync } from '../lib/storage';
 import { prefetchProverbs } from '../lib/proverbCache';
 import { prefetchBibleChapters } from '../lib/prefetchBible';
 import { prefetchDevotionals } from '../lib/devotionalContent';
 import { AppContext } from './AppContextCore';
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
-  // Initialize state synchronously with loadState() to provide robust defaults prior to IndexedDB/Cloud hydration
-  const [state, dispatch] = React.useReducer(appReducer, loadState());
-  const [debouncedState, setDebouncedState] = React.useState(state);
-  const [hasHydrated, setHasHydrated] = React.useState(false);
+  // Initialize state synchronously with loadState() so the very first paint
+  // already has the full persisted state from localStorage.
+  const [state, dispatch] = React.useReducer(appReducer, undefined, loadState);
+  const [hasHydrated, setHasHydrated] = React.useState(() => hasStoredStateSync());
 
   const hydrated = React.useRef(false);
   
@@ -26,21 +26,13 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     stateRef.current = state;
   }, [state]);
 
-  // Buffer state changes for storage
-  useEffect(() => {
-    if (!hasHydrated) return; // Prevent initial 'Today' state from overwriting saved state before it loads
-    const handler = setTimeout(() => {
-      setDebouncedState(state);
-    }, 500);
-    return () => clearTimeout(handler);
-  }, [state, hasHydrated]);
-
-  // Sync state to local storage
+  // Persist state to localStorage immediately when hydrated so a reload or
+  // next launch never sees a stale pre-hydration snapshot on first paint.
   useEffect(() => {
     if (hasHydrated) {
-      saveState(debouncedState);
+      saveState(state);
     }
-  }, [debouncedState, hasHydrated]);
+  }, [state, hasHydrated]);
 
   // Flush state synchronously on visibility hidden, pagehide, and beforeunload
   // (Prevents silent iOS/Safari state freezes and loss of progress)
@@ -108,10 +100,14 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     };
   }, [hasHydrated, state.progress, bibleVersion]);
 
-  // Async hydration from IndexedDB
+  // Async fallback hydration from IndexedDB (only needed when localStorage was empty)
   useEffect(() => {
     if (hydrated.current) return;
     hydrated.current = true;
+
+    if (hasStoredStateSync()) {
+      return;
+    }
 
     async function hydrate() {
       try {

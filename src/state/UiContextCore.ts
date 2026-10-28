@@ -32,6 +32,17 @@ export interface ConfirmDialogState {
   confirmHref?: string;
 }
 
+export interface BookFinishedPromptState {
+  categoryId: string;
+  finishedBookIndex: number;
+  finishedBookName: string;
+  lastChapter: number;
+  recommendedBookIndex: number | null;
+  recommendedBookName: string | null;
+  loggedHistoryId?: string;
+  previousPartialChapters?: Record<string, number>;
+}
+
 export interface UiContextType {
   showSettings: boolean;
   setShowSettings: (val: boolean) => void;
@@ -41,6 +52,8 @@ export interface UiContextType {
   setActivePlanCategory: (catId: string | null) => void;
   selectingCategoryId: string | null;
   setSelectingCategoryId: (catId: string | null) => void;
+  bookFinishedPrompt: BookFinishedPromptState | null;
+  setBookFinishedPrompt: (prompt: BookFinishedPromptState | null) => void;
   // Category whose current chapter is open in the in-app reader (null = closed).
   readerCategoryId: string | null;
   setReaderCategoryId: (catId: string | null) => void;

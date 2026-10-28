@@ -44,6 +44,13 @@ export async function prefetchBibleChapters(
       // Guard against an out-of-range stored chapter.
       if (chapter < 1 || chapter > book.chapters) break;
 
+      // Skip books read outside the category plan (e.g. Daily Proverb).
+      if (book.dailyOnly) {
+        bookIdx++;
+        chapter = 1;
+        continue;
+      }
+
       try {
         await getChapterText(book.name, chapter, version);
       } catch {
@@ -56,6 +63,9 @@ export async function prefetchBibleChapters(
         chapter++;
       } else if (bookIdx < category.books.length - 1) {
         bookIdx++;
+        while (bookIdx < category.books.length && category.books[bookIdx]?.dailyOnly) {
+          bookIdx++;
+        }
         chapter = 1;
       } else {
         break; // end of the category — nothing more to warm

@@ -8,6 +8,7 @@ import { twMerge } from 'tailwind-merge';
 import { format, parseISO, subDays } from 'date-fns';
 import { CATEGORIES } from '../constants';
 import { Progress } from '../types';
+import { isCategoryComplete, normalizeProgressPosition } from './bible';
 
 /**
  * Combines Tailwind classes with clsx and twMerge.
@@ -27,14 +28,22 @@ export function cn(...inputs: ClassValue[]) {
  * them. lastReadAt remains the fallback for guests and legacy docs, where every
  * entry comes from a single device and is therefore self-consistent.
  */
-export function pickLastReadProgress(progress: Progress[]): Progress | undefined {
+export function pickLastReadProgress(
+  progress: Progress[],
+  completedBooks?: Set<string>
+): Progress | undefined {
   const rank = (p: Progress) =>
     typeof p.serverMillis === 'number'
       ? p.serverMillis
       : (p.lastReadAt ? new Date(p.lastReadAt).getTime() : 0);
 
   return [...progress]
-    .filter((p) => p.lastReadAt && !isNaN(new Date(p.lastReadAt).getTime()))
+    .filter((p) => {
+      if (!p.lastReadAt || isNaN(new Date(p.lastReadAt).getTime())) return false;
+      if (completedBooks && isCategoryComplete(p.categoryId, completedBooks)) return false;
+      return true;
+    })
+    .map((p) => normalizeProgressPosition(p))
     .sort((a, b) => rank(b) - rank(a))[0];
 }
 
@@ -56,6 +65,8 @@ export function formatLastRead(lastReadAt: string, todayStr: string): string {
 
 /**
  * Calculates both per-category and overall reading progress in a single pass.
+ * Skips `dailyOnly` books (Proverbs) and includes saved `partialChapters` for
+ * books the user switched away from partway through.
  */
 export function computeProgressStats(progress: Progress[], completedBooks: Set<string>) {
   const catProgress: Record<string, { pct: number; chaptersRead: number; totalChapters: number }> = {};
@@ -63,43 +74,50 @@ export function computeProgressStats(progress: Progress[], completedBooks: Set<s
   let overallTotalChapters = 0;
 
   CATEGORIES.forEach((cat) => {
-    const prog = progress.find((p) => p.categoryId === cat.id);
-    const totalChapters = cat.books.reduce((sum, b) => sum + b.chapters, 0);
+    const rawProg = progress.find((p) => p.categoryId === cat.id);
+    const totalChapters = cat.books.reduce((sum, b) => sum + (b.dailyOnly ? 0 : b.chapters), 0);
     overallTotalChapters += totalChapters;
 
-    if (!prog) {
+    if (!rawProg) {
       catProgress[cat.id] = { pct: 0, chaptersRead: 0, totalChapters };
       return;
     }
 
+    const prog = normalizeProgressPosition(rawProg);
     let chaptersRead = 0;
     for (let i = 0; i < cat.books.length; i++) {
       const book = cat.books[i];
+      if (book.dailyOnly) continue;
+
       const isCompleted = completedBooks.has(`${cat.id}:${book.name}`);
 
-      // Count a book as read only if it's actually marked complete (sequential
-      // reading records every finished book in completedBooks), plus the
-      // partial chapters of the book currently in progress. We deliberately do
-      // NOT count every book before the progress pointer: skipping ahead to a
-      // later book must not silently mark the skipped-over books as read.
+      // Count a book as read if it's marked complete, plus partial chapters of
+      // the active book OR any unread book saved in prog.partialChapters.
       if (isCompleted) {
         chaptersRead += book.chapters;
       } else if (i === prog.bookIndex) {
-        chaptersRead += Math.max(0, prog.chapter - 1);
+        chaptersRead += Math.max(0, Math.min(book.chapters, prog.chapter - 1));
+      } else {
+        const savedChapter = prog.partialChapters?.[book.name];
+        if (typeof savedChapter === 'number' && Number.isFinite(savedChapter) && savedChapter > 1) {
+          chaptersRead += Math.max(0, Math.min(book.chapters, Math.floor(savedChapter) - 1));
+        }
       }
     }
 
     overallTotalRead += Math.min(chaptersRead, totalChapters);
     const pct = totalChapters > 0 ? Math.min((chaptersRead / totalChapters) * 100, 100) : 0;
-    catProgress[cat.id] = { 
-      pct: Math.round(pct * 10) / 10, 
-      chaptersRead: Math.min(chaptersRead, totalChapters), 
-      totalChapters 
+    catProgress[cat.id] = {
+      pct: Math.round(pct * 10) / 10,
+      chaptersRead: Math.min(chaptersRead, totalChapters),
+      totalChapters,
     };
   });
 
-  const overallPct = overallTotalChapters > 0 ? (overallTotalRead / overallTotalChapters) * 100 : 0;
-  const overallProgress = Math.min(100, Math.round(overallPct * 10) / 10);
+  const overallProgress =
+    overallTotalChapters > 0
+      ? Math.round((overallTotalRead / overallTotalChapters) * 1000) / 10
+      : 0;
 
   return {
     catProgress,

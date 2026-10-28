@@ -18,12 +18,14 @@ import {
   Minus,
   Plus,
   BookOpen,
-  Flame
+  Flame,
+  Check
 } from 'lucide-react';
 import { format, parseISO, subDays } from 'date-fns';
 import { CATEGORIES, CATEGORIES_BY_ID, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
 import { Progress } from '../types';
 import { cn, computeProgressStats, formatLastRead } from '../lib/utils';
+import { isCategoryComplete } from '../lib/bible';
 
 import { getChapterInfo, getCachedReadTime } from '../lib/bibleCache';
 
@@ -78,7 +80,7 @@ function DashboardComponent({
     const todayEntries = state.history.filter(
       h => h.localDate === todayStr && h.categoryId !== 'devotional'
     );
-    const minutes = todayEntries.reduce((sum, h) => {
+    const rawMinutes = todayEntries.reduce((sum, h) => {
       if (h.readTime && h.readTime > 0) {
         return sum + h.readTime;
       }
@@ -89,7 +91,7 @@ function DashboardComponent({
       const perCh = BOOK_READ_MINUTES[h.bookName] ?? DEFAULT_BOOK_MINUTES;
       return sum + perCh;
     }, 0);
-    return { minutes, chapterCount: todayEntries.length, entries: todayEntries };
+    return { minutes: Math.round(rawMinutes), chapterCount: todayEntries.length, entries: todayEntries };
   }, [state.history, bibleVersion, todayStr]);
 
   // Hours checked off in today's 24-hour sprint (its own discipline — never
@@ -100,11 +102,26 @@ function DashboardComponent({
     return Object.values(sprint.hours).filter(h => h.done).length;
   }, [state.scriptureSprints, todayStr]);
 
-  // Reading-plan parts touched today (same "done" signal the card order uses),
-  // for the phone summary strip. Display only.
+  // Active reading-plan parts (parts that still have unread books left).
+  const activeCategories = useMemo(
+    () => CATEGORIES.filter(cat => !isCategoryComplete(cat.id, state.completedBooks)),
+    [state.completedBooks]
+  );
+
+  // Reading-plan parts with reading left that were touched today, for the phone
+  // summary strip ("2 of 6 parts today" when one part is 100% finished).
   const partsDoneToday = useMemo(
-    () => new Set(state.progress.filter(p => p.localDate === todayStr).map(p => p.categoryId)),
-    [state.progress, todayStr]
+    () =>
+      new Set(
+        state.progress
+          .filter(
+            p =>
+              p.localDate === todayStr &&
+              !isCategoryComplete(p.categoryId, state.completedBooks)
+          )
+          .map(p => p.categoryId)
+      ),
+    [state.progress, state.completedBooks, todayStr]
   );
 
   // Today's proverb counts as read once logProverbRead has logged it — the same
@@ -137,22 +154,26 @@ function DashboardComponent({
     return dates;
   }, [state.history]);
 
-  // Reading-plan card order: parts not yet read today float to the top (in plan
-  // order); parts already read today sink to the bottom. The "done" flag is based on
-  // today's local date, so the order naturally resets to Part 01 on top each new day.
-  // We keep each card's original index so the "PART 0X" label stays tied to the part.
+  // Reading-plan card order: active parts not yet read today float to the top
+  // (in plan order); active parts already read today come next; 100% completed
+  // parts sink below all active parts.
   const orderedCategories = useMemo(() => {
     const doneToday = (catId: string) =>
       state.progress.find(p => p.categoryId === catId)?.localDate === todayStr;
     return CATEGORIES
-      .map((cat, idx) => ({ cat, idx }))
+      .map((cat, idx) => ({
+        cat,
+        idx,
+        isCatComplete: isCategoryComplete(cat.id, state.completedBooks),
+      }))
       .sort((a, b) => {
+        if (a.isCatComplete !== b.isCatComplete) return a.isCatComplete ? 1 : -1;
         const aDone = doneToday(a.cat.id);
         const bDone = doneToday(b.cat.id);
         if (aDone !== bDone) return aDone ? 1 : -1;
         return a.idx - b.idx;
       });
-  }, [state.progress, todayStr]);
+  }, [state.progress, state.completedBooks, todayStr]);
 
   useEffect(() => {
     let active = true;
@@ -218,7 +239,7 @@ function DashboardComponent({
                 {partsDoneToday.size}
               </span>
               <span className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">
-                of {CATEGORIES.length} parts today
+                of {activeCategories.length} parts today
               </span>
             </div>
           </div>
@@ -230,8 +251,12 @@ function DashboardComponent({
             <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--text-secondary)] mt-2">Day streak</p>
           </div>
         </div>
-        <div className="grid grid-cols-7 gap-1.5 mt-5" aria-hidden="true">
-          {CATEGORIES.map(cat => (
+        <div
+          className="grid gap-1.5 mt-5"
+          style={{ gridTemplateColumns: `repeat(${Math.max(1, activeCategories.length)}, minmax(0, 1fr))` }}
+          aria-hidden="true"
+        >
+          {activeCategories.map(cat => (
             <div
               key={cat.id}
               className={cn("h-1.5 rounded-full", partsDoneToday.has(cat.id) ? "bg-brand" : "bg-[var(--bg-tertiary)]")}
@@ -491,14 +516,13 @@ function DashboardComponent({
             </div>
           )}
 
-          {orderedCategories.map(({ cat, idx }) => {
+          {orderedCategories.map(({ cat, idx, isCatComplete }) => {
             const prog = state.progress.find(p => p.categoryId === cat.id);
             if (!prog) return null;
 
             const book = cat.books[prog.bookIndex];
-            const todayStr = format(new Date(), 'yyyy-MM-dd');
             const isDone = prog.localDate === todayStr;
-            const bookIsCompleted = state.completedBooks.has(`${cat.id}:${book.name}`);
+            const bookIsCompleted = isCatComplete || state.completedBooks.has(`${cat.id}:${book.name}`);
             const infoKey = `${bibleVersion}:${cat.id}:${prog.bookIndex}:${prog.chapter}`;
             const info = chapterInfos[infoKey];
 
@@ -511,6 +535,7 @@ function DashboardComponent({
                 book={book}
                 isDone={isDone as boolean}
                 bookIsCompleted={bookIsCompleted}
+                categoryIsCompleted={isCatComplete}
                 info={info}
                 theme={state.settings.theme}
                 progressStats={catProgress[cat.id]}
@@ -533,7 +558,7 @@ function DashboardComponent({
                 <div className="text-right">
                   <span className="text-sm font-bold text-[var(--text-primary)] tabular-nums block leading-none">{overallProgress}%</span>
                   <span className="text-[10px] font-medium text-[var(--text-secondary)] mt-1 tracking-tight tabular-nums opacity-80 block">
-                    {totalRead} / {totalChaptersCount} Chapters
+                    {totalRead.toLocaleString()} / {totalChaptersCount.toLocaleString()} Chapters
                   </span>
                 </div>
               </div>
@@ -628,6 +653,7 @@ interface CategoryCardProps {
   book: typeof CATEGORIES[number]['books'][number];
   isDone: boolean;
   bookIsCompleted: boolean;
+  categoryIsCompleted: boolean;
   info: { firstVerse: string, readTime: number } | undefined;
   theme: string;
   progressStats: { pct: number; chaptersRead: number; totalChapters: number } | undefined;
@@ -643,6 +669,7 @@ const CategoryCard = memo(({
   book,
   isDone,
   bookIsCompleted,
+  categoryIsCompleted,
   info,
   progressStats,
   advanceChapter,
@@ -651,6 +678,7 @@ const CategoryCard = memo(({
 }: CategoryCardProps) => {
   return (
     <div
+      data-testid={`category-card-${cat.id}`}
       className={cn(
         "relative p-8 h-60 flex flex-col justify-between group transition-all duration-300 overflow-hidden",
         bookIsCompleted 
@@ -671,87 +699,117 @@ const CategoryCard = memo(({
             "text-[11px] uppercase tracking-widest font-bold block leading-none",
             bookIsCompleted ? "text-white/80" : "text-[var(--text-secondary)]"
           )}>
-            PART 0{idx + 1} / {cat.name} {info && `· ~${info.readTime} MIN`}
+            PART 0{idx + 1} / {cat.name} {!categoryIsCompleted && info && `· ~${info.readTime} MIN`}
           </span>
 
-          {!isDone && !bookIsCompleted && (
+          {!isDone && !bookIsCompleted && !categoryIsCompleted && (
             <span className="text-[9px] font-bold uppercase text-brand animate-pulse tracking-widest block leading-none mt-1">
               Next to Read
             </span>
           )}
 
-          <div className="flex items-center gap-2 mt-2">
-            <button
-              onClick={() => onOpenReader(cat.id)}
-              title="Read this chapter"
-              className="group/btn flex items-center gap-2 text-left min-w-0 flex-1"
-            >
-              <h3 className={cn(
-                "text-3xl font-bold tracking-tighter transition-transform uppercase group-hover/btn:scale-[1.01] truncate",
-                bookIsCompleted ? "text-white" : isDone ? "text-zinc-400 dark:text-zinc-600" : "text-[var(--text-primary)]"
-              )}>
-                {book.name} {prog.chapter}
-              </h3>
-              <BookOpen size={18} className={cn("shrink-0 transition-all opacity-0 group-hover/btn:opacity-100", bookIsCompleted ? "text-white" : "text-brand")} />
-            </button>
-            <button
-              onClick={() => setSelectingCategoryId(cat.id)}
-              title="Switch book"
-              className={cn(
-                "shrink-0 p-1.5 rounded-full transition-colors",
-                bookIsCompleted ? "text-white/80 hover:bg-white/10" : "text-brand hover:bg-brand/10"
-              )}
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-
-          {info ? (
-            <button
-              onClick={() => onOpenReader(cat.id)}
-              title="Read this chapter"
-              className={cn(
-                "text-xs font-medium italic line-clamp-1 opacity-70 mt-1 text-left hover:opacity-100 transition-opacity",
-                bookIsCompleted ? "text-white" : "text-[var(--text-secondary)]"
-              )}
-            >
-              {info.firstVerse}
-            </button>
+          {categoryIsCompleted ? (
+            <>
+              <div className="flex items-center justify-between gap-2 mt-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/20 text-white shrink-0">
+                    <Check size={16} strokeWidth={3} />
+                  </span>
+                  <h3 className="text-2xl sm:text-3xl font-bold tracking-tighter uppercase text-white truncate">
+                    100% Complete
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setSelectingCategoryId(cat.id)}
+                  title="View books in this part"
+                  className="shrink-0 p-1.5 rounded-full transition-colors text-white/80 hover:bg-white/10"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+              <p className="text-xs font-medium text-white/85 mt-1">
+                All {progressStats?.totalChapters ?? 0} chapters finished
+              </p>
+            </>
           ) : (
-            <div className="h-4 w-32 bg-[var(--bg-tertiary)] mt-1 rounded animate-pulse" />
+            <>
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  onClick={() => onOpenReader(cat.id)}
+                  title="Read this chapter"
+                  className="group/btn flex items-center gap-2 text-left min-w-0 flex-1"
+                >
+                  <h3 className={cn(
+                    "text-3xl font-bold tracking-tighter transition-transform uppercase group-hover/btn:scale-[1.01] truncate",
+                    bookIsCompleted ? "text-white" : isDone ? "text-zinc-400 dark:text-zinc-600" : "text-[var(--text-primary)]"
+                  )}>
+                    {book.name} {prog.chapter}
+                  </h3>
+                  <BookOpen size={18} className={cn("shrink-0 transition-all opacity-0 group-hover/btn:opacity-100", bookIsCompleted ? "text-white" : "text-brand")} />
+                </button>
+                <button
+                  onClick={() => setSelectingCategoryId(cat.id)}
+                  title="Switch book"
+                  className={cn(
+                    "shrink-0 p-1.5 rounded-full transition-colors",
+                    bookIsCompleted ? "text-white/80 hover:bg-white/10" : "text-brand hover:bg-brand/10"
+                  )}
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+
+              {info ? (
+                <button
+                  onClick={() => onOpenReader(cat.id)}
+                  title="Read this chapter"
+                  className={cn(
+                    "text-xs font-medium italic line-clamp-1 opacity-70 mt-1 text-left hover:opacity-100 transition-opacity",
+                    bookIsCompleted ? "text-white" : "text-[var(--text-secondary)]"
+                  )}
+                >
+                  {info.firstVerse}
+                </button>
+              ) : (
+                <div className="h-4 w-32 bg-[var(--bg-tertiary)] mt-1 rounded animate-pulse" />
+              )}
+            </>
           )}
         </div>
 
         <div className="space-y-4">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={(e) => { e.stopPropagation(); advanceChapter(cat.id, -1); }}
-                className={cn(
-                  "w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-200 active:scale-95",
-                  bookIsCompleted 
-                    ? "border-white/20 hover:bg-white hover:text-brand" 
-                    : "border-[var(--border-color)] hover:bg-[var(--text-primary)] hover:text-white dark:hover:bg-white dark:hover:text-black hover:border-transparent"
-                )}
-                title="Go back one chapter"
-              >
-                <Minus size={16} />
-              </button>
-              <div className="relative group/plus">
+            {!categoryIsCompleted && (
+              <div className="flex items-center gap-3">
                 <button 
-                  onClick={(e) => { e.stopPropagation(); advanceChapter(cat.id, 1); }}
+                  onClick={(e) => { e.stopPropagation(); advanceChapter(cat.id, -1); }}
+                  disabled={prog.chapter <= 1}
                   className={cn(
-                    "w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-200 shadow-sm active:scale-95",
+                    "w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:pointer-events-none",
                     bookIsCompleted 
-                      ? "border-white text-white hover:bg-white hover:text-brand shadow-[0_0_12px_rgba(255,255,255,0.2)]" 
-                      : "border-brand text-brand hover:bg-brand hover:text-white dark:hover:bg-brand"
+                      ? "border-white/20 hover:bg-white hover:text-brand" 
+                      : "border-[var(--border-color)] hover:bg-[var(--text-primary)] hover:text-white dark:hover:bg-white dark:hover:text-black hover:border-transparent"
                   )}
-                  title="Advance chapter"
+                  title="Go back one chapter"
                 >
-                  <Plus size={24} />
+                  <Minus size={16} />
                 </button>
+                <div className="relative group/plus">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); advanceChapter(cat.id, 1); }}
+                    className={cn(
+                      "w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-200 shadow-sm active:scale-95",
+                      bookIsCompleted 
+                        ? "border-white text-white hover:bg-white hover:text-brand shadow-[0_0_12px_rgba(255,255,255,0.2)]" 
+                        : "border-brand text-brand hover:bg-brand hover:text-white dark:hover:bg-brand"
+                    )}
+                    title="Advance chapter"
+                  >
+                    <Plus size={24} />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {progressStats && (() => {
               const pct = progressStats.pct;
@@ -763,7 +821,7 @@ const CategoryCard = memo(({
                       "text-[10px] font-bold uppercase tracking-widest",
                       bookIsCompleted ? "text-white/90" : "text-[var(--text-secondary)]"
                     )}>
-                      {safePct === 100 ? 'COMPLETE' : `${safePct}%`}
+                      {safePct === 100 ? '100% · COMPLETE' : `${safePct}%`}
                     </span>
                     <span className={cn(
                       "text-[10px] font-bold uppercase tracking-widest hidden xs:inline opacity-60",

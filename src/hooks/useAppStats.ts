@@ -91,8 +91,8 @@ export function useAppStats(state: AppState) {
   [state.progress, state.completedBooks]);
 
   const lastReadProgress = useMemo(
-    () => pickLastReadProgress(state.progress),
-    [state.progress]
+    () => pickLastReadProgress(state.progress, state.completedBooks),
+    [state.progress, state.completedBooks]
   );
 
   return {

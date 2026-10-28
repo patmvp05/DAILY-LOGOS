@@ -53,20 +53,21 @@ jobs:
           fi
 
       - uses: actions/setup-node@v4
-        if: steps.commit.outputs.committed == 'true'
+        if: steps.commit.outputs.committed == 'true' || github.event_name == 'workflow_dispatch'
         with:
           node-version: 22
           cache: npm
 
       - name: Install & build
-        if: steps.commit.outputs.committed == 'true'
+        if: steps.commit.outputs.committed == 'true' || github.event_name == 'workflow_dispatch'
         run: npm ci && npm run build
 
       - name: Deploy to Firebase Hosting
-        if: steps.commit.outputs.committed == 'true'
+        if: steps.commit.outputs.committed == 'true' || github.event_name == 'workflow_dispatch'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live
           projectId: gen-lang-client-0538747272
+          firebaseToolsVersion: '15.34.0'

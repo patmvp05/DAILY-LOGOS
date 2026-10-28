@@ -66,18 +66,21 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
   const onClose = () => setReaderCategoryId(null);
   const dismissOverlay = useOverlayDismiss(onClose);
 
-  // Is there a chapter beyond the current one (within this category's plan)?
-  // calculateNextProgress returns the same position at the terminal chapter.
-  const hasNext = useMemo(() => {
-    if (!readerCategoryId || !progress) return false;
-    const next = calculateNextProgress(readerCategoryId, 1, progress, state.completedBooks).progress;
-    return !(next.bookIndex === progress.bookIndex && next.chapter === progress.chapter);
+  // Can the current chapter still be recorded and advanced?
+  // Even on the final chapter of a category's last unread book, historySteps
+  // has length 1 so tapping the primary button records that chapter, marks the
+  // book complete, and opens the Book Finished sheet.
+  const nextCalc = useMemo(() => {
+    if (!readerCategoryId || !progress) return null;
+    return calculateNextProgress(readerCategoryId, 1, progress, state.completedBooks);
   }, [readerCategoryId, progress, state.completedBooks]);
+  const canAdvance = (nextCalc?.historySteps.length ?? 0) > 0;
+  const hasNextInBook = !!book && !!chapter && chapter < book.chapters;
 
   const onPrimary = () => {
-    if (hasNext) {
-      // Advancing updates global progress (debounced), which re-renders this
-      // modal onto the next chapter and refetches automatically.
+    if (canAdvance) {
+      // Advancing updates global progress (debounced), which either moves to
+      // the next chapter in this book or opens the Book Finished sheet.
       advanceChapter(readerCategoryId!, 1);
     } else {
       onClose();
@@ -283,10 +286,15 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
               onClick={guardedPrimary}
               className="w-full min-h-[52px] font-bold uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-[18px] shadow-sm hover:opacity-90 active:scale-[0.98]"
             >
-              {hasNext ? (
+              {hasNextInBook ? (
                 <>
                   Next Chapter
                   <ArrowRight size={16} />
+                </>
+              ) : canAdvance ? (
+                <>
+                  Finish {book.name}
+                  <Check size={16} />
                 </>
               ) : (
                 <>
