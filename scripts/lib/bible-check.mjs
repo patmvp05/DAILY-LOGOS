@@ -105,7 +105,7 @@ export function tidyVerseText(text) {
     .replace(/([(\[])\s+/g, '$1')
     .replace(/([“‘])\s+/g, '$1')
     .replace(/(?<=[\p{L}\p{N}_.,;:!?)\]—–-])\s+([”’])(?![\p{L}\p{N}_])/gu, '$1')
-    .replace(/(?<=[\p{L}\p{N}_])\s+(’s)\b/gu, '$1');
+    .replace(/(?<=[\p{L}\p{N}_])\s+(['’]s)\b/gu, '$1');
   return t.replace(/\u0000(\d+)\u0000/g, (_, i) => kept[Number(i)]).trim();
 }
 
@@ -113,6 +113,7 @@ export function tidyVerseText(text) {
 export const TEXT_DEFECTS = [
   { name: 'space before punctuation', re: /(?<![.\s])\s[.,;:!?](?!\s?\.)/ },
   { name: 'space after opening quote or bracket', re: /[“‘(\[]\s/ },
+  { name: "space before a possessive 's", re: /[\p{L}\p{N}]\s+['’]s\b/u },
   { name: 'footnote or cross-reference marker', re: /\[\s?[a-z]{1,2}\s?\]|\(\s?[A-Z]{1,2}\s?\)/ },
   { name: 'combined-verse label left in text', re: /^\s*\[\d+\s*[-–]\s*\d+\]/ },
   { name: 'html', re: /<[a-z/][^>]*>|&[a-z]+;/i },

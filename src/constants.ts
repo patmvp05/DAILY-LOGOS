@@ -292,7 +292,7 @@ export const BOOK_READ_MINUTES: Record<string, number> = {
   'Hebrews': 3, 'James': 2, '1 Peter': 3, '2 Peter': 2,
   '1 John': 2, '2 John': 1, '3 John': 1, 'Jude': 3,
   // Prophecy
-  'Isaiah': 3, 'Jeremiah': 4, 'Lamentations': 3, 'Ezekiel': 4, 'Daniel': 4,
+  'Isaiah': 3, 'Jeremiah': 4, 'Lamentations': 3, 'Ezekiel': 3, 'Daniel': 4,
   'Hosea': 2, 'Joel': 3, 'Amos': 2, 'Obadiah': 3, 'Jonah': 1,
   'Micah': 2, 'Nahum': 2, 'Habakkuk': 2, 'Zephaniah': 2,
   'Haggai': 3, 'Zechariah': 2, 'Malachi': 2,

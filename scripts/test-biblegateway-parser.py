@@ -92,6 +92,9 @@ html = page('<span class="text Num-1-20-Num-1-21"><sup class="versenum">20-21 </
             '<tr><td><span class="text Num-1-20-Num-1-21">Reuben</span></td><td><span class="text Num-1-20-Num-1-21">46,500</span></td></tr></table>')
 v = bg.parse_passage(html, 1)
 ok("table rows read as 'cell — cell'", v[0]["text"] == "intro: Tribe — Number Reuben — 46,500", v[0]["text"])
+html = page('<table><tr><td><span class="text 1Chr-25-10"><sup class="versenum">10 </sup>his relatives—</span></td><td><span class="text 1Chr-25-10">12</span></td></tr></table>')
+v = bg.parse_passage(html, 25)
+ok("a cell ending in a dash joins directly (CSB 1 Chr 25)", v[0]["text"] == "his relatives—12", v[0]["text"])
 
 # 6. Completeness rules.
 def entries(*nums):
@@ -118,6 +121,9 @@ v = bg.parse_passage(html, 16)
 ok("words around a footnote stay apart", v[0]["text"] == "on the roof watching them.", v[0]["text"])
 ok("a citation after a quote keeps its space", v[1]["text"] == "under your control.” Psalm 110:1", v[1]["text"])
 ok("small caps before an em dash join", v[2]["text"] == "the Temple of the Lord—wherever.", v[2]["text"])
+html = page('<span class="text Lev-3-16"><sup class="versenum">16 </sup>All fat is the <span class="small-caps">Lord</span>'"'"'s.</span>')
+v = bg.parse_passage(html, 3)
+ok("a straight-apostrophe possessive after small caps joins (ESV)", v[0]["text"] == "All fat is the Lord's.", v[0]["text"])
 
 # 8. Tidy leaves real punctuation alone.
 ok("spaced ellipsis kept", bg.tidy("and so . . . they went") == "and so . . . they went", bg.tidy("and so . . . they went"))

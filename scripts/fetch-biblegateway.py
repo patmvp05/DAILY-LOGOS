@@ -120,7 +120,7 @@ def tidy(text, dashes=True):
     # A closing quote right after a word or punctuation. "’ ”" (two adjacent
     # closing quotes) keeps its space; that one is the printed typography.
     text = re.sub(r"(?<=[\w.,;:!?)\]—–-])\s+([”’])(?!\w)", r"\1", text)
-    text = re.sub(r"(?<=\w)\s+(’s)\b", r"\1", text)
+    text = re.sub("(?<=\\w)\\s+(['\u2019]s)\\b", r"\1", text)   # "the Lord 's" (ESV uses a straight apostrophe)
     if dashes:
         text = re.sub("\\s*\u2014\\s*", "\u2014", text)
     else:
@@ -191,7 +191,13 @@ def parse_passage(html, chapter):
         text = parts[0][0]
         for (prev, prev_row), (cur, cur_row) in zip(parts, parts[1:]):
             same_row = cur_row is not None and cur_row is prev_row
-            text += (" — " if same_row else " ") + cur
+            if not same_row:
+                sep = " "
+            elif text.endswith(("\u2014", "\u2013")) or cur.startswith(("\u2014", "\u2013")):
+                sep = ""           # the cell already ends in a dash: "relatives\u201412" (CSB 1 Chr 25)
+            else:
+                sep = " \u2014 "
+            text += sep + cur
         entry = {"verse": start, "text": tidy(text, dashes=False)}
         if verses[start]["end"] > start:
             entry["verseEnd"] = verses[start]["end"]
