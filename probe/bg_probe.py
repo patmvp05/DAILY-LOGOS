@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 s = requests.Session(); s.headers.update({"User-Agent": UA, "Accept-Language": "en-US,en;q=0.9"})
 os.makedirs("probe/out", exist_ok=True)
-for version, book, ch in [("NCV","Genesis",8),("NCV","Numbers",7),("NCV","1 Chronicles",4),("NCV","Acts",1),("CSB","Genesis",8)]:
+for version, book, ch in [("NCV","1 Corinthians",6),("NCV","1 John",3),("NCV","Joshua",13),("NIV","Amos",1),("NIV","Revelation",13),("NIV","Exodus",8),("NLT","Numbers",1),("NKJV","Psalms",23),("ESV","Psalms",23),("NCV","Psalms",23),("NCV","Luke",9),("NCV","2 Chronicles",35)]:
     r = s.get("https://www.biblegateway.com/passage/", params={"search": f"{book} {ch}", "version": version}, timeout=30)
     soup = BeautifulSoup(r.text, "html.parser")
     div = soup.select_one("div.passage-text")
