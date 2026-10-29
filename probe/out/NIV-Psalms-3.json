@@ -1,0 +1,755 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "Psalm 3 [ a ] A psalm of David. When he fled from his son Ab"
+},
+{
+"tag": "div",
+"class": [
+"version-NIV",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "Psalm 3 [ a ] A psalm of David. When he fled from his son Ab"
+},
+{
+"tag": "div",
+"class": [
+"std-text"
+],
+"id": null,
+"text": "Psalm 3 [ a ] A psalm of David. When he fled from his son Ab"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-1"
+],
+"id": "en-NIV-13959",
+"text": "Psalm 3 [ a ]"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ a ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-1"
+],
+"id": null,
+"text": "A psalm of David. When he fled from his son Absalom. ( A )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( A )"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "1 Lord , how many are my foes! How many rise up against me! "
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "1 Lord , how many are my foes! How many rise up against me! "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-1"
+],
+"id": null,
+"text": "1 Lord , how many are my foes!"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "1"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "How many rise up against me!"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-1"
+],
+"id": null,
+"text": "How many rise up against me!"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-2"
+],
+"id": "en-NIV-13960",
+"text": "2 Many are saying of me,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "“God will not deliver him. ( B ) ” [ b ]"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-2"
+],
+"id": null,
+"text": "“God will not deliver him. ( B ) ” [ b ]"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( B )"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ b ]"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "3 But you, Lord , are a shield ( C ) around me, my glory, th"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "3 But you, Lord , are a shield ( C ) around me, my glory, th"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-3"
+],
+"id": "en-NIV-13961",
+"text": "3 But you, Lord , are a shield ( C ) around me,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( C )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "my glory, the One who lifts my head high. ( D )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-3"
+],
+"id": null,
+"text": "my glory, the One who lifts my head high. ( D )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( D )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-4"
+],
+"id": "en-NIV-13962",
+"text": "4 I call out to the Lord , ( E )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( E )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and he answers me from his holy mountain. ( F )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-4"
+],
+"id": null,
+"text": "and he answers me from his holy mountain. ( F )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( F )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "5 I lie down and sleep; ( G ) I wake again, ( H ) because th"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "5 I lie down and sleep; ( G ) I wake again, ( H ) because th"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-5"
+],
+"id": "en-NIV-13963",
+"text": "5 I lie down and sleep; ( G )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( G )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I wake again, ( H ) because the Lord sustains me."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-5"
+],
+"id": null,
+"text": "I wake again, ( H ) because the Lord sustains me."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( H )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-6"
+],
+"id": "en-NIV-13964",
+"text": "6 I will not fear ( I ) though tens of thousands"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( I )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "assail me on every side. ( J )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-6"
+],
+"id": null,
+"text": "assail me on every side. ( J )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( J )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "7 Arise, ( K ) Lord ! Deliver me, ( L ) my God! Strike ( M )"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "7 Arise, ( K ) Lord ! Deliver me, ( L ) my God! Strike ( M )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-7"
+],
+"id": "en-NIV-13965",
+"text": "7 Arise, ( K ) Lord !"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "7"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( K )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "Deliver me, ( L ) my God!"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-7"
+],
+"id": null,
+"text": "Deliver me, ( L ) my God!"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( L )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-7"
+],
+"id": null,
+"text": "Strike ( M ) all my enemies on the jaw;"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( M )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "break the teeth ( N ) of the wicked."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-7"
+],
+"id": null,
+"text": "break the teeth ( N ) of the wicked."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( N )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "8 From the Lord comes deliverance. ( O ) May your blessing ("
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "8 From the Lord comes deliverance. ( O ) May your blessing ("
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-8"
+],
+"id": "en-NIV-13966",
+"text": "8 From the Lord comes deliverance. ( O )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "8"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( O )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "May your blessing ( P ) be on your people."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-3-8"
+],
+"id": null,
+"text": "May your blessing ( P ) be on your people."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( P )"
+},
+{
+"tag": "div",
+"class": [
+"il-text"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "div",
+"class": [
+"footnotes",
+"resources-section"
+],
+"id": null,
+"text": "Footnotes Psalm 3:1 In Hebrew texts 3:1-8 is numbered 3:2-9."
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 3:1 In Hebrew texts 3:1-8 is numbered 3:2-9. Psalm 3:2"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "In Hebrew texts 3:1-8 is numbered 3:2-9."
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "The Hebrew has Selah (a word of uncertain meaning) here and "
+},
+{
+"tag": "div",
+"class": [
+"crossrefs",
+"resources-section"
+],
+"id": null,
+"text": "Cross references Psalm 3:1 : 2Sa 15:14 Psalm 3:2 : Ps 22:8; "
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 3:1 : 2Sa 15:14 Psalm 3:2 : Ps 22:8; 71:11; Isa 36:15;"
+}
+]
+}

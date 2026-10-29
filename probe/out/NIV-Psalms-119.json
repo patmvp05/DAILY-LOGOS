@@ -1,0 +1,10851 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "Psalm 119 [ a ] א Aleph 1 Blessed are those whose ways are b"
+},
+{
+"tag": "div",
+"class": [
+"version-NIV",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "Psalm 119 [ a ] א Aleph 1 Blessed are those whose ways are b"
+},
+{
+"tag": "div",
+"class": [
+"std-text"
+],
+"id": null,
+"text": "Psalm 119 [ a ] א Aleph 1 Blessed are those whose ways are b"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-1"
+],
+"id": "en-NIV-15900",
+"text": "Psalm 119 [ a ]"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ a ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-1"
+],
+"id": null,
+"text": "א Aleph"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "1 Blessed are those whose ways are blameless, ( A ) who walk"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "1 Blessed are those whose ways are blameless, ( A ) who walk"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-1"
+],
+"id": null,
+"text": "1 Blessed are those whose ways are blameless, ( A )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "1"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( A )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "who walk ( B ) according to the law of the Lord . ( C )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-1"
+],
+"id": null,
+"text": "who walk ( B ) according to the law of the Lord . ( C )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( B )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( C )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-2"
+],
+"id": "en-NIV-15901",
+"text": "2 Blessed ( D ) are those who keep his statutes ( E )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( D )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( E )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and seek him ( F ) with all their heart— ( G )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-2"
+],
+"id": null,
+"text": "and seek him ( F ) with all their heart— ( G )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( F )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( G )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-3"
+],
+"id": "en-NIV-15902",
+"text": "3 they do no wrong ( H )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( H )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but follow his ways. ( I )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-3"
+],
+"id": null,
+"text": "but follow his ways. ( I )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( I )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-4"
+],
+"id": "en-NIV-15903",
+"text": "4 You have laid down precepts ( J )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( J )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that are to be fully obeyed. ( K )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-4"
+],
+"id": null,
+"text": "that are to be fully obeyed. ( K )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( K )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-5"
+],
+"id": "en-NIV-15904",
+"text": "5 Oh, that my ways were steadfast"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "in obeying your decrees! ( L )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-5"
+],
+"id": null,
+"text": "in obeying your decrees! ( L )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( L )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-6"
+],
+"id": "en-NIV-15905",
+"text": "6 Then I would not be put to shame ( M )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( M )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "when I consider all your commands. ( N )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-6"
+],
+"id": null,
+"text": "when I consider all your commands. ( N )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( N )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-7"
+],
+"id": "en-NIV-15906",
+"text": "7 I will praise you with an upright heart"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "7"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "as I learn your righteous laws. ( O )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-7"
+],
+"id": null,
+"text": "as I learn your righteous laws. ( O )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( O )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-8"
+],
+"id": "en-NIV-15907",
+"text": "8 I will obey your decrees;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "8"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "do not utterly forsake me. ( P )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-8"
+],
+"id": null,
+"text": "do not utterly forsake me. ( P )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( P )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-9"
+],
+"id": "en-NIV-15908",
+"text": "ב Beth"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "9 How can a young person stay on the path of purity? ( Q ) B"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "9 How can a young person stay on the path of purity? ( Q ) B"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-9"
+],
+"id": null,
+"text": "9 How can a young person stay on the path of purity? ( Q )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "9"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Q )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "By living according to your word. ( R )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-9"
+],
+"id": null,
+"text": "By living according to your word. ( R )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( R )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-10"
+],
+"id": "en-NIV-15909",
+"text": "10 I seek you with all my heart; ( S )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "10"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( S )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "do not let me stray from your commands. ( T )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-10"
+],
+"id": null,
+"text": "do not let me stray from your commands. ( T )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( T )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-11"
+],
+"id": "en-NIV-15910",
+"text": "11 I have hidden your word in my heart ( U )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "11"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( U )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that I might not sin ( V ) against you."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-11"
+],
+"id": null,
+"text": "that I might not sin ( V ) against you."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( V )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-12"
+],
+"id": "en-NIV-15911",
+"text": "12 Praise be ( W ) to you, Lord ;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "12"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( W )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "teach me ( X ) your decrees. ( Y )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-12"
+],
+"id": null,
+"text": "teach me ( X ) your decrees. ( Y )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( X )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Y )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-13"
+],
+"id": "en-NIV-15912",
+"text": "13 With my lips I recount"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "13"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "all the laws that come from your mouth. ( Z )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-13"
+],
+"id": null,
+"text": "all the laws that come from your mouth. ( Z )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Z )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-14"
+],
+"id": "en-NIV-15913",
+"text": "14 I rejoice in following your statutes ( AA )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "14"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AA )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "as one rejoices in great riches."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-14"
+],
+"id": null,
+"text": "as one rejoices in great riches."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-15"
+],
+"id": "en-NIV-15914",
+"text": "15 I meditate on your precepts ( AB )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "15"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AB )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and consider your ways."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-15"
+],
+"id": null,
+"text": "and consider your ways."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-16"
+],
+"id": "en-NIV-15915",
+"text": "16 I delight ( AC ) in your decrees;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "16"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AC )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I will not neglect your word."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-16"
+],
+"id": null,
+"text": "I will not neglect your word."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-17"
+],
+"id": "en-NIV-15916",
+"text": "ג Gimel"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "17 Be good to your servant ( AD ) while I live, that I may o"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "17 Be good to your servant ( AD ) while I live, that I may o"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-17"
+],
+"id": null,
+"text": "17 Be good to your servant ( AD ) while I live,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "17"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AD )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that I may obey your word. ( AE )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-17"
+],
+"id": null,
+"text": "that I may obey your word. ( AE )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AE )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-18"
+],
+"id": "en-NIV-15917",
+"text": "18 Open my eyes that I may see"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "18"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "wonderful things in your law."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-18"
+],
+"id": null,
+"text": "wonderful things in your law."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-19"
+],
+"id": "en-NIV-15918",
+"text": "19 I am a stranger on earth; ( AF )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "19"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AF )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "do not hide your commands from me."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-19"
+],
+"id": null,
+"text": "do not hide your commands from me."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-20"
+],
+"id": "en-NIV-15919",
+"text": "20 My soul is consumed ( AG ) with longing"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "20"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AG )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for your laws ( AH ) at all times."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-20"
+],
+"id": null,
+"text": "for your laws ( AH ) at all times."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AH )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-21"
+],
+"id": "en-NIV-15920",
+"text": "21 You rebuke the arrogant, ( AI ) who are accursed, ( AJ )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "21"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AI )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AJ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "those who stray ( AK ) from your commands."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-21"
+],
+"id": null,
+"text": "those who stray ( AK ) from your commands."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AK )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-22"
+],
+"id": "en-NIV-15921",
+"text": "22 Remove from me their scorn ( AL ) and contempt,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "22"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AL )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I keep your statutes. ( AM )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-22"
+],
+"id": null,
+"text": "for I keep your statutes. ( AM )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AM )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-23"
+],
+"id": "en-NIV-15922",
+"text": "23 Though rulers sit together and slander me,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "23"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "your servant will meditate on your decrees."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-23"
+],
+"id": null,
+"text": "your servant will meditate on your decrees."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-24"
+],
+"id": "en-NIV-15923",
+"text": "24 Your statutes are my delight;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "24"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "they are my counselors."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-24"
+],
+"id": null,
+"text": "they are my counselors."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-25"
+],
+"id": "en-NIV-15924",
+"text": "ד Daleth"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "25 I am laid low in the dust; ( AN ) preserve my life ( AO )"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "25 I am laid low in the dust; ( AN ) preserve my life ( AO )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-25"
+],
+"id": null,
+"text": "25 I am laid low in the dust; ( AN )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "25"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AN )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "preserve my life ( AO ) according to your word. ( AP )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-25"
+],
+"id": null,
+"text": "preserve my life ( AO ) according to your word. ( AP )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AO )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AP )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-26"
+],
+"id": "en-NIV-15925",
+"text": "26 I gave an account of my ways and you answered me;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "26"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "teach me your decrees. ( AQ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-26"
+],
+"id": null,
+"text": "teach me your decrees. ( AQ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AQ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-27"
+],
+"id": "en-NIV-15926",
+"text": "27 Cause me to understand the way of your precepts,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "27"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that I may meditate on your wonderful deeds. ( AR )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-27"
+],
+"id": null,
+"text": "that I may meditate on your wonderful deeds. ( AR )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AR )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-28"
+],
+"id": "en-NIV-15927",
+"text": "28 My soul is weary with sorrow; ( AS )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "28"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AS )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "strengthen me ( AT ) according to your word. ( AU )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-28"
+],
+"id": null,
+"text": "strengthen me ( AT ) according to your word. ( AU )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AT )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AU )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-29"
+],
+"id": "en-NIV-15928",
+"text": "29 Keep me from deceitful ways; ( AV )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "29"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AV )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "be gracious to me ( AW ) and teach me your law."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-29"
+],
+"id": null,
+"text": "be gracious to me ( AW ) and teach me your law."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AW )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-30"
+],
+"id": "en-NIV-15929",
+"text": "30 I have chosen ( AX ) the way of faithfulness; ( AY )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "30"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AX )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AY )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I have set my heart ( AZ ) on your laws."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-30"
+],
+"id": null,
+"text": "I have set my heart ( AZ ) on your laws."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AZ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-31"
+],
+"id": "en-NIV-15930",
+"text": "31 I hold fast ( BA ) to your statutes, Lord ;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "31"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BA )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "do not let me be put to shame."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-31"
+],
+"id": null,
+"text": "do not let me be put to shame."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-32"
+],
+"id": "en-NIV-15931",
+"text": "32 I run in the path of your commands,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "32"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for you have broadened my understanding."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-32"
+],
+"id": null,
+"text": "for you have broadened my understanding."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-33"
+],
+"id": "en-NIV-15932",
+"text": "ה He"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "33 Teach me, ( BB ) Lord , the way of your decrees, that I m"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "33 Teach me, ( BB ) Lord , the way of your decrees, that I m"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-33"
+],
+"id": null,
+"text": "33 Teach me, ( BB ) Lord , the way of your decrees,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "33"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BB )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that I may follow it to the end. [ b ]"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-33"
+],
+"id": null,
+"text": "that I may follow it to the end. [ b ]"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ b ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-34"
+],
+"id": "en-NIV-15933",
+"text": "34 Give me understanding, ( BC ) so that I may keep your law"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "34"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BC )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BD )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and obey it with all my heart. ( BE )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-34"
+],
+"id": null,
+"text": "and obey it with all my heart. ( BE )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BE )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-35"
+],
+"id": "en-NIV-15934",
+"text": "35 Direct me ( BF ) in the path of your commands, ( BG )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "35"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BF )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BG )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for there I find delight. ( BH )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-35"
+],
+"id": null,
+"text": "for there I find delight. ( BH )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BH )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-36"
+],
+"id": "en-NIV-15935",
+"text": "36 Turn my heart ( BI ) toward your statutes"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "36"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BI )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and not toward selfish gain. ( BJ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-36"
+],
+"id": null,
+"text": "and not toward selfish gain. ( BJ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BJ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-37"
+],
+"id": "en-NIV-15936",
+"text": "37 Turn my eyes away from worthless things;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "37"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "preserve my life ( BK ) according to your word. [ c ] ( BL )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-37"
+],
+"id": null,
+"text": "preserve my life ( BK ) according to your word. [ c ] ( BL )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BK )"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ c ]"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BL )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-38"
+],
+"id": "en-NIV-15937",
+"text": "38 Fulfill your promise ( BM ) to your servant,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "38"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BM )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "so that you may be feared."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-38"
+],
+"id": null,
+"text": "so that you may be feared."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-39"
+],
+"id": "en-NIV-15938",
+"text": "39 Take away the disgrace ( BN ) I dread,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "39"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BN )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for your laws are good."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-39"
+],
+"id": null,
+"text": "for your laws are good."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-40"
+],
+"id": "en-NIV-15939",
+"text": "40 How I long ( BO ) for your precepts!"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "40"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BO )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "In your righteousness preserve my life. ( BP )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-40"
+],
+"id": null,
+"text": "In your righteousness preserve my life. ( BP )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BP )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-41"
+],
+"id": "en-NIV-15940",
+"text": "ו Waw"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "41 May your unfailing love ( BQ ) come to me, Lord , your sa"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "41 May your unfailing love ( BQ ) come to me, Lord , your sa"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-41"
+],
+"id": null,
+"text": "41 May your unfailing love ( BQ ) come to me, Lord ,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "41"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BQ )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "your salvation, according to your promise; ( BR )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-41"
+],
+"id": null,
+"text": "your salvation, according to your promise; ( BR )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BR )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-42"
+],
+"id": "en-NIV-15941",
+"text": "42 then I can answer ( BS ) anyone who taunts me, ( BT )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "42"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BS )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BT )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I trust in your word."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-42"
+],
+"id": null,
+"text": "for I trust in your word."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-43"
+],
+"id": "en-NIV-15942",
+"text": "43 Never take your word of truth from my mouth, ( BU )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "43"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BU )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I have put my hope ( BV ) in your laws."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-43"
+],
+"id": null,
+"text": "for I have put my hope ( BV ) in your laws."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BV )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-44"
+],
+"id": "en-NIV-15943",
+"text": "44 I will always obey your law, ( BW )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "44"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BW )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for ever and ever."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-44"
+],
+"id": null,
+"text": "for ever and ever."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-45"
+],
+"id": "en-NIV-15944",
+"text": "45 I will walk about in freedom,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "45"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I have sought out your precepts. ( BX )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-45"
+],
+"id": null,
+"text": "for I have sought out your precepts. ( BX )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BX )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-46"
+],
+"id": "en-NIV-15945",
+"text": "46 I will speak of your statutes before kings ( BY )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "46"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BY )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and will not be put to shame, ( BZ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-46"
+],
+"id": null,
+"text": "and will not be put to shame, ( BZ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( BZ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-47"
+],
+"id": "en-NIV-15946",
+"text": "47 for I delight ( CA ) in your commands"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "47"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CA )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "because I love them. ( CB )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-47"
+],
+"id": null,
+"text": "because I love them. ( CB )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CB )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-48"
+],
+"id": "en-NIV-15947",
+"text": "48 I reach out for your commands, which I love,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "48"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that I may meditate ( CC ) on your decrees."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-48"
+],
+"id": null,
+"text": "that I may meditate ( CC ) on your decrees."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CC )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-49"
+],
+"id": "en-NIV-15948",
+"text": "ז Zayin"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "49 Remember your word ( CD ) to your servant, for you have g"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "49 Remember your word ( CD ) to your servant, for you have g"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-49"
+],
+"id": null,
+"text": "49 Remember your word ( CD ) to your servant,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "49"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CD )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for you have given me hope. ( CE )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-49"
+],
+"id": null,
+"text": "for you have given me hope. ( CE )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CE )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-50"
+],
+"id": "en-NIV-15949",
+"text": "50 My comfort in my suffering is this:"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "50"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "Your promise preserves my life. ( CF )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-50"
+],
+"id": null,
+"text": "Your promise preserves my life. ( CF )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CF )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-51"
+],
+"id": "en-NIV-15950",
+"text": "51 The arrogant mock me ( CG ) unmercifully,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "51"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CG )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but I do not turn ( CH ) from your law."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-51"
+],
+"id": null,
+"text": "but I do not turn ( CH ) from your law."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CH )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-52"
+],
+"id": "en-NIV-15951",
+"text": "52 I remember, ( CI ) Lord , your ancient laws,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "52"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CI )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and I find comfort in them."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-52"
+],
+"id": null,
+"text": "and I find comfort in them."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-53"
+],
+"id": "en-NIV-15952",
+"text": "53 Indignation grips me ( CJ ) because of the wicked,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "53"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CJ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "who have forsaken your law. ( CK )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-53"
+],
+"id": null,
+"text": "who have forsaken your law. ( CK )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CK )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-54"
+],
+"id": "en-NIV-15953",
+"text": "54 Your decrees are the theme of my song ( CL )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "54"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CL )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "wherever I lodge."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-54"
+],
+"id": null,
+"text": "wherever I lodge."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-55"
+],
+"id": "en-NIV-15954",
+"text": "55 In the night, Lord , I remember ( CM ) your name,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "55"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CM )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that I may keep your law. ( CN )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-55"
+],
+"id": null,
+"text": "that I may keep your law. ( CN )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CN )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-56"
+],
+"id": "en-NIV-15955",
+"text": "56 This has been my practice:"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "56"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I obey your precepts. ( CO )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-56"
+],
+"id": null,
+"text": "I obey your precepts. ( CO )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CO )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-57"
+],
+"id": "en-NIV-15956",
+"text": "ח Heth"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "57 You are my portion, ( CP ) Lord ; I have promised to obey"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "57 You are my portion, ( CP ) Lord ; I have promised to obey"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-57"
+],
+"id": null,
+"text": "57 You are my portion, ( CP ) Lord ;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "57"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CP )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I have promised to obey your words. ( CQ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-57"
+],
+"id": null,
+"text": "I have promised to obey your words. ( CQ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CQ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-58"
+],
+"id": "en-NIV-15957",
+"text": "58 I have sought ( CR ) your face with all my heart;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "58"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CR )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "be gracious to me ( CS ) according to your promise. ( CT )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-58"
+],
+"id": null,
+"text": "be gracious to me ( CS ) according to your promise. ( CT )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CS )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CT )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-59"
+],
+"id": "en-NIV-15958",
+"text": "59 I have considered my ways ( CU )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "59"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CU )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and have turned my steps to your statutes."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-59"
+],
+"id": null,
+"text": "and have turned my steps to your statutes."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-60"
+],
+"id": "en-NIV-15959",
+"text": "60 I will hasten and not delay"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "60"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "to obey your commands. ( CV )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-60"
+],
+"id": null,
+"text": "to obey your commands. ( CV )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CV )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-61"
+],
+"id": "en-NIV-15960",
+"text": "61 Though the wicked bind me with ropes,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "61"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I will not forget ( CW ) your law."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-61"
+],
+"id": null,
+"text": "I will not forget ( CW ) your law."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CW )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-62"
+],
+"id": "en-NIV-15961",
+"text": "62 At midnight ( CX ) I rise to give you thanks"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "62"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CX )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for your righteous laws. ( CY )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-62"
+],
+"id": null,
+"text": "for your righteous laws. ( CY )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CY )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-63"
+],
+"id": "en-NIV-15962",
+"text": "63 I am a friend to all who fear you, ( CZ )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "63"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( CZ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "to all who follow your precepts. ( DA )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-63"
+],
+"id": null,
+"text": "to all who follow your precepts. ( DA )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DA )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-64"
+],
+"id": "en-NIV-15963",
+"text": "64 The earth is filled with your love, ( DB ) Lord ;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "64"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DB )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "teach me your decrees. ( DC )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-64"
+],
+"id": null,
+"text": "teach me your decrees. ( DC )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DC )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-65"
+],
+"id": "en-NIV-15964",
+"text": "ט Teth"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "65 Do good ( DD ) to your servant according to your word, ( "
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "65 Do good ( DD ) to your servant according to your word, ( "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-65"
+],
+"id": null,
+"text": "65 Do good ( DD ) to your servant"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "65"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DD )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "according to your word, ( DE ) Lord ."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-65"
+],
+"id": null,
+"text": "according to your word, ( DE ) Lord ."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DE )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-66"
+],
+"id": "en-NIV-15965",
+"text": "66 Teach me knowledge ( DF ) and good judgment,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "66"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DF )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I trust your commands."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-66"
+],
+"id": null,
+"text": "for I trust your commands."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-67"
+],
+"id": "en-NIV-15966",
+"text": "67 Before I was afflicted ( DG ) I went astray, ( DH )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "67"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DG )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DH )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but now I obey your word. ( DI )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-67"
+],
+"id": null,
+"text": "but now I obey your word. ( DI )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DI )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-68"
+],
+"id": "en-NIV-15967",
+"text": "68 You are good, ( DJ ) and what you do is good;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "68"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DJ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "teach me your decrees. ( DK )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-68"
+],
+"id": null,
+"text": "teach me your decrees. ( DK )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DK )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-69"
+],
+"id": "en-NIV-15968",
+"text": "69 Though the arrogant have smeared me with lies, ( DL )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "69"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DL )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I keep your precepts with all my heart."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-69"
+],
+"id": null,
+"text": "I keep your precepts with all my heart."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-70"
+],
+"id": "en-NIV-15969",
+"text": "70 Their hearts are callous ( DM ) and unfeeling,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "70"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DM )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but I delight in your law."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-70"
+],
+"id": null,
+"text": "but I delight in your law."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-71"
+],
+"id": "en-NIV-15970",
+"text": "71 It was good for me to be afflicted ( DN )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "71"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DN )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "so that I might learn your decrees."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-71"
+],
+"id": null,
+"text": "so that I might learn your decrees."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-72"
+],
+"id": "en-NIV-15971",
+"text": "72 The law from your mouth is more precious to me"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "72"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "than thousands of pieces of silver and gold. ( DO )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-72"
+],
+"id": null,
+"text": "than thousands of pieces of silver and gold. ( DO )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DO )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-73"
+],
+"id": "en-NIV-15972",
+"text": "י Yodh"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "73 Your hands made me ( DP ) and formed me; give me understa"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "73 Your hands made me ( DP ) and formed me; give me understa"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-73"
+],
+"id": null,
+"text": "73 Your hands made me ( DP ) and formed me;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "73"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DP )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "give me understanding to learn your commands."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-73"
+],
+"id": null,
+"text": "give me understanding to learn your commands."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-74"
+],
+"id": "en-NIV-15973",
+"text": "74 May those who fear you rejoice ( DQ ) when they see me,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "74"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DQ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I have put my hope in your word. ( DR )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-74"
+],
+"id": null,
+"text": "for I have put my hope in your word. ( DR )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DR )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-75"
+],
+"id": "en-NIV-15974",
+"text": "75 I know, Lord , that your laws are righteous, ( DS )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "75"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DS )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and that in faithfulness ( DT ) you have afflicted me."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-75"
+],
+"id": null,
+"text": "and that in faithfulness ( DT ) you have afflicted me."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DT )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-76"
+],
+"id": "en-NIV-15975",
+"text": "76 May your unfailing love ( DU ) be my comfort,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "76"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DU )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "according to your promise ( DV ) to your servant."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-76"
+],
+"id": null,
+"text": "according to your promise ( DV ) to your servant."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DV )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-77"
+],
+"id": "en-NIV-15976",
+"text": "77 Let your compassion ( DW ) come to me that I may live,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "77"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DW )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for your law is my delight. ( DX )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-77"
+],
+"id": null,
+"text": "for your law is my delight. ( DX )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DX )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-78"
+],
+"id": "en-NIV-15977",
+"text": "78 May the arrogant ( DY ) be put to shame for wronging me w"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "78"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DY )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( DZ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but I will meditate on your precepts."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-78"
+],
+"id": null,
+"text": "but I will meditate on your precepts."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-79"
+],
+"id": "en-NIV-15978",
+"text": "79 May those who fear you turn to me,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "79"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "those who understand your statutes. ( EA )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-79"
+],
+"id": null,
+"text": "those who understand your statutes. ( EA )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EA )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-80"
+],
+"id": "en-NIV-15979",
+"text": "80 May I wholeheartedly follow ( EB ) your decrees, ( EC )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "80"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EB )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EC )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that I may not be put to shame. ( ED )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-80"
+],
+"id": null,
+"text": "that I may not be put to shame. ( ED )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( ED )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-81"
+],
+"id": "en-NIV-15980",
+"text": "כ Kaph"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "81 My soul faints ( EE ) with longing for your salvation, ( "
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "81 My soul faints ( EE ) with longing for your salvation, ( "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-81"
+],
+"id": null,
+"text": "81 My soul faints ( EE ) with longing for your salvation, ( "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "81"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EE )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EF )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but I have put my hope ( EG ) in your word."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-81"
+],
+"id": null,
+"text": "but I have put my hope ( EG ) in your word."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EG )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-82"
+],
+"id": "en-NIV-15981",
+"text": "82 My eyes fail, ( EH ) looking for your promise; ( EI )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "82"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EH )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EI )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I say, “When will you comfort me?”"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-82"
+],
+"id": null,
+"text": "I say, “When will you comfort me?”"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-83"
+],
+"id": "en-NIV-15982",
+"text": "83 Though I am like a wineskin in the smoke,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "83"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I do not forget ( EJ ) your decrees."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-83"
+],
+"id": null,
+"text": "I do not forget ( EJ ) your decrees."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EJ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-84"
+],
+"id": "en-NIV-15983",
+"text": "84 How long ( EK ) must your servant wait?"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "84"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EK )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "When will you punish my persecutors? ( EL )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-84"
+],
+"id": null,
+"text": "When will you punish my persecutors? ( EL )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EL )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-85"
+],
+"id": "en-NIV-15984",
+"text": "85 The arrogant ( EM ) dig pits ( EN ) to trap me,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "85"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EM )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EN )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "contrary to your law."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-85"
+],
+"id": null,
+"text": "contrary to your law."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-86"
+],
+"id": "en-NIV-15985",
+"text": "86 All your commands are trustworthy; ( EO )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "86"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EO )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "help me, ( EP ) for I am being persecuted ( EQ ) without cau"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-86"
+],
+"id": null,
+"text": "help me, ( EP ) for I am being persecuted ( EQ ) without cau"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EP )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EQ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( ER )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-87"
+],
+"id": "en-NIV-15986",
+"text": "87 They almost wiped me from the earth,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "87"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but I have not forsaken ( ES ) your precepts."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-87"
+],
+"id": null,
+"text": "but I have not forsaken ( ES ) your precepts."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( ES )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-88"
+],
+"id": "en-NIV-15987",
+"text": "88 In your unfailing love ( ET ) preserve my life, ( EU )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "88"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( ET )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EU )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that I may obey the statutes ( EV ) of your mouth."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-88"
+],
+"id": null,
+"text": "that I may obey the statutes ( EV ) of your mouth."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EV )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-89"
+],
+"id": "en-NIV-15988",
+"text": "ל Lamedh"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "89 Your word, Lord , is eternal; ( EW ) it stands firm in th"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "89 Your word, Lord , is eternal; ( EW ) it stands firm in th"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-89"
+],
+"id": null,
+"text": "89 Your word, Lord , is eternal; ( EW )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "89"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EW )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "it stands firm in the heavens."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-89"
+],
+"id": null,
+"text": "it stands firm in the heavens."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-90"
+],
+"id": "en-NIV-15989",
+"text": "90 Your faithfulness ( EX ) continues through all generation"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "90"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EX )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EY )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "you established the earth, and it endures. ( EZ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-90"
+],
+"id": null,
+"text": "you established the earth, and it endures. ( EZ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( EZ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-91"
+],
+"id": "en-NIV-15990",
+"text": "91 Your laws endure ( FA ) to this day,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "91"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FA )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for all things serve you. ( FB )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-91"
+],
+"id": null,
+"text": "for all things serve you. ( FB )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FB )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-92"
+],
+"id": "en-NIV-15991",
+"text": "92 If your law had not been my delight, ( FC )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "92"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FC )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I would have perished in my affliction. ( FD )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-92"
+],
+"id": null,
+"text": "I would have perished in my affliction. ( FD )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FD )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-93"
+],
+"id": "en-NIV-15992",
+"text": "93 I will never forget ( FE ) your precepts,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "93"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FE )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for by them you have preserved my life. ( FF )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-93"
+],
+"id": null,
+"text": "for by them you have preserved my life. ( FF )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FF )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-94"
+],
+"id": "en-NIV-15993",
+"text": "94 Save me, ( FG ) for I am yours;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "94"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FG )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I have sought out your precepts. ( FH )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-94"
+],
+"id": null,
+"text": "I have sought out your precepts. ( FH )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FH )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-95"
+],
+"id": "en-NIV-15994",
+"text": "95 The wicked are waiting to destroy me, ( FI )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "95"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FI )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but I will ponder your statutes. ( FJ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-95"
+],
+"id": null,
+"text": "but I will ponder your statutes. ( FJ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FJ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-96"
+],
+"id": "en-NIV-15995",
+"text": "96 To all perfection I see a limit,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "96"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but your commands are boundless. ( FK )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-96"
+],
+"id": null,
+"text": "but your commands are boundless. ( FK )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FK )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-97"
+],
+"id": "en-NIV-15996",
+"text": "מ Mem"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "97 Oh, how I love your law! ( FL ) I meditate ( FM ) on it a"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "97 Oh, how I love your law! ( FL ) I meditate ( FM ) on it a"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-97"
+],
+"id": null,
+"text": "97 Oh, how I love your law! ( FL )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "97"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FL )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I meditate ( FM ) on it all day long."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-97"
+],
+"id": null,
+"text": "I meditate ( FM ) on it all day long."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FM )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-98"
+],
+"id": "en-NIV-15997",
+"text": "98 Your commands are always with me"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "98"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and make me wiser ( FN ) than my enemies."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-98"
+],
+"id": null,
+"text": "and make me wiser ( FN ) than my enemies."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FN )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-99"
+],
+"id": "en-NIV-15998",
+"text": "99 I have more insight than all my teachers,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "99"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I meditate on your statutes. ( FO )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-99"
+],
+"id": null,
+"text": "for I meditate on your statutes. ( FO )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FO )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-100"
+],
+"id": "en-NIV-15999",
+"text": "100 I have more understanding than the elders,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "100"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I obey your precepts. ( FP )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-100"
+],
+"id": null,
+"text": "for I obey your precepts. ( FP )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FP )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-101"
+],
+"id": "en-NIV-16000",
+"text": "101 I have kept my feet ( FQ ) from every evil path"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "101"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FQ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "so that I might obey your word. ( FR )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-101"
+],
+"id": null,
+"text": "so that I might obey your word. ( FR )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FR )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-102"
+],
+"id": "en-NIV-16001",
+"text": "102 I have not departed from your laws, ( FS )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "102"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FS )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for you yourself have taught ( FT ) me."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-102"
+],
+"id": null,
+"text": "for you yourself have taught ( FT ) me."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FT )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-103"
+],
+"id": "en-NIV-16002",
+"text": "103 How sweet are your words to my taste,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "103"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "sweeter than honey ( FU ) to my mouth! ( FV )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-103"
+],
+"id": null,
+"text": "sweeter than honey ( FU ) to my mouth! ( FV )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FU )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FV )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-104"
+],
+"id": "en-NIV-16003",
+"text": "104 I gain understanding ( FW ) from your precepts;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "104"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FW )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "therefore I hate every wrong path. ( FX )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-104"
+],
+"id": null,
+"text": "therefore I hate every wrong path. ( FX )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FX )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-105"
+],
+"id": "en-NIV-16004",
+"text": "נ Nun"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "105 Your word is a lamp ( FY ) for my feet, a light ( FZ ) o"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "105 Your word is a lamp ( FY ) for my feet, a light ( FZ ) o"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-105"
+],
+"id": null,
+"text": "105 Your word is a lamp ( FY ) for my feet,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "105"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FY )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "a light ( FZ ) on my path."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-105"
+],
+"id": null,
+"text": "a light ( FZ ) on my path."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( FZ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-106"
+],
+"id": "en-NIV-16005",
+"text": "106 I have taken an oath ( GA ) and confirmed it,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "106"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GA )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that I will follow your righteous laws. ( GB )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-106"
+],
+"id": null,
+"text": "that I will follow your righteous laws. ( GB )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GB )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-107"
+],
+"id": "en-NIV-16006",
+"text": "107 I have suffered much;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "107"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "preserve my life, ( GC ) Lord , according to your word."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-107"
+],
+"id": null,
+"text": "preserve my life, ( GC ) Lord , according to your word."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GC )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-108"
+],
+"id": "en-NIV-16007",
+"text": "108 Accept, Lord , the willing praise of my mouth, ( GD )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "108"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GD )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and teach me your laws. ( GE )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-108"
+],
+"id": null,
+"text": "and teach me your laws. ( GE )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GE )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-109"
+],
+"id": "en-NIV-16008",
+"text": "109 Though I constantly take my life in my hands, ( GF )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "109"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GF )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I will not forget ( GG ) your law."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-109"
+],
+"id": null,
+"text": "I will not forget ( GG ) your law."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GG )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-110"
+],
+"id": "en-NIV-16009",
+"text": "110 The wicked have set a snare ( GH ) for me,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "110"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GH )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but I have not strayed ( GI ) from your precepts."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-110"
+],
+"id": null,
+"text": "but I have not strayed ( GI ) from your precepts."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GI )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-111"
+],
+"id": "en-NIV-16010",
+"text": "111 Your statutes are my heritage forever;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "111"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "they are the joy of my heart. ( GJ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-111"
+],
+"id": null,
+"text": "they are the joy of my heart. ( GJ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GJ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-112"
+],
+"id": "en-NIV-16011",
+"text": "112 My heart is set ( GK ) on keeping your decrees"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "112"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GK )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "to the very end. [ d ] ( GL )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-112"
+],
+"id": null,
+"text": "to the very end. [ d ] ( GL )"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ d ]"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GL )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-113"
+],
+"id": "en-NIV-16012",
+"text": "ס Samekh"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "113 I hate double-minded people, ( GM ) but I love your law."
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "113 I hate double-minded people, ( GM ) but I love your law."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-113"
+],
+"id": null,
+"text": "113 I hate double-minded people, ( GM )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "113"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GM )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but I love your law. ( GN )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-113"
+],
+"id": null,
+"text": "but I love your law. ( GN )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GN )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-114"
+],
+"id": "en-NIV-16013",
+"text": "114 You are my refuge and my shield; ( GO )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "114"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GO )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I have put my hope ( GP ) in your word."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-114"
+],
+"id": null,
+"text": "I have put my hope ( GP ) in your word."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GP )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-115"
+],
+"id": "en-NIV-16014",
+"text": "115 Away from me, ( GQ ) you evildoers,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "115"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GQ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that I may keep the commands of my God!"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-115"
+],
+"id": null,
+"text": "that I may keep the commands of my God!"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-116"
+],
+"id": "en-NIV-16015",
+"text": "116 Sustain me, ( GR ) my God, according to your promise, ( "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "116"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GR )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GS )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "do not let my hopes be dashed. ( GT )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-116"
+],
+"id": null,
+"text": "do not let my hopes be dashed. ( GT )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GT )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-117"
+],
+"id": "en-NIV-16016",
+"text": "117 Uphold me, ( GU ) and I will be delivered; ( GV )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "117"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GU )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GV )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I will always have regard for your decrees. ( GW )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-117"
+],
+"id": null,
+"text": "I will always have regard for your decrees. ( GW )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GW )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-118"
+],
+"id": "en-NIV-16017",
+"text": "118 You reject all who stray ( GX ) from your decrees,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "118"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GX )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for their delusions come to nothing."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-118"
+],
+"id": null,
+"text": "for their delusions come to nothing."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-119"
+],
+"id": "en-NIV-16018",
+"text": "119 All the wicked of the earth you discard like dross; ( GY"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "119"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GY )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "therefore I love your statutes. ( GZ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-119"
+],
+"id": null,
+"text": "therefore I love your statutes. ( GZ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( GZ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-120"
+],
+"id": "en-NIV-16019",
+"text": "120 My flesh trembles ( HA ) in fear of you; ( HB )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "120"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HA )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HB )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I stand in awe ( HC ) of your laws."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-120"
+],
+"id": null,
+"text": "I stand in awe ( HC ) of your laws."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HC )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-121"
+],
+"id": "en-NIV-16020",
+"text": "ע Ayin"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "121 I have done what is righteous and just; ( HD ) do not le"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "121 I have done what is righteous and just; ( HD ) do not le"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-121"
+],
+"id": null,
+"text": "121 I have done what is righteous and just; ( HD )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "121"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HD )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "do not leave me to my oppressors."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-121"
+],
+"id": null,
+"text": "do not leave me to my oppressors."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-122"
+],
+"id": "en-NIV-16021",
+"text": "122 Ensure your servant’s well-being; ( HE )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "122"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HE )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "do not let the arrogant oppress me. ( HF )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-122"
+],
+"id": null,
+"text": "do not let the arrogant oppress me. ( HF )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HF )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-123"
+],
+"id": "en-NIV-16022",
+"text": "123 My eyes fail, ( HG ) looking for your salvation, ( HH )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "123"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HG )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HH )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "looking for your righteous promise. ( HI )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-123"
+],
+"id": null,
+"text": "looking for your righteous promise. ( HI )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HI )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-124"
+],
+"id": "en-NIV-16023",
+"text": "124 Deal with your servant according to your love ( HJ )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "124"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HJ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and teach me your decrees. ( HK )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-124"
+],
+"id": null,
+"text": "and teach me your decrees. ( HK )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HK )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-125"
+],
+"id": "en-NIV-16024",
+"text": "125 I am your servant; ( HL ) give me discernment"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "125"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HL )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that I may understand your statutes. ( HM )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-125"
+],
+"id": null,
+"text": "that I may understand your statutes. ( HM )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HM )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-126"
+],
+"id": "en-NIV-16025",
+"text": "126 It is time for you to act, Lord ;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "126"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "your law is being broken. ( HN )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-126"
+],
+"id": null,
+"text": "your law is being broken. ( HN )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HN )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-127"
+],
+"id": "en-NIV-16026",
+"text": "127 Because I love your commands ( HO )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "127"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HO )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "more than gold, ( HP ) more than pure gold, ( HQ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-127"
+],
+"id": null,
+"text": "more than gold, ( HP ) more than pure gold, ( HQ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HP )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HQ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-128"
+],
+"id": "en-NIV-16027",
+"text": "128 and because I consider all your precepts right, ( HR )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "128"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HR )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I hate every wrong path. ( HS )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-128"
+],
+"id": null,
+"text": "I hate every wrong path. ( HS )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HS )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-129"
+],
+"id": "en-NIV-16028",
+"text": "פ Pe"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "129 Your statutes are wonderful; ( HT ) therefore I obey the"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "129 Your statutes are wonderful; ( HT ) therefore I obey the"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-129"
+],
+"id": null,
+"text": "129 Your statutes are wonderful; ( HT )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "129"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HT )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "therefore I obey them. ( HU )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-129"
+],
+"id": null,
+"text": "therefore I obey them. ( HU )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HU )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-130"
+],
+"id": "en-NIV-16029",
+"text": "130 The unfolding of your words gives light; ( HV )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "130"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HV )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "it gives understanding to the simple. ( HW )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-130"
+],
+"id": null,
+"text": "it gives understanding to the simple. ( HW )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HW )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-131"
+],
+"id": "en-NIV-16030",
+"text": "131 I open my mouth and pant, ( HX )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "131"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HX )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "longing for your commands. ( HY )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-131"
+],
+"id": null,
+"text": "longing for your commands. ( HY )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HY )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-132"
+],
+"id": "en-NIV-16031",
+"text": "132 Turn to me ( HZ ) and have mercy ( IA ) on me,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "132"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( HZ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IA )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "as you always do to those who love your name. ( IB )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-132"
+],
+"id": null,
+"text": "as you always do to those who love your name. ( IB )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IB )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-133"
+],
+"id": "en-NIV-16032",
+"text": "133 Direct my footsteps according to your word; ( IC )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "133"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IC )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "let no sin rule ( ID ) over me."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-133"
+],
+"id": null,
+"text": "let no sin rule ( ID ) over me."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( ID )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-134"
+],
+"id": "en-NIV-16033",
+"text": "134 Redeem me from human oppression, ( IE )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "134"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IE )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that I may obey your precepts. ( IF )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-134"
+],
+"id": null,
+"text": "that I may obey your precepts. ( IF )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IF )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-135"
+],
+"id": "en-NIV-16034",
+"text": "135 Make your face shine ( IG ) on your servant"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "135"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IG )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and teach me your decrees. ( IH )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-135"
+],
+"id": null,
+"text": "and teach me your decrees. ( IH )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IH )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-136"
+],
+"id": "en-NIV-16035",
+"text": "136 Streams of tears ( II ) flow from my eyes,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "136"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( II )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for your law is not obeyed. ( IJ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-136"
+],
+"id": null,
+"text": "for your law is not obeyed. ( IJ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IJ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-137"
+],
+"id": "en-NIV-16036",
+"text": "צ Tsadhe"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "137 You are righteous, ( IK ) Lord , and your laws are right"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "137 You are righteous, ( IK ) Lord , and your laws are right"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-137"
+],
+"id": null,
+"text": "137 You are righteous, ( IK ) Lord ,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "137"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IK )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and your laws are right. ( IL )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-137"
+],
+"id": null,
+"text": "and your laws are right. ( IL )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IL )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-138"
+],
+"id": "en-NIV-16037",
+"text": "138 The statutes you have laid down are righteous; ( IM )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "138"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IM )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "they are fully trustworthy. ( IN )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-138"
+],
+"id": null,
+"text": "they are fully trustworthy. ( IN )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IN )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-139"
+],
+"id": "en-NIV-16038",
+"text": "139 My zeal wears me out, ( IO )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "139"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IO )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for my enemies ignore your words."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-139"
+],
+"id": null,
+"text": "for my enemies ignore your words."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-140"
+],
+"id": "en-NIV-16039",
+"text": "140 Your promises ( IP ) have been thoroughly tested, ( IQ )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "140"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IP )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IQ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and your servant loves them. ( IR )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-140"
+],
+"id": null,
+"text": "and your servant loves them. ( IR )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IR )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-141"
+],
+"id": "en-NIV-16040",
+"text": "141 Though I am lowly and despised, ( IS )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "141"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IS )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I do not forget your precepts. ( IT )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-141"
+],
+"id": null,
+"text": "I do not forget your precepts. ( IT )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IT )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-142"
+],
+"id": "en-NIV-16041",
+"text": "142 Your righteousness is everlasting"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "142"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and your law is true. ( IU )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-142"
+],
+"id": null,
+"text": "and your law is true. ( IU )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IU )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-143"
+],
+"id": "en-NIV-16042",
+"text": "143 Trouble and distress have come upon me,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "143"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but your commands give me delight. ( IV )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-143"
+],
+"id": null,
+"text": "but your commands give me delight. ( IV )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IV )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-144"
+],
+"id": "en-NIV-16043",
+"text": "144 Your statutes are always righteous;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "144"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "give me understanding ( IW ) that I may live."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-144"
+],
+"id": null,
+"text": "give me understanding ( IW ) that I may live."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IW )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-145"
+],
+"id": "en-NIV-16044",
+"text": "ק Qoph"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "145 I call with all my heart; ( IX ) answer me, Lord , and I"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "145 I call with all my heart; ( IX ) answer me, Lord , and I"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-145"
+],
+"id": null,
+"text": "145 I call with all my heart; ( IX ) answer me, Lord ,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "145"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IX )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and I will obey your decrees. ( IY )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-145"
+],
+"id": null,
+"text": "and I will obey your decrees. ( IY )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IY )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-146"
+],
+"id": "en-NIV-16045",
+"text": "146 I call out to you; save me ( IZ )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "146"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( IZ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and I will keep your statutes."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-146"
+],
+"id": null,
+"text": "and I will keep your statutes."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-147"
+],
+"id": "en-NIV-16046",
+"text": "147 I rise before dawn ( JA ) and cry for help;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "147"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JA )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I have put my hope in your word."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-147"
+],
+"id": null,
+"text": "I have put my hope in your word."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-148"
+],
+"id": "en-NIV-16047",
+"text": "148 My eyes stay open through the watches of the night, ( JB"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "148"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JB )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that I may meditate on your promises."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-148"
+],
+"id": null,
+"text": "that I may meditate on your promises."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-149"
+],
+"id": "en-NIV-16048",
+"text": "149 Hear my voice ( JC ) in accordance with your love; ( JD "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "149"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JC )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JD )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "preserve my life, ( JE ) Lord , according to your laws."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-149"
+],
+"id": null,
+"text": "preserve my life, ( JE ) Lord , according to your laws."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JE )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-150"
+],
+"id": "en-NIV-16049",
+"text": "150 Those who devise wicked schemes ( JF ) are near,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "150"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JF )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but they are far from your law."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-150"
+],
+"id": null,
+"text": "but they are far from your law."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-151"
+],
+"id": "en-NIV-16050",
+"text": "151 Yet you are near, ( JG ) Lord ,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "151"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JG )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and all your commands are true. ( JH )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-151"
+],
+"id": null,
+"text": "and all your commands are true. ( JH )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JH )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-152"
+],
+"id": "en-NIV-16051",
+"text": "152 Long ago I learned from your statutes ( JI )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "152"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JI )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that you established them to last forever. ( JJ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-152"
+],
+"id": null,
+"text": "that you established them to last forever. ( JJ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JJ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-153"
+],
+"id": "en-NIV-16052",
+"text": "ר Resh"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "153 Look on my suffering ( JK ) and deliver me, ( JL ) for I"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "153 Look on my suffering ( JK ) and deliver me, ( JL ) for I"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-153"
+],
+"id": null,
+"text": "153 Look on my suffering ( JK ) and deliver me, ( JL )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "153"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JK )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JL )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I have not forgotten ( JM ) your law."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-153"
+],
+"id": null,
+"text": "for I have not forgotten ( JM ) your law."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JM )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-154"
+],
+"id": "en-NIV-16053",
+"text": "154 Defend my cause ( JN ) and redeem me; ( JO )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "154"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JN )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JO )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "preserve my life ( JP ) according to your promise. ( JQ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-154"
+],
+"id": null,
+"text": "preserve my life ( JP ) according to your promise. ( JQ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JP )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JQ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-155"
+],
+"id": "en-NIV-16054",
+"text": "155 Salvation is far from the wicked,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "155"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for they do not seek out ( JR ) your decrees."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-155"
+],
+"id": null,
+"text": "for they do not seek out ( JR ) your decrees."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JR )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-156"
+],
+"id": "en-NIV-16055",
+"text": "156 Your compassion, Lord , is great; ( JS )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "156"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JS )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "preserve my life ( JT ) according to your laws. ( JU )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-156"
+],
+"id": null,
+"text": "preserve my life ( JT ) according to your laws. ( JU )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JT )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JU )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-157"
+],
+"id": "en-NIV-16056",
+"text": "157 Many are the foes who persecute me, ( JV )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "157"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JV )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but I have not turned ( JW ) from your statutes."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-157"
+],
+"id": null,
+"text": "but I have not turned ( JW ) from your statutes."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JW )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-158"
+],
+"id": "en-NIV-16057",
+"text": "158 I look on the faithless with loathing, ( JX )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "158"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JX )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for they do not obey your word. ( JY )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-158"
+],
+"id": null,
+"text": "for they do not obey your word. ( JY )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JY )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-159"
+],
+"id": "en-NIV-16058",
+"text": "159 See how I love your precepts;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "159"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "preserve my life, ( JZ ) Lord , in accordance with your love"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-159"
+],
+"id": null,
+"text": "preserve my life, ( JZ ) Lord , in accordance with your love"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( JZ )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-160"
+],
+"id": "en-NIV-16059",
+"text": "160 All your words are true;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "160"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "all your righteous laws are eternal. ( KA )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-160"
+],
+"id": null,
+"text": "all your righteous laws are eternal. ( KA )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KA )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-161"
+],
+"id": "en-NIV-16060",
+"text": "ש Sin and Shin"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "161 Rulers persecute me ( KB ) without cause, but my heart t"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "161 Rulers persecute me ( KB ) without cause, but my heart t"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-161"
+],
+"id": null,
+"text": "161 Rulers persecute me ( KB ) without cause,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "161"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KB )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but my heart trembles ( KC ) at your word."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-161"
+],
+"id": null,
+"text": "but my heart trembles ( KC ) at your word."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KC )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-162"
+],
+"id": "en-NIV-16061",
+"text": "162 I rejoice ( KD ) in your promise"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "162"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KD )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "like one who finds great spoil. ( KE )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-162"
+],
+"id": null,
+"text": "like one who finds great spoil. ( KE )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KE )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-163"
+],
+"id": "en-NIV-16062",
+"text": "163 I hate and detest ( KF ) falsehood"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "163"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KF )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but I love your law. ( KG )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-163"
+],
+"id": null,
+"text": "but I love your law. ( KG )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KG )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-164"
+],
+"id": "en-NIV-16063",
+"text": "164 Seven times a day I praise you"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "164"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for your righteous laws. ( KH )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-164"
+],
+"id": null,
+"text": "for your righteous laws. ( KH )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KH )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-165"
+],
+"id": "en-NIV-16064",
+"text": "165 Great peace ( KI ) have those who love your law,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "165"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KI )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and nothing can make them stumble. ( KJ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-165"
+],
+"id": null,
+"text": "and nothing can make them stumble. ( KJ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KJ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-166"
+],
+"id": "en-NIV-16065",
+"text": "166 I wait for your salvation, ( KK ) Lord ,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "166"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KK )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and I follow your commands."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-166"
+],
+"id": null,
+"text": "and I follow your commands."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-167"
+],
+"id": "en-NIV-16066",
+"text": "167 I obey your statutes,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "167"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I love them ( KL ) greatly."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-167"
+],
+"id": null,
+"text": "for I love them ( KL ) greatly."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KL )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-168"
+],
+"id": "en-NIV-16067",
+"text": "168 I obey your precepts ( KM ) and your statutes, ( KN )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "168"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KM )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KN )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for all my ways are known ( KO ) to you."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-168"
+],
+"id": null,
+"text": "for all my ways are known ( KO ) to you."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KO )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-169"
+],
+"id": "en-NIV-16068",
+"text": "ת Taw"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "169 May my cry come ( KP ) before you, Lord ; give me unders"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "169 May my cry come ( KP ) before you, Lord ; give me unders"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-169"
+],
+"id": null,
+"text": "169 May my cry come ( KP ) before you, Lord ;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "169"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KP )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "give me understanding ( KQ ) according to your word. ( KR )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-169"
+],
+"id": null,
+"text": "give me understanding ( KQ ) according to your word. ( KR )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KQ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KR )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-170"
+],
+"id": "en-NIV-16069",
+"text": "170 May my supplication come ( KS ) before you;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "170"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KS )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "deliver me ( KT ) according to your promise. ( KU )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-170"
+],
+"id": null,
+"text": "deliver me ( KT ) according to your promise. ( KU )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KT )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KU )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-171"
+],
+"id": "en-NIV-16070",
+"text": "171 May my lips overflow with praise, ( KV )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "171"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KV )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for you teach me ( KW ) your decrees."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-171"
+],
+"id": null,
+"text": "for you teach me ( KW ) your decrees."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KW )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-172"
+],
+"id": "en-NIV-16071",
+"text": "172 May my tongue sing ( KX ) of your word,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "172"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KX )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for all your commands are righteous. ( KY )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-172"
+],
+"id": null,
+"text": "for all your commands are righteous. ( KY )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KY )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-173"
+],
+"id": "en-NIV-16072",
+"text": "173 May your hand be ready to help ( KZ ) me,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "173"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( KZ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I have chosen ( LA ) your precepts."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-173"
+],
+"id": null,
+"text": "for I have chosen ( LA ) your precepts."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( LA )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-174"
+],
+"id": "en-NIV-16073",
+"text": "174 I long for your salvation, ( LB ) Lord ,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "174"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( LB )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and your law gives me delight. ( LC )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-174"
+],
+"id": null,
+"text": "and your law gives me delight. ( LC )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( LC )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-175"
+],
+"id": "en-NIV-16074",
+"text": "175 Let me live ( LD ) that I may praise you,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "175"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( LD )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and may your laws sustain me."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-175"
+],
+"id": null,
+"text": "and may your laws sustain me."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-176"
+],
+"id": "en-NIV-16075",
+"text": "176 I have strayed like a lost sheep. ( LE )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "176"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( LE )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "Seek your servant,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-176"
+],
+"id": null,
+"text": "Seek your servant,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I have not forgotten ( LF ) your commands."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-119-176"
+],
+"id": null,
+"text": "for I have not forgotten ( LF ) your commands."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( LF )"
+},
+{
+"tag": "div",
+"class": [
+"il-text"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "div",
+"class": [
+"footnotes",
+"resources-section"
+],
+"id": null,
+"text": "Footnotes Psalm 119:1 This psalm is an acrostic poem, the st"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 119:1 This psalm is an acrostic poem, the stanzas of w"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "This psalm is an acrostic poem, the stanzas of which begin w"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or follow it for its reward"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Two manuscripts of the Masoretic Text and Dead Sea Scrolls; "
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or decrees / for their enduring reward"
+},
+{
+"tag": "div",
+"class": [
+"crossrefs",
+"resources-section"
+],
+"id": null,
+"text": "Cross references Psalm 119:1 : S Ge 17:1; S Dt 18:13; Pr 11:"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 119:1 : S Ge 17:1; S Dt 18:13; Pr 11:20 Psalm 119:1 : "
+}
+]
+}

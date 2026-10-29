@@ -1,0 +1,658 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "Psalm 23 A psalm of David. 1 The Lord is my shepherd, ( A ) "
+},
+{
+"tag": "div",
+"class": [
+"version-NIV",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "Psalm 23 A psalm of David. 1 The Lord is my shepherd, ( A ) "
+},
+{
+"tag": "div",
+"class": [
+"std-text"
+],
+"id": null,
+"text": "Psalm 23 A psalm of David. 1 The Lord is my shepherd, ( A ) "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": "en-NIV-14237",
+"text": "Psalm 23"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": null,
+"text": "A psalm of David."
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "1 The Lord is my shepherd, ( A ) I lack nothing. ( B ) 2 He "
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "1 The Lord is my shepherd, ( A ) I lack nothing. ( B ) 2 He "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": null,
+"text": "1 The Lord is my shepherd, ( A ) I lack nothing. ( B )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "1"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( A )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( B )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "2 He makes me lie down in green pastures,"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-2"
+],
+"id": "en-NIV-14238",
+"text": "2 He makes me lie down in green pastures,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-2"
+],
+"id": null,
+"text": "he leads me beside quiet waters, ( C )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( C )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "3 he refreshes my soul. ( D )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-3"
+],
+"id": "en-NIV-14239",
+"text": "3 he refreshes my soul. ( D )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( D )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-3"
+],
+"id": null,
+"text": "He guides me ( E ) along the right paths ( F )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( E )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( F )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for his name’s sake. ( G )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-3"
+],
+"id": null,
+"text": "for his name’s sake. ( G )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( G )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": "en-NIV-14240",
+"text": "4 Even though I walk"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "through the darkest valley, [ a ] ( H )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "through the darkest valley, [ a ] ( H )"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ a ]"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( H )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "I will fear no evil, ( I )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( I )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for you are with me; ( J )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "for you are with me; ( J )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( J )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "your rod and your staff,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "they comfort me."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "they comfort me."
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "5 You prepare a table ( K ) before me in the presence of my "
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "5 You prepare a table ( K ) before me in the presence of my "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": "en-NIV-14241",
+"text": "5 You prepare a table ( K ) before me"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( K )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "in the presence of my enemies."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": null,
+"text": "in the presence of my enemies."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": null,
+"text": "You anoint my head with oil; ( L )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( L )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "my cup ( M ) overflows."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": null,
+"text": "my cup ( M ) overflows."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( M )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": "en-NIV-14242",
+"text": "6 Surely your goodness and love ( N ) will follow me"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( N )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "all the days of my life,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": null,
+"text": "all the days of my life,"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": null,
+"text": "and I will dwell in the house of the Lord"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "forever."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": null,
+"text": "forever."
+},
+{
+"tag": "div",
+"class": [
+"il-text"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "div",
+"class": [
+"footnotes",
+"resources-section"
+],
+"id": null,
+"text": "Footnotes Psalm 23:4 Or the valley of the shadow of death"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 23:4 Or the valley of the shadow of death"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or the valley of the shadow of death"
+},
+{
+"tag": "div",
+"class": [
+"crossrefs",
+"resources-section"
+],
+"id": null,
+"text": "Cross references Psalm 23:1 : S Ge 48:15; S Ps 28:9; S Jn 10"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 23:1 : S Ge 48:15; S Ps 28:9; S Jn 10:11 Psalm 23:1 : "
+}
+]
+}
