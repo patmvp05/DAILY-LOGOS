@@ -1,0 +1,532 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "The Lord the Shepherd of His People A Psalm of David. 23 The"
+},
+{
+"tag": "div",
+"class": [
+"version-NKJV",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "The Lord the Shepherd of His People A Psalm of David. 23 The"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": "en-NKJV-14237",
+"text": "The Lord the Shepherd of His People"
+},
+{
+"tag": "span",
+"class": [
+"small-caps",
+"divine-name"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": null,
+"text": "A Psalm of David."
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "23 The Lord is ( A ) my shepherd; ( B ) I shall not [ a ] wa"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "23 The Lord is ( A ) my shepherd; ( B ) I shall not [ a ] wa"
+},
+{
+"tag": "span",
+"class": [
+"chapter-2"
+],
+"id": null,
+"text": "23 The Lord is ( A ) my shepherd;"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": null,
+"text": "23 The Lord is ( A ) my shepherd;"
+},
+{
+"tag": "span",
+"class": [
+"chapternum"
+],
+"id": null,
+"text": "23"
+},
+{
+"tag": "span",
+"class": [
+"small-caps",
+"divine-name"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( A )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": null,
+"text": "( B ) I shall not [ a ] want."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( B )"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ a ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-2"
+],
+"id": "en-NKJV-14238",
+"text": "2 ( C ) He makes me to lie down in [ b ] green pastures;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( C )"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ b ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-2"
+],
+"id": null,
+"text": "( D ) He leads me beside the [ c ] still waters."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( D )"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ c ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-3"
+],
+"id": "en-NKJV-14239",
+"text": "3 He restores my soul;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-3"
+],
+"id": null,
+"text": "( E ) He leads me in the paths of righteousness"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( E )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-3"
+],
+"id": null,
+"text": "For His name’s sake."
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-1"
+],
+"id": null,
+"text": "4 Yea, though I walk through the valley of ( F ) the shadow "
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "4 Yea, though I walk through the valley of ( F ) the shadow "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": "en-NKJV-14240",
+"text": "4 Yea, though I walk through the valley of ( F ) the shadow "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( F )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "( G ) I will fear no evil;"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( G )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "( H ) For You are with me;"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( H )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "Your rod and Your staff, they comfort me."
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-1"
+],
+"id": null,
+"text": "5 You ( I ) prepare a table before me in the presence of my "
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "5 You ( I ) prepare a table before me in the presence of my "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": "en-NKJV-14241",
+"text": "5 You ( I ) prepare a table before me in the presence of my "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( I )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": null,
+"text": "You ( J ) anoint my head with oil;"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( J )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": null,
+"text": "My cup runs over."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": "en-NKJV-14242",
+"text": "6 Surely goodness and mercy shall follow me"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": null,
+"text": "All the days of my life;"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": null,
+"text": "And I will [ d ] dwell in the house of the Lord"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ d ]"
+},
+{
+"tag": "span",
+"class": [
+"small-caps",
+"divine-name"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": null,
+"text": "[ e ] Forever."
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ e ]"
+},
+{
+"tag": "div",
+"class": [
+"footnotes",
+"resources-section"
+],
+"id": null,
+"text": "Footnotes Psalm 23:1 lack Psalm 23:2 Lit. pastures of tender"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 23:1 lack Psalm 23:2 Lit. pastures of tender grass Psa"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "lack"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Lit. pastures of tender grass"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Lit. waters of rest"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "So with LXX, Syr., Tg., Vg.; MT return"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or To the end of my days, lit. For length of days"
+},
+{
+"tag": "div",
+"class": [
+"crossrefs",
+"resources-section"
+],
+"id": null,
+"text": "Cross references Psalm 23:1 : Ps. 78:52; 80:1; [Is. 40:11]; "
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 23:1 : Ps. 78:52; 80:1; [Is. 40:11]; Ezek. 34:11, 12; "
+}
+]
+}

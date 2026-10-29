@@ -1,0 +1,692 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "Land Still to Be Taken 13 When Joshua was very old, the Lord"
+},
+{
+"tag": "div",
+"class": [
+"version-NCV",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "Land Still to Be Taken 13 When Joshua was very old, the Lord"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-1"
+],
+"id": "en-NCV-6078",
+"text": "Land Still to Be Taken"
+},
+{
+"tag": "p",
+"class": [
+"chapter-2"
+],
+"id": null,
+"text": "13 When Joshua was very old, the Lord said to him, “Joshua, "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-1"
+],
+"id": null,
+"text": "13 When Joshua was very old, the Lord said to him, “Joshua, "
+},
+{
+"tag": "span",
+"class": [
+"chapternum"
+],
+"id": null,
+"text": "13"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-2"
+],
+"id": "en-NCV-6079",
+"text": "2 This is what is left: the regions of Geshur and of the Phi"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-3"
+],
+"id": "en-NCV-6080",
+"text": "3 the area from the Shihor River at the border of Egypt to E"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-4"
+],
+"id": "en-NCV-6081",
+"text": "4 who live south of the Canaanite land;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-5"
+],
+"id": "en-NCV-6082",
+"text": "5 the Gebalites, and the area of Lebanon east of Baal Gad be"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "6 “The Sidonians are living in the hill country from Lebanon"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-6"
+],
+"id": "en-NCV-6083",
+"text": "6 “The Sidonians are living in the hill country from Lebanon"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "7 “Now divide the land among the nine tribes and West Manass"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-7"
+],
+"id": "en-NCV-6084",
+"text": "7 “Now divide the land among the nine tribes and West Manass"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "7"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-8"
+],
+"id": "en-NCV-6085",
+"text": "Dividing the Land"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "8 East Manasseh and the tribes of Reuben and Gad had receive"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-8"
+],
+"id": null,
+"text": "8 East Manasseh and the tribes of Reuben and Gad had receive"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "8"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-9"
+],
+"id": "en-NCV-6086",
+"text": "9 Their land started at Aroer at the Arnon Ravine and contin"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "9"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-10"
+],
+"id": "en-NCV-6087",
+"text": "10 All the towns ruled by Sihon king of the Amorites, who ru"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "10"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-11"
+],
+"id": "en-NCV-6088",
+"text": "11 Gilead was also there, as well as the area where the peop"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "11"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-12"
+],
+"id": "en-NCV-6089",
+"text": "12 All the kingdom of Og king of Bashan was in the land. Og "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "12"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-13"
+],
+"id": "en-NCV-6090",
+"text": "13 Because the Israelites did not force out the people of Ge"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "13"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "14 The tribe of Levi was the only one that did not get any l"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-14"
+],
+"id": "en-NCV-6091",
+"text": "14 The tribe of Levi was the only one that did not get any l"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "14"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "15 Moses had given each family group from the tribe of Reube"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-15"
+],
+"id": "en-NCV-6092",
+"text": "15 Moses had given each family group from the tribe of Reube"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "15"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-16"
+],
+"id": "en-NCV-6093",
+"text": "16 Theirs was the land from Aroer near the Arnon Ravine to t"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "16"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-17"
+],
+"id": "en-NCV-6094",
+"text": "17 Heshbon and all the towns on the plain: Dibon, Bamoth Baa"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "17"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-18"
+],
+"id": "en-NCV-6095",
+"text": "18 Jahaz, Kedemoth, Mephaath,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "18"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-19"
+],
+"id": "en-NCV-6096",
+"text": "19 Kiriathaim, Sibmah, Zereth Shahar on the hill in the vall"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "19"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-20"
+],
+"id": "en-NCV-6097",
+"text": "20 Beth Peor, the hills of Pisgah, and Beth Jeshimoth."
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "20"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-21"
+],
+"id": "en-NCV-6098",
+"text": "21 So that land included all the towns on the plain and all "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "21"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-22"
+],
+"id": "en-NCV-6099",
+"text": "22 The Israelites killed many people during the fighting, in"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "22"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-23"
+],
+"id": "en-NCV-6100",
+"text": "23 The land given to Reuben stopped at the shore of the Jord"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "23"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "24 This is the land Moses gave to the tribe of Gad, to all i"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-24"
+],
+"id": "en-NCV-6101",
+"text": "24 This is the land Moses gave to the tribe of Gad, to all i"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "24"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-25"
+],
+"id": "en-NCV-6102",
+"text": "25 the land of Jazer and all the towns of Gilead; half the l"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "25"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-26"
+],
+"id": "en-NCV-6103",
+"text": "26 the area from Heshbon to Ramath Mizpah and Betonim; the a"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "26"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-27"
+],
+"id": "en-NCV-6104",
+"text": "27 in the valley, Beth Haram, Beth Nimrah, Succoth, and Zaph"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "27"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-28"
+],
+"id": "en-NCV-6105",
+"text": "28 All this land went to the family groups of Gad, including"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "28"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "29 This is the land Moses had given to East Manasseh. Half o"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-29"
+],
+"id": "en-NCV-6106",
+"text": "29 This is the land Moses had given to East Manasseh. Half o"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "29"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-30"
+],
+"id": "en-NCV-6107",
+"text": "30 The land started at Mahanaim and included all of Bashan a"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "30"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-31"
+],
+"id": "en-NCV-6108",
+"text": "31 half of Gilead, Ashtaroth, and Edrei, the cities where Og"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "31"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "32 Moses had given this land to these tribes on the plains o"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-32"
+],
+"id": "en-NCV-6109",
+"text": "32 Moses had given this land to these tribes on the plains o"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "32"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Josh-13-33"
+],
+"id": "en-NCV-6110",
+"text": "33 But Moses had given no land to the tribe of Levi because "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "33"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+}
+]
+}

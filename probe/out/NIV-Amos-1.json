@@ -1,0 +1,1800 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "1 The words of Amos, one of the shepherds of Tekoa ( A ) —th"
+},
+{
+"tag": "div",
+"class": [
+"version-NIV",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "1 The words of Amos, one of the shepherds of Tekoa ( A ) —th"
+},
+{
+"tag": "div",
+"class": [
+"std-text"
+],
+"id": null,
+"text": "1 The words of Amos, one of the shepherds of Tekoa ( A ) —th"
+},
+{
+"tag": "p",
+"class": [
+"chapter-1"
+],
+"id": null,
+"text": "1 The words of Amos, one of the shepherds of Tekoa ( A ) —th"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-1"
+],
+"id": "en-NIV-22366",
+"text": "1 The words of Amos, one of the shepherds of Tekoa ( A ) —th"
+},
+{
+"tag": "span",
+"class": [
+"chapternum"
+],
+"id": null,
+"text": "1"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( A )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( B )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( C )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( D )"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ a ]"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( E )"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "2 He said:"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-2"
+],
+"id": "en-NIV-22367",
+"text": "2 He said:"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "“The Lord roars ( F ) from Zion and thunders ( G ) from Jeru"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "“The Lord roars ( F ) from Zion and thunders ( G ) from Jeru"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-2"
+],
+"id": null,
+"text": "“The Lord roars ( F ) from Zion"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( F )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and thunders ( G ) from Jerusalem; ( H )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-2"
+],
+"id": null,
+"text": "and thunders ( G ) from Jerusalem; ( H )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( G )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( H )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-2"
+],
+"id": null,
+"text": "the pastures of the shepherds dry up,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and the top of Carmel ( I ) withers.” ( J )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-2"
+],
+"id": null,
+"text": "and the top of Carmel ( I ) withers.” ( J )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( I )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( J )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-3"
+],
+"id": "en-NIV-22368",
+"text": "Judgment on Israel’s Neighbors"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "3 This is what the Lord says:"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-3"
+],
+"id": null,
+"text": "3 This is what the Lord says:"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "“For three sins of Damascus, ( K ) even for four, I will not"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "“For three sins of Damascus, ( K ) even for four, I will not"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-3"
+],
+"id": null,
+"text": "“For three sins of Damascus, ( K )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( K )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "even for four, I will not relent. ( L )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-3"
+],
+"id": null,
+"text": "even for four, I will not relent. ( L )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( L )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-3"
+],
+"id": null,
+"text": "Because she threshed Gilead"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "with sledges having iron teeth,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-3"
+],
+"id": null,
+"text": "with sledges having iron teeth,"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-4"
+],
+"id": "en-NIV-22369",
+"text": "4 I will send fire ( M ) on the house of Hazael ( N )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( M )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( N )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that will consume the fortresses ( O ) of Ben-Hadad. ( P )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-4"
+],
+"id": null,
+"text": "that will consume the fortresses ( O ) of Ben-Hadad. ( P )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( O )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( P )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-5"
+],
+"id": "en-NIV-22370",
+"text": "5 I will break down the gate ( Q ) of Damascus;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Q )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I will destroy the king who is in [ b ] the Valley of Aven ["
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-5"
+],
+"id": null,
+"text": "I will destroy the king who is in [ b ] the Valley of Aven ["
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ b ]"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ c ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-5"
+],
+"id": null,
+"text": "and the one who holds the scepter in Beth Eden. ( R )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( R )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "The people of Aram will go into exile to Kir, ( S ) ”"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-5"
+],
+"id": null,
+"text": "The people of Aram will go into exile to Kir, ( S ) ”"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( S )"
+},
+{
+"tag": "span",
+"class": [
+"right"
+],
+"id": null,
+"text": "says the Lord . ( T )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-5"
+],
+"id": null,
+"text": "says the Lord . ( T )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( T )"
+},
+{
+"tag": "p",
+"class": [
+"top-05"
+],
+"id": null,
+"text": "6 This is what the Lord says:"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-6"
+],
+"id": "en-NIV-22371",
+"text": "6 This is what the Lord says:"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "“For three sins of Gaza, ( U ) even for four, I will not rel"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "“For three sins of Gaza, ( U ) even for four, I will not rel"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-6"
+],
+"id": null,
+"text": "“For three sins of Gaza, ( U )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( U )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "even for four, I will not relent. ( V )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-6"
+],
+"id": null,
+"text": "even for four, I will not relent. ( V )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( V )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-6"
+],
+"id": null,
+"text": "Because she took captive whole communities"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and sold them to Edom, ( W )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-6"
+],
+"id": null,
+"text": "and sold them to Edom, ( W )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( W )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-7"
+],
+"id": "en-NIV-22372",
+"text": "7 I will send fire on the walls of Gaza"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "7"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that will consume her fortresses."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-7"
+],
+"id": null,
+"text": "that will consume her fortresses."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-8"
+],
+"id": "en-NIV-22373",
+"text": "8 I will destroy the king [ d ] of Ashdod ( X )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "8"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ d ]"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( X )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and the one who holds the scepter in Ashkelon."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-8"
+],
+"id": null,
+"text": "and the one who holds the scepter in Ashkelon."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-8"
+],
+"id": null,
+"text": "I will turn my hand ( Y ) against Ekron,"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Y )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "till the last of the Philistines ( Z ) are dead,” ( AA )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-8"
+],
+"id": null,
+"text": "till the last of the Philistines ( Z ) are dead,” ( AA )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Z )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AA )"
+},
+{
+"tag": "span",
+"class": [
+"right"
+],
+"id": null,
+"text": "says the Sovereign Lord . ( AB )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-8"
+],
+"id": null,
+"text": "says the Sovereign Lord . ( AB )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AB )"
+},
+{
+"tag": "p",
+"class": [
+"top-05"
+],
+"id": null,
+"text": "9 This is what the Lord says:"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-9"
+],
+"id": "en-NIV-22374",
+"text": "9 This is what the Lord says:"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "9"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "“For three sins of Tyre, ( AC ) even for four, I will not re"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "“For three sins of Tyre, ( AC ) even for four, I will not re"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-9"
+],
+"id": null,
+"text": "“For three sins of Tyre, ( AC )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AC )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "even for four, I will not relent. ( AD )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-9"
+],
+"id": null,
+"text": "even for four, I will not relent. ( AD )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AD )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-9"
+],
+"id": null,
+"text": "Because she sold whole communities of captives to Edom,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "disregarding a treaty of brotherhood, ( AE )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-9"
+],
+"id": null,
+"text": "disregarding a treaty of brotherhood, ( AE )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AE )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-10"
+],
+"id": "en-NIV-22375",
+"text": "10 I will send fire on the walls of Tyre"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "10"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that will consume her fortresses. ( AF ) ”"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-10"
+],
+"id": null,
+"text": "that will consume her fortresses. ( AF ) ”"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AF )"
+},
+{
+"tag": "p",
+"class": [
+"top-05"
+],
+"id": null,
+"text": "11 This is what the Lord says:"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-11"
+],
+"id": "en-NIV-22376",
+"text": "11 This is what the Lord says:"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "11"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "“For three sins of Edom, ( AG ) even for four, I will not re"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "“For three sins of Edom, ( AG ) even for four, I will not re"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-11"
+],
+"id": null,
+"text": "“For three sins of Edom, ( AG )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AG )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "even for four, I will not relent."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-11"
+],
+"id": null,
+"text": "even for four, I will not relent."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-11"
+],
+"id": null,
+"text": "Because he pursued his brother with a sword ( AH )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AH )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and slaughtered the women of the land,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-11"
+],
+"id": null,
+"text": "and slaughtered the women of the land,"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-11"
+],
+"id": null,
+"text": "because his anger raged continually"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and his fury flamed unchecked, ( AI )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-11"
+],
+"id": null,
+"text": "and his fury flamed unchecked, ( AI )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AI )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-12"
+],
+"id": "en-NIV-22377",
+"text": "12 I will send fire on Teman ( AJ )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "12"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AJ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that will consume the fortresses of Bozrah. ( AK ) ”"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-12"
+],
+"id": null,
+"text": "that will consume the fortresses of Bozrah. ( AK ) ”"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AK )"
+},
+{
+"tag": "p",
+"class": [
+"top-05"
+],
+"id": null,
+"text": "13 This is what the Lord says:"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-13"
+],
+"id": "en-NIV-22378",
+"text": "13 This is what the Lord says:"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "13"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "“For three sins of Ammon, ( AL ) even for four, I will not r"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "“For three sins of Ammon, ( AL ) even for four, I will not r"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-13"
+],
+"id": null,
+"text": "“For three sins of Ammon, ( AL )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AL )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "even for four, I will not relent."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-13"
+],
+"id": null,
+"text": "even for four, I will not relent."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-13"
+],
+"id": null,
+"text": "Because he ripped open the pregnant women ( AM ) of Gilead"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AM )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "in order to extend his borders,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-13"
+],
+"id": null,
+"text": "in order to extend his borders,"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-14"
+],
+"id": "en-NIV-22379",
+"text": "14 I will set fire to the walls of Rabbah ( AN )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "14"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AN )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that will consume ( AO ) her fortresses"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-14"
+],
+"id": null,
+"text": "that will consume ( AO ) her fortresses"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AO )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-14"
+],
+"id": null,
+"text": "amid war cries ( AP ) on the day of battle,"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AP )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "amid violent winds ( AQ ) on a stormy day."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-14"
+],
+"id": null,
+"text": "amid violent winds ( AQ ) on a stormy day."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AQ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-15"
+],
+"id": "en-NIV-22380",
+"text": "15 Her king [ e ] will go into exile,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "15"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ e ]"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "he and his officials together, ( AR ) ”"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-15"
+],
+"id": null,
+"text": "he and his officials together, ( AR ) ”"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AR )"
+},
+{
+"tag": "span",
+"class": [
+"right"
+],
+"id": null,
+"text": "says the Lord . ( AS )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Amos-1-15"
+],
+"id": null,
+"text": "says the Lord . ( AS )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AS )"
+},
+{
+"tag": "div",
+"class": [
+"il-text"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "div",
+"class": [
+"footnotes",
+"resources-section"
+],
+"id": null,
+"text": "Footnotes Amos 1:1 Hebrew Joash, a variant of Jehoash Amos 1"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Amos 1:1 Hebrew Joash, a variant of Jehoash Amos 1:5 Or the "
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Hebrew Joash, a variant of Jehoash"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or the inhabitants of"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Aven means wickedness ."
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or inhabitants"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or / Molek"
+},
+{
+"tag": "div",
+"class": [
+"crossrefs",
+"resources-section"
+],
+"id": null,
+"text": "Cross references Amos 1:1 : S 2Sa 14:2 Amos 1:1 : Zec 14:5 A"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Amos 1:1 : S 2Sa 14:2 Amos 1:1 : Zec 14:5 Amos 1:1 : S 2Ki 1"
+}
+]
+}

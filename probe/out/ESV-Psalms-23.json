@@ -1,0 +1,794 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "The Lord Is My Shepherd A Psalm of David. 23 The Lord is my "
+},
+{
+"tag": "div",
+"class": [
+"version-ESV",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "The Lord Is My Shepherd A Psalm of David. 23 The Lord is my "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": "en-ESV-14237",
+"text": "The Lord Is My Shepherd"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": null,
+"text": "A Psalm of David."
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "23 The Lord is my ( A ) shepherd; I shall not ( B ) want. 2 "
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "23 The Lord is my ( A ) shepherd; I shall not ( B ) want. 2 "
+},
+{
+"tag": "span",
+"class": [
+"chapter-2"
+],
+"id": null,
+"text": "23 The Lord is my ( A ) shepherd; I shall not ( B ) want."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": null,
+"text": "23 The Lord is my ( A ) shepherd; I shall not ( B ) want."
+},
+{
+"tag": "span",
+"class": [
+"chapternum"
+],
+"id": null,
+"text": "23"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( A )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( B )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "2 He makes me lie down in green ( C ) pastures."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-2"
+],
+"id": "en-ESV-14238",
+"text": "2 He makes me lie down in green ( C ) pastures."
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( C )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-2"
+],
+"id": null,
+"text": "He leads me beside still waters. [ a ]"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ a ]"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "3 He ( D ) restores my soul."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-3"
+],
+"id": "en-ESV-14239",
+"text": "3 He ( D ) restores my soul."
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( D )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-3"
+],
+"id": null,
+"text": "He ( E ) leads me in ( F ) paths of righteousness [ b ]"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( E )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( F )"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ b ]"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for his ( G ) name's sake."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-3"
+],
+"id": null,
+"text": "for his ( G ) name's sake."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( G )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-1"
+],
+"id": null,
+"text": "4 Even though I ( H ) walk through the valley of ( I ) the s"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "4 Even though I ( H ) walk through the valley of ( I ) the s"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": "en-ESV-14240",
+"text": "4 Even though I ( H ) walk through the valley of ( I ) the s"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( H )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( I )"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ c ]"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I will ( J ) fear no evil,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "I will ( J ) fear no evil,"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( J )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "for ( K ) you are with me;"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( K )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "your ( L ) rod and your staff,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "your ( L ) rod and your staff,"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( L )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "they comfort me."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "they comfort me."
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-1"
+],
+"id": null,
+"text": "5 You ( M ) prepare a table before me in ( N ) the presence "
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "5 You ( M ) prepare a table before me in ( N ) the presence "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": "en-ESV-14241",
+"text": "5 You ( M ) prepare a table before me"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( M )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "in ( N ) the presence of my enemies;"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": null,
+"text": "in ( N ) the presence of my enemies;"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( N )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": null,
+"text": "you ( O ) anoint my head with oil;"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( O )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "my ( P ) cup overflows."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": null,
+"text": "my ( P ) cup overflows."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( P )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": "en-ESV-14242",
+"text": "6 Surely [ d ] goodness and mercy [ e ] shall follow me"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ d ]"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ e ]"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "all the days of my life,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": null,
+"text": "all the days of my life,"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": null,
+"text": "and I shall ( Q ) dwell [ f ] in the house of the Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Q )"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ f ]"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "( R ) forever. [ g ]"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": null,
+"text": "( R ) forever. [ g ]"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( R )"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ g ]"
+},
+{
+"tag": "div",
+"class": [
+"footnotes",
+"resources-section"
+],
+"id": null,
+"text": "Footnotes Psalm 23:2 Hebrew beside waters of rest Psalm 23:3"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 23:2 Hebrew beside waters of rest Psalm 23:3 Or in rig"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Hebrew beside waters of rest"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or in right paths"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or the valley of deep darkness"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or Only"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or steadfast love"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or shall return to dwell"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Hebrew for length of days"
+},
+{
+"tag": "div",
+"class": [
+"crossrefs",
+"resources-section"
+],
+"id": null,
+"text": "Cross references Psalm 23:1 : Ps. 78:52; 80:1; Isa. 40:11; J"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 23:1 : Ps. 78:52; 80:1; Isa. 40:11; Jer. 31:10; Ezek. "
+}
+]
+}

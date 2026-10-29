@@ -1,0 +1,471 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "The Lord the Shepherd A psalm of David. 23 The Lord is my sh"
+},
+{
+"tag": "div",
+"class": [
+"version-NCV",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "The Lord the Shepherd A psalm of David. 23 The Lord is my sh"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": "en-NCV-14135",
+"text": "The Lord the Shepherd"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": null,
+"text": "A psalm of David."
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "23 The Lord is my shepherd; I have everything I need. 2 He l"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "23 The Lord is my shepherd; I have everything I need. 2 He l"
+},
+{
+"tag": "span",
+"class": [
+"chapter-2"
+],
+"id": null,
+"text": "23 The Lord is my shepherd;"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": null,
+"text": "23 The Lord is my shepherd;"
+},
+{
+"tag": "span",
+"class": [
+"chapternum"
+],
+"id": null,
+"text": "23"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I have everything I need."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-1"
+],
+"id": null,
+"text": "I have everything I need."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-2"
+],
+"id": "en-NCV-14136",
+"text": "2 He lets me rest in green pastures."
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "He leads me to calm water."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-2"
+],
+"id": null,
+"text": "He leads me to calm water."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-3"
+],
+"id": "en-NCV-14137",
+"text": "3 He gives me new strength."
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-3"
+],
+"id": null,
+"text": "He leads me on paths that are right"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for the good of his name."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-3"
+],
+"id": null,
+"text": "for the good of his name."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": "en-NCV-14138",
+"text": "4 Even if I walk through a very dark valley,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I will not be afraid,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "I will not be afraid,"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "because you are with me."
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "Your rod and your shepherd’s staff comfort me."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-4"
+],
+"id": null,
+"text": "Your rod and your shepherd’s staff comfort me."
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-1"
+],
+"id": null,
+"text": "5 You prepare a meal for me in front of my enemies. You pour"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "5 You prepare a meal for me in front of my enemies. You pour"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": "en-NCV-14139",
+"text": "5 You prepare a meal for me"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "in front of my enemies."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": null,
+"text": "in front of my enemies."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": null,
+"text": "You pour oil of blessing on my head; [ a ]"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ a ]"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "you fill my cup to overflowing."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-5"
+],
+"id": null,
+"text": "you fill my cup to overflowing."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": "en-NCV-14140",
+"text": "6 Surely your goodness and love will be with me"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "all my life,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": null,
+"text": "all my life,"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-23-6"
+],
+"id": null,
+"text": "and I will live in the house of the Lord forever."
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "div",
+"class": [
+"footnotes",
+"resources-section"
+],
+"id": null,
+"text": "Footnotes 23:5 pour oil . . . head This can mean that God ga"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "23:5 pour oil . . . head This can mean that God gave him gre"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "pour oil . . . head This can mean that God gave him great we"
+}
+]
+}
