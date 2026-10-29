@@ -75,6 +75,7 @@ BOOKS = [
 
 KNOWN_NAMES = {
     "NCV": "New Century Version",
+    "NIV": "New International Version",
     "CSB": "Christian Standard Bible",
     "ESV": "English Standard Version",
     "NKJV": "New King James Version",
@@ -92,6 +93,7 @@ VERSE_CLASS_RE = re.compile(
     r"^([1-3]?[A-Za-z]+)-(\d+)-(\d+)(?:-([1-3]?[A-Za-z]+)-(\d+)-(\d+))?$"
 )
 PLACEHOLDER_RE = re.compile(r"^[\s\-‐-―]*$")
+JUNK_TEXT_RE = re.compile(r"prohibited me from using|bolls\.life|biblegateway\.com|All rights reserved|Copyright ©", re.I)
 SPACED_ELLIPSIS_RE = re.compile(r"\.(?:\s\.){2,}")
 
 
@@ -231,6 +233,17 @@ def check_chapter(verses, book_name, chapter):
             problems.append(f"verse {start} is empty")
         covered.extend(range(start, end + 1))
 
+    # Text that is not scripture: a notice served in place of every verse (bolls
+    # began answering NIV requests with a statement from its owner, Oct 2026,
+    # and every verse number was still present), or one text repeated.
+    texts = [v.get("text", "") for v in verses]
+    if any(JUNK_TEXT_RE.search(t) for t in texts):
+        problems.append("notice or page text instead of scripture")
+    if len(texts) >= 5:
+        top = max(texts.count(t) for t in set(texts))
+        if top > len(texts) / 2:
+            problems.append(f"{top} of {len(texts)} verses have identical text")
+
     have = set(covered)
     best = None
     for n in allowed_last:
@@ -346,6 +359,10 @@ def main():
                     break
                 except Exception as e:  # noqa: BLE001 - retried, then reported
                     last_err = e
+                    # An incomplete chapter is retried once (a truncated page),
+                    # not five times: the parser's answer won't change.
+                    if isinstance(e, ValueError) and attempt >= 1:
+                        break
                     if attempt < MAX_RETRIES:
                         time.sleep(min(2 * (2 ** attempt), 30))
             if last_err is not None:

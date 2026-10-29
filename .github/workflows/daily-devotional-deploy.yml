@@ -60,7 +60,7 @@ jobs:
 
       - name: Install & build
         if: steps.commit.outputs.committed == 'true' || github.event_name == 'workflow_dispatch'
-        run: npm ci && npm run build
+        run: npm ci && npx tsx scripts/test-bible-integrity.mts && npm run build
 
       - name: Deploy to Firebase Hosting
         if: steps.commit.outputs.committed == 'true' || github.event_name == 'workflow_dispatch'

@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const VERSE_COUNTS = JSON.parse(readFileSync(join(HERE, 'verse-counts.json'), 'utf8'));
+const JUNK_TEXT = /prohibited me from using|bolls\.life|biblegateway\.com|All rights reserved|Copyright ©/i;
 
 /**
  * Problems with one chapter's verses (empty array = complete):
@@ -51,6 +52,18 @@ export function checkChapter(verses, bookName, chapter) {
     lastEnd = Math.max(lastEnd, end);
     if (!String(v.text || '').trim()) problems.push(`verse ${start} is empty`);
     for (let n = start; n <= end; n++) have.add(n);
+  }
+
+  // Text that is not scripture: a notice served in place of every verse (bolls
+  // began answering NIV requests with a statement from its owner, Oct 2026,
+  // while every verse number was still present), or one text repeated.
+  const texts = verses.map((v) => String(v.text || ''));
+  if (texts.some((t) => JUNK_TEXT.test(t))) problems.push('notice or page text instead of scripture');
+  if (texts.length >= 5) {
+    const counts = new Map();
+    for (const t of texts) counts.set(t, (counts.get(t) || 0) + 1);
+    const top = Math.max(...counts.values());
+    if (top > texts.length / 2) problems.push(`${top} of ${texts.length} verses have identical text`);
   }
 
   let best = null;

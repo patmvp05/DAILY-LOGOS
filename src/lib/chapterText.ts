@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { get, set } from 'idb-keyval';
+import { get, set, keys, delMany } from 'idb-keyval';
 import {
   BIBLE_VERSION_NAMES,
   BOLLS_BIBLE_BOOK_IDS,
@@ -15,6 +15,10 @@ import {
 export interface ChapterVerse {
   verse: number;
   text: string;
+  // Set when the translation prints several verses as one passage (NCV
+  // Numbers 7:12-83, Genesis 8:3-4): the entry covers verse..verseEnd. Show and
+  // count it through src/lib/verseLabel.ts.
+  verseEnd?: number;
 }
 
 export interface ChapterTextResponse {
@@ -30,22 +34,48 @@ export interface ChapterTextResponse {
   _fallback?: boolean;
 }
 
-// v6: bumped from v5 to discard any KJV-fallback entries that got persisted
-// under a modern-version key while that version's static files weren't deployed
-// yet. Going forward, fallbacks are memory-only (see getChapterText), so this
-// is the last time stale fallbacks should ever reach disk.
-const CACHE_PREFIX = 'chapter_text_v6_';
-// One-time cache-bust on the static-file URL. Earlier builds requested
-// /bible/<CODE>/.../<ch>.json before those files existed; Firebase's SPA rewrite
-// answered with index.html (HTTP 200) and our old `immutable` header told the
-// browser to keep it for a year. Appending ?b=N makes a fresh URL key that
-// bypasses those poisoned entries so the real JSON is fetched. Bump if ever
-// needed again.
-const STATIC_CACHE_BUST = 'b=2';
+// v7 (Oct 2026): the committed text was repaired. NCV had dropped every
+// combined passage (Numbers 7 kept 17 of 89 verses), NIV/NLT had lost the first
+// line of many poetry verses, and thousands of verses read "the Lord ." A cached
+// chapter is otherwise kept forever, so without this bump a phone would keep
+// showing the broken copy it had already saved. Older prefixes are deleted by
+// purgeStaleChapterCache().
+// (v6 discarded KJV-fallback entries persisted under a modern version's key.)
+const CACHE_PREFIX = 'chapter_text_v7_';
+const STALE_PREFIX = /^chapter_text_v\d+_/;
+// Cache-bust on the static-file URL. b=2: earlier builds requested files before
+// they existed and Firebase answered with index.html under an `immutable`
+// header. b=3: the text itself was repaired (see CACHE_PREFIX). Bump whenever
+// the committed text changes in a way a stale copy must not survive.
+const STATIC_CACHE_BUST = 'b=3';
 const FETCH_TIMEOUT_MS = 12000;
 
 // L1 in-memory cache to avoid repeated IndexedDB reads / re-parsing.
 const memoryCache = new Map<string, ChapterTextResponse>();
+
+/**
+ * Delete chapters cached under an older CACHE_PREFIX. They are never read again,
+ * so this only frees storage (a few MB on a phone). Best effort, runs once per
+ * prefix per device.
+ */
+export async function purgeStaleChapterCache(): Promise<number> {
+  const marker = `purged_before_${CACHE_PREFIX}`;
+  try {
+    if (localStorage.getItem(marker)) return 0;
+  } catch {
+    // no localStorage: still try the purge
+  }
+  try {
+    const stale = (await keys()).filter(
+      (k): k is string => typeof k === 'string' && STALE_PREFIX.test(k) && !k.startsWith(CACHE_PREFIX)
+    );
+    if (stale.length) await delMany(stale);
+    try { localStorage.setItem(marker, '1'); } catch { /* ignored */ }
+    return stale.length;
+  } catch {
+    return 0;
+  }
+}
 
 /**
  * Collapse the occasional stray HTML/whitespace bible-api.com returns (verse

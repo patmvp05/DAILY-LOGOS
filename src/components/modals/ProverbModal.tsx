@@ -12,9 +12,10 @@ import { useUi } from '../../state/UiContextCore';
 import { triggerHaptic } from '../../lib/haptic';
 import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 import VerseCopyPopup from '../VerseCopyPopup';
+import { lastVerseInChapter, verseLabel } from '../../lib/verseLabel';
 
 interface ProverbContent {
-  verses?: { verse: number; text: string }[];
+  verses?: { verse: number; text: string; verseEnd?: number }[];
   text?: string;
   translation_id?: string;
   translation_name?: string;
@@ -76,7 +77,7 @@ function ProverbModal({
   const verses = proverbContent?.verses ?? [];
   // Last verse number, so the heading can show the range (e.g. "19:1–29"),
   // the same way the Bible reader does.
-  const lastVerse = verses.length > 0 ? verses[verses.length - 1].verse : null;
+  const lastVerse = lastVerseInChapter(verses);
 
   return (
     <>
@@ -172,7 +173,7 @@ function ProverbModal({
                             }}
                             className="text-[12px] font-bold align-super mr-1.5 text-brand/70 tabular-nums select-none cursor-pointer hover:text-brand active:scale-110 transition-all inline"
                           >
-                            {v.verse}
+                            {verseLabel(v)}
                           </button>
                           {v.text}
                         </div>

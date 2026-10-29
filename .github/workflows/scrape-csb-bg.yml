@@ -15,6 +15,11 @@ on:
     paths:
       - '.github/workflows/scrape-csb-bg.yml'
   workflow_dispatch:
+    inputs:
+      refetch:
+        description: 'Re-download chapters saved by an older parser version'
+        required: false
+        default: 'false'
 
 # Per-WORKFLOW concurrency, deliberately not a single shared group.
 #
@@ -46,6 +51,11 @@ jobs:
       - name: Install scraper deps
         run: pip install requests beautifulsoup4
 
+      # Offline: the parser still reads combined verses, small caps, psalm
+      # titles and tables the way BibleGateway marks them up.
+      - name: Parser tests
+        run: python scripts/test-biblegateway-parser.py
+
       - name: Smoke test — CSB John 3 via BibleGateway
         env:
           SMOKE: '1'
@@ -59,6 +69,7 @@ jobs:
         timeout-minutes: 50
         env:
           BG_VERSION: CSB
+          REFETCH: ${{ github.event.inputs.refetch == 'true' && '1' || '0' }}
         run: python scripts/fetch-biblegateway.py
 
       - name: Commit CSB static files (even if incomplete)

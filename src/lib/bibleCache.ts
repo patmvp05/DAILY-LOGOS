@@ -6,11 +6,27 @@
 import { resolveBibleVersion } from '../constants';
 import { getChapterText } from './chapterText';
 
-// v11: bumped to discard KJV-fallback previews that got cached under a modern
-// version's key before that version's static files were deployed. We also now
-// refuse to persist fallback previews (see getChapterInfo), so once the real
-// text deploys the preview self-heals on next load.
-const CACHE_PREFIX = 'bible_chapter_cache_v11_';
+// v12 (Oct 2026): the committed text was repaired (see CACHE_PREFIX in
+// chapterText.ts). A preview cached from the broken text kept its reading time
+// forever: NCV Numbers 7 showed "~2 MIN" for a chapter that is about 4.
+// (v11 discarded KJV-fallback previews cached under a modern version's key.)
+const CACHE_PREFIX = 'bible_chapter_cache_v12_';
+const STALE_PREFIX = /^bible_chapter_cache_v\d+_/;
+
+/** Remove previews cached under an older prefix. Best effort, synchronous. */
+export function purgeStalePreviewCache(): number {
+  try {
+    const stale: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && STALE_PREFIX.test(k) && !k.startsWith(CACHE_PREFIX)) stale.push(k);
+    }
+    stale.forEach((k) => localStorage.removeItem(k));
+    return stale.length;
+  } catch {
+    return 0;
+  }
+}
 
 interface ChapterInfo {
   firstVerse: string;
