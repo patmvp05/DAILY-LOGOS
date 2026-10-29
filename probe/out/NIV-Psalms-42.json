@@ -1,0 +1,1423 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "BOOK II Psalms 42–72 Psalm 42 [ a ] [ b ] For the director o"
+},
+{
+"tag": "div",
+"class": [
+"version-NIV",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "BOOK II Psalms 42–72 Psalm 42 [ a ] [ b ] For the director o"
+},
+{
+"tag": "div",
+"class": [
+"std-text"
+],
+"id": null,
+"text": "BOOK II Psalms 42–72 Psalm 42 [ a ] [ b ] For the director o"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-1"
+],
+"id": "en-NIV-14557",
+"text": "BOOK II"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-1"
+],
+"id": null,
+"text": "Psalms 42–72"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-1"
+],
+"id": null,
+"text": "Psalm 42 [ a ] [ b ]"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ a ]"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ b ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-1"
+],
+"id": null,
+"text": "For the director of music. A maskil [ c ] of the Sons of Kor"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ c ]"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "1 As the deer ( A ) pants for streams of water, ( B ) so my "
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "1 As the deer ( A ) pants for streams of water, ( B ) so my "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-1"
+],
+"id": null,
+"text": "1 As the deer ( A ) pants for streams of water, ( B )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "1"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( A )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( B )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "so my soul pants ( C ) for you, my God."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-1"
+],
+"id": null,
+"text": "so my soul pants ( C ) for you, my God."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( C )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-2"
+],
+"id": "en-NIV-14558",
+"text": "2 My soul thirsts ( D ) for God, for the living God. ( E )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( D )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( E )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "When can I go ( F ) and meet with God?"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-2"
+],
+"id": null,
+"text": "When can I go ( F ) and meet with God?"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( F )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-3"
+],
+"id": "en-NIV-14559",
+"text": "3 My tears ( G ) have been my food"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( G )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "day and night,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-3"
+],
+"id": null,
+"text": "day and night,"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-3"
+],
+"id": null,
+"text": "while people say to me all day long,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "“Where is your God?” ( H )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-3"
+],
+"id": null,
+"text": "“Where is your God?” ( H )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( H )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-4"
+],
+"id": "en-NIV-14560",
+"text": "4 These things I remember"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "as I pour out my soul: ( I )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-4"
+],
+"id": null,
+"text": "as I pour out my soul: ( I )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( I )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-4"
+],
+"id": null,
+"text": "how I used to go to the house of God ( J )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( J )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "under the protection of the Mighty One [ d ]"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-4"
+],
+"id": null,
+"text": "under the protection of the Mighty One [ d ]"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ d ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-4"
+],
+"id": null,
+"text": "with shouts of joy ( K ) and praise ( L )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( K )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( L )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "among the festive throng. ( M )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-4"
+],
+"id": null,
+"text": "among the festive throng. ( M )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( M )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "5 Why, my soul, are you downcast? ( N ) Why so disturbed ( O"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "5 Why, my soul, are you downcast? ( N ) Why so disturbed ( O"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-5"
+],
+"id": "en-NIV-14561",
+"text": "5 Why, my soul, are you downcast? ( N )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( N )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "Why so disturbed ( O ) within me?"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-5"
+],
+"id": null,
+"text": "Why so disturbed ( O ) within me?"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( O )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-5"
+],
+"id": null,
+"text": "Put your hope in God, ( P )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( P )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I will yet praise ( Q ) him,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-5"
+],
+"id": null,
+"text": "for I will yet praise ( Q ) him,"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Q )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "my Savior ( R ) and my God. ( S )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-5"
+],
+"id": null,
+"text": "my Savior ( R ) and my God. ( S )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( R )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( S )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "6 My soul is downcast within me; therefore I will remember ("
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "6 My soul is downcast within me; therefore I will remember ("
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-6"
+],
+"id": "en-NIV-14562",
+"text": "6 My soul is downcast within me;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "therefore I will remember ( T ) you"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-6"
+],
+"id": null,
+"text": "therefore I will remember ( T ) you"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( T )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-6"
+],
+"id": null,
+"text": "from the land of the Jordan, ( U )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( U )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "the heights of Hermon ( V ) —from Mount Mizar."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-6"
+],
+"id": null,
+"text": "the heights of Hermon ( V ) —from Mount Mizar."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( V )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-7"
+],
+"id": "en-NIV-14563",
+"text": "7 Deep calls to deep ( W )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "7"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( W )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "in the roar of your waterfalls;"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-7"
+],
+"id": null,
+"text": "in the roar of your waterfalls;"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-7"
+],
+"id": null,
+"text": "all your waves and breakers"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "have swept over me. ( X )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-7"
+],
+"id": null,
+"text": "have swept over me. ( X )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( X )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "8 By day the Lord directs his love, ( Y ) at night ( Z ) his"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "8 By day the Lord directs his love, ( Y ) at night ( Z ) his"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-8"
+],
+"id": "en-NIV-14564",
+"text": "8 By day the Lord directs his love, ( Y )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "8"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Y )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "at night ( Z ) his song ( AA ) is with me—"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-8"
+],
+"id": null,
+"text": "at night ( Z ) his song ( AA ) is with me—"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Z )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AA )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "a prayer to the God of my life. ( AB )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-8"
+],
+"id": null,
+"text": "a prayer to the God of my life. ( AB )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AB )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "9 I say to God my Rock, ( AC ) “Why have you forgotten ( AD "
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "9 I say to God my Rock, ( AC ) “Why have you forgotten ( AD "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-9"
+],
+"id": "en-NIV-14565",
+"text": "9 I say to God my Rock, ( AC )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "9"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AC )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "“Why have you forgotten ( AD ) me?"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-9"
+],
+"id": null,
+"text": "“Why have you forgotten ( AD ) me?"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AD )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-9"
+],
+"id": null,
+"text": "Why must I go about mourning, ( AE )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AE )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "oppressed ( AF ) by the enemy?” ( AG )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-9"
+],
+"id": null,
+"text": "oppressed ( AF ) by the enemy?” ( AG )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AF )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AG )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-10"
+],
+"id": "en-NIV-14566",
+"text": "10 My bones suffer mortal agony ( AH )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "10"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AH )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "as my foes taunt ( AI ) me,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-10"
+],
+"id": null,
+"text": "as my foes taunt ( AI ) me,"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AI )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-10"
+],
+"id": null,
+"text": "saying to me all day long,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "“Where is your God?” ( AJ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-10"
+],
+"id": null,
+"text": "“Where is your God?” ( AJ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AJ )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "11 Why, my soul, are you downcast? Why so disturbed within m"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "11 Why, my soul, are you downcast? Why so disturbed within m"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-11"
+],
+"id": "en-NIV-14567",
+"text": "11 Why, my soul, are you downcast?"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "11"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "Why so disturbed within me?"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-11"
+],
+"id": null,
+"text": "Why so disturbed within me?"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-11"
+],
+"id": null,
+"text": "Put your hope in God,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for I will yet praise him,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-11"
+],
+"id": null,
+"text": "for I will yet praise him,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "my Savior and my God. ( AK )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-42-11"
+],
+"id": null,
+"text": "my Savior and my God. ( AK )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AK )"
+},
+{
+"tag": "div",
+"class": [
+"il-text"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "div",
+"class": [
+"footnotes",
+"resources-section"
+],
+"id": null,
+"text": "Footnotes Psalm 42:1 In many Hebrew manuscripts Psalms 42 an"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 42:1 In many Hebrew manuscripts Psalms 42 and 43 const"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "In many Hebrew manuscripts Psalms 42 and 43 constitute one p"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "In Hebrew texts 42:1-11 is numbered 42:2-12."
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Title: Probably a literary or musical term"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "See Septuagint and Syriac; the meaning of the Hebrew for thi"
+},
+{
+"tag": "div",
+"class": [
+"crossrefs",
+"resources-section"
+],
+"id": null,
+"text": "Cross references Psalm 42:1 : S Ps 18:33 Psalm 42:1 : S Dt 1"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 42:1 : S Ps 18:33 Psalm 42:1 : S Dt 10:7 Psalm 42:1 : "
+}
+]
+}

@@ -1,0 +1,1990 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "Habakkuk’s Prayer 3 A prayer of Habakkuk the prophet. On shi"
+},
+{
+"tag": "div",
+"class": [
+"version-NIV",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "Habakkuk’s Prayer 3 A prayer of Habakkuk the prophet. On shi"
+},
+{
+"tag": "div",
+"class": [
+"std-text"
+],
+"id": null,
+"text": "Habakkuk’s Prayer 3 A prayer of Habakkuk the prophet. On shi"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-1"
+],
+"id": "en-NIV-22770",
+"text": "Habakkuk’s Prayer"
+},
+{
+"tag": "p",
+"class": [
+"chapter-1"
+],
+"id": null,
+"text": "3 A prayer of Habakkuk the prophet. On shigionoth . [ a ] ( "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-1"
+],
+"id": null,
+"text": "3 A prayer of Habakkuk the prophet. On shigionoth . [ a ] ( "
+},
+{
+"tag": "span",
+"class": [
+"chapternum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ a ]"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( A )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "2 Lord , I have heard ( B ) of your fame; I stand in awe ( C"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "2 Lord , I have heard ( B ) of your fame; I stand in awe ( C"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-2"
+],
+"id": "en-NIV-22771",
+"text": "2 Lord , I have heard ( B ) of your fame;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( B )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I stand in awe ( C ) of your deeds, Lord . ( D )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-2"
+],
+"id": null,
+"text": "I stand in awe ( C ) of your deeds, Lord . ( D )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( C )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( D )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-2"
+],
+"id": null,
+"text": "Repeat ( E ) them in our day,"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( E )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "in our time make them known;"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-2"
+],
+"id": null,
+"text": "in our time make them known;"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "in wrath remember mercy. ( F )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-2"
+],
+"id": null,
+"text": "in wrath remember mercy. ( F )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( F )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "3 God came from Teman, ( G ) the Holy One ( H ) from Mount P"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "3 God came from Teman, ( G ) the Holy One ( H ) from Mount P"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-3"
+],
+"id": "en-NIV-22772",
+"text": "3 God came from Teman, ( G )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( G )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "the Holy One ( H ) from Mount Paran. [ b ] ( I )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-3"
+],
+"id": null,
+"text": "the Holy One ( H ) from Mount Paran. [ b ] ( I )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( H )"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ b ]"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( I )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-3"
+],
+"id": null,
+"text": "His glory covered the heavens ( J )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( J )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and his praise filled the earth. ( K )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-3"
+],
+"id": null,
+"text": "and his praise filled the earth. ( K )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( K )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-4"
+],
+"id": "en-NIV-22773",
+"text": "4 His splendor was like the sunrise; ( L )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( L )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "rays flashed from his hand,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-4"
+],
+"id": null,
+"text": "rays flashed from his hand,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "where his power ( M ) was hidden."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-4"
+],
+"id": null,
+"text": "where his power ( M ) was hidden."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( M )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-5"
+],
+"id": "en-NIV-22774",
+"text": "5 Plague ( N ) went before him;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( N )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "pestilence followed his steps."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-5"
+],
+"id": null,
+"text": "pestilence followed his steps."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-6"
+],
+"id": "en-NIV-22775",
+"text": "6 He stood, and shook the earth;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "he looked, and made the nations tremble."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-6"
+],
+"id": null,
+"text": "he looked, and made the nations tremble."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-6"
+],
+"id": null,
+"text": "The ancient mountains crumbled ( O )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( O )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and the age-old hills ( P ) collapsed ( Q ) —"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-6"
+],
+"id": null,
+"text": "and the age-old hills ( P ) collapsed ( Q ) —"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( P )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Q )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but he marches on forever. ( R )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-6"
+],
+"id": null,
+"text": "but he marches on forever. ( R )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( R )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-7"
+],
+"id": "en-NIV-22776",
+"text": "7 I saw the tents of Cushan in distress,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "7"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "the dwellings of Midian ( S ) in anguish. ( T )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-7"
+],
+"id": null,
+"text": "the dwellings of Midian ( S ) in anguish. ( T )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( S )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( T )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "8 Were you angry with the rivers, ( U ) Lord ? Was your wrat"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "8 Were you angry with the rivers, ( U ) Lord ? Was your wrat"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-8"
+],
+"id": "en-NIV-22777",
+"text": "8 Were you angry with the rivers, ( U ) Lord ?"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "8"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( U )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "Was your wrath against the streams?"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-8"
+],
+"id": null,
+"text": "Was your wrath against the streams?"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-8"
+],
+"id": null,
+"text": "Did you rage against the sea ( V )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( V )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "when you rode your horses"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-8"
+],
+"id": null,
+"text": "when you rode your horses"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and your chariots to victory? ( W )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-8"
+],
+"id": null,
+"text": "and your chariots to victory? ( W )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( W )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-9"
+],
+"id": "en-NIV-22778",
+"text": "9 You uncovered your bow,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "9"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "you called for many arrows. ( X )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-9"
+],
+"id": null,
+"text": "you called for many arrows. ( X )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( X )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-9"
+],
+"id": null,
+"text": "You split the earth with rivers;"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "10 the mountains saw you and writhed. ( Y )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-10"
+],
+"id": "en-NIV-22779",
+"text": "10 the mountains saw you and writhed. ( Y )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "10"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Y )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-10"
+],
+"id": null,
+"text": "Torrents of water swept by;"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "the deep roared ( Z )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-10"
+],
+"id": null,
+"text": "the deep roared ( Z )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Z )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and lifted its waves ( AA ) on high."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-10"
+],
+"id": null,
+"text": "and lifted its waves ( AA ) on high."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AA )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "11 Sun and moon stood still ( AB ) in the heavens at the gli"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "11 Sun and moon stood still ( AB ) in the heavens at the gli"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-11"
+],
+"id": "en-NIV-22780",
+"text": "11 Sun and moon stood still ( AB ) in the heavens"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "11"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AB )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "at the glint of your flying arrows, ( AC )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-11"
+],
+"id": null,
+"text": "at the glint of your flying arrows, ( AC )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AC )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "at the lightning ( AD ) of your flashing spear."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-11"
+],
+"id": null,
+"text": "at the lightning ( AD ) of your flashing spear."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AD )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-12"
+],
+"id": "en-NIV-22781",
+"text": "12 In wrath you strode through the earth"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "12"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and in anger you threshed ( AE ) the nations."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-12"
+],
+"id": null,
+"text": "and in anger you threshed ( AE ) the nations."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AE )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-13"
+],
+"id": "en-NIV-22782",
+"text": "13 You came out ( AF ) to deliver ( AG ) your people,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "13"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AF )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AG )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "to save your anointed ( AH ) one."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-13"
+],
+"id": null,
+"text": "to save your anointed ( AH ) one."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AH )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-13"
+],
+"id": null,
+"text": "You crushed ( AI ) the leader of the land of wickedness,"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AI )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "you stripped him from head to foot."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-13"
+],
+"id": null,
+"text": "you stripped him from head to foot."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-14"
+],
+"id": "en-NIV-22783",
+"text": "14 With his own spear you pierced his head"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "14"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "when his warriors stormed out to scatter us, ( AJ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-14"
+],
+"id": null,
+"text": "when his warriors stormed out to scatter us, ( AJ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AJ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-14"
+],
+"id": null,
+"text": "gloating as though about to devour"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "the wretched ( AK ) who were in hiding."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-14"
+],
+"id": null,
+"text": "the wretched ( AK ) who were in hiding."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AK )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-15"
+],
+"id": "en-NIV-22784",
+"text": "15 You trampled the sea ( AL ) with your horses,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "15"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AL )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "churning the great waters. ( AM )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-15"
+],
+"id": null,
+"text": "churning the great waters. ( AM )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AM )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "16 I heard and my heart pounded, my lips quivered at the sou"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "16 I heard and my heart pounded, my lips quivered at the sou"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-16"
+],
+"id": "en-NIV-22785",
+"text": "16 I heard and my heart pounded,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "16"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "my lips quivered at the sound;"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-16"
+],
+"id": null,
+"text": "my lips quivered at the sound;"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-16"
+],
+"id": null,
+"text": "decay crept into my bones,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and my legs trembled. ( AN )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-16"
+],
+"id": null,
+"text": "and my legs trembled. ( AN )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AN )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-16"
+],
+"id": null,
+"text": "Yet I will wait patiently ( AO ) for the day of calamity"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AO )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "to come on the nation invading us."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-16"
+],
+"id": null,
+"text": "to come on the nation invading us."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-17"
+],
+"id": "en-NIV-22786",
+"text": "17 Though the fig tree does not bud"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "17"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and there are no grapes on the vines,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-17"
+],
+"id": null,
+"text": "and there are no grapes on the vines,"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-17"
+],
+"id": null,
+"text": "though the olive crop fails"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and the fields produce no food, ( AP )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-17"
+],
+"id": null,
+"text": "and the fields produce no food, ( AP )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AP )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-17"
+],
+"id": null,
+"text": "though there are no sheep in the pen"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and no cattle in the stalls, ( AQ )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-17"
+],
+"id": null,
+"text": "and no cattle in the stalls, ( AQ )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AQ )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-18"
+],
+"id": "en-NIV-22787",
+"text": "18 yet I will rejoice in the Lord , ( AR )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "18"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AR )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "I will be joyful in God my Savior. ( AS )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-18"
+],
+"id": null,
+"text": "I will be joyful in God my Savior. ( AS )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AS )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "19 The Sovereign Lord is my strength; ( AT ) he makes my fee"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "19 The Sovereign Lord is my strength; ( AT ) he makes my fee"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-19"
+],
+"id": "en-NIV-22788",
+"text": "19 The Sovereign Lord is my strength; ( AT )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "19"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AT )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "he makes my feet like the feet of a deer,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-19"
+],
+"id": null,
+"text": "he makes my feet like the feet of a deer,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "he enables me to tread on the heights. ( AU )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-19"
+],
+"id": null,
+"text": "he enables me to tread on the heights. ( AU )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AU )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "For the director of music. On my stringed instruments."
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "For the director of music. On my stringed instruments."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Hab-3-19"
+],
+"id": null,
+"text": "For the director of music. On my stringed instruments."
+},
+{
+"tag": "div",
+"class": [
+"il-text"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "div",
+"class": [
+"footnotes",
+"resources-section"
+],
+"id": null,
+"text": "Footnotes Habakkuk 3:1 Probably a literary or musical term H"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Habakkuk 3:1 Probably a literary or musical term Habakkuk 3:"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Probably a literary or musical term"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "The Hebrew has Selah (a word of uncertain meaning) here and "
+},
+{
+"tag": "div",
+"class": [
+"crossrefs",
+"resources-section"
+],
+"id": null,
+"text": "Cross references Habakkuk 3:1 : Ps 7 Title Habakkuk 3:2 : S "
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Habakkuk 3:1 : Ps 7 Title Habakkuk 3:2 : S Job 26:14; Ps 44:"
+}
+]
+}

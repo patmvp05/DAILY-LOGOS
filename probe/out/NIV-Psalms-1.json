@@ -1,0 +1,672 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "BOOK I Psalms 1–41 Psalm 1 1 Blessed is the one ( A ) who do"
+},
+{
+"tag": "div",
+"class": [
+"version-NIV",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "BOOK I Psalms 1–41 Psalm 1 1 Blessed is the one ( A ) who do"
+},
+{
+"tag": "div",
+"class": [
+"std-text"
+],
+"id": null,
+"text": "BOOK I Psalms 1–41 Psalm 1 1 Blessed is the one ( A ) who do"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-1"
+],
+"id": "en-NIV-13941",
+"text": "BOOK I"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-1"
+],
+"id": null,
+"text": "Psalms 1–41"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-1"
+],
+"id": null,
+"text": "Psalm 1"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "1 Blessed is the one ( A ) who does not walk ( B ) in step w"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "1 Blessed is the one ( A ) who does not walk ( B ) in step w"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-1"
+],
+"id": null,
+"text": "1 Blessed is the one ( A )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "1"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( A )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "who does not walk ( B ) in step with the wicked ( C )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-1"
+],
+"id": null,
+"text": "who does not walk ( B ) in step with the wicked ( C )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( B )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( C )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-1"
+],
+"id": null,
+"text": "or stand in the way ( D ) that sinners take ( E )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( D )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( E )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "or sit ( F ) in the company of mockers, ( G )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-1"
+],
+"id": null,
+"text": "or sit ( F ) in the company of mockers, ( G )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( F )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( G )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-2"
+],
+"id": "en-NIV-13942",
+"text": "2 but whose delight ( H ) is in the law of the Lord , ( I )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( H )"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( I )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and who meditates ( J ) on his law day and night."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-2"
+],
+"id": null,
+"text": "and who meditates ( J ) on his law day and night."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( J )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-3"
+],
+"id": "en-NIV-13943",
+"text": "3 That person is like a tree ( K ) planted by streams ( L ) "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( K )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( L )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( M )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "which yields its fruit ( N ) in season"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-3"
+],
+"id": null,
+"text": "which yields its fruit ( N ) in season"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( N )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-3"
+],
+"id": null,
+"text": "and whose leaf ( O ) does not wither—"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( O )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "whatever they do prospers. ( P )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-3"
+],
+"id": null,
+"text": "whatever they do prospers. ( P )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( P )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "4 Not so the wicked! They are like chaff ( Q ) that the wind"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "4 Not so the wicked! They are like chaff ( Q ) that the wind"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-4"
+],
+"id": "en-NIV-13944",
+"text": "4 Not so the wicked!"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "They are like chaff ( Q )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-4"
+],
+"id": null,
+"text": "They are like chaff ( Q )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Q )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that the wind blows away."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-4"
+],
+"id": null,
+"text": "that the wind blows away."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-5"
+],
+"id": "en-NIV-13945",
+"text": "5 Therefore the wicked will not stand ( R ) in the judgment,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( R )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( S )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "nor sinners in the assembly ( T ) of the righteous."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-5"
+],
+"id": null,
+"text": "nor sinners in the assembly ( T ) of the righteous."
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( T )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "6 For the Lord watches over ( U ) the way of the righteous, "
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "6 For the Lord watches over ( U ) the way of the righteous, "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-6"
+],
+"id": "en-NIV-13946",
+"text": "6 For the Lord watches over ( U ) the way of the righteous,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( U )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but the way of the wicked leads to destruction. ( V )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-1-6"
+],
+"id": null,
+"text": "but the way of the wicked leads to destruction. ( V )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( V )"
+},
+{
+"tag": "div",
+"class": [
+"il-text"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "div",
+"class": [
+"crossrefs",
+"resources-section"
+],
+"id": null,
+"text": "Cross references Psalm 1:1 : S Dt 33:29; Ps 40:4; 128:4 Psal"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 1:1 : S Dt 33:29; Ps 40:4; 128:4 Psalm 1:1 : Ps 89:15 "
+}
+]
+}

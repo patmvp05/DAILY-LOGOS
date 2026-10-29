@@ -1,0 +1,1258 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "BOOK IV Psalms 90–106 Psalm 90 A prayer of Moses the man of "
+},
+{
+"tag": "div",
+"class": [
+"version-NIV",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "BOOK IV Psalms 90–106 Psalm 90 A prayer of Moses the man of "
+},
+{
+"tag": "div",
+"class": [
+"std-text"
+],
+"id": null,
+"text": "BOOK IV Psalms 90–106 Psalm 90 A prayer of Moses the man of "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-1"
+],
+"id": "en-NIV-15380",
+"text": "BOOK IV"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-1"
+],
+"id": null,
+"text": "Psalms 90–106"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-1"
+],
+"id": null,
+"text": "Psalm 90"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-1"
+],
+"id": null,
+"text": "A prayer of Moses the man of God."
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "1 Lord, you have been our dwelling place ( A ) throughout al"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "1 Lord, you have been our dwelling place ( A ) throughout al"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-1"
+],
+"id": null,
+"text": "1 Lord, you have been our dwelling place ( A )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "1"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( A )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "throughout all generations."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-1"
+],
+"id": null,
+"text": "throughout all generations."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-2"
+],
+"id": "en-NIV-15381",
+"text": "2 Before the mountains were born ( B )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( B )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "or you brought forth the whole world,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-2"
+],
+"id": null,
+"text": "or you brought forth the whole world,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "from everlasting to everlasting ( C ) you are God. ( D )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-2"
+],
+"id": null,
+"text": "from everlasting to everlasting ( C ) you are God. ( D )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( C )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( D )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "3 You turn people back to dust, saying, “Return to dust, you"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "3 You turn people back to dust, saying, “Return to dust, you"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-3"
+],
+"id": "en-NIV-15382",
+"text": "3 You turn people back to dust,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "saying, “Return to dust, you mortals.” ( E )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-3"
+],
+"id": null,
+"text": "saying, “Return to dust, you mortals.” ( E )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( E )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-4"
+],
+"id": "en-NIV-15383",
+"text": "4 A thousand years in your sight"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "are like a day that has just gone by,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-4"
+],
+"id": null,
+"text": "are like a day that has just gone by,"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "or like a watch in the night. ( F )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-4"
+],
+"id": null,
+"text": "or like a watch in the night. ( F )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( F )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-5"
+],
+"id": "en-NIV-15384",
+"text": "5 Yet you sweep people away ( G ) in the sleep of death—"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( G )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "they are like the new grass of the morning:"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-5"
+],
+"id": null,
+"text": "they are like the new grass of the morning:"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-6"
+],
+"id": "en-NIV-15385",
+"text": "6 In the morning it springs up new,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "but by evening it is dry and withered. ( H )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-6"
+],
+"id": null,
+"text": "but by evening it is dry and withered. ( H )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( H )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "7 We are consumed by your anger and terrified by your indign"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "7 We are consumed by your anger and terrified by your indign"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-7"
+],
+"id": "en-NIV-15386",
+"text": "7 We are consumed by your anger"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "7"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "and terrified by your indignation."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-7"
+],
+"id": null,
+"text": "and terrified by your indignation."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-8"
+],
+"id": "en-NIV-15387",
+"text": "8 You have set our iniquities before you,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "8"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "our secret sins ( I ) in the light of your presence. ( J )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-8"
+],
+"id": null,
+"text": "our secret sins ( I ) in the light of your presence. ( J )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( I )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( J )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-9"
+],
+"id": "en-NIV-15388",
+"text": "9 All our days pass away under your wrath;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "9"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "we finish our years with a moan. ( K )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-9"
+],
+"id": null,
+"text": "we finish our years with a moan. ( K )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( K )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-10"
+],
+"id": "en-NIV-15389",
+"text": "10 Our days may come to seventy years, ( L )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "10"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( L )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "or eighty, ( M ) if our strength endures;"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-10"
+],
+"id": null,
+"text": "or eighty, ( M ) if our strength endures;"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( M )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-10"
+],
+"id": null,
+"text": "yet the best of them are but trouble and sorrow, ( N )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( N )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for they quickly pass, and we fly away. ( O )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-10"
+],
+"id": null,
+"text": "for they quickly pass, and we fly away. ( O )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( O )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-11"
+],
+"id": "en-NIV-15390",
+"text": "11 If only we knew the power of your anger!"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "11"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "Your wrath ( P ) is as great as the fear that is your due. ("
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-11"
+],
+"id": null,
+"text": "Your wrath ( P ) is as great as the fear that is your due. ("
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( P )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Q )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-12"
+],
+"id": "en-NIV-15391",
+"text": "12 Teach us to number our days, ( R )"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "12"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( R )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that we may gain a heart of wisdom. ( S )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-12"
+],
+"id": null,
+"text": "that we may gain a heart of wisdom. ( S )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( S )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "13 Relent, Lord ! How long ( T ) will it be? Have compassion"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "13 Relent, Lord ! How long ( T ) will it be? Have compassion"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-13"
+],
+"id": "en-NIV-15392",
+"text": "13 Relent, Lord ! How long ( T ) will it be?"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "13"
+},
+{
+"tag": "span",
+"class": [
+"small-caps"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( T )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "Have compassion on your servants. ( U )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-13"
+],
+"id": null,
+"text": "Have compassion on your servants. ( U )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( U )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-14"
+],
+"id": "en-NIV-15393",
+"text": "14 Satisfy ( V ) us in the morning with your unfailing love,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "14"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( V )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( W )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "that we may sing for joy ( X ) and be glad all our days. ( Y"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-14"
+],
+"id": null,
+"text": "that we may sing for joy ( X ) and be glad all our days. ( Y"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( X )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Y )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-15"
+],
+"id": "en-NIV-15394",
+"text": "15 Make us glad for as many days as you have afflicted us,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "15"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "for as many years as we have seen trouble."
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-15"
+],
+"id": null,
+"text": "for as many years as we have seen trouble."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-16"
+],
+"id": "en-NIV-15395",
+"text": "16 May your deeds be shown to your servants,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "16"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "your splendor to their children. ( Z )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-16"
+],
+"id": null,
+"text": "your splendor to their children. ( Z )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( Z )"
+},
+{
+"tag": "div",
+"class": [
+"poetry",
+"top-05"
+],
+"id": null,
+"text": "17 May the favor [ a ] of the Lord our God rest on us; estab"
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "17 May the favor [ a ] of the Lord our God rest on us; estab"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-17"
+],
+"id": "en-NIV-15396",
+"text": "17 May the favor [ a ] of the Lord our God rest on us;"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "17"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ a ]"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "establish the work of our hands for us—"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-17"
+],
+"id": null,
+"text": "establish the work of our hands for us—"
+},
+{
+"tag": "span",
+"class": [
+"indent-1"
+],
+"id": null,
+"text": "yes, establish the work of our hands. ( AA )"
+},
+{
+"tag": "span",
+"class": [
+"indent-1-breaks"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Ps-90-17"
+],
+"id": null,
+"text": "yes, establish the work of our hands. ( AA )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( AA )"
+},
+{
+"tag": "div",
+"class": [
+"il-text"
+],
+"id": null,
+"text": ""
+},
+{
+"tag": "div",
+"class": [
+"footnotes",
+"resources-section"
+],
+"id": null,
+"text": "Footnotes Psalm 90:17 Or beauty"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 90:17 Or beauty"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or beauty"
+},
+{
+"tag": "div",
+"class": [
+"crossrefs",
+"resources-section"
+],
+"id": null,
+"text": "Cross references Psalm 90:1 : S Dt 33:27; Eph 2:22; Rev 21:3"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "Psalm 90:1 : S Dt 33:27; Eph 2:22; Rev 21:3 Psalm 90:2 : S J"
+}
+]
+}
