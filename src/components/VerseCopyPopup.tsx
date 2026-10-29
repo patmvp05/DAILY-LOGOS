@@ -11,6 +11,7 @@ import { useUi } from '../state/UiContextCore';
 import { BOOK_ABBREVIATIONS } from '../constants';
 import { getChapterText, type ChapterVerse } from '../lib/chapterText';
 import { triggerHaptic } from '../lib/haptic';
+import { lastVerseInChapter, lastVerseOf, nextEntryEnd, prevEntryEnd, verseLabel, verseLabelPlain } from '../lib/verseLabel';
 import { useOverlayDismiss, useTapGuard } from '../hooks/useOverlayDismiss';
 
 interface VerseCopyPopupProps {
@@ -43,30 +44,36 @@ function VerseCopyPopup({
   // screen — right where the tapped verse number plausibly was.
   const guardedClose = useTapGuard(onClose);
 
-  const [rangeEndVerse, setRangeEndVerse] = useState(anchorVerse);
+  // A combined passage (e.g. NCV Genesis 8:3-4) is one selectable unit: the
+  // selection starts at its end, and each expand/contract step moves a whole
+  // entry, so "3-4" is never split or skipped over.
+  const anchorEnd = useMemo(() => {
+    const a = currentVerses.find((v) => v.verse === anchorVerse);
+    return a ? lastVerseOf(a) : anchorVerse;
+  }, [currentVerses, anchorVerse]);
+  const [rangeEndVerse, setRangeEndVerse] = useState(anchorEnd);
   const [rangeEndChapter, setRangeEndChapter] = useState(chapter);
   const [extraChapters, setExtraChapters] = useState<Map<number, ChapterVerse[]>>(new Map());
   const [loadingChapter, setLoadingChapter] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'copy' | 'options'>('copy');
 
-  const lastVerseInCurrentChapter = currentVerses.length > 0
-    ? currentVerses[currentVerses.length - 1].verse
-    : anchorVerse;
+  const lastVerseInCurrentChapter = lastVerseInChapter(currentVerses) ?? anchorVerse;
 
   const lastVerseInEndChapter = useMemo(() => {
     if (rangeEndChapter === chapter) return lastVerseInCurrentChapter;
     const chVs = extraChapters.get(rangeEndChapter);
-    return chVs && chVs.length > 0 ? chVs[chVs.length - 1].verse : 1;
+    return (chVs && lastVerseInChapter(chVs)) ?? 1;
   }, [rangeEndChapter, chapter, lastVerseInCurrentChapter, extraChapters]);
 
   const atBookEnd = rangeEndChapter >= totalChaptersInBook && rangeEndVerse >= lastVerseInEndChapter;
-  const atAnchor = rangeEndChapter === chapter && rangeEndVerse === anchorVerse;
+  const atAnchor = rangeEndChapter === chapter && rangeEndVerse === anchorEnd;
 
   const expandRange = useCallback(async () => {
     if (loadingChapter !== null) return;
 
     if (rangeEndVerse < lastVerseInEndChapter) {
-      setRangeEndVerse(rangeEndVerse + 1);
+      const endVerses = rangeEndChapter === chapter ? currentVerses : (extraChapters.get(rangeEndChapter) ?? []);
+      setRangeEndVerse(nextEntryEnd(endVerses, rangeEndVerse) ?? rangeEndVerse + 1);
       triggerHaptic('light');
       return;
     }
@@ -75,8 +82,9 @@ function VerseCopyPopup({
     if (nextCh > totalChaptersInBook) return;
 
     if (extraChapters.has(nextCh)) {
+      const first = extraChapters.get(nextCh)?.[0];
       setRangeEndChapter(nextCh);
-      setRangeEndVerse(1);
+      setRangeEndVerse(first ? lastVerseOf(first) : 1);
       triggerHaptic('light');
       return;
     }
@@ -86,31 +94,34 @@ function VerseCopyPopup({
       const data = await getChapterText(bookName, nextCh, versionId);
       setExtraChapters(prev => new Map(prev).set(nextCh, data.verses));
       setRangeEndChapter(nextCh);
-      setRangeEndVerse(1);
+      setRangeEndVerse(data.verses[0] ? lastVerseOf(data.verses[0]) : 1);
       triggerHaptic('light');
     } catch {
       showToast("Couldn't load next chapter", 'error');
     } finally {
       setLoadingChapter(null);
     }
-  }, [rangeEndVerse, rangeEndChapter, lastVerseInEndChapter, totalChaptersInBook, extraChapters, loadingChapter, bookName, versionId, showToast]);
+  }, [rangeEndVerse, rangeEndChapter, lastVerseInEndChapter, totalChaptersInBook, extraChapters, loadingChapter, bookName, versionId, showToast, chapter, currentVerses]);
 
   const contractRange = useCallback(() => {
     if (atAnchor) return;
 
-    if (rangeEndChapter > chapter && rangeEndVerse > 1) {
-      setRangeEndVerse(rangeEndVerse - 1);
+    const prevInEnd = rangeEndChapter > chapter
+      ? prevEntryEnd(extraChapters.get(rangeEndChapter) ?? [], rangeEndVerse)
+      : null;
+    if (rangeEndChapter > chapter && prevInEnd !== null) {
+      setRangeEndVerse(prevInEnd);
     } else if (rangeEndChapter > chapter) {
       const prevCh = rangeEndChapter - 1;
       const prevVerses = prevCh === chapter ? currentVerses : extraChapters.get(prevCh);
-      const lastV = prevVerses && prevVerses.length > 0 ? prevVerses[prevVerses.length - 1].verse : anchorVerse;
+      const lastV = (prevVerses && lastVerseInChapter(prevVerses)) ?? anchorEnd;
       setRangeEndChapter(prevCh);
       setRangeEndVerse(lastV);
     } else {
-      setRangeEndVerse(rangeEndVerse - 1);
+      setRangeEndVerse(Math.max(prevEntryEnd(currentVerses, rangeEndVerse) ?? anchorEnd, anchorEnd));
     }
     triggerHaptic('light');
-  }, [atAnchor, rangeEndChapter, rangeEndVerse, chapter, currentVerses, extraChapters, anchorVerse]);
+  }, [atAnchor, rangeEndChapter, rangeEndVerse, chapter, currentVerses, extraChapters, anchorEnd]);
 
   const abbr = BOOK_ABBREVIATIONS[bookName] || bookName;
 
@@ -125,12 +136,12 @@ function VerseCopyPopup({
   }, [abbr, chapter, anchorVerse, rangeEndChapter, rangeEndVerse]);
 
   const selectedVerses = useMemo(() => {
-    const result: { chapter: number; verse: number; text: string }[] = [];
+    const result: { chapter: number; verse: number; verseEnd?: number; text: string }[] = [];
 
     const endInCurrent = rangeEndChapter === chapter ? rangeEndVerse : Infinity;
     for (const v of currentVerses) {
       if (v.verse >= anchorVerse && v.verse <= endInCurrent) {
-        result.push({ chapter, verse: v.verse, text: v.text });
+        result.push({ chapter, verse: v.verse, verseEnd: v.verseEnd, text: v.text });
       }
     }
 
@@ -140,7 +151,7 @@ function VerseCopyPopup({
       const endV = ch === rangeEndChapter ? rangeEndVerse : Infinity;
       for (const v of chVerses) {
         if (v.verse <= endV) {
-          result.push({ chapter: ch, verse: v.verse, text: v.text });
+          result.push({ chapter: ch, verse: v.verse, verseEnd: v.verseEnd, text: v.text });
         }
       }
     }
@@ -168,7 +179,7 @@ function VerseCopyPopup({
         lines.push(`[${bookName} ${sv.chapter}]`);
         lastCh = sv.chapter;
       }
-      lines.push(`${sv.verse} ${sv.text}`);
+      lines.push(`${verseLabelPlain(sv)} ${sv.text}`);
     }
 
     return lines.join('\n');
@@ -271,7 +282,7 @@ function VerseCopyPopup({
                       )}
                       <span>
                         <span className="text-[11px] font-bold align-super mr-1 text-brand/70 tabular-nums">
-                          {sv.verse}
+                          {verseLabel(sv)}
                         </span>
                         {sv.text}{' '}
                       </span>

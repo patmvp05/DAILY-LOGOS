@@ -19,10 +19,13 @@
     `scripts/fetch-bible-static.mjs` (clean JSON API). It does NOT have NCV/CSB/NRSV/NASB2020
     (its get-text endpoint returns `[]`).
   - **NCV** → scraped from **BibleGateway** (`scripts/fetch-biblegateway.py`,
-    requests+BeautifulSoup). bolls lacks it and the `meaningless` lib rejects it. ✅ 1189/1189 committed.
+    requests+BeautifulSoup). bolls lacks it and the `meaningless` lib rejects it. 1189/1189 files
+    (they were all present yet 38 were missing combined passages until Oct 2026: "all files exist"
+    is not "all verses exist", which is why the integrity test counts verses).
   - **CSB** → same BibleGateway scraper, `BG_VERSION=CSB`. bolls returns `[]` for it. The
     verse-span classes are identical across versions (runner-verified: `text John-3-1`,
-    `text Ps-23-1`, `text 3John-1-1`, `text Obad-1-1`), so one parser serves both.
+    `text Ps-23-1`, `text 3John-1-1`, `text Obad-1-1`, and range classes like `Gen-8-3-Gen-8-4`
+    for combined verses), so one parser serves both.
   - **BSB** → NOT scraped. bereanbible.com publishes the whole text as ONE tab-separated
     file (`https://bereanbible.com/bsb.txt`, ~4.3 MB, ~31k verses) dedicated to the **public
     domain**, so `scripts/fetch-bsb-berean.mjs` does one request instead of 1189 — no rate
@@ -35,17 +38,66 @@
     candidate source actually returns. Established that bolls, getbible.net and
     bible-api.com all 404 for BSB **and** CSB, and that BibleGateway serves no verse spans
     for BSB — so don't retry those routes.
-  - **NIV / NLT / ESV / NKJV** → scraped from bolls.life by `.github/workflows/scrape-bolls.yml`
-    (runs `scripts/fetch-bible-static.mjs`). ✅ All four are committed, 1189/1189 each, as are
-    NCV, CSB and BSB, so every `source: 'bolls'` version in `BIBLE_VERSIONS` has its full
-    static set (verified Oct 2026). None of them falls back to KJV for want of files.
+  - **NIV / NLT / ESV / NKJV** → BibleGateway since Oct 2026 (same scraper, `BG_VERSION=NIV` …);
+    they came from bolls.life before (see "All six modern translations" below for why that
+    stopped). All seven stored versions (NCV, CSB, NIV, NLT, ESV, NKJV, BSB) have 1189/1189
+    complete chapters, enforced by `scripts/test-bible-integrity.mts`.
 - **Regenerating static text (no local machine needed):** GitHub Actions runs the scrapers
   ON GITHUB'S RUNNERS, which CAN reach bolls.life / BibleGateway (the sandbox can't).
   - NCV: `.github/workflows/scrape-ncv-bg.yml` (BibleGateway). Has a fail-fast smoke test,
     is time-bounded + always-commits + resumable (re-run fills gaps), reports completeness.
-  - bolls versions: `.github/workflows/scrape-bolls.yml` runs `scripts/fetch-bible-static.mjs`
+  - bolls (no longer a source for any shipped version): `.github/workflows/scrape-bolls.yml` runs `scripts/fetch-bible-static.mjs`
     (honors `ONLY_VERSION=NIV,ESV,...`), one version per job. Resumable (skips existing files);
-    its `force` input re-fetches chapters already on disk after a parser change.
+    its `force` input re-fetches chapters already on disk after a parser change. The NCV/CSB
+    workflows take a `refetch` input that re-downloads only files below the current `textVersion`.
+- **Every stored chapter must be complete (Oct 2026).** NCV Numbers 7 shipped with 17 of its
+  89 verses and nothing noticed. `scripts/test-bible-integrity.mts` (in `npm test` AND run by
+  `deploy.yml` / `daily-devotional-deploy.yml` before building) reads all 1,189 chapters of
+  every stored translation and fails on a missing, duplicated or out-of-order verse, empty
+  text, leftover markers ("[a]", "(A)", "[20-21]", a leaked chapter number, HTML), a space
+  before punctuation, or a translation whose signature verses read like a different one.
+  Verse counts come from `scripts/lib/verse-counts.json` (1,189 chapters, 31,103 verses,
+  ESV-style versification, two independent sources agree). Legitimate differences are listed
+  there and nowhere else: alternate last verses (3 John 14/15, 2 Cor 13 13/14, Rev 12 17/18)
+  and the footnoted verses critical-text translations omit (Matt 17:21 …); each translation's
+  exact omission list is pinned in the test. Both scrapers run the same check
+  (`scripts/lib/bible-check.mjs`, mirrored in Python) and refuse to write a chapter that fails.
+- **Combined verses.** Some translations print several verses as one passage: NCV Genesis 8:3-4
+  and Numbers 7:12-83 (38 chapters), NLT Numbers 1:20-21. A file stores it once as
+  `{ verse: 12, verseEnd: 83, text }`. The reader, the daily proverb, copy-verse and the header
+  range all go through `src/lib/verseLabel.ts`, so it reads "12–83" and copies as "Num 7:12-83".
+  Never split a combined passage or invent per-verse text for it.
+- **How BibleGateway marks things up** (runner probe, Oct 2026; `scripts/test-biblegateway-parser.py`
+  replays the structure offline): verse text is `span.text` with class `Gen-8-2`; a combined
+  verse's class is a RANGE, `Gen-8-3-Gen-8-4` (the old parser's single-verse regex dropped
+  these, text and all); two NCV verses (1 Cor 6:9, 1 John 3:19) are a "-" placeholder whose text
+  is in the next verse, merged into one combined verse; headings are `h3` (dropped), psalm
+  superscriptions `h4.psalm-title` (kept, they open verse 1); the divine name is
+  `span.small-caps`, so text inside a span is joined with NO separator (joining with " " wrote
+  "the Lord ." into ~5,000 NCV/CSB verses); NLT census tables are `tr` rows, joined "cell — cell".
+- **All six modern translations come from BibleGateway (Oct 2026).** NCV and CSB always did;
+  NIV, NLT, ESV and NKJV moved off bolls.life because (1) bolls now answers NIV requests with a
+  statement from its owner in place of every verse (every verse number still present, so only a
+  content check catches it), and (2) bolls separates headings and poetry lines with the same
+  `<br/>`, which no rule separates reliably: the original rule deleted the unpunctuated first line
+  of ~1,200 NLT verses in 413 sampled chapters (Amos 1:4 lost "I will send fire on the house of
+  Hazael"), and a title-case rule still deleted lines like "The LORD of Heaven's Armies" and left
+  headings, speaker labels ("Young Woman") and an editor's note (NLT Mark 16:8) inside verses.
+  BibleGateway marks headings as `h3`, so there is nothing to guess. Before switching, a second
+  BibleGateway copy of 413 chapters was compared word for word: NKJV matched 8,985 of 8,990 verses
+  (the rest are bolls placing "before the LORD" in the wrong verse). `fetch-bible-static.mjs`
+  and `scrape-bolls.yml` are kept for reference but feed no shipped translation; do not point
+  them at NIV.
+- **The NIV is now the 2011 text** (BibleGateway's NIV; Ps 23:1 "I lack nothing"). The app used to
+  ship bolls' 1984 NIV, which had lost poetry lines and can no longer be re-downloaded anywhere.
+  The ESV is BibleGateway's current text, which differs from the old bolls copy in a handful of
+  words (Job 7:4, Lam 3:32 …): those are ESV revisions, not errors.
+- **`textVersion` in each file** records which parser wrote it (2 = the Oct 2026 fixes). Run a
+  scraper with `REFETCH=1` to re-download only files below the current version; it resumes
+  where an interrupted run stopped. Changing what the parser writes means bumping
+  `TEXT_VERSION` in the scraper AND the cache prefixes in `chapterText.ts` (`chapter_text_v7_`)
+  and `bibleCache.ts` (`bible_chapter_cache_v12_`) plus `STATIC_CACHE_BUST`: a phone otherwise
+  keeps the chapter (and its reading time) it cached from the old text forever.
 - **Honest fallback:** if a chapter fails to load, `getChapterText()` falls back to
   public-domain KJV but labels it "King James Version" (never mislabeled) and flags the
   result `_fallback`. **Fallbacks are memory-only — NEVER persisted to IndexedDB/localStorage**

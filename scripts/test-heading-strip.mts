@@ -12,7 +12,7 @@
  *
  * Run with: npx tsx scripts/test-heading-strip.mts
  */
-import { stripLeadingHeadings } from './fetch-bible-static.mjs';
+import { stripLeadingHeadings, splitRangeLabel } from './fetch-bible-static.mjs';
 
 let pass = 0;
 let fail = 0;
@@ -23,7 +23,7 @@ function ok(name: string, cond: boolean, detail = '') {
   else { fail++; failures.push(`✗ ${name}${detail ? ': ' + detail : ''}`); }
 }
 
-const strip = (s: string) => stripLeadingHeadings(s) as { text: string; stripped: string[] };
+const strip = (s: string, chapter?: number) => stripLeadingHeadings(s, chapter) as { text: string; stripped: string[] };
 
 // ── MUST STRIP: real headings observed in NIV
 {
@@ -75,6 +75,48 @@ const strip = (s: string) => stripLeadingHeadings(s) as { text: string; stripped
      r.text === 'darkness was on the face of the deep.', r.text);
 }
 
+// ── MUST KEEP: a poetry verse whose first line has no punctuation (Oct 2026).
+// The old rule called any short, capitalised, unpunctuated leading line a
+// heading, and these first lines were deleted from the committed NIV/NLT.
+for (const [raw, first] of [
+  ['I will send fire on the house of Hazael<br/>that will consume the fortresses of Ben-Hadad.', 'I will send fire'],
+  ['Woe to those who are wise in their own eyes<br/>and clever in their own sight.', 'Woe to those'],
+  ['But everyone who calls on the name of the LORD<br/>will be saved.’', 'But everyone who calls'],
+  ['Your towns and your fields<br/>will be blessed.', 'Your towns and your fields'],
+  ['He has made my skin and my flesh grow old<br/>and has broken my bones.', 'He has made my skin'],
+] as const) {
+  const r = strip(raw);
+  ok(`keeps the unpunctuated first poetry line "${first}"`, r.text.startsWith(first) && r.stripped.length === 0, r.text);
+}
+
+// ── MUST STRIP: a heading in the middle of a verse, and stray chapter numbers
+{
+  const r = strip('13<br/>And the dragon stood on the shore of the sea.<br/>The Beast out of the Sea<br/>And I saw a beast coming out of the sea.', 13);
+  ok('drops the chapter number and the mid-verse heading (NIV Rev 13:1)',
+     r.text === 'And the dragon stood on the shore of the sea. And I saw a beast coming out of the sea.', r.text);
+  ok('reports both removals', r.stripped.join('|') === '13|The Beast out of the Sea', r.stripped.join('|'));
+}
+{
+  const r = strip('8 Then the Lord said to Moses, “Go to Pharaoh.', 8);
+  ok('drops an inline chapter number before verse 1 (NIV Exod 8:1)', r.text === 'Then the Lord said to Moses, “Go to Pharaoh.', r.text);
+}
+{
+  const r = strip('435 camels and 6,720 donkeys.', 2);
+  ok('a number that is not the chapter number is scripture (Ezra 2:67)', r.text === '435 camels and 6,720 donkeys.', r.text);
+}
+{
+  const r = strip('Eliphaz<br/>Then Eliphaz the Temanite replied:');
+  ok('drops a one-word speaker heading (NIV Job)', r.text === 'Then Eliphaz the Temanite replied:', r.text);
+}
+
+// ── Combined-verse labels (NLT Numbers 1: "[20-21] …")
+{
+  const r = splitRangeLabel('[20-21] This is the number of men', 20) as { text: string; verseEnd?: number };
+  ok('a "[20-21]" label becomes verseEnd 21', r.verseEnd === 21 && r.text === 'This is the number of men', JSON.stringify(r));
+  const n = splitRangeLabel('[3] not a range', 3) as { text: string; verseEnd?: number };
+  ok('anything else is left alone', n.verseEnd === undefined && n.text === '[3] not a range', JSON.stringify(n));
+}
+
 // ── Structural safety
 {
   const r = strip('In the beginning God created the heavens and the earth.');
@@ -82,8 +124,8 @@ const strip = (s: string) => stripLeadingHeadings(s) as { text: string; stripped
      r.text === 'In the beginning God created the heavens and the earth.' && r.stripped.length === 0);
 }
 {
-  const r = strip('Heading One<br/>Heading Two<br/>Heading Three<br/>Actual verse text here.');
-  ok('never removes more than 2 leading segments', r.stripped.length === 2, String(r.stripped.length));
+  const r = strip('Heading One<br/>Heading Two<br/>Heading Three<br/>Heading Four<br/>Actual verse text here.');
+  ok('never removes more than 3 segments', r.stripped.length === 3, String(r.stripped.length));
   ok('so a mis-hit can never consume the whole verse',
      r.text.includes('Actual verse text here.'), r.text);
 }

@@ -115,7 +115,8 @@ const BOOKS = [
   { id: 66, name: 'Revelation', chapters: 22 },
 ];
 
-import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
+import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
+import { checkChapter, tidyVerseText } from './lib/bible-check.mjs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -142,47 +143,117 @@ function cleanVerseText(raw) {
 }
 
 /**
- * Strip bolls' embedded SECTION HEADINGS from the front of a verse.
+ * Strip bolls' embedded SECTION HEADINGS (and stray chapter numbers) from a verse.
  *
  * bolls puts a heading inline, separated by <br/>, so naively stripping tags
- * glued it onto the text — committed NIV read "The Beginning In the beginning
+ * glued it onto the text: committed NIV read "The Beginning In the beginning
  * God created…" and "Psalm 23 A psalm of David. The Lord is my shepherd…".
  * Verified raw shapes (runner probe):
  *   NIV Ps 23:1   "Psalm 23<br/>A psalm of David.<br/>The Lord is my shepherd…"
  *   NIV John 3:1  "Jesus Teaches Nicodemus<br/>Now there was a man…"
  *
- * <br/> is ALSO the poetry line break ("…green pastures,<br/>he leads me…"),
- * so splitting on it blindly would delete scripture. A leading segment is only
- * treated as a heading when it looks like one and cannot be prose:
- *   - it is a LEADING segment (headings never appear mid-verse)
- *   - it ends with NO sentence punctuation (prose and poetry lines do)
- *   - it is short (<= 60 chars)
- *   - it starts with a capital
- * That keeps "A psalm of David." (superscription, ends with '.') and every
- * poetry line, while removing "The Beginning" / "Jesus Teaches Nicodemus".
- * At most 2 leading segments are dropped, so a mis-hit can never eat a verse.
+ * <br/> is ALSO the poetry line break, so a segment is only a heading when it
+ * cannot be scripture:
+ *   - it is TITLE CASE: every word except small words (of, the, to, on…) is
+ *     capitalised. Headings are ("Jesus Teaches Nicodemus", "The Beast out of
+ *     the Sea", "Psalm 23"); poetry lines are not.
+ *   - it ends with no punctuation, is short (<= 60 chars), and is followed by
+ *     more text;
+ *   - it leads the verse, or follows a finished sentence (a mid-verse heading,
+ *     e.g. NIV Revelation 13:1).
  *
- * Returns { text, stripped[] } so every removal is auditable in the log
- * rather than silently mutating scripture.
+ * The title-case test is the Oct 2026 fix. The first version treated ANY short,
+ * capitalised, unpunctuated leading line as a heading, and NIV/NLT poetry often
+ * opens a verse with such a line, so it deleted scripture: NIV Amos 1:4 kept
+ * "that will consume the fortresses of Ben-Hadad" and lost "I will send fire on
+ * the house of Hazael"; NLT Acts 2:21 kept only "will be saved."
+ *
+ * A bare chapter number before verse 1 ("8<br/>Then the Lord said…", or inline
+ * "8 Then the Lord said…") is removed too: bolls prints it where a chapter
+ * starts mid-paragraph.
+ *
+ * Returns { text, stripped[] } so every removal is auditable rather than
+ * silently mutating scripture.
  */
-export function stripLeadingHeadings(rawText) {
-  const parts = String(rawText).split(/<br\s*\/?>/i);
-  const stripped = [];
-  while (parts.length > 1 && stripped.length < 2) {
-    const seg = parts[0].replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
-    const looksLikeHeading =
-      seg.length > 0 &&
-      seg.length <= 60 &&
-      !/[.,;:!?"'\u201d\u2019)\u2014-]$/.test(seg) &&
-      /^[A-Z\u2018\u201c(]/.test(seg);
-    if (!looksLikeHeading) break;
-    // Never let stripping empty the verse: if everything after this segment is
-    // blank, the "heading" was the only content and must be kept.
-    if (!cleanVerseText(parts.slice(1).join(' '))) break;
-    stripped.push(seg);
-    parts.shift();
+const SMALL_WORDS = new Set([
+  'a', 'an', 'the', 'and', 'but', 'or', 'nor', 'for', 'so', 'yet', 'of', 'on', 'in',
+  'to', 'at', 'by', 'as', 'up', 'from', 'with', 'into', 'onto', 'out', 'over', 'upon',
+  'off', 'is', 'are', 'was', 'be', 'about', 'after', 'against', 'among', 'before',
+  'between', 'through', 'toward', 'under', 'until', 'within', 'without',
+]);
+
+export function isTitleCase(seg) {
+  const words = seg
+    .split(/\s+/)
+    .map((w) => w.replace(/^[‘“"'(\[]+|[’”"')\]]+$/g, ''))
+    .filter(Boolean);
+  if (words.length === 0) return false;
+  let capitalised = 0;
+  for (const w of words) {
+    if (/^\d/.test(w)) continue;
+    if (SMALL_WORDS.has(w.toLowerCase())) continue;
+    if (!/^\p{Lu}/u.test(w)) return false;
+    capitalised++;
   }
-  return { text: cleanVerseText(parts.join(' ')), stripped };
+  return capitalised > 0 && /^[\p{Lu}\d‘“(]/u.test(words[0]);
+}
+
+function looksLikeHeading(seg) {
+  return (
+    seg.length > 0 &&
+    seg.length <= 60 &&
+    !/[.,;:!?"'”’)—-]$/.test(seg) &&
+    isTitleCase(seg)
+  );
+}
+
+export function stripHeadings(rawText, chapter) {
+  const parts = String(rawText)
+    .split(/<br\s*\/?>/i)
+    .map((p) => p.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim())
+    .filter((p, i, all) => p.length > 0 || i === all.length - 1);
+  const stripped = [];
+  const kept = [];
+  for (let i = 0; i < parts.length; i++) {
+    const seg = parts[i];
+    if (!seg) continue;
+    const isLast = i === parts.length - 1 || parts.slice(i + 1).every((p) => !p);
+    const prev = kept[kept.length - 1];
+    const atSentenceStart = prev === undefined || /[.!?][”’"')]*$/.test(prev);
+    if (chapter !== undefined && kept.length === 0 && seg === String(chapter) && !isLast) {
+      stripped.push(seg);
+      continue;
+    }
+    if (!isLast && atSentenceStart && stripped.length < 3 && looksLikeHeading(seg)) {
+      stripped.push(seg);
+      continue;
+    }
+    kept.push(seg);
+  }
+  let text = cleanVerseText(kept.join(' '));
+  // Inline chapter number ("8 Then the Lord said…"), seen only before verse 1.
+  if (chapter !== undefined) {
+    const m = text.match(new RegExp(`^${chapter}\\s+(?=[\\p{L}\\u2018\\u201c(])`, 'u'));
+    if (m) { stripped.push(String(chapter)); text = text.slice(m[0].length); }
+  }
+  if (!text) return { text: cleanVerseText(parts.join(' ')), stripped: [] };
+  return { text, stripped };
+}
+
+// Kept for older callers/tests; same behaviour.
+export function stripLeadingHeadings(rawText, chapter) {
+  return stripHeadings(rawText, chapter);
+}
+
+/**
+ * bolls marks a combined verse by printing its range at the front of the text
+ * ("[20-21] This is the number…", NLT Numbers 1). Turn that into verseEnd so
+ * the reader shows "20–21" instead of a stray label and an apparent gap.
+ */
+export function splitRangeLabel(text, verse) {
+  const m = String(text).match(/^\s*\[(\d+)\s*[-–]\s*(\d+)\]\s*/);
+  if (!m || Number(m[1]) !== verse || Number(m[2]) <= verse) return { text, verseEnd: undefined };
+  return { text: text.slice(m[0].length), verseEnd: Number(m[2]) };
 }
 
 // Fetch one chapter, retrying with exponential backoff on throttling (429) and
@@ -223,14 +294,19 @@ async function fetchChapter(version, bookId, chapter) {
  * no parsing/cleaning. (_cachedAt is stamped at fetch time on the client.)
  */
 const headingsStripped = [];
+export const TEXT_VERSION = 2;
 
-function toChapterResponse(raw, bookName, chapter, code, displayName) {
+export function toChapterResponse(raw, bookName, chapter, code, displayName) {
   if (!Array.isArray(raw)) return null;
   const verses = raw
     .map((v) => {
-      const { text, stripped } = stripLeadingHeadings(v.text || '');
-      if (stripped.length) headingsStripped.push(`${bookName} ${chapter}:${v.verse} -> ${stripped.join(' | ')}`);
-      return { verse: Number(v.verse), text };
+      const verse = Number(v.verse);
+      const { text: stripped1, stripped } = stripHeadings(v.text || '', verse === 1 ? chapter : undefined);
+      if (stripped.length) headingsStripped.push({ ref: `${bookName} ${chapter}:${verse}`, removed: stripped });
+      const { text: body, verseEnd } = splitRangeLabel(stripped1, verse);
+      const out = { verse, text: tidyVerseText(body) };
+      if (verseEnd) out.verseEnd = verseEnd;
+      return out;
     })
     .filter((v) => Number.isFinite(v.verse) && v.text.length > 0)
     .sort((a, b) => a.verse - b.verse);
@@ -240,7 +316,19 @@ function toChapterResponse(raw, bookName, chapter, code, displayName) {
     verses,
     translationId: code,
     translationName: displayName,
+    textVersion: TEXT_VERSION,
   };
+}
+
+function needsFetch(outFile) {
+  if (!existsSync(outFile)) return true;
+  if (process.env.FORCE === '1') return true;
+  if (process.env.REFETCH !== '1') return false;
+  try {
+    return (JSON.parse(readFileSync(outFile, 'utf8')).textVersion || 1) < TEXT_VERSION;
+  } catch {
+    return true;
+  }
 }
 
 async function main() {
@@ -278,10 +366,10 @@ async function main() {
         const outDir = join(PUBLIC_DIR, ver.code, String(book.id));
         const outFile = join(outDir, `${ch}.json`);
 
-        // FORCE=1 re-fetches chapters already on disk. Needed when the parser
-        // itself changed (e.g. the heading fix) — resumability would otherwise
-        // keep serving the old, wrong text forever.
-        if (existsSync(outFile) && process.env.FORCE !== '1') {
+        // FORCE=1 re-fetches every chapter; REFETCH=1 re-fetches only files
+        // written before the current TEXT_VERSION, so an interrupted re-scrape
+        // after a parser change resumes where it stopped.
+        if (!needsFetch(outFile)) {
           verFetched++;
           fetched++;
           continue;
@@ -291,6 +379,10 @@ async function main() {
           const raw = await fetchChapter(ver.code, book.id, ch);
           const shaped = toChapterResponse(raw, book.name, ch, ver.code, ver.name);
           if (!shaped) throw new Error('empty/invalid chapter payload');
+          // Never save an incomplete chapter: a dropped verse used to ship
+          // silently (NCV Numbers 7 had 17 of 89 verses).
+          const problems = checkChapter(shaped.verses, book.name, ch);
+          if (problems.length) throw new Error(`incomplete: ${problems.join('; ')}`);
           mkdirSync(outDir, { recursive: true });
           writeFileSync(outFile, JSON.stringify(shaped));
           verFetched++;
@@ -309,9 +401,16 @@ async function main() {
     }
     console.log(`  ${ver.code} done: ${verFetched}/${totalChapters} chapters`);
     if (headingsStripped.length) {
-      console.log(`  ${ver.code}: removed ${headingsStripped.length} inline section headings, e.g.`);
-      headingsStripped.slice(0, 15).forEach((h) => console.log(`     ${h}`));
+      console.log(`  ${ver.code}: removed ${headingsStripped.length} inline headings/chapter numbers, e.g.`);
+      headingsStripped.slice(0, 15).forEach((h) => console.log(`     ${h.ref} -> ${h.removed.join(' | ')}`));
       if (headingsStripped.length > 15) console.log(`     … and ${headingsStripped.length - 15} more`);
+      // AUDIT_DIR: write every removal to a file so it can be reviewed in full.
+      if (process.env.AUDIT_DIR) {
+        mkdirSync(process.env.AUDIT_DIR, { recursive: true });
+        writeFileSync(join(process.env.AUDIT_DIR, `headings-removed-${ver.code}.json`),
+          JSON.stringify(headingsStripped, null, 1));
+      }
+      headingsStripped.length = 0;
     }
   }
 
@@ -319,6 +418,7 @@ async function main() {
   console.log(`Files saved to: public/bible/`);
   if (errors > 0) {
     console.log(`\n⚠️  ${errors} chapters failed — re-run the script to retry only the missing ones.`);
+    process.exitCode = 1;
   }
   console.log(`\nNext steps:`);
   console.log(`  git add public/bible/`);

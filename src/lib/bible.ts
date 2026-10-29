@@ -340,7 +340,7 @@ export function calculateNextProgress(
  */
 export function isChapterUnreadInPlan(
   entry: { categoryId: string; bookName: string; chapter: number },
-  progressList: Progress[],
+  progressList: ProgressType[],
   completedBooks: Set<string>
 ): boolean {
   if (entry.categoryId === 'devotional' || entry.bookName === 'Proverbs') {

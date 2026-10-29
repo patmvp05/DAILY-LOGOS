@@ -10,6 +10,8 @@ import { saveState, loadState, loadStateAsync, saveStateSync, hasStoredStateSync
 import { prefetchProverbs } from '../lib/proverbCache';
 import { prefetchBibleChapters } from '../lib/prefetchBible';
 import { prefetchDevotionals } from '../lib/devotionalContent';
+import { purgeStaleChapterCache } from '../lib/chapterText';
+import { purgeStalePreviewCache } from '../lib/bibleCache';
 import { AppContext } from './AppContextCore';
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
@@ -72,6 +74,16 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     triggerPrefetch();
     return () => window.removeEventListener('online', triggerPrefetch);
   }, [bibleVersion]);
+
+  // Free the storage held by chapters cached under an older text version
+  // (they are never read again). Deferred so it never competes with first paint.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      purgeStalePreviewCache();
+      void purgeStaleChapterCache();
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const triggerPrefetch = () => {

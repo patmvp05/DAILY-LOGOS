@@ -91,7 +91,7 @@ console.log('=== Step 4: BOOK_READ_MINUTES vs Committed NCV Bible Text (225 WPM)
 {
   const report = computeBookReadMinutes('NCV');
   check('NCV 1-decimal avg Genesis === 3.2', report.averages['Genesis'] === 3.2, `got ${report.averages['Genesis']}`);
-  check('NCV 1-decimal avg 1 Chronicles === 2.9', report.averages['1 Chronicles'] === 2.9, `got ${report.averages['1 Chronicles']}`);
+  check('NCV 1-decimal avg 1 Chronicles === 3.0', report.averages['1 Chronicles'] === 3.0, `got ${report.averages['1 Chronicles']}`);
   check('NCV 1-decimal avg Isaiah === 2.6', report.averages['Isaiah'] === 2.6, `got ${report.averages['Isaiah']}`);
   check('NCV 1-decimal avg Job === 1.9', report.averages['Job'] === 1.9, `got ${report.averages['Job']}`);
   check('NCV 1-decimal avg Proverbs === 2.0', report.averages['Proverbs'] === 2.0, `got ${report.averages['Proverbs']}`);

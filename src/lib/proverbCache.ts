@@ -10,7 +10,7 @@ import { resolveBibleVersion } from '../constants';
 
 export interface ProverbResponse {
   reference: string;
-  verses: { verse: number; text: string }[];
+  verses: { verse: number; text: string; verseEnd?: number }[];
   text: string;
   translation_id: string;
   translation_name: string;

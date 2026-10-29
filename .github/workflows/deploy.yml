@@ -15,6 +15,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Every stored Bible chapter must be complete before anything ships
+      # (NCV Numbers 7 once went live with 17 of its 89 verses).
+      - name: Check Bible text
+        run: npx tsx scripts/test-bible-integrity.mts
       - run: npm run build
 
       # Firestore security rules ship BEFORE the hosting bundle that depends on

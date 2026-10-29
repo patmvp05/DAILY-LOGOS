@@ -16,6 +16,7 @@ import { triggerHaptic } from '../../lib/haptic';
 import { READER_END_SLOP_PX, READER_TAIL_CSS } from '../../lib/readerLayout';
 import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 import VerseCopyPopup from '../VerseCopyPopup';
+import { lastVerseInChapter, verseLabel } from '../../lib/verseLabel';
 
 interface ReaderModalProps {
   // Wired from AppModals' useReadingActions (with the signed-in user), so
@@ -133,10 +134,9 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
   const content = settled ? result.data : null;
 
   // Last verse number of the loaded chapter, so the header can show the verse
-  // range (e.g. "16:1–31") — a quick sense of how long the chapter is.
-  const lastVerse = content && content.verses.length > 0
-    ? content.verses[content.verses.length - 1].verse
-    : null;
+  // range (e.g. "16:1–31") — a quick sense of how long the chapter is. A final
+  // combined passage counts to its end (2 Chronicles 35 ends with 26–27).
+  const lastVerse = content ? lastVerseInChapter(content.verses) : null;
 
   return (
     <>
@@ -243,7 +243,7 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
                         }}
                         className="text-[12px] font-bold align-super mr-1.5 text-brand/70 tabular-nums select-none cursor-pointer hover:text-brand active:scale-110 transition-all inline"
                       >
-                        {v.verse}
+                        {verseLabel(v)}
                       </button>
                       {v.text}
                     </div>

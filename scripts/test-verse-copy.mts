@@ -6,6 +6,7 @@
  */
 
 // Inline the logic functions (can't import React components in Node)
+import { verseLabel, verseLabelPlain, lastVerseInChapter, nextEntryEnd, prevEntryEnd } from '../src/lib/verseLabel';
 
 const BOOK_ABBREVIATIONS: Record<string, string> = {
   'Genesis': 'Gen', 'Exodus': 'Exo', 'Leviticus': 'Lev', 'Numbers': 'Num', 'Deuteronomy': 'Deu',
@@ -370,6 +371,33 @@ function assert(cond: boolean, msg: string) {
   assert(!atBookEnd(s), 'ch 1 of 50 is NOT book end even if at last verse');
   // This confirms `atBookEnd` correctly checks chapter >= totalChaptersInBook,
   // not just verse position. (Bug note: canExpandDown is dead code.)
+}
+
+// ── Test 14: combined verses (NCV Genesis 8:3-4, Numbers 7:12-83) ──
+{
+  const gen8 = [
+    { verse: 1, text: 'a' }, { verse: 2, text: 'b' }, { verse: 3, verseEnd: 4, text: 'c' },
+    { verse: 5, text: 'd' }, { verse: 6, text: 'e' },
+  ];
+  assert(verseLabel(gen8[2]) === '3\u20134', `label 3–4: got ${verseLabel(gen8[2])}`);
+  assert(verseLabelPlain(gen8[2]) === '3-4', 'plain label 3-4');
+  assert(verseLabel(gen8[0]) === '1', 'single verse label unchanged');
+  // Expanding from verse 2 takes in the whole combined passage, never half of it.
+  assert(nextEntryEnd(gen8, 2) === 4, `expand 2 -> 4: got ${nextEntryEnd(gen8, 2)}`);
+  assert(nextEntryEnd(gen8, 4) === 5, 'expand 4 -> 5');
+  assert(nextEntryEnd(gen8, 6) === null, 'nothing after the last verse');
+  assert(prevEntryEnd(gen8, 5) === 4, `contract 5 -> 4: got ${prevEntryEnd(gen8, 5)}`);
+  assert(prevEntryEnd(gen8, 4) === 2, `contract 4 -> 2: got ${prevEntryEnd(gen8, 4)}`);
+  assert(prevEntryEnd(gen8, 1) === null, 'nothing before verse 1');
+  // Contiguous single verses step exactly as before (+1 / -1).
+  const plain = makeVerses(1, 10);
+  assert(nextEntryEnd(plain, 3) === 4 && prevEntryEnd(plain, 4) === 3, 'single verses step by one');
+  // A chapter ending in a combined passage reports its true last verse.
+  const chr35 = [...makeVerses(1, 25), { verse: 26, verseEnd: 27, text: 'z' }];
+  assert(lastVerseInChapter(chr35) === 27, `2 Chr 35 ends at 27: got ${lastVerseInChapter(chr35)}`);
+  const num7 = [...makeVerses(1, 11), { verse: 12, verseEnd: 83, text: 'gifts' }, ...makeVerses(84, 89)];
+  assert(nextEntryEnd(num7, 11) === 83, 'Numbers 7: one step covers 12-83');
+  assert(lastVerseInChapter([]) === null, 'empty chapter');
 }
 
 console.log(`\nVERSE-COPY ${fail === 0 ? 'PASS' : 'FAIL'} ${pass} / ${pass + fail}`);

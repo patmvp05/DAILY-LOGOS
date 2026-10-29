@@ -42,6 +42,7 @@ import { join } from 'node:path';
 import { addDays, format, parseISO, isValid } from 'date-fns';
 
 import { CATEGORIES, CATEGORIES_BY_ID, BOLLS_BIBLE_BOOK_IDS } from '../src/constants';
+import { lastVerseInChapter, verseLabel } from '../src/lib/verseLabel';
 import { normalizeProgressPosition } from '../src/lib/bible';
 import { computeProgressStats } from '../src/lib/utils';
 import { INTERNAL_DEVOTIONALS } from '../src/lib/devotionalCatalog';
@@ -258,7 +259,7 @@ export function walkChapters(prog: Progress, count: number): ChapterRef[] {
 
 interface ChapterText {
   reference: string;
-  verses: { verse: number; text: string }[];
+  verses: { verse: number; verseEnd?: number; text: string }[];
   translationName?: string;
 }
 
@@ -401,9 +402,9 @@ const sectionPage = xhtmlDocument;
 
 function renderChapter(day: DayPlan, ref: ChapterRef, text: ChapterText): string {
   const category = CATEGORIES_BY_ID.get(ref.categoryId)!;
-  const last = text.verses[text.verses.length - 1].verse;
+  const last = lastVerseInChapter(text.verses);
   const verses = text.verses
-    .map((v) => `<p class="verse"><span class="vn">${v.verse}</span>${escapeXml(v.text)}</p>`)
+    .map((v) => `<p class="verse"><span class="vn">${verseLabel(v)}</span>${escapeXml(v.text)}</p>`)
     .join('\n');
 
   return sectionPage(
@@ -417,9 +418,9 @@ ${verses}`
 }
 
 function renderProverb(day: DayPlan, text: ChapterText): string {
-  const last = text.verses[text.verses.length - 1].verse;
+  const last = lastVerseInChapter(text.verses);
   const verses = text.verses
-    .map((v) => `<p class="verse"><span class="vn">${v.verse}</span>${escapeXml(v.text)}</p>`)
+    .map((v) => `<p class="verse"><span class="vn">${verseLabel(v)}</span>${escapeXml(v.text)}</p>`)
     .join('\n');
 
   return sectionPage(

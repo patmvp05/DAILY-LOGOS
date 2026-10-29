@@ -175,9 +175,11 @@ export interface BibleVersion {
  *  - 'bibleapi': bible-api.com (keyless, CORS-friendly). Public-domain texts
  *    only. `code` is the bible-api.com translation slug (e.g. 'web', 'kjv').
  *  - 'bolls':    modern, copyrighted translations served from same-origin static
- *    files at /bible/{code}/{bookId}/{chapter}.json (pre-fetched from bolls.life
- *    by scripts/fetch-bible-static.mjs — bolls.life blocks runtime access). `code`
- *    is the bolls.life translation short-name (e.g. 'NIV', 'ESV').
+ *    files at /bible/{code}/{bookId}/{chapter}.json. The name is historical: the
+ *    files were first fetched from bolls.life; since Oct 2026 NCV, CSB, NIV, NLT,
+ *    ESV and NKJV come from BibleGateway (scripts/fetch-biblegateway.py) and BSB
+ *    from bereanbible.com. `code` is the folder name (e.g. 'NIV', 'ESV').
+ *    scripts/test-bible-integrity.mts checks every chapter of every one.
  *
  * Every entry must be COMPLETE for all 66 books, or it would fall back to KJV
  * on the missing books. If a modern translation ever fails to load (missing
@@ -186,9 +188,9 @@ export interface BibleVersion {
  */
 export const BIBLE_VERSIONS: BibleVersion[] = [
   // Modern, copyrighted — served from same-origin static files (public/bible/),
-  // pre-fetched from bolls.life by scripts/fetch-bible-static.mjs. ('bolls' here
-  // means "the bolls-sourced static set", NOT a runtime bolls.life call — that's
-  // blocked by Cloudflare. See AGENTS.md.)
+  // downloaded from BibleGateway by scripts/fetch-biblegateway.py. ('bolls' here
+  // means "a static set", NOT a runtime bolls.life call. See AGENTS.md.)
+  // The NIV is the 2011 text (the 1984 text shipped until Oct 2026).
   { id: 'niv',  name: 'New International Version', source: 'bolls', code: 'NIV',  modern: true },
   { id: 'nlt',  name: 'New Living Translation',    source: 'bolls', code: 'NLT',  modern: true },
   { id: 'esv',  name: 'English Standard Version',  source: 'bolls', code: 'ESV',  modern: true },
@@ -290,7 +292,7 @@ export const BOOK_READ_MINUTES: Record<string, number> = {
   'Hebrews': 3, 'James': 2, '1 Peter': 3, '2 Peter': 2,
   '1 John': 2, '2 John': 1, '3 John': 1, 'Jude': 3,
   // Prophecy
-  'Isaiah': 3, 'Jeremiah': 4, 'Lamentations': 3, 'Ezekiel': 4, 'Daniel': 4,
+  'Isaiah': 3, 'Jeremiah': 4, 'Lamentations': 3, 'Ezekiel': 3, 'Daniel': 4,
   'Hosea': 2, 'Joel': 3, 'Amos': 2, 'Obadiah': 3, 'Jonah': 1,
   'Micah': 2, 'Nahum': 2, 'Habakkuk': 2, 'Zephaniah': 2,
   'Haggai': 3, 'Zechariah': 2, 'Malachi': 2,
