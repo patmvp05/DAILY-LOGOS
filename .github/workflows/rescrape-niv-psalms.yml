@@ -1,0 +1,27 @@
+name: Re-download NIV Psalms with titles (temporary, fix branch only)
+on:
+  push:
+    branches: ['fix/bible-text-integrity']
+    paths: ['.github/workflows/rescrape-niv-psalms.yml']
+permissions:
+  contents: write
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/bible-text-integrity
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4
+      - run: python scripts/test-biblegateway-parser.py
+      - name: Download NIV Psalms
+        continue-on-error: true
+        env: { BG_VERSION: NIV, OUT_ROOT: audit/niv-psalms, ONLY_BOOKS: Psalms, DELAY: '1.0' }
+        run: python scripts/fetch-biblegateway.py
+      - name: Commit
+        if: always()
+        run: bash .github/scripts/commit-to-fix-branch.sh "audit/niv-psalms" "NIV Psalms with titles"

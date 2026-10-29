@@ -87,7 +87,7 @@ KNOWN_NAMES = {
 
 # Bumped whenever the parser changes what it writes. REFETCH=1 re-fetches any
 # file below it, so an interrupted full re-scrape resumes where it stopped.
-TEXT_VERSION = 3
+TEXT_VERSION = 4
 
 VERSE_COUNTS = json.load(open(os.path.join(HERE, "lib", "verse-counts.json"), encoding="utf-8"))
 
@@ -151,7 +151,23 @@ def verse_range(span, chapter):
     return None
 
 
-def parse_passage(html, chapter):
+def keep_h4(h4, book):
+    """Psalm superscriptions are scripture and open verse 1. Most versions mark
+    them <h4 class="psalm-title">; the NIV uses a bare <h4> (its other h4s are
+    classed: psalm-book "BOOK I", psalm-acrostic "Aleph", speaker "She",
+    resources-header "Footnotes"), so a bare h4 counts only in Psalms."""
+    classes = h4.get("class") or []
+    if "psalm-title" in classes:
+        return True
+    return (not classes and book == "Psalms"
+            and any(verse_class(s) for s in h4.select("span.text")))
+
+
+def verse_class(span):
+    return any(VERSE_CLASS_RE.match(c) for c in span.get("class", []))
+
+
+def parse_passage(html, chapter, book=None):
     """Return [{verse, text[, verseEnd]}] for one chapter page, in order."""
     soup = BeautifulSoup(html, "html.parser")
     root = soup.select_one("div.passage-text") or soup
@@ -164,7 +180,7 @@ def parse_passage(html, chapter):
         for el in root.select(sel):
             el.decompose()
     for h4 in root.select("h4"):
-        if "psalm-title" not in (h4.get("class") or []):
+        if not keep_h4(h4, book):
             h4.decompose()
     for br in root.find_all("br"):
         br.replace_with(" ")
@@ -308,7 +324,7 @@ def fetch_chapter(book_name, chapter):
         timeout=30,
     )
     resp.raise_for_status()
-    return parse_passage(resp.text, chapter)
+    return parse_passage(resp.text, chapter, book_name)
 
 
 def needs_fetch(path):
