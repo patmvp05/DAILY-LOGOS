@@ -62,6 +62,30 @@
   and the footnoted verses critical-text translations omit (Matt 17:21 …); each translation's
   exact omission list is pinned in the test. Both scrapers run the same check
   (`scripts/lib/bible-check.mjs`, mirrored in Python) and refuse to write a chapter that fails.
+  The test also compares every verse's length with the same verse in the other six
+  translations (a cut-short verse keeps its number, so only its length gives it away): under
+  0.4x or over 2.6x the median fails unless the verse is in `scripts/lib/verse-length-exceptions.json`,
+  where each of the 79 reviewed outliers (NLT census tables, NCV city lists, manuscript
+  additions like NKJV 1 John 5:7) is grouped under its reason. Add to that file only after
+  reading the verse against the other translations.
+- **Three checks run every day (Oct 2026), so a broken chapter is caught even if it gets past a
+  deploy:**
+  1. **On the phone, every time a chapter loads** (`src/lib/chapterCheck.ts`, same rules as
+     `bible-check.mjs`; `scripts/test-chapter-check.mts` proves they agree on all 8,323 stored
+     chapters). `getChapterText` checks every copy, including copies saved in IndexedDB: one
+     that fails is deleted and downloaded again, and only a passing copy is ever saved. The
+     prefetch loads the next 7 chapters per part on every launch, so those are re-checked daily.
+     Results go to `src/lib/textCheckLog.ts` (localStorage `dl_text_checks_v1`).
+  2. **On screen:** the reader and the daily proverb show "All N verses checked" under the
+     title, or a red notice naming the missing verses with a "Download again" button
+     (`refetchChapterText` skips every saved copy). A KJV fallback counts as a failed check.
+     The dashboard's `TextCheckSummary` (phone summary strip; Plan Status card on desktop)
+     says whether all preloaded chapters (next 7 per part + today's proverb) passed.
+  3. **On GitHub every morning** (`.github/workflows/daily-bible-check.yml`, 22:47 UTC): the
+     integrity test, then `scripts/check-live-bible.mts`, which downloads every NCV chapter and
+     a rotating 1/30 of each other translation from the live site (FULL=1: all 8,323) and fails
+     if any differs from the repo, fails the verse check, or comes back as `index.html`. A failed
+     run is how Patrick gets emailed; its summary lists each problem in plain words.
 - **Combined verses.** Some translations print several verses as one passage: NCV Genesis 8:3-4
   and Numbers 7:12-83 (38 chapters), NLT Numbers 1:20-21. A file stores it once as
   `{ verse: 12, verseEnd: 83, text }`. The reader, the daily proverb, copy-verse and the header
@@ -72,7 +96,9 @@
   verse's class is a RANGE, `Gen-8-3-Gen-8-4` (the old parser's single-verse regex dropped
   these, text and all); two NCV verses (1 Cor 6:9, 1 John 3:19) are a "-" placeholder whose text
   is in the next verse, merged into one combined verse; headings are `h3` (dropped), psalm
-  superscriptions `h4.psalm-title` (kept, they open verse 1); the divine name is
+  superscriptions `h4.psalm-title` (kept, they open verse 1; the NIV marks them as a bare
+  `<h4>` with no class, kept only in Psalms and only when it holds verse text, which is what
+  restored 116 NIV psalm titles in Oct 2026); the divine name is
   `span.small-caps`, so text inside a span is joined with NO separator (joining with " " wrote
   "the Lord ." into ~5,000 NCV/CSB verses); NLT census tables are `tr` rows, joined "cell — cell".
 - **All six modern translations come from BibleGateway (Oct 2026).** NCV and CSB always did;
@@ -95,8 +121,8 @@
 - **`textVersion` in each file** records which parser wrote it (2 = the Oct 2026 fixes). Run a
   scraper with `REFETCH=1` to re-download only files below the current version; it resumes
   where an interrupted run stopped. Changing what the parser writes means bumping
-  `TEXT_VERSION` in the scraper AND the cache prefixes in `chapterText.ts` (`chapter_text_v7_`)
-  and `bibleCache.ts` (`bible_chapter_cache_v12_`) plus `STATIC_CACHE_BUST`: a phone otherwise
+  `TEXT_VERSION` in the scraper AND the cache prefixes in `chapterText.ts` (`chapter_text_v8_`)
+  and `bibleCache.ts` (`bible_chapter_cache_v13_`) plus `STATIC_CACHE_BUST`: a phone otherwise
   keeps the chapter (and its reading time) it cached from the old text forever.
 - **Honest fallback:** if a chapter fails to load, `getChapterText()` falls back to
   public-domain KJV but labels it "King James Version" (never mislabeled) and flags the
@@ -147,8 +173,8 @@
 
 ## Caching & Prefetch
 - **Two-tier text cache:** L1 memory Map → L2 IndexedDB (idb-keyval), keyed by
-  version+book+chapter (`chapter_text_v6_…`). Once read, a real chapter is permanent and
-  offline. Fallbacks are L1-only (see above). Bump the prefix when the cache could hold
+  version+book+chapter (`chapter_text_v8_…`). Once read, a complete chapter is kept and works
+  offline; every read re-checks it (see "Three checks run every day"). Fallbacks are L1-only. Bump the prefix when the cache could hold
   stale entries from a prior architecture.
 - **Look-ahead prefetch:** `src/lib/prefetchBible.ts` warms the next 7 chapters per
   category in the selected version on app start / progress change / reconnect (wired in

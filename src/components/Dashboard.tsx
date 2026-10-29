@@ -35,6 +35,7 @@ import { useAppStats } from '../hooks/useAppStats';
 import { useReadingActions } from '../hooks/useReadingActions';
 import { useProverb } from '../hooks/useProverb';
 import { useToday } from '../hooks/useToday';
+import { TextCheckSummary } from './TextCheck';
 import { resolveDevotionalKind, getDevotionalSlug, interpolateDevotionalUrl } from '../lib/devotionalCatalog';
 
 interface DashboardProps {
@@ -263,6 +264,12 @@ function DashboardComponent({
             />
           ))}
         </div>
+        <TextCheckSummary
+          progress={state.progress}
+          bibleVersion={bibleVersion}
+          proverbChapter={dayOfMonth}
+          className="mt-5"
+        />
         <button
           onClick={() => setActivePlanCategory('_all')}
           className="mt-5 w-full flex items-center justify-center gap-2 py-3 rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] text-[13px] font-semibold text-[var(--text-primary)] active:scale-[0.98] transition-transform"
@@ -577,6 +584,11 @@ function DashboardComponent({
                   )}
                 />
               </div>
+            </div>
+
+            {/* Phones show this in the summary strip at the top instead. */}
+            <div className="hidden lg:block mb-6">
+              <TextCheckSummary progress={state.progress} bibleVersion={bibleVersion} proverbChapter={dayOfMonth} />
             </div>
 
             {state.customDevotionals.length > 0 && (

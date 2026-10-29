@@ -11,12 +11,13 @@ import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
 import { CATEGORIES_BY_ID, DEFAULT_BIBLE_VERSION } from '../../constants';
 import { calculateNextProgress } from '../../lib/bible';
-import { getChapterText, type ChapterTextResponse } from '../../lib/chapterText';
+import { getChapterText, refetchChapterText, type ChapterTextResponse } from '../../lib/chapterText';
 import { triggerHaptic } from '../../lib/haptic';
 import { READER_END_SLOP_PX, READER_TAIL_CSS } from '../../lib/readerLayout';
 import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 import VerseCopyPopup from '../VerseCopyPopup';
 import { lastVerseInChapter, verseLabel } from '../../lib/verseLabel';
+import { TextCheckBadge } from '../TextCheck';
 
 interface ReaderModalProps {
   // Wired from AppModals' useReadingActions (with the signed-in user), so
@@ -39,6 +40,9 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
   // fetch (and shows the loading state) even for the same chapter/version.
   const [retry, setRetry] = useState(0);
   const reqKey = book && chapter ? `${book.name}|${chapter}|${version}|${retry}` : '';
+  // "Download again" on a chapter that failed its text check: the request it
+  // names skips every saved copy (memory and IndexedDB) and goes to the network.
+  const [refetchKey, setRefetchKey] = useState('');
 
   // Result is keyed by the request it belongs to; status/content are DERIVED
   // from whether the latest result matches the current request. This avoids a
@@ -99,11 +103,12 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
   useEffect(() => {
     if (!reqKey || !book || !chapter) return;
     let ignore = false;
-    getChapterText(book.name, chapter, version)
+    const load = refetchKey === reqKey ? refetchChapterText : getChapterText;
+    load(book.name, chapter, version)
       .then((data) => { if (!ignore) setResult({ key: reqKey, data, error: false }); })
       .catch(() => { if (!ignore) setResult({ key: reqKey, data: null, error: true }); });
     return () => { ignore = true; };
-  }, [reqKey, book, chapter, version]);
+  }, [reqKey, refetchKey, book, chapter, version]);
 
   // On each chapter (re)load: jump to the top and decide whether the action is
   // immediately visible (chapter fits without scrolling) or hidden until the
@@ -137,6 +142,11 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
   // range (e.g. "16:1–31") — a quick sense of how long the chapter is. A final
   // combined passage counts to its end (2 Chronicles 35 ends with 26–27).
   const lastVerse = content ? lastVerseInChapter(content.verses) : null;
+
+  const downloadAgain = () => {
+    setRefetchKey(`${book.name}|${chapter}|${version}|${retry + 1}`);
+    setRetry((r) => r + 1);
+  };
 
   return (
     <>
@@ -231,6 +241,7 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
                     <span className="text-[var(--text-secondary)] font-normal">:1–{lastVerse}</span>
                   )}
                 </h2>
+                <TextCheckBadge check={content?._check} onRetry={downloadAgain} />
                 <div className="reader-prose font-serif text-[19px] sm:text-[20px] leading-[1.9] text-[var(--text-primary)]">
                   {content?.verses.map((v) => (
                     <div key={v.verse} className="mb-[1.1em]">

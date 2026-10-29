@@ -4,7 +4,8 @@
  */
 
 import { addDays, subDays } from 'date-fns';
-import { getChapterText } from './chapterText';
+import { getChapterText, refetchChapterText } from './chapterText';
+import type { ChapterCheck } from './chapterCheck';
 import { seedChapterInfoFromText } from './bibleCache';
 import { resolveBibleVersion } from '../constants';
 
@@ -15,6 +16,8 @@ export interface ProverbResponse {
   translation_id: string;
   translation_name: string;
   _cachedAt?: number;
+  /** Text check of this copy (src/lib/chapterCheck.ts). */
+  check?: ChapterCheck;
 }
 
 // L1 cache, keyed by version + chapter so switching translations never serves
@@ -45,10 +48,22 @@ export async function getProverb(chapter: number, version?: string): Promise<Pro
     translation_id: ct.translationId,
     translation_name: ct.translationName,
     _cachedAt: ct._cachedAt,
+    check: ct._check,
   };
 
   memoryCache.set(memKey, result);
   return result;
+}
+
+/**
+ * Forget the saved copies of a proverb chapter and download it again (the
+ * "Download again" button when it fails its text check).
+ */
+export async function refetchProverb(chapter: number, version?: string): Promise<ProverbResponse> {
+  const id = resolveBibleVersion(version);
+  memoryCache.delete(`${id}_${chapter}`);
+  await refetchChapterText('Proverbs', chapter, id);
+  return getProverb(chapter, id);
 }
 
 /**

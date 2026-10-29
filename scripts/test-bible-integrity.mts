@@ -16,7 +16,10 @@
  *     below, so a lost verse that happens to be on that list still fails);
  *   - empty text, a leftover footnote marker, "[20-21]" label, chapter number,
  *     HTML, or a space before punctuation;
- *   - a translation whose text is not the one its label says (signature verses).
+ *   - a translation whose text is not the one its label says (signature verses);
+ *   - a verse far shorter or longer than the same verse in the other six
+ *     translations, unless it is in scripts/lib/verse-length-exceptions.json
+ *     (a cut-short verse keeps its number, so only its length gives it away).
  *
  * The deploy workflows run this before building, so a broken chapter can't ship.
  * Run with: npx tsx scripts/test-bible-integrity.mts
@@ -26,6 +29,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BIBLE_VERSIONS, BOLLS_BIBLE_BOOK_IDS } from '../src/constants';
 import { VERSE_COUNTS, checkChapter, omittedVerses, TEXT_DEFECTS } from './lib/bible-check.mjs';
+import LENGTH_EXCEPTIONS from './lib/verse-length-exceptions.json';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'bible');
 
@@ -76,6 +80,7 @@ ok('every stored translation has a recorded omission list',
 
 let chapters = 0;
 let versesCovered = 0;
+const allText = new Map<string, Map<string, Verse[]>>();
 for (const ver of stored) {
   const omitted: string[] = [];
   const byRef = new Map<string, Verse[]>();
@@ -119,6 +124,62 @@ for (const ver of stored) {
       !!hit && hit.text.includes(phrase), hit?.text.slice(0, 80) ?? 'missing');
   }
   ok(`${ver.code} has signature checks`, (SIGNATURES[ver.code] ?? []).length > 0);
+  allText.set(ver.code, byRef);
+}
+
+// Cut-short or swollen verses. Each verse's word count is compared with the
+// median of the other translations over the same verse numbers (a combined
+// passage against the sum of the verses it covers). Rule and reviewed
+// exceptions: scripts/lib/verse-length-exceptions.json.
+{
+  const wordCount = (t: string) => t.trim().split(/\s+/).filter(Boolean).length;
+  const entries = new Map<string, Map<string, { end: number; words: number }>>();
+  for (const [code, byRef] of allText) {
+    const m = new Map<string, { end: number; words: number }>();
+    for (const [ref, verses] of byRef) {
+      for (const v of verses) m.set(`${ref}:${v.verse}`, { end: v.verseEnd ?? v.verse, words: wordCount(v.text) });
+    }
+    entries.set(code, m);
+  }
+  const median = (xs: number[]) => {
+    const s = [...xs].sort((a, b) => a - b);
+    const mid = s.length >> 1;
+    return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+  };
+  const allowed = new Set(LENGTH_EXCEPTIONS.groups.flatMap((g) => g.verses));
+  const outliers: string[] = [];
+  let compared = 0;
+  for (const [code, m] of entries) {
+    for (const [key, { end, words }] of m) {
+      const [ref, first] = [key.slice(0, key.lastIndexOf(':')), Number(key.slice(key.lastIndexOf(':') + 1))];
+      const others: number[] = [];
+      for (const [other, om] of entries) {
+        if (other === code) continue;
+        let sum = 0;
+        let usable = true;
+        for (let n = first; n <= end && usable; n++) {
+          const e = om.get(`${ref}:${n}`);
+          if (!e || e.end !== n) usable = false; // missing here, or combined differently
+          else sum += e.words;
+        }
+        if (usable) others.push(sum);
+      }
+      if (others.length < 3) continue;
+      compared++;
+      const med = median(others);
+      const short = med >= 10 && words < 0.4 * med;
+      const long = med >= 6 && words > 2.6 * med && words - med > 15;
+      if (short || long) outliers.push(`${code} ${key}`);
+      if ((short || long) && !allowed.has(`${code} ${key}`)) {
+        ok(`${code} ${key} is about as long as in other translations`, false,
+          `${words} words, others ~${med} (${short ? 'cut short?' : 'extra text?'})`);
+      }
+    }
+  }
+  ok('verse lengths were compared across translations', compared > 200000, String(compared));
+  const stale = [...allowed].filter((k) => !outliers.includes(k));
+  if (stale.length) console.log(`  (verse-length exceptions no longer needed: ${stale.join(', ')})`);
+  console.log(`  ${compared} verses compared across translations, ${outliers.length} reviewed outliers`);
 }
 
 // The combined passages that started this: NCV Numbers 7 is complete again.

@@ -1,0 +1,120 @@
+{
+  "about": "Verses whose length is far from the median of the other translations for a known reason, reviewed by reading each one (Oct 29 2026). scripts/test-bible-integrity.mts fails on any outlier NOT listed here, which is how a cut-short verse like NCV Numbers 7 (17 of 89 verses) is caught even when every verse number is present. Key: translation, book, chapter:first verse of the entry.",
+  "rule": "SHORT: fewer than 0.4 x the median word count of the other translations over the same verses, when that median is at least 10 words. LONG: more than 2.6 x the median and more than 15 words above it.",
+  "groups": [
+    {
+      "reason": "A list printed one or two names or places per verse (genealogies, city lists), so each verse is a few words while other translations write full sentences",
+      "verses": [
+        "NCV Joshua 12:9",
+        "NCV Joshua 12:10",
+        "NCV Joshua 12:11",
+        "NCV Joshua 12:12",
+        "NCV Joshua 12:13",
+        "NCV Joshua 12:14",
+        "NCV Joshua 12:15",
+        "NCV Joshua 12:16",
+        "NCV Joshua 12:17",
+        "NCV Joshua 12:18",
+        "NCV Joshua 12:19",
+        "NCV Joshua 12:20",
+        "NCV Joshua 12:21",
+        "NCV Joshua 12:22",
+        "NCV Ezra 2:57",
+        "NIV Ezra 2:57",
+        "NLT Ezra 2:57",
+        "NLT 1 Chronicles 6:21",
+        "NLT 1 Chronicles 6:24",
+        "NLT 1 Chronicles 6:34",
+        "NLT 1 Chronicles 6:35",
+        "NLT 1 Chronicles 6:36",
+        "NLT 1 Chronicles 6:37",
+        "NLT 1 Chronicles 6:38",
+        "NLT 1 Chronicles 6:40",
+        "NLT 1 Chronicles 6:41",
+        "NLT 1 Chronicles 6:42",
+        "NLT 1 Chronicles 6:43",
+        "NLT 1 Chronicles 6:45",
+        "NLT 1 Chronicles 6:46",
+        "NLT 1 Chronicles 6:47",
+        "NLT Joshua 21:39",
+        "NLT Ezekiel 41:24",
+        "NLT Ezekiel 45:14",
+        "NLT Ezekiel 48:5",
+        "NLT Ezekiel 48:6",
+        "NLT Numbers 31:35"
+      ]
+    },
+    {
+      "reason": "NLT prints the census in Numbers 1-2 as a table: one 'Tribe - number' row per pair of verses",
+      "verses": [
+        "NLT Numbers 1:22",
+        "NLT Numbers 1:24",
+        "NLT Numbers 1:26",
+        "NLT Numbers 1:28",
+        "NLT Numbers 1:30",
+        "NLT Numbers 1:32",
+        "NLT Numbers 1:34",
+        "NLT Numbers 1:36",
+        "NLT Numbers 1:38",
+        "NLT Numbers 1:40",
+        "NLT Numbers 1:42",
+        "NLT Numbers 2:5",
+        "NLT Numbers 2:7",
+        "NLT Numbers 2:12",
+        "NLT Numbers 2:14",
+        "NLT Numbers 2:20",
+        "NLT Numbers 2:22",
+        "NLT Numbers 2:27",
+        "NLT Numbers 2:29"
+      ]
+    },
+    {
+      "reason": "Thought-for-thought wording moves words between neighbouring verses; the chapter as a whole is complete",
+      "verses": [
+        "NCV Genesis 35:13",
+        "NCV Joshua 13:4",
+        "NLT 1 Samuel 17:42",
+        "NLT Exodus 26:10",
+        "NLT Exodus 36:17",
+        "NLT Ezekiel 15:5",
+        "NLT Ezekiel 16:52",
+        "NLT Ezekiel 33:26",
+        "NLT Ezra 5:7",
+        "NLT Jeremiah 34:10",
+        "NLT Job 10:13",
+        "NLT Matthew 24:50",
+        "NLT Nehemiah 12:17",
+        "CSB Ezekiel 40:14",
+        "BSB 1 Kings 18:33",
+        "BSB Genesis 7:14"
+      ]
+    },
+    {
+      "reason": "NCV prints the twelve identical offerings of Numbers 7:12-83 once, as one combined passage",
+      "verses": [
+        "NCV Numbers 7:12"
+      ]
+    },
+    {
+      "reason": "Words found in some ancient manuscripts that this translation includes (Dead Sea Scrolls, Septuagint, Textus Receptus)",
+      "verses": [
+        "NLT 1 Samuel 10:27",
+        "ESV 1 Samuel 10:1",
+        "ESV 1 Kings 7:15",
+        "NKJV 1 John 5:7"
+      ]
+    },
+    {
+      "reason": "The NIV prints a bracketed note about John 7:53-8:11 in its text, before verse 53",
+      "verses": [
+        "NIV John 7:53"
+      ]
+    },
+    {
+      "reason": "CSB numbers the closing blessing as 2 Corinthians 13:13 (others: 13:14)",
+      "verses": [
+        "CSB 2 Corinthians 13:13"
+      ]
+    }
+  ]
+}

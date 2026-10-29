@@ -54,7 +54,7 @@ export const AppModals = memo(({
    // the right chapter without a reload.
    const todayStr = useToday();
    const dayOfMonth = Number(todayStr.slice(8, 10));
-   const { proverbContent, isFetchingProverb } = useProverb(dayOfMonth, state.settings.bibleVersion);
+   const { proverbContent, isFetchingProverb, reloadProverb } = useProverb(dayOfMonth, state.settings.bibleVersion);
    const { devotionalContent, isFetchingDevotional, error: devotionalError } = useDevotional(activeInternalDevotional?.slug ?? null);
 
    return (
@@ -82,6 +82,7 @@ export const AppModals = memo(({
           proverbContent={proverbContent}
           saveProverbJournal={saveProverbJournal}
           logProverbRead={logProverbRead}
+          reloadProverb={reloadProverb}
         />
       )}
 

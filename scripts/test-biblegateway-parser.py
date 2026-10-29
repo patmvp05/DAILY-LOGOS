@@ -86,6 +86,21 @@ v = bg.parse_passage(html, 23)
 ok("psalm title leads verse 1, heading does not", v[0]["text"] == "A title line. line one; line two.", v[0]["text"])
 ok("a <br> inside a span is a space", v[1]["text"] == "three four.", v[1]["text"])
 
+# 4b. NIV marks psalm titles with a bare <h4>; its book divisions, Psalm 119
+#     letters and Song of Songs speakers are classed h4s and stay out.
+html = page('<h3 class="psalm-book"><span class="text Ps-42-1">BOOK II</span></h3>'
+            '<h4 class="psalm-book"><span class="text Ps-42-1">Psalms 42–72</span></h4>'
+            '<h3><span class="text Ps-42-1">Psalm 42</span></h3>'
+            '<h4><span class="text Ps-42-1">For the director of music.</span></h4>'
+            '<h4 class="psalm-acrostic"><span class="text Ps-42-1">Aleph</span></h4>'
+            '<p><span class="text Ps-42-1"><span class="chapternum">42 </span>first line.</span>'
+            '<span class="text Ps-42-2"><sup class="versenum">2 </sup>second.</span></p>')
+v = bg.parse_passage(html, 42, "Psalms")
+ok("NIV bare-h4 psalm title kept, book/letter headings dropped", v[0]["text"] == "For the director of music. first line.", v[0]["text"])
+html = page('<h4><span class="text Song-1-2">She</span></h4><p><span class="text Song-1-2"><sup class="versenum">2 </sup>words.</span></p>')
+v = bg.parse_passage(html, 1, "Song of Solomon")
+ok("a bare h4 outside Psalms is not verse text", v[0]["text"] == "words.", v[0]["text"])
+
 # 5. Table cells in one row are joined with a dash (NLT census tables).
 html = page('<span class="text Num-1-20-Num-1-21"><sup class="versenum">20-21 </sup>intro:</span>'
             '<table><tr><th><span class="text Num-1-20-Num-1-21">Tribe</span></th><th><span class="text Num-1-20-Num-1-21">Number</span></th></tr>'

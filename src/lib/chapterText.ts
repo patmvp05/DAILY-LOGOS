@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { get, set, keys, delMany } from 'idb-keyval';
+import { get, set, del, keys, delMany } from 'idb-keyval';
 import {
   BIBLE_VERSION_NAMES,
   BOLLS_BIBLE_BOOK_IDS,
@@ -11,6 +11,8 @@ import {
   getBibleVersion,
   resolveBibleVersion,
 } from '../constants';
+import { checkChapterVerses, type ChapterCheck } from './chapterCheck';
+import { recordTextCheck, textCheckKey } from './textCheckLog';
 
 export interface ChapterVerse {
   verse: number;
@@ -32,8 +34,13 @@ export interface ChapterTextResponse {
   // persisted to disk — only memory-cached for the session — so the moment the
   // real text deploys, the next reload fetches it instead of a stuck KJV.
   _fallback?: boolean;
+  // Result of the completeness check (src/lib/chapterCheck.ts) on this copy.
+  // Computed every time a chapter is loaded, never saved with it.
+  _check?: ChapterCheck;
 }
 
+// v8 (Oct 29 2026): NIV psalm titles restored (116 psalms). A copy cached
+// without them still passes the verse check, so only a new prefix replaces it.
 // v7 (Oct 2026): the committed text was repaired. NCV had dropped every
 // combined passage (Numbers 7 kept 17 of 89 verses), NIV/NLT had lost the first
 // line of many poetry verses, and thousands of verses read "the Lord ." A cached
@@ -41,13 +48,14 @@ export interface ChapterTextResponse {
 // showing the broken copy it had already saved. Older prefixes are deleted by
 // purgeStaleChapterCache().
 // (v6 discarded KJV-fallback entries persisted under a modern version's key.)
-const CACHE_PREFIX = 'chapter_text_v7_';
+const CACHE_PREFIX = 'chapter_text_v8_';
 const STALE_PREFIX = /^chapter_text_v\d+_/;
 // Cache-bust on the static-file URL. b=2: earlier builds requested files before
 // they existed and Firebase answered with index.html under an `immutable`
-// header. b=3: the text itself was repaired (see CACHE_PREFIX). Bump whenever
+// header. b=3: the text itself was repaired (see CACHE_PREFIX). b=4: NIV psalm
+// titles. Bump whenever
 // the committed text changes in a way a stale copy must not survive.
-const STATIC_CACHE_BUST = 'b=3';
+const STATIC_CACHE_BUST = 'b=4';
 const FETCH_TIMEOUT_MS = 12000;
 
 // L1 in-memory cache to avoid repeated IndexedDB reads / re-parsing.
@@ -220,8 +228,15 @@ export async function getChapterText(
   try {
     const cached = await get<ChapterTextResponse>(cacheKey);
     if (cached) {
-      memoryCache.set(cacheKey, cached);
-      return cached;
+      const checked = withCheck(cached, id, bookName, chapter);
+      if (checked._check?.ok) {
+        memoryCache.set(cacheKey, checked);
+        return checked;
+      }
+      // A saved copy that fails the check is thrown away and fetched again.
+      // This is how a phone gets rid of a broken chapter it saved earlier
+      // (NCV Numbers 7 with 17 of 89 verses) without waiting for a cache bump.
+      try { await del(cacheKey); } catch { /* ignored */ }
     }
   } catch {
     // fall through to fetch
@@ -264,17 +279,57 @@ export async function getChapterText(
     throw new Error(`${bookName} ${chapter} could not be loaded.`);
   }
 
+  const checked = withCheck(result, id, bookName, chapter);
+
   // Memory-cache everything (cheap, session-scoped). Persist to IndexedDB ONLY
-  // for the genuinely-requested translation — never a KJV fallback, so a
-  // missing modern version self-heals on the next reload once its files deploy.
-  memoryCache.set(cacheKey, result);
-  if (!isFallback) {
+  // a complete copy of the genuinely-requested translation — never a KJV
+  // fallback and never a copy that failed the check, so either self-heals on a
+  // later load instead of being kept forever.
+  memoryCache.set(cacheKey, checked);
+  if (!isFallback && checked._check?.ok) {
     try {
-      await set(cacheKey, result);
+      const { _check: _omit, ...toStore } = checked;
+      void _omit;
+      await set(cacheKey, toStore);
     } catch {
       // storage full / private mode — memory cache still serves this session
     }
   }
 
-  return result;
+  return checked;
+}
+
+/**
+ * Check a chapter and record the result for the dashboard summary. A KJV
+ * fallback counts as a failed check of the requested translation: that
+ * translation's text is not what is on screen.
+ */
+function withCheck(
+  result: ChapterTextResponse,
+  versionId: string,
+  bookName: string,
+  chapter: number
+): ChapterTextResponse {
+  const check = checkChapterVerses(result.verses, bookName, chapter);
+  const shown: ChapterCheck = result._fallback
+    ? { ...check, ok: false, problems: [`Showing the King James Version: the ${BIBLE_VERSION_NAMES[versionId] ?? versionId} copy could not be loaded`, ...check.problems] }
+    : check;
+  recordTextCheck(textCheckKey(versionId, bookName, chapter), shown.ok, shown.problems);
+  return { ...result, _check: shown };
+}
+
+/**
+ * Forget every saved copy of a chapter and load it again. Used by the
+ * reader's "Download again" button when a chapter fails its check.
+ */
+export async function refetchChapterText(
+  bookName: string,
+  chapter: number,
+  version: string = DEFAULT_BIBLE_VERSION
+): Promise<ChapterTextResponse> {
+  const id = resolveBibleVersion(version);
+  const cacheKey = `${CACHE_PREFIX}${id}_${bookName}_${chapter}`;
+  memoryCache.delete(cacheKey);
+  try { await del(cacheKey); } catch { /* ignored */ }
+  return getChapterText(bookName, chapter, id);
 }

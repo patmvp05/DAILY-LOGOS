@@ -6,11 +6,13 @@
 import { resolveBibleVersion } from '../constants';
 import { getChapterText } from './chapterText';
 
+// v13 (Oct 29 2026): NIV psalm titles restored, so verse 1 and the reading
+// time of 116 NIV psalms changed.
 // v12 (Oct 2026): the committed text was repaired (see CACHE_PREFIX in
 // chapterText.ts). A preview cached from the broken text kept its reading time
 // forever: NCV Numbers 7 showed "~2 MIN" for a chapter that is about 4.
 // (v11 discarded KJV-fallback previews cached under a modern version's key.)
-const CACHE_PREFIX = 'bible_chapter_cache_v12_';
+const CACHE_PREFIX = 'bible_chapter_cache_v13_';
 const STALE_PREFIX = /^bible_chapter_cache_v\d+_/;
 
 /** Remove previews cached under an older prefix. Best effort, synchronous. */

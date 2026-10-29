@@ -13,12 +13,15 @@ import { triggerHaptic } from '../../lib/haptic';
 import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 import VerseCopyPopup from '../VerseCopyPopup';
 import { lastVerseInChapter, verseLabel } from '../../lib/verseLabel';
+import type { ChapterCheck } from '../../lib/chapterCheck';
+import { TextCheckBadge } from '../TextCheck';
 
 interface ProverbContent {
   verses?: { verse: number; text: string; verseEnd?: number }[];
   text?: string;
   translation_id?: string;
   translation_name?: string;
+  check?: ChapterCheck;
 }
 
 interface ProverbModalProps {
@@ -27,6 +30,7 @@ interface ProverbModalProps {
   proverbContent: ProverbContent | null;
   saveProverbJournal: (content: string, verse: string, id: string | null) => void;
   logProverbRead: (chapter: number, readTime?: number) => void;
+  reloadProverb?: () => void;
 }
 
 function ProverbModal({
@@ -35,6 +39,7 @@ function ProverbModal({
   proverbContent,
   saveProverbJournal,
   logProverbRead,
+  reloadProverb,
 }: ProverbModalProps) {
   const { setShowProverbModal, journalDraft, setJournalDraft } = useUi();
   const [journalVerse, setJournalVerse] = useState(journalDraft.verse);
@@ -160,6 +165,7 @@ function ProverbModal({
                       <span className="text-[var(--text-secondary)] font-normal">:1–{lastVerse}</span>
                     )}
                   </h2>
+                  <TextCheckBadge check={proverbContent?.check} onRetry={reloadProverb} />
                   <div className="reader-prose font-serif text-[19px] sm:text-[20px] leading-[1.9] text-[var(--text-primary)]">
                     {verses.length > 0 ? (
                       verses.map((v) => (

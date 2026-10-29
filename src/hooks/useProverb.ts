@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
-import { getProverb, type ProverbResponse } from '../lib/proverbCache';
+import { useState, useEffect, useCallback } from 'react';
+import { getProverb, refetchProverb, type ProverbResponse } from '../lib/proverbCache';
 
 export function useProverb(dayOfMonth: number, version?: string) {
   const [proverbSnippet, setProverbSnippet] = useState<string | null>(null);
@@ -37,9 +37,24 @@ export function useProverb(dayOfMonth: number, version?: string) {
     return () => { active = false; };
   }, [dayOfMonth, version]);
 
+  // Skips every saved copy: for a chapter that failed its text check.
+  const reloadProverb = useCallback(async () => {
+    setIsFetchingProverb(true);
+    try {
+      const data = await refetchProverb(dayOfMonth, version);
+      setProverbContent(data);
+      if (data.verses && data.verses.length > 0) setProverbSnippet(data.verses[0].text);
+    } catch (err) {
+      console.error('Failed to reload proverb:', err);
+    } finally {
+      setIsFetchingProverb(false);
+    }
+  }, [dayOfMonth, version]);
+
   return {
     proverbSnippet,
     proverbContent,
-    isFetchingProverb
+    isFetchingProverb,
+    reloadProverb,
   };
 }

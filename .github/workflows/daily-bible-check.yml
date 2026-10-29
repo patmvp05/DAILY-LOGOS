@@ -1,0 +1,41 @@
+name: Daily Bible text check
+
+# Every morning: (1) every stored chapter of every translation is complete and
+# in order (the same test that runs before each deploy), and (2) the live site
+# serves exactly that text. A failure fails this run and GitHub emails it.
+# Added Oct 2026 after NCV Numbers 7 went live with 17 of its 89 verses.
+on:
+  schedule:
+    # 22:47 UTC = 05:47 in Vietnam, after the 05:00 devotional deploy.
+    - cron: '47 22 * * *'
+  workflow_dispatch:
+    inputs:
+      full:
+        description: 'Read every chapter of every translation from the live site (normally all NCV + 1/30 of the rest)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-bible-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Every stored chapter is complete
+        run: npx tsx scripts/test-bible-integrity.mts
+      - name: The live site serves that exact text
+        run: npx tsx scripts/check-live-bible.mts
+        env:
+          FULL: ${{ inputs.full && '1' || '' }}

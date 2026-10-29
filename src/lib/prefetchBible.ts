@@ -24,11 +24,23 @@ const DEFAULT_CHAPTERS_AHEAD = 7;
  * retry on demand. Already-cached chapters return from L1/L2 with no network
  * hit, so re-running on every progress change is cheap and idempotent.
  */
-export async function prefetchBibleChapters(
+export interface UpcomingChapter {
+  categoryId: string;
+  bookName: string;
+  chapter: number;
+}
+
+/**
+ * The next `chaptersAhead` chapters in every reading part, starting at the
+ * current position and rolling into the next book at a boundary (skipping
+ * books read outside the plan, e.g. the Daily Proverb). This is the set the
+ * app preloads, and the set the dashboard reports as checked each day.
+ */
+export function upcomingChapters(
   progress: Progress[],
-  version?: string,
   chaptersAhead = DEFAULT_CHAPTERS_AHEAD
-): Promise<void> {
+): UpcomingChapter[] {
+  const out: UpcomingChapter[] = [];
   for (const prog of progress) {
     const category = CATEGORIES_BY_ID.get(prog.categoryId);
     if (!category) continue;
@@ -51,11 +63,7 @@ export async function prefetchBibleChapters(
         continue;
       }
 
-      try {
-        await getChapterText(book.name, chapter, version);
-      } catch {
-        // best-effort — live read will retry on demand
-      }
+      out.push({ categoryId: prog.categoryId, bookName: book.name, chapter });
       remaining--;
 
       // Advance to the next chapter, rolling into the next book at a boundary.
@@ -70,6 +78,23 @@ export async function prefetchBibleChapters(
       } else {
         break; // end of the category — nothing more to warm
       }
+    }
+  }
+  return out;
+}
+
+export async function prefetchBibleChapters(
+  progress: Progress[],
+  version?: string,
+  chaptersAhead = DEFAULT_CHAPTERS_AHEAD
+): Promise<void> {
+  // Each load also runs the completeness check (getChapterText), so this is
+  // the daily check of exactly the chapters about to be read.
+  for (const { bookName, chapter } of upcomingChapters(progress, chaptersAhead)) {
+    try {
+      await getChapterText(bookName, chapter, version);
+    } catch {
+      // best-effort — live read will retry on demand
     }
   }
 }
