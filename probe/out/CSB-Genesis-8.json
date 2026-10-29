@@ -1,0 +1,654 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "The Flood Recedes 8 God remembered Noah, ( A ) as well as al"
+},
+{
+"tag": "div",
+"class": [
+"version-CSB",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "The Flood Recedes 8 God remembered Noah, ( A ) as well as al"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-1"
+],
+"id": "en-CSB-185",
+"text": "The Flood Recedes"
+},
+{
+"tag": "p",
+"class": [
+"first-line-none",
+"chapter-1"
+],
+"id": null,
+"text": "8 God remembered Noah, ( A ) as well as all the wildlife and"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-1"
+],
+"id": null,
+"text": "8 God remembered Noah, ( A ) as well as all the wildlife and"
+},
+{
+"tag": "span",
+"class": [
+"chapternum"
+],
+"id": null,
+"text": "8"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( A )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( B )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-2"
+],
+"id": "en-CSB-186",
+"text": "2 The sources of the watery depths and the floodgates of the"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( C )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-3"
+],
+"id": "en-CSB-187",
+"text": "3 The water steadily receded from the earth, and by the end "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( D )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-4"
+],
+"id": "en-CSB-188",
+"text": "4 The ark came to rest in the seventh month, on the seventee"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( E )"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "5 The water continued to recede until the tenth month; in th"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-5"
+],
+"id": "en-CSB-189",
+"text": "5 The water continued to recede until the tenth month; in th"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-6"
+],
+"id": "en-CSB-190",
+"text": "6 After forty days Noah opened the window of the ark that he"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-7"
+],
+"id": "en-CSB-191",
+"text": "7 and he sent out a raven. It went back and forth until the "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "7"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-8"
+],
+"id": "en-CSB-192",
+"text": "8 Then he sent out a dove to see whether the water on the ea"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "8"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-9"
+],
+"id": "en-CSB-193",
+"text": "9 but the dove found no resting place for its foot. It retur"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "9"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-10"
+],
+"id": "en-CSB-194",
+"text": "10 So Noah waited seven more days and sent out the dove from"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "10"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-11"
+],
+"id": "en-CSB-195",
+"text": "11 When the dove came to him at evening, there was a plucked"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "11"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-12"
+],
+"id": "en-CSB-196",
+"text": "12 After he had waited another seven days, he sent out the d"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "12"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-13"
+],
+"id": "en-CSB-197",
+"text": "13 In the six hundred first year, [ a ] in the first month, "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "13"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ a ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-14"
+],
+"id": "en-CSB-198",
+"text": "14 By the twenty-seventh day of the second month, the earth "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "14"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-15"
+],
+"id": "en-CSB-199",
+"text": "The Lord ’s Promise"
+},
+{
+"tag": "span",
+"class": [
+"small-caps",
+"divine-name"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "p",
+"class": [
+"first-line-none"
+],
+"id": null,
+"text": "15 Then God spoke to Noah, 16 “Come out of the ark, you, you"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-15"
+],
+"id": null,
+"text": "15 Then God spoke to Noah,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "15"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-16"
+],
+"id": "en-CSB-200",
+"text": "16 “Come out of the ark, you, your wife, your sons, and your"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "16"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-17"
+],
+"id": "en-CSB-201",
+"text": "17 Bring out all the living creatures that are with you—bird"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "17"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( F )"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-18"
+],
+"id": "en-CSB-202",
+"text": "18 So Noah, along with his sons, his wife, and his sons’ wiv"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "18"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-19"
+],
+"id": "en-CSB-203",
+"text": "19 All the animals, all the creatures that crawl, and all th"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "19"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "20 Then Noah built an altar to the Lord . He took some of ev"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-20"
+],
+"id": "en-CSB-204",
+"text": "20 Then Noah built an altar to the Lord . He took some of ev"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "20"
+},
+{
+"tag": "span",
+"class": [
+"small-caps",
+"divine-name"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-21"
+],
+"id": "en-CSB-205",
+"text": "21 When the Lord smelled the pleasing aroma, ( G ) he said t"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "21"
+},
+{
+"tag": "span",
+"class": [
+"small-caps",
+"divine-name"
+],
+"id": null,
+"text": "Lord"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( G )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( H )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( I )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( J )"
+},
+{
+"tag": "div",
+"class": [
+"poetry"
+],
+"id": null,
+"text": "22 As long as the earth endures, seedtime and harvest, cold "
+},
+{
+"tag": "p",
+"class": [
+"line"
+],
+"id": null,
+"text": "22 As long as the earth endures, seedtime and harvest, cold "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-22"
+],
+"id": "en-CSB-206",
+"text": "22 As long as the earth endures,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "22"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-22"
+],
+"id": null,
+"text": "seedtime and harvest, cold and heat,"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-22"
+],
+"id": null,
+"text": "summer and winter, and day and night"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Gen-8-22"
+],
+"id": null,
+"text": "will not cease.” ( K )"
+},
+{
+"tag": "sup",
+"class": [
+"crossreference"
+],
+"id": null,
+"text": "( K )"
+},
+{
+"tag": "div",
+"class": [
+"footnotes",
+"resources-section"
+],
+"id": null,
+"text": "Footnotes 8:13 = of Noah’s life"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "8:13 = of Noah’s life"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "= of Noah’s life"
+},
+{
+"tag": "div",
+"class": [
+"crossrefs",
+"resources-section"
+],
+"id": null,
+"text": "Cross references 8:1 : Gn 19:29; Ex 2:24; 1Sm 1:19; Ps 105:4"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "8:1 : Gn 19:29; Ex 2:24; 1Sm 1:19; Ps 105:42 8:1 : Ex 14:21;"
+}
+]
+}
