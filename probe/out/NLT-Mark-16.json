@@ -1,0 +1,602 @@
+{
+"status": 200,
+"found_div": true,
+"elements": [
+{
+"tag": "div",
+"class": [
+"passage-content",
+"passage-class-0"
+],
+"id": null,
+"text": "The Resurrection 16 Saturday evening, when the Sabbath ended"
+},
+{
+"tag": "div",
+"class": [
+"version-NLT",
+"result-text-style-normal",
+"text-html"
+],
+"id": null,
+"text": "The Resurrection 16 Saturday evening, when the Sabbath ended"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-1"
+],
+"id": "en-NLT-24843",
+"text": "The Resurrection"
+},
+{
+"tag": "p",
+"class": [
+"first-line-none",
+"chapter-2"
+],
+"id": null,
+"text": "16 Saturday evening, when the Sabbath ended, Mary Magdalene,"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-1"
+],
+"id": null,
+"text": "16 Saturday evening, when the Sabbath ended, Mary Magdalene,"
+},
+{
+"tag": "span",
+"class": [
+"chapternum"
+],
+"id": null,
+"text": "16"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-2"
+],
+"id": "en-NLT-24844",
+"text": "2 Very early on Sunday morning, [ a ] just at sunrise, they "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "2"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ a ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-3"
+],
+"id": "en-NLT-24845",
+"text": "3 On the way they were asking each other, “Who will roll awa"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "3"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-4"
+],
+"id": "en-NLT-24846",
+"text": "4 But as they arrived, they looked up and saw that the stone"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "4"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "5 When they entered the tomb, they saw a young man clothed i"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-5"
+],
+"id": "en-NLT-24847",
+"text": "5 When they entered the tomb, they saw a young man clothed i"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "5"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-6"
+],
+"id": "en-NLT-24848",
+"text": "6 but the angel said, “Don’t be alarmed. You are looking for"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "6"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ b ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-7"
+],
+"id": "en-NLT-24849",
+"text": "7 Now go and tell his disciples, including Peter, that Jesus"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "7"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "8 The women fled from the tomb, trembling and bewildered, an"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-8"
+],
+"id": "en-NLT-24850",
+"text": "8 The women fled from the tomb, trembling and bewildered, an"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "8"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ c ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-8"
+],
+"id": null,
+"text": "[ The most ancient manuscripts of Mark conclude with verse 1"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-8"
+],
+"id": null,
+"text": "[ Shorter Ending of Mark ]"
+},
+{
+"tag": "p",
+"class": [
+"first-line-none",
+"top-1"
+],
+"id": null,
+"text": "Then they briefly reported all this to Peter and his compani"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-8"
+],
+"id": null,
+"text": "Then they briefly reported all this to Peter and his compani"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-9"
+],
+"id": "en-NLT-24851",
+"text": "[ Longer Ending of Mark ]"
+},
+{
+"tag": "p",
+"class": [
+"first-line-none",
+"top-1"
+],
+"id": null,
+"text": "9 After Jesus rose from the dead early on Sunday morning, th"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-9"
+],
+"id": null,
+"text": "9 After Jesus rose from the dead early on Sunday morning, th"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "9"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-10"
+],
+"id": "en-NLT-24852",
+"text": "10 She went to the disciples, who were grieving and weeping,"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "10"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-11"
+],
+"id": "en-NLT-24853",
+"text": "11 But when she told them that Jesus was alive and she had s"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "11"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "12 Afterward he appeared in a different form to two of his f"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-12"
+],
+"id": "en-NLT-24854",
+"text": "12 Afterward he appeared in a different form to two of his f"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "12"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-13"
+],
+"id": "en-NLT-24855",
+"text": "13 They rushed back to tell the others, but no one believed "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "13"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "14 Still later he appeared to the eleven disciples as they w"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-14"
+],
+"id": "en-NLT-24856",
+"text": "14 Still later he appeared to the eleven disciples as they w"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "14"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ d ]"
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "15 And then he told them, “Go into all the world and preach "
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-15"
+],
+"id": "en-NLT-24857",
+"text": "15 And then he told them, “Go into all the world and preach "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "15"
+},
+{
+"tag": "span",
+"class": [
+"woj"
+],
+"id": null,
+"text": "“Go into all the world and preach the Good News to everyone."
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-16"
+],
+"id": "en-NLT-24858",
+"text": "16 Anyone who believes and is baptized will be saved. But an"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "16"
+},
+{
+"tag": "span",
+"class": [
+"woj"
+],
+"id": null,
+"text": "Anyone who believes and is baptized will be saved. But anyon"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-17"
+],
+"id": "en-NLT-24859",
+"text": "17 These miraculous signs will accompany those who believe: "
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "17"
+},
+{
+"tag": "span",
+"class": [
+"woj"
+],
+"id": null,
+"text": "These miraculous signs will accompany those who believe: The"
+},
+{
+"tag": "sup",
+"class": [
+"footnote"
+],
+"id": null,
+"text": "[ e ]"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-18"
+],
+"id": "en-NLT-24860",
+"text": "18 They will be able to handle snakes with safety, and if th"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "18"
+},
+{
+"tag": "span",
+"class": [
+"woj"
+],
+"id": null,
+"text": "They will be able to handle snakes with safety, and if they "
+},
+{
+"tag": "p",
+"class": null,
+"id": null,
+"text": "19 When the Lord Jesus had finished talking with them, he wa"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-19"
+],
+"id": "en-NLT-24861",
+"text": "19 When the Lord Jesus had finished talking with them, he wa"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "19"
+},
+{
+"tag": "span",
+"class": [
+"text",
+"Mark-16-20"
+],
+"id": "en-NLT-24862",
+"text": "20 And the disciples went everywhere and preached, and the L"
+},
+{
+"tag": "sup",
+"class": [
+"versenum"
+],
+"id": null,
+"text": "20"
+},
+{
+"tag": "div",
+"class": [
+"footnotes",
+"resources-section"
+],
+"id": null,
+"text": "Footnotes 16:2 Greek on the first day of the week; also in 1"
+},
+{
+"tag": "div",
+"class": [
+"resources-content"
+],
+"id": null,
+"text": "16:2 Greek on the first day of the week; also in 16:9 . 16:6"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Greek on the first day of the week; also in 16:9 ."
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or Jesus the Nazarene."
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "The most reliable early manuscripts of the Gospel of Mark en"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Some early manuscripts add: And they excused themselves, say"
+},
+{
+"tag": "span",
+"class": [
+"footnote-text"
+],
+"id": null,
+"text": "Or new tongues; some manuscripts do not include new."
+}
+]
+}
