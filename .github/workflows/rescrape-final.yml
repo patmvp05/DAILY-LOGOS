@@ -1,0 +1,49 @@
+name: Download Bible text from BibleGateway (temporary, fix branch only)
+
+# One-time repair, Oct 2026; deleted before merging. NCV and CSB are written to
+# public/bible/; NIV, NLT, ESV and NKJV to audit/bgfull/ for review first. Every
+# chapter must pass the completeness and content checks or it is not written.
+# Re-run: change the "run" number and push (REFETCH resumes).  run: 1
+
+on:
+  push:
+    branches: ['fix/bible-text-integrity']
+    paths: ['.github/workflows/rescrape-final.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: NCV, out: public/bible }
+          - { version: CSB, out: public/bible }
+          - { version: NIV, out: audit/bgfull }
+          - { version: NLT, out: audit/bgfull }
+          - { version: ESV, out: audit/bgfull }
+          - { version: NKJV, out: audit/bgfull }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/bible-text-integrity
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4
+      - run: python scripts/test-biblegateway-parser.py
+      - name: Smoke (${{ matrix.version }})
+        env: { SMOKE: '1', BG_VERSION: '${{ matrix.version }}' }
+        run: python scripts/fetch-biblegateway.py
+      - name: Download ${{ matrix.version }}
+        continue-on-error: true
+        timeout-minutes: 52
+        env: { BG_VERSION: '${{ matrix.version }}', OUT_ROOT: '${{ matrix.out }}', REFETCH: '1', DELAY: '1.0' }
+        run: python scripts/fetch-biblegateway.py
+      - name: Commit
+        if: always()
+        run: bash .github/scripts/commit-to-fix-branch.sh "${{ matrix.out }}/${{ matrix.version }}" "BibleGateway ${{ matrix.version }} (text version 3)"

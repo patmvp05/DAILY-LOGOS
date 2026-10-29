@@ -109,7 +109,17 @@ ok("a notice in place of scripture is caught", any("notice" in p for p in bg.che
 same = [{"verse": n, "text": "identical words"} for n in range(1, 32)]
 ok("one text repeated in every verse is caught", any("identical" in p for p in bg.check_chapter(same, "Genesis", 1)))
 
-# 7. Tidy leaves real punctuation alone.
+# 7. A footnote between two words with no space (NCV Judges 16:27), a citation
+#    after a quote (Hebrews 1:13), and the em dash after small caps (2 Kings 22:5).
+html = page('<span class="text Judg-16-27"><sup class="versenum">27 </sup>on the roof<sup class="footnote">[<a>b</a>]</sup>watching them.</span>'
+            '<span class="text Judg-16-28"><sup class="versenum">28 </sup>under your control.”<sup class="footnote">[<a>b</a>]</sup><i>Psalm 110:1</i></span>'
+            '<span class="text Judg-16-29"><sup class="versenum">29 </sup>the Temple of the <span class="small-caps">Lord</span>—wherever.</span>')
+v = bg.parse_passage(html, 16)
+ok("words around a footnote stay apart", v[0]["text"] == "on the roof watching them.", v[0]["text"])
+ok("a citation after a quote keeps its space", v[1]["text"] == "under your control.” Psalm 110:1", v[1]["text"])
+ok("small caps before an em dash join", v[2]["text"] == "the Temple of the Lord—wherever.", v[2]["text"])
+
+# 8. Tidy leaves real punctuation alone.
 ok("spaced ellipsis kept", bg.tidy("and so . . . they went") == "and so . . . they went", bg.tidy("and so . . . they went"))
 ok("adjacent closing quotes keep their space", bg.tidy("he said.’ ”") == "he said.’ ”", bg.tidy("he said.’ ”"))
 ok("artifact spaces removed", bg.tidy("“ the Lord , ( yes ) ”") == "“the Lord, (yes)”", bg.tidy("“ the Lord , ( yes ) ”"))

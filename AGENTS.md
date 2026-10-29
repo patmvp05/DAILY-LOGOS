@@ -38,15 +38,15 @@
     candidate source actually returns. Established that bolls, getbible.net and
     bible-api.com all 404 for BSB **and** CSB, and that BibleGateway serves no verse spans
     for BSB — so don't retry those routes.
-  - **NIV / NLT / ESV / NKJV** → scraped from bolls.life by `.github/workflows/scrape-bolls.yml`
-    (runs `scripts/fetch-bible-static.mjs`). ✅ All four are committed, 1189/1189 each, as are
-    NCV, CSB and BSB, so every `source: 'bolls'` version in `BIBLE_VERSIONS` has its full
-    static set (verified Oct 2026). None of them falls back to KJV for want of files.
+  - **NIV / NLT / ESV / NKJV** → BibleGateway since Oct 2026 (same scraper, `BG_VERSION=NIV` …);
+    they came from bolls.life before (see "All six modern translations" below for why that
+    stopped). All seven stored versions (NCV, CSB, NIV, NLT, ESV, NKJV, BSB) have 1189/1189
+    complete chapters, enforced by `scripts/test-bible-integrity.mts`.
 - **Regenerating static text (no local machine needed):** GitHub Actions runs the scrapers
   ON GITHUB'S RUNNERS, which CAN reach bolls.life / BibleGateway (the sandbox can't).
   - NCV: `.github/workflows/scrape-ncv-bg.yml` (BibleGateway). Has a fail-fast smoke test,
     is time-bounded + always-commits + resumable (re-run fills gaps), reports completeness.
-  - bolls versions: `.github/workflows/scrape-bolls.yml` runs `scripts/fetch-bible-static.mjs`
+  - bolls (no longer a source for any shipped version): `.github/workflows/scrape-bolls.yml` runs `scripts/fetch-bible-static.mjs`
     (honors `ONLY_VERSION=NIV,ESV,...`), one version per job. Resumable (skips existing files);
     its `force` input re-fetches chapters already on disk after a parser change. The NCV/CSB
     workflows take a `refetch` input that re-downloads only files below the current `textVersion`.
@@ -75,16 +75,23 @@
   superscriptions `h4.psalm-title` (kept, they open verse 1); the divine name is
   `span.small-caps`, so text inside a span is joined with NO separator (joining with " " wrote
   "the Lord ." into ~5,000 NCV/CSB verses); NLT census tables are `tr` rows, joined "cell — cell".
-- **bolls headings vs poetry.** bolls separates both headings and poetry lines with `<br/>`. A
-  segment is removed only when it is TITLE CASE ("Jesus Teaches Nicodemus", "The Beast out of the
-  Sea", "Psalm 23"), unpunctuated, short, followed by more text, and leads the verse or follows a
-  finished sentence. The old rule skipped the title-case test and deleted the unpunctuated first
-  line of many NIV/NLT poetry verses (Amos 1:4 lost "I will send fire on the house of Hazael").
-  A bare chapter number before verse 1 ("8 Then the Lord said…") is removed too. With
-  `AUDIT_DIR` set the scraper writes every removal to a file for review.
-- **The app's NIV is the 1984 edition** (bolls code `NIV`; Ps 23:1 "I shall not be in want").
-  BibleGateway's NIV is the 2011 text, so it is not a drop-in source; switching editions is a
-  decision for Patrick, not a repair.
+- **All six modern translations come from BibleGateway (Oct 2026).** NCV and CSB always did;
+  NIV, NLT, ESV and NKJV moved off bolls.life because (1) bolls now answers NIV requests with a
+  statement from its owner in place of every verse (every verse number still present, so only a
+  content check catches it), and (2) bolls separates headings and poetry lines with the same
+  `<br/>`, which no rule separates reliably: the original rule deleted the unpunctuated first line
+  of ~1,200 NLT verses in 413 sampled chapters (Amos 1:4 lost "I will send fire on the house of
+  Hazael"), and a title-case rule still deleted lines like "The LORD of Heaven's Armies" and left
+  headings, speaker labels ("Young Woman") and an editor's note (NLT Mark 16:8) inside verses.
+  BibleGateway marks headings as `h3`, so there is nothing to guess. Before switching, a second
+  BibleGateway copy of 413 chapters was compared word for word: NKJV matched 8,985 of 8,990 verses
+  (the rest are bolls placing "before the LORD" in the wrong verse). `fetch-bible-static.mjs`
+  and `scrape-bolls.yml` are kept for reference but feed no shipped translation; do not point
+  them at NIV.
+- **The NIV is now the 2011 text** (BibleGateway's NIV; Ps 23:1 "I lack nothing"). The app used to
+  ship bolls' 1984 NIV, which had lost poetry lines and can no longer be re-downloaded anywhere.
+  The ESV is BibleGateway's current text, which differs from the old bolls copy in a handful of
+  words (Job 7:4, Lam 3:32 …): those are ESV revisions, not errors.
 - **`textVersion` in each file** records which parser wrote it (2 = the Oct 2026 fixes). Run a
   scraper with `REFETCH=1` to re-download only files below the current version; it resumes
   where an interrupted run stopped. Changing what the parser writes means bumping

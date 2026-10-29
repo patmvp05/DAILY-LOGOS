@@ -23,9 +23,12 @@ How BibleGateway marks up a chapter (verified on a runner, Oct 2026):
   - section headings are <h3>, psalm superscriptions are <h4 class="psalm-title">
     (kept: they are scripture, printed above verse 1), footnote and cross-reference
     markers are <sup>s;
-  - the divine name is <span class="small-caps">Lord</span>. Joining text nodes
-    with a separator turned "the Lord." into "the Lord ." on ~2,400 NCV verses, so
-    text inside a span is joined with no separator.
+  - the divine name is <span class="small-caps">Lord</span>, and a footnote marker
+    can sit between two words with no space ("roof<sup>[b]</sup>watching"). Text
+    is joined WITH a space at every markup boundary (never glues words) and
+    tidy() then removes the spaces that land before punctuation: the first
+    version of this script stopped at the join and wrote "the Lord ." into ~2,400
+    NCV verses; joining with no space instead glued "roofwatching".
 
 Configured by env so one script serves every BibleGateway-sourced translation:
   BG_VERSION  BibleGateway's version parameter   (default NCV)
@@ -84,7 +87,7 @@ KNOWN_NAMES = {
 
 # Bumped whenever the parser changes what it writes. REFETCH=1 re-fetches any
 # file below it, so an interrupted full re-scrape resumes where it stopped.
-TEXT_VERSION = 2
+TEXT_VERSION = 3
 
 VERSE_COUNTS = json.load(open(os.path.join(HERE, "lib", "verse-counts.json"), encoding="utf-8"))
 
@@ -97,10 +100,12 @@ JUNK_TEXT_RE = re.compile(r"prohibited me from using|bolls\.life|biblegateway\.c
 SPACED_ELLIPSIS_RE = re.compile(r"\.(?:\s\.){2,}")
 
 
-def tidy(text):
+def tidy(text, dashes=True):
     """Collapse whitespace and remove spaces that markup boundaries inserted
     before closing punctuation ("the Lord ." -> "the Lord."). Spaced ellipses
-    (". . .") are typography, not artifacts, and are left alone."""
+    (". . .") are typography, not artifacts, and are left alone. With dashes,
+    spaces around an em dash go too ("the Lord — wherever" -> "the Lord—wherever");
+    without, only a one-sided space does, so a table's "cell — cell" survives."""
     text = " ".join(text.split())
     kept = []
 
@@ -116,6 +121,11 @@ def tidy(text):
     # closing quotes) keeps its space; that one is the printed typography.
     text = re.sub(r"(?<=[\w.,;:!?)\]—–-])\s+([”’])(?!\w)", r"\1", text)
     text = re.sub(r"(?<=\w)\s+(’s)\b", r"\1", text)
+    if dashes:
+        text = re.sub("\\s*\u2014\\s*", "\u2014", text)
+    else:
+        text = re.sub("(?<=\\S)\u2014\\s+", "\u2014", text)
+        text = re.sub("\\s+\u2014(?=\\S)", "\u2014", text)
     text = re.sub(r"\x00(\d+)\x00", lambda m: kept[int(m.group(1))], text)
     return text.strip()
 
@@ -165,7 +175,7 @@ def parse_passage(html, chapter):
         rng = verse_range(span, chapter)
         if rng is None:
             continue
-        text = " ".join(span.get_text("").split())
+        text = tidy(span.get_text(" "))
         if not text:
             continue
         start, end = rng
@@ -182,7 +192,7 @@ def parse_passage(html, chapter):
         for (prev, prev_row), (cur, cur_row) in zip(parts, parts[1:]):
             same_row = cur_row is not None and cur_row is prev_row
             text += (" — " if same_row else " ") + cur
-        entry = {"verse": start, "text": tidy(text)}
+        entry = {"verse": start, "text": tidy(text, dashes=False)}
         if verses[start]["end"] > start:
             entry["verseEnd"] = verses[start]["end"]
         out.append(entry)

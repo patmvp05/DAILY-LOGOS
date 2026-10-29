@@ -54,7 +54,7 @@ const EXPECTED_OMISSIONS: Record<string, string[]> = {
 // different translation's text (a mislabelled scrape), these fail.
 const SIGNATURES: Record<string, [string, number, number, string][]> = {
   NCV: [['John', 3, 16, 'may not be lost'], ['Psalms', 23, 1, 'I have everything I need'], ['Genesis', 1, 1, 'the sky and the earth']],
-  NIV: [['John', 3, 16, 'one and only Son'], ['Psalms', 23, 1, 'I shall not be in want'], ['Genesis', 1, 1, 'the heavens and the earth']],
+  NIV: [['John', 3, 16, 'one and only Son'], ['Psalms', 23, 1, 'I lack nothing'], ['Genesis', 1, 1, 'the heavens and the earth']],
   NLT: [['John', 3, 16, 'this is how God loved the world'], ['Psalms', 23, 1, 'I have all that I need'], ['Genesis', 1, 1, 'the heavens and the earth']],
   ESV: [['John', 3, 16, 'he gave his only Son'], ['Psalms', 23, 1, 'I shall not want'], ['Genesis', 1, 1, 'the heavens and the earth']],
   NKJV: [['John', 3, 16, 'only begotten Son'], ['Psalms', 23, 1, 'I shall not want'], ['Genesis', 1, 1, 'the heavens and the earth']],
