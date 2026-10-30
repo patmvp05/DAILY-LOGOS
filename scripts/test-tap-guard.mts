@@ -211,8 +211,13 @@ function isFullBleed(src: string): boolean {
   }
 
   const proverb = read('../src/components/modals/ProverbModal.tsx');
-  ok('the proverb Done button is guarded', proverb.includes('useTapGuard(onClose)')
-     && (proverb.match(/onClick=\{guardedClose\}/g) ?? []).length === 2);
+  // Header ✓ closes; "Done reading" at the end of the chapter logs the read and
+  // closes. Both sit where the ghost click from the opening tap can land.
+  ok('the proverb close buttons are guarded', proverb.includes('useTapGuard(onClose)')
+     && /const guardedFinish = useTapGuard\(/.test(proverb)
+     && (proverb.match(/onClick=\{guardedClose\}/g) ?? []).length === 1
+     && (proverb.match(/onClick=\{guardedFinish\}/g) ?? []).length === 1
+     && !proverb.includes('onClick={onClose}'));
 
   // Like the Bible reader, no permanent bottom bar duplicating the header ✓.
   const dev = read('../src/components/modals/DevotionalReaderModal.tsx');

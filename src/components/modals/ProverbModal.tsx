@@ -5,7 +5,7 @@
 
 import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpen, Check, Sparkles, FileText } from 'lucide-react';
+import { BookOpen, Check, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 
 import { useUi } from '../../state/UiContextCore';
@@ -28,7 +28,6 @@ interface ProverbModalProps {
   dayOfMonth: number;
   isFetchingProverb: boolean;
   proverbContent: ProverbContent | null;
-  saveProverbJournal: (content: string, verse: string, id: string | null) => void;
   logProverbRead: (chapter: number, readTime?: number) => void;
   reloadProverb?: () => void;
 }
@@ -37,13 +36,10 @@ function ProverbModal({
   dayOfMonth,
   isFetchingProverb,
   proverbContent,
-  saveProverbJournal,
   logProverbRead,
   reloadProverb,
 }: ProverbModalProps) {
-  const { setShowProverbModal, journalDraft, setJournalDraft } = useUi();
-  const [journalVerse, setJournalVerse] = useState(journalDraft.verse);
-  const [journalContent, setJournalContent] = useState(journalDraft.content);
+  const { setShowProverbModal } = useUi();
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
 
   // Scroll tracking to trigger read completion. The ref latch matters:
@@ -51,26 +47,23 @@ function ProverbModal({
   // check in logProverbRead sees the updated history, so without it a single
   // scroll to the bottom could log duplicate entries (and Firestore writes).
   const hasLoggedRef = useRef(false);
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+  const logReadOnce = () => {
     if (hasLoggedRef.current || isFetchingProverb || !proverbContent) return;
-    const target = e.currentTarget;
-    const { scrollTop, scrollHeight, clientHeight } = target;
-    // If within 50px of bottom, count as read
-    if (scrollTop + clientHeight >= scrollHeight - 50) {
-      hasLoggedRef.current = true;
-      const wordCount = (proverbContent.verses ?? []).reduce(
-        (acc, v) => acc + (v.text ? v.text.trim().split(/\s+/).filter(Boolean).length : 0),
-        0
-      );
-      const readTime = wordCount > 0 ? Math.max(1, Math.round(wordCount / 225)) : undefined;
-      logProverbRead(dayOfMonth, readTime);
-    }
+    hasLoggedRef.current = true;
+    const wordCount = (proverbContent.verses ?? []).reduce(
+      (acc, v) => acc + (v.text ? v.text.trim().split(/\s+/).filter(Boolean).length : 0),
+      0
+    );
+    const readTime = wordCount > 0 ? Math.max(1, Math.round(wordCount / 225)) : undefined;
+    logProverbRead(dayOfMonth, readTime);
+  };
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    // Within 50px of the bottom counts as read.
+    if (scrollTop + clientHeight >= scrollHeight - 50) logReadOnce();
   };
 
-  const onClose = () => {
-    setShowProverbModal(false);
-    setJournalDraft({ id: null, content: '', verse: '' });
-  };
+  const onClose = () => setShowProverbModal(false);
   // Ignore the delayed "ghost click" from the tap that opened this modal so it
   // doesn't close itself immediately (see useOverlayDismiss).
   const dismissOverlay = useOverlayDismiss(onClose);
@@ -78,6 +71,9 @@ function ProverbModal({
   // most a thin frame of it — the ghost click from the tap that opened this
   // lands inside, where the close controls are. See useTapGuard.
   const guardedClose = useTapGuard(onClose);
+  // "Done reading" at the end of the chapter counts as reading it, even when
+  // the chapter fits without scrolling (the ✓ in the header only closes).
+  const guardedFinish = useTapGuard(() => { logReadOnce(); onClose(); });
 
   const verses = proverbContent?.verses ?? [];
   // Last verse number, so the heading can show the range (e.g. "19:1–29"),
@@ -139,11 +135,16 @@ function ProverbModal({
 
         <div
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto ios-scroll flex flex-col lg:flex-row bg-[var(--bg-primary)]"
+          className="flex-1 overflow-y-auto ios-scroll bg-[var(--bg-primary)]"
         >
-          {/* Bible Content — the reader's centered column and type */}
-          <div className="w-full lg:flex-1 lg:border-r border-[var(--border-color)]">
-            <div className="px-6 sm:px-12 py-8 sm:py-12 max-w-[680px] mx-auto">
+          {/* The chapter in the reader's centered column and type, then Done.
+              (The journal that followed it was removed in Oct 2026: never used.)
+              The bottom pad clears the iPhone home indicator. */}
+          <div className="w-full">
+            <div
+              className="px-6 sm:px-12 pt-8 sm:pt-12 max-w-[680px] mx-auto"
+              style={{ paddingBottom: 'calc(2.5rem + env(safe-area-inset-bottom, 0px))' }}
+            >
               {isFetchingProverb ? (
                 <div className="py-24 flex flex-col items-center justify-center text-center">
                   <motion.div
@@ -202,61 +203,18 @@ function ProverbModal({
                       <p className="text-base italic text-[var(--text-secondary)]">No text available for this chapter.</p>
                     )}
                   </div>
+                  <button
+                    onClick={guardedFinish}
+                    className="mt-10 w-full p-4 font-bold uppercase tracking-widest text-[12px] flex items-center justify-center gap-2 rounded-[16px] bg-[var(--text-primary)] text-[var(--bg-primary)] shadow-sm hover:opacity-90 active:scale-[0.98] transition-all"
+                  >
+                    <Check size={16} />
+                    Done reading
+                  </button>
                 </>
               )}
             </div>
           </div>
 
-          {/* Journaling — below the text on a phone, a side panel on desktop.
-              The bottom pad clears the iPhone home indicator. */}
-          <div className="w-full lg:w-[450px] bg-[var(--bg-secondary)] shrink-0 border-t lg:border-t-0 border-[var(--border-color)]">
-            <div
-              className="px-6 sm:px-12 lg:px-10 pt-8 lg:pt-10 max-w-[680px] mx-auto space-y-8 lg:sticky lg:top-0"
-              style={{ paddingBottom: 'calc(2.5rem + env(safe-area-inset-bottom, 0px))' }}
-            >
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-brand mb-4 flex items-center gap-2">
-                  <FileText size={14} />
-                  Journal Your Reflection
-                </p>
-                <label className="block text-[11px] uppercase font-bold tracking-widest text-[var(--text-secondary)] mb-2">Key Verse</label>
-                <input 
-                  type="text"
-                  placeholder="Which verse spoke to you? (e.g. Verse 5)"
-                  value={journalVerse}
-                  onChange={(e) => setJournalVerse(e.target.value)}
-                  className="w-full p-4 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg outline-none focus:border-brand transition-all mb-6 font-bold text-[var(--text-primary)]"
-                />
-                
-                <label className="block text-[11px] uppercase font-bold tracking-widest text-[var(--text-secondary)] mb-2">Personal Reflection</label>
-                <textarea 
-                  placeholder="Write down what you learned or how this chapter applies to your life today..."
-                  value={journalContent}
-                  onChange={(e) => setJournalContent(e.target.value)}
-                  className="w-full h-64 lg:h-96 p-4 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg outline-none focus:border-brand transition-all resize-none font-medium leading-relaxed text-[var(--text-primary)]"
-                />
-              </div>
-
-              <button 
-                onClick={() => saveProverbJournal(journalContent, journalVerse, journalDraft.id)}
-                disabled={!journalContent.trim()}
-                className="w-full p-4 font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 disabled:opacity-50 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-[16px] shadow-sm hover:opacity-90 active:scale-95"
-              >
-                Save to My Journal
-              </button>
-
-              <button 
-                onClick={guardedClose}
-                className="w-full p-4 font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 rounded-[16px] bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm hover:bg-[var(--bg-tertiary)] active:scale-95 text-center mt-4"
-              >
-                Done Reading
-              </button>
-              
-              <p className="text-[11px] text-center text-[var(--text-secondary)] font-bold uppercase tracking-widest opacity-60">
-                Saved journals are synced to your account.
-              </p>
-            </div>
-          </div>
         </div>
 
         <AnimatePresence>

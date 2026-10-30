@@ -66,7 +66,7 @@ interface SettingsModalProps {
    isSigningIn
  }) => {
   const { state, dispatch } = useApp();
-  const { setShowSettings, setShowProverbModal, setJournalDraft, showToast } = useUi();
+  const { setShowSettings, showToast } = useUi();
   const { user } = useAuth();
   const [settingsTab, setSettingsTab] = React.useState<'general' | 'journals' | 'devotionals'>('general');
   const [newDevotional, setNewDevotional] = React.useState({ name: '', description: '', url: '' });
@@ -140,15 +140,19 @@ interface SettingsModalProps {
           >
             General
           </button>
-          <button 
-            onClick={() => setSettingsTab('journals')}
-            className={cn(
-              "flex-1 py-3 text-[11px] font-bold uppercase tracking-widest rounded-md transition-all",
-              settingsTab === 'journals' ? "bg-[var(--bg-primary)] shadow-sm text-brand" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-            )}
-          >
-            Journals ({state.proverbJournals.length})
-          </button>
+          {/* Journaling was removed from the daily proverb (Oct 2026). Entries
+              saved before then stay here to read, export or delete. */}
+          {state.proverbJournals.length > 0 && (
+            <button
+              onClick={() => setSettingsTab('journals')}
+              className={cn(
+                "flex-1 py-3 text-[11px] font-bold uppercase tracking-widest rounded-md transition-all",
+                settingsTab === 'journals' ? "bg-[var(--bg-primary)] shadow-sm text-brand" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              )}
+            >
+              Journals ({state.proverbJournals.length})
+            </button>
+          )}
           <button 
             onClick={() => setSettingsTab('devotionals')}
             className={cn(
@@ -410,19 +414,9 @@ interface SettingsModalProps {
                         "{entry.verse}"
                       </div>
                     )}
-                    <p className="text-sm font-medium leading-relaxed text-[var(--audible-text-primary)] line-clamp-3">
+                    <p className="text-sm font-medium leading-relaxed text-[var(--audible-text-primary)] whitespace-pre-line">
                       {entry.content}
                     </p>
-                    <button
-                      onClick={() => {
-                        setJournalDraft({ id: entry.id, content: entry.content, verse: entry.verse || '' });
-                        onClose();
-                        setShowProverbModal(true);
-                      }}
-                      className="mt-4 text-[10px] font-black uppercase tracking-[0.12em] text-brand hover:underline"
-                    >
-                      View / Edit
-                    </button>
                   </div>
                 ))
               ) : (

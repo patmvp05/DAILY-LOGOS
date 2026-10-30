@@ -94,6 +94,17 @@
     @apply bg-[var(--bg-secondary)] rounded-[24px] p-6 cursor-pointer hover:bg-[var(--bg-tertiary)] active:scale-[0.98] transition-all duration-200;
   }
 
+  /* Dashboard cards (Oct 2026): every block on the dashboard uses the reading-
+     part card surface. The page itself is --bg-secondary, so a bare cb-card
+     had no visible edge and those sections looked like loose text. */
+  .dl-card {
+    @apply bg-[var(--bg-secondary)] rounded-[24px] border border-[var(--border-color)] shadow-sm;
+  }
+
+  .dl-card-interactive {
+    @apply bg-[var(--bg-secondary)] rounded-[24px] border border-[var(--border-color)] shadow-sm cursor-pointer transition-all duration-200 hover:border-brand active:scale-[0.98];
+  }
+
   .cb-button {
     @apply bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-full px-6 py-4 font-semibold text-[17px] flex items-center justify-center transition-all active:scale-[0.98];
   }

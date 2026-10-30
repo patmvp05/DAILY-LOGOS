@@ -319,15 +319,23 @@
   the grant every time it closes — so it prompted on nearly every open. Do not add an age
   limit or a launch/visibility-time geolocation call back; `scripts/test-weather-location.mts`
   fails if you do.
-- **The phone dashboard order is set with `order-*`** (`src/components/Dashboard.tsx`). Below
-  `lg` the page is one column: today's proverb while unread (`order-1`), Resume Reading
-  (`order-2`), the summary strip (`order-3`, phone only), the seven parts (`order-4`), the
-  proverb once read (`order-5`, via `proverbReadToday`, the same Proverbs-today test
-  `logProverbRead` uses), then Today's Reading, the sprint and Plan Status (`order-6` to
-  `order-8`). The two column wrappers are `display: contents` below `lg` so their children can
-  be reordered, and every `lg:` class reproduces the desktop layout unchanged. A new block in
-  either column needs its own `order-*` plus `lg:order-none`, or on a phone it lands at order
-  0, above everything.
+- **The dashboard is all cards, and its phone order is set with `order-*`** (`src/components/Dashboard.tsx`,
+  cards in `src/components/DashboardCards.tsx`, Oct 2026). Every block uses the `.dl-card` surface
+  (the reading-part card look: border + soft shadow), because the page itself is `--bg-secondary`
+  and a bare `cb-card` had no visible edge. Below `lg` the page is one column: today's proverb
+  (`order-1`, always first because it doubles as the date, Proverbs 30 on the 30th; it turns into a
+  slim "Read today" row once `proverbReadToday`), the Today card (`order-2`: day number, parts read
+  today, streak with the last 7 days, minutes read today, whole-Bible progress, the text check,
+  Full Plan and the 24-hour sprint; it replaced the summary strip, Today's Reading, Plan Status
+  and the sprint card), Resume Reading (`order-3`), the reading parts (`order-4`), finished parts
+  as one slim row each (`order-5`; tapping opens the part's books), then the devotionals last
+  (`order-6`, with a check on any read today). On desktop the left column holds the proverb,
+  Today, Resume and devotionals, the right column the parts. The two column wrappers are
+  `display: contents` below `lg`, so a new block needs its own `order-*` plus `lg:order-none`, or
+  on a phone it lands at order 0, above everything.
+- **The daily proverb has no journal** (removed Oct 2026: never used). It ends with "Done reading",
+  which also logs the read (so a chapter that fits without scrolling still counts); the header ✓
+  only closes. Settings shows the Journals tab only while old entries exist (read, export, delete).
 
 ## reMarkable "7-day pack"
 

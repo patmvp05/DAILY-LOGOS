@@ -5,23 +5,17 @@
 
 import React, { useState, useMemo, useEffect, memo } from 'react';
 import { type User } from 'firebase/auth';
-import { 
-  Layers, 
-  Play, 
-  ArrowRight, 
-  Sparkles, 
+import {
   ChevronRight,
-  ExternalLink,
   Cloud,
   LogIn,
   RefreshCw,
   Minus,
   Plus,
   BookOpen,
-  Flame,
   Check
 } from 'lucide-react';
-import { format, parseISO, subDays } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { CATEGORIES, CATEGORIES_BY_ID, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
 import { Progress } from '../types';
 import { cn, computeProgressStats, formatLastRead } from '../lib/utils';
@@ -36,6 +30,7 @@ import { useReadingActions } from '../hooks/useReadingActions';
 import { useProverb } from '../hooks/useProverb';
 import { useToday } from '../hooks/useToday';
 import { TextCheckSummary } from './TextCheck';
+import { DevotionalsCard, FinishedPartsCard, ProverbCard, ResumeCard, TodayCard } from './DashboardCards';
 import { resolveDevotionalKind, getDevotionalSlug, interpolateDevotionalUrl } from '../lib/devotionalCatalog';
 
 interface DashboardProps {
@@ -67,15 +62,10 @@ function DashboardComponent({
 
   const {
     setActivePlanCategory, setShowProverbModal, setShowSprintModal, setActiveDevotion, setActiveInternalDevotional,
-    setSelectingCategoryId, setReaderCategoryId, setJournalDraft, syncStatus
+    setSelectingCategoryId, setReaderCategoryId, syncStatus
   } = useUi();
 
   const [chapterInfos, setChapterInfos] = useState<Record<string, { firstVerse: string, readTime: number }>>({});
-
-  const handleShowProverbModal = (val: boolean) => {
-    if (val) setJournalDraft({ id: null, content: '', verse: '' });
-    setShowProverbModal(val);
-  };
 
   const todayReadingStats = useMemo(() => {
     const todayEntries = state.history.filter(
@@ -127,8 +117,8 @@ function DashboardComponent({
 
   // Today's proverb counts as read once logProverbRead has logged it — the same
   // test it uses to avoid logging twice: a Proverbs entry for today's chapter.
-  // On a phone the proverb leads the page until then, and drops below the
-  // reading parts once it's read. Display only; nothing here logs anything.
+  // The proverb card stays first either way (it is also the date) and turns
+  // slim once read. Display only; nothing here logs anything.
   const proverbReadToday = useMemo(
     () => state.history.some(h => h.bookName === 'Proverbs' && h.chapter === dayOfMonth && h.localDate === todayStr),
     [state.history, dayOfMonth, todayStr]
@@ -220,265 +210,113 @@ function DashboardComponent({
     return () => { active = false; };
   }, [state.progress, chapterInfos, bibleVersion]);
 
+  const activeParts = orderedCategories.filter(({ isCatComplete }) => !isCatComplete);
+  const finishedParts = orderedCategories.filter(({ isCatComplete }) => isCatComplete);
+
+  const resume = (() => {
+    if (!lastReadProgress) return null;
+    const cat = CATEGORIES_BY_ID.get(lastReadProgress.categoryId);
+    const book = cat?.books[lastReadProgress.bookIndex];
+    if (!cat || !book) return null;
+    return {
+      categoryId: cat.id,
+      partName: cat.name,
+      bookName: book.name,
+      chapter: lastReadProgress.chapter,
+      lastRead: formatLastRead(lastReadProgress.lastReadAt!, todayStr),
+    };
+  })();
+
+  const devotionalsReadToday = new Set(
+    state.history
+      .filter((h) => h.categoryId === 'devotional' && h.localDate === todayStr)
+      .map((h) => h.bookName)
+  );
+
+  const openDevotional = (id: string) => {
+    const dev = state.customDevotionals.find((d) => d.id === id);
+    if (!dev) return;
+    const kind = resolveDevotionalKind(dev.id);
+    const slug = getDevotionalSlug(dev.id);
+    if (kind === 'internal' && slug) {
+      setActiveInternalDevotional({ id: dev.id, slug, name: dev.name });
+    } else {
+      setActiveDevotion({ name: dev.name, url: interpolateDevotionalUrl(dev.url) });
+    }
+  };
+
   return (
-    // Below lg (phones, iPad upright) the page is one column, and it used to
-    // open with the title, Resume Reading, the proverb, today's minutes and the
-    // sprint — so the seven reading parts started about two screens down. Phone
-    // order now: today's proverb (until it's read), Resume Reading, the summary
-    // strip, the seven parts, then the proverb once read, today's minutes, the
-    // sprint and Plan Status. The two column wrappers are `display: contents`
-    // below lg so their children can be reordered with `order-*`; every lg:
-    // class reproduces the desktop layout exactly as it was.
-    <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6 lg:py-12 flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:gap-12 transition-opacity duration-300">
-      {/* Phone / tablet summary strip (the big title block is desktop-only) */}
-      <section className="order-3 lg:hidden cb-card" aria-label="Today at a glance">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-widest font-bold text-brand mb-2">Day {dayNumber}</p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-[40px] leading-none font-bold tracking-tighter tabular-nums text-[var(--text-primary)]">
-                {partsDoneToday.size}
-              </span>
-              <span className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">
-                of {activeCategories.length} parts today
-              </span>
-            </div>
-          </div>
-          <div className="text-right shrink-0">
-            <div className="flex items-center justify-end gap-1.5">
-              <Flame size={18} className="text-brand" />
-              <span className="text-[28px] leading-none font-bold tracking-tighter tabular-nums text-[var(--text-primary)]">{streak}</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--text-secondary)] mt-2">Day streak</p>
-          </div>
+    // Every block is a card (Oct 2026). Phone order, one column: today's
+    // proverb (always first: it is also the date, Proverbs 30 on the 30th; slim
+    // once read), the Today card, Resume Reading, the reading parts, finished
+    // parts as slim rows, then the devotionals last. The two column wrappers are
+    // `display: contents` below lg so their children can be ordered with
+    // `order-*`; on desktop the left column holds the proverb, Today, Resume and
+    // devotionals, and the right column the parts.
+    <main className="max-w-7xl mx-auto px-4 sm:px-8 py-5 lg:py-12 flex flex-col gap-4 sm:gap-5 lg:grid lg:grid-cols-12 lg:gap-10 transition-opacity duration-300">
+      <div className="contents lg:flex lg:col-span-4 lg:flex-col lg:gap-6">
+        <div className="hidden lg:block mb-2">
+          <p className="text-[11px] uppercase tracking-widest font-bold text-brand mb-2">{"λóγος"}</p>
+          <h1 className="text-5xl xl:text-6xl font-black leading-none tracking-tighter text-[var(--text-primary)]">The Daily<br />Logos</h1>
         </div>
-        <div
-          className="grid gap-1.5 mt-5"
-          style={{ gridTemplateColumns: `repeat(${Math.max(1, activeCategories.length)}, minmax(0, 1fr))` }}
-          aria-hidden="true"
-        >
-          {activeCategories.map(cat => (
-            <div
-              key={cat.id}
-              className={cn("h-1.5 rounded-full", partsDoneToday.has(cat.id) ? "bg-brand" : "bg-[var(--bg-tertiary)]")}
-            />
-          ))}
-        </div>
-        <TextCheckSummary
-          progress={state.progress}
-          bibleVersion={bibleVersion}
-          proverbChapter={dayOfMonth}
-          className="mt-5"
+
+        <ProverbCard
+          className="order-1 lg:order-none"
+          todayStr={todayStr}
+          chapter={dayOfMonth}
+          read={proverbReadToday}
+          snippet={proverbSnippet}
+          loading={isFetchingProverb}
+          onOpen={() => setShowProverbModal(true)}
         />
-        <button
-          onClick={() => setActivePlanCategory('_all')}
-          className="mt-5 w-full flex items-center justify-center gap-2 py-3 rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] text-[13px] font-semibold text-[var(--text-primary)] active:scale-[0.98] transition-transform"
-        >
-          <Layers size={14} />
-          View Full Plan
-        </button>
-      </section>
 
-      {/* Left Control Panel */}
-      <div className="contents lg:flex lg:col-span-4 lg:flex-col lg:justify-between lg:py-2 lg:space-y-12">
-        <section className="contents lg:block">
-          <div className="hidden lg:block mb-10 text-center lg:text-left">
-            <p className="text-[11px] uppercase tracking-widest font-bold text-brand mb-2">{"λóγος"}</p>
-            <h1 className="text-5xl sm:text-6xl font-black leading-none mb-4 tracking-tighter text-[var(--text-primary)]">The Daily<br />Logos</h1>
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-6">
-              <p className="text-[var(--text-secondary)] font-medium text-lg">Day {dayNumber} of your journey.</p>
-            </div>
-            <button 
-              onClick={() => setActivePlanCategory('_all')}
-              className="cb-button w-full sm:w-auto mx-auto lg:mx-0 flex items-center justify-center gap-2"
-            >
-              <Layers size={14} />
-              View Full Plan
-            </button>
-          </div>
+        <TodayCard
+          className="order-2 lg:order-none"
+          dayNumber={dayNumber}
+          streak={streak}
+          readDates={readDatesSet}
+          todayStr={todayStr}
+          activeParts={activeCategories.map((cat) => ({ id: cat.id, doneToday: partsDoneToday.has(cat.id) }))}
+          minutes={todayReadingStats.minutes}
+          chaptersToday={todayReadingStats.entries.map((e) => `${e.bookName} ${e.chapter}`)}
+          overallProgress={overallProgress}
+          totalRead={totalRead}
+          totalChapters={totalChaptersCount}
+          sprintCompleted={sprintCompleted}
+          textCheck={<TextCheckSummary progress={state.progress} bibleVersion={bibleVersion} proverbChapter={dayOfMonth} />}
+          onOpenPlan={() => setActivePlanCategory('_all')}
+          onOpenSprint={() => setShowSprintModal(true)}
+        />
 
-          {/* Resume Reading Card (Audible Mini-Player style) */}
-          {lastReadProgress && (
-            <div className={cn(
-              "order-2 lg:order-none lg:mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700"
-            )}>
-              <div className="flex justify-between items-center mb-3">
-                <p className="text-[11px] uppercase font-bold tracking-widest text-brand">Resume Reading</p>
-                {syncStatus === 'syncing' && (
-                  <span className="flex items-center gap-1 text-[10px] text-brand font-bold uppercase animate-pulse">
-                    <Cloud size={12} />
-                    Syncing...
-                  </span>
-                )}
-                {syncStatus === 'offline' && (
-                  <span className="flex items-center gap-1 text-[10px] text-zinc-400 font-bold uppercase">
-                    <Cloud size={12} className="text-zinc-400" />
-                    Offline Mode
-                  </span>
-                )}
-                {syncStatus === 'error' && (
-                  <span className="flex items-center gap-1 text-[10px] text-red-500 font-bold uppercase">
-                    <Cloud size={12} className="text-red-500" />
-                    Sync Error
-                  </span>
-                )}
-              </div>
-              {/* Opens that chapter in the reader (it used to open the Plan
-                  Breakdown). The reader's Next Chapter is the same
-                  advanceChapter the dashboard + button uses. */}
-              <button
-                onClick={() => setReaderCategoryId(lastReadProgress.categoryId)}
-                aria-label={`Resume reading ${CATEGORIES_BY_ID.get(lastReadProgress.categoryId)?.books[lastReadProgress.bookIndex]?.name ?? ''} ${lastReadProgress.chapter}`}
-                className="w-full group relative flex items-center justify-between cb-card-interactive"
-              >
-                <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 rounded-full bg-brand text-white flex items-center justify-center transition-transform duration-300 group-hover:scale-105 active:scale-95 shadow-md shadow-brand/20">
-                    <Play size={24} fill="currentColor" className="ml-1" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold uppercase tracking-widest text-[#8B909A] mb-1">
-                      {CATEGORIES_BY_ID.get(lastReadProgress.categoryId)?.name}
-                    </p>
-                    <h4 className="text-[22px] font-bold tracking-tighter leading-none text-[var(--text-primary)]">
-                      {(() => {
-                        const cat = CATEGORIES_BY_ID.get(lastReadProgress.categoryId);
-                        const book = cat?.books[lastReadProgress.bookIndex];
-                        return `${book?.name || 'Unknown'} ${lastReadProgress.chapter}`;
-                      })()}
-                    </h4>
-                    <p className="text-[11px] text-[var(--text-secondary)] font-medium mt-1">
-                      Last read {formatLastRead(lastReadProgress.lastReadAt!, todayStr)}
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight size={24} className="text-[#8B909A] transition-transform group-hover:translate-x-1" />
-              </button>
-            </div>
-          )}
+        {resume && (
+          <ResumeCard
+            className="order-3 lg:order-none"
+            partName={resume.partName}
+            bookName={resume.bookName}
+            chapter={resume.chapter}
+            lastRead={resume.lastRead}
+            syncStatus={syncStatus}
+            onOpen={() => setReaderCategoryId(resume.categoryId)}
+          />
+        )}
 
-          {/* Proverb of the Day */}
-          <button
-            onClick={() => handleShowProverbModal(true)}
-            className={cn(
-              proverbReadToday ? "order-5" : "order-1",
-              "lg:order-none w-full lg:mb-6 relative overflow-hidden group text-left block cb-card-interactive"
-            )}
-          >
-            <div className="relative">
-              <Sparkles className="absolute top-0 right-0 group-hover:scale-110 transition-transform text-brand/20 dark:text-brand/40" size={48} />
-              <p className="text-[11px] uppercase tracking-widest font-bold mb-4 text-[var(--text-secondary)]">Daily Proverb</p>
-              <h2 className="text-3xl font-bold mb-3 tracking-tighter text-[var(--text-primary)]">Proverbs {dayOfMonth}</h2>
-              {isFetchingProverb ? (
-                <div className="space-y-2 animate-pulse mt-2">
-                  <div className="h-4 bg-[var(--border-color)] rounded w-3/4" />
-                  <div className="h-4 bg-[var(--border-color)] rounded w-1/2" />
-                </div>
-              ) : proverbSnippet ? (
-                <div className="mt-2 text-[var(--text-secondary)]">
-                  <p className="text-[15px] leading-relaxed line-clamp-2">
-                    "{proverbSnippet}"
-                  </p>
-                  <p className="text-xs font-semibold text-brand mt-4">Read more & journal &rarr;</p>
-                </div>
-              ) : (
-                <p className="text-[15px] text-[var(--text-secondary)] leading-relaxed mt-2">It's the {format(new Date(), 'do')} of the month. Click to read today's wisdom and journal.</p>
-              )}
-            </div>
-          </button>
+        <DevotionalsCard
+          className="order-6 lg:order-none"
+          items={state.customDevotionals.map((dev) => ({
+            id: dev.id,
+            name: dev.name,
+            internal: resolveDevotionalKind(dev.id) === 'internal' && !!getDevotionalSlug(dev.id),
+            readToday: devotionalsReadToday.has(dev.name),
+          }))}
+          onOpen={openDevotional}
+        />
 
-          <div className="order-6 lg:order-none cb-card lg:mb-10 overflow-hidden relative group">
-            <div className="relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16 blur-xl" />
-              <div className="flex items-baseline justify-between mb-1">
-                <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold">
-                  Today's Reading
-                </p>
-                <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest italic opacity-70">
-                  {format(new Date(), 'EEE, MMM d')}
-                </span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <h2 className={cn(
-                  "text-[40px] font-bold tracking-tighter",
-                  todayReadingStats.minutes === 0
-                    ? "text-[var(--text-secondary)] opacity-50"
-                    : "text-[var(--text-primary)]"
-                )}>
-                  {todayReadingStats.minutes}
-                </h2>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold uppercase tracking-widest text-brand">
-                    {todayReadingStats.minutes === 1 ? 'Minute' : 'Minutes'}
-                  </span>
-                  <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest italic opacity-70 leading-none mt-1">
-                    {todayReadingStats.chapterCount === 0
-                      ? 'No chapters yet today'
-                      : `${todayReadingStats.chapterCount} chapter${todayReadingStats.chapterCount === 1 ? '' : 's'} read`}
-                  </span>
-                </div>
-              </div>
-              {todayReadingStats.entries.length > 0 && (
-                <p className="text-[11px] text-[var(--text-secondary)] font-medium mt-3 line-clamp-1 opacity-80">
-                  {todayReadingStats.entries
-                    .slice(0, 3)
-                    .map(e => `${e.bookName} ${e.chapter}`)
-                    .join(' · ')}
-                  {todayReadingStats.entries.length > 3 && ` · +${todayReadingStats.entries.length - 3} more`}
-                </p>
-              )}
-            </div>
-          </div>
-          {/* 24-Hour Scripture Sprint — an occasional discipline, so it sits
-              quietly at the bottom rather than competing with the daily plan. */}
-          <button
-            onClick={() => setShowSprintModal(true)}
-            className="order-7 lg:order-none w-full lg:mb-6 relative overflow-hidden group text-left block cb-card-interactive"
-          >
-            <div className="relative">
-              <Flame
-                className="absolute top-0 right-0 group-hover:scale-110 transition-transform text-brand/20 dark:text-brand/40"
-                size={48}
-              />
-              <p className="text-[11px] uppercase tracking-widest font-bold mb-4 text-[var(--text-secondary)]">
-                24-Hour Sprint
-              </p>
-              <div className="flex items-baseline gap-2 mb-3">
-                <h2 className={cn(
-                  'text-3xl font-bold tracking-tighter',
-                  sprintCompleted === 0 ? 'text-[var(--text-primary)]' : 'text-brand'
-                )}>
-                  {sprintCompleted > 0 ? `${sprintCompleted} / 24` : '24 Chapters'}
-                </h2>
-              </div>
-              {sprintCompleted > 0 ? (
-                <>
-                  <div className="h-1.5 w-full rounded-full bg-[var(--border-color)] overflow-hidden mb-3">
-                    <div
-                      className="h-full rounded-full bg-brand transition-all duration-500"
-                      style={{ width: `${Math.round((sprintCompleted / 24) * 100)}%` }}
-                    />
-                  </div>
-                  <p className="text-xs font-semibold text-brand">
-                    {sprintCompleted === 24 ? 'Complete — well done →' : 'Keep going →'}
-                  </p>
-                </>
-              ) : (
-                <p className="text-[15px] text-[var(--text-secondary)] leading-relaxed">
-                  One chapter every hour, for a full day. Tap to begin whenever you
-                  want to stir up a hunger for the Word.
-                </p>
-              )}
-            </div>
-          </button>
-        </section>
-
-        <footer className="text-[10px] text-zinc-400 uppercase tracking-[0.2em] font-black pt-8 hidden lg:block opacity-60">
+        <footer className="text-[10px] text-zinc-400 uppercase tracking-[0.2em] font-black pt-4 hidden lg:block opacity-60">
           Daily Logos &copy; {new Date().getFullYear()}
         </footer>
       </div>
 
-      {/* Right Grid Area: The 7 Sections */}
-      <div className="contents lg:block lg:col-span-8">
+      <div className="contents lg:flex lg:col-span-8 lg:flex-col lg:gap-6">
         <div className="order-4 lg:order-none grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {!user && !isAuthLoading && (
             <div 
@@ -523,7 +361,7 @@ function DashboardComponent({
             </div>
           )}
 
-          {orderedCategories.map(({ cat, idx, isCatComplete }) => {
+          {activeParts.map(({ cat, idx, isCatComplete }) => {
             const prog = state.progress.find(p => p.categoryId === cat.id);
             if (!prog) return null;
 
@@ -554,105 +392,16 @@ function DashboardComponent({
           })}
         </div>
 
-        <div className="order-8 lg:order-none cb-card lg:mt-6 overflow-hidden relative group">
-          <div className="relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16 blur-xl" />
-            <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-4">Plan Status</p>
-
-            <div className="space-y-2 mb-6">
-              <div className="flex justify-between items-end">
-                <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Overall Progress</span>
-                <div className="text-right">
-                  <span className="text-sm font-bold text-[var(--text-primary)] tabular-nums block leading-none">{overallProgress}%</span>
-                  <span className="text-[10px] font-medium text-[var(--text-secondary)] mt-1 tracking-tight tabular-nums opacity-80 block">
-                    {totalRead.toLocaleString()} / {totalChaptersCount.toLocaleString()} Chapters
-                  </span>
-                </div>
-              </div>
-              <div
-                className="relative w-full h-[8px] rounded-full overflow-hidden bg-[var(--bg-tertiary)]"
-                role="progressbar"
-                aria-valuenow={overallProgress}
-                aria-valuemin={0}
-                aria-valuemax={100}
-              >
-                <div
-                  style={{ width: `${overallProgress}%` }}
-                  className={cn(
-                    "h-full rounded-full transition-all duration-700 ease-out bg-brand",
-                    overallProgress < 100 && "shimmer-effect"
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Phones show this in the summary strip at the top instead. */}
-            <div className="hidden lg:block mb-6">
-              <TextCheckSummary progress={state.progress} bibleVersion={bibleVersion} proverbChapter={dayOfMonth} />
-            </div>
-
-            {state.customDevotionals.length > 0 && (
-              <div className="pt-6 border-t border-[var(--border-color)]">
-                <p className="text-[11px] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-4">Daily Devotionals</p>
-                <div className="space-y-2">
-                  {state.customDevotionals.map(dev => {
-                    const kind = resolveDevotionalKind(dev.id);
-                    const slug = getDevotionalSlug(dev.id);
-                    return (
-                      <button
-                        key={dev.id}
-                        onClick={() => {
-                          if (kind === 'internal' && slug) {
-                            setActiveInternalDevotional({ id: dev.id, slug, name: dev.name });
-                          } else {
-                            setActiveDevotion({ name: dev.name, url: interpolateDevotionalUrl(dev.url) });
-                          }
-                        }}
-                        className="w-full flex items-center justify-between p-4 border border-[var(--border-color)] hover:border-brand transition-all text-left bg-[var(--bg-primary)] group rounded-2xl"
-                      >
-                        <div className="flex items-center gap-3">
-                          {kind === 'internal'
-                            ? <BookOpen size={14} className="text-zinc-400 group-hover:text-brand" />
-                            : <ExternalLink size={14} className="text-zinc-400 group-hover:text-brand" />}
-                          <span className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">{dev.name}</span>
-                        </div>
-                        <ChevronRight size={16} className="text-zinc-400 group-hover:text-brand group-hover:translate-x-0.5 transition-all" />
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div className="pt-6 border-t border-[var(--border-color)]">
-              <div className="flex items-baseline gap-3 mb-8 text-[var(--text-primary)]">
-                <h2 className="text-[40px] font-bold tracking-tighter">{streak}</h2>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold uppercase tracking-widest text-brand">Day Streak</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-7 gap-1 mb-6 group-hover:opacity-100 transition-opacity">
-                {Array.from({ length: 7 }).map((_, i) => {
-                  const checkDate = subDays(new Date(), 6 - i);
-                  const isTodayVisit = i === 6;
-                  const dateStr = format(checkDate, 'yyyy-MM-dd');
-                  const hasReadOnDay = readDatesSet.has(dateStr);
-                  return (
-                    <div key={i} className="flex flex-col items-center gap-1">
-                      <div className={cn(
-                        "w-full aspect-square transition-all duration-500 rounded-full",
-                        hasReadOnDay ? "bg-brand" : "bg-[var(--bg-tertiary)]",
-                        isTodayVisit && !hasReadOnDay && "bg-transparent border-2 border-brand/50 border-dashed"
-                      )} />
-                      <span className="text-[9px] font-bold uppercase text-[var(--text-secondary)] mt-1">{format(checkDate, 'eee')[0]}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
+        <FinishedPartsCard
+          className="order-5 lg:order-none"
+          parts={finishedParts.map(({ cat, idx }) => ({
+            id: cat.id,
+            number: idx + 1,
+            name: cat.name,
+            chapters: catProgress[cat.id]?.totalChapters ?? 0,
+          }))}
+          onOpen={setSelectingCategoryId}
+        />
       </div>
     </main>
   );
