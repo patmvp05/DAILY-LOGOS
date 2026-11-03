@@ -263,9 +263,14 @@
   - Stepping backward with `-` stays inside the current book (stops at chapter 1). Undoing a
     finished book goes through `BookFinishedModal`'s Undo action (`UNDO_FINISH_BOOK`) or
     Full Plan (`CategoryPlanModal`, which requires confirmation before toggling completion).
-  - When all plan books in a part are completed (`isCategoryComplete`), its card shows `100%
-    Complete`, hides `"Next to Read"`, sorts below active parts, and the mobile summary strip
-    counts only active parts (`"X of 6 parts today"`).
+  - When all plan books in a part are completed (`isCategoryComplete`), it shows as one slim
+    row under "Finished" (not a full card), and the Today card counts only active parts
+    (`"X of 6 parts today"`).
+  - **The daily proverb counts as the Wisdom part for the day** (`partsReadToday` in
+    `src/lib/bible.ts`, Nov 2026). Proverbs is Wisdom's daily-only book, read every day instead
+    of in the plan, so a Proverbs history entry dated today fills Wisdom's segment in "X of 6
+    parts today", and the Wisdom card shows done-for-today ("✓ Proverbs 3 read today", sorted
+    after unread parts). It never moves Wisdom's plan pointer. `scripts/test-parts-today.mts`.
 - **Revision-aware conflict resolution & signed-out completion tracking:**
   - `Progress` docs carry a monotonic `revision` integer. Every user progress change sets
     `revision` to `(current.revision ?? 0) + 1`. In `resolveProgressConflict`, higher

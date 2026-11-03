@@ -19,7 +19,7 @@ import { format, parseISO } from 'date-fns';
 import { CATEGORIES, CATEGORIES_BY_ID, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
 import { Progress } from '../types';
 import { cn, computeProgressStats, formatLastRead } from '../lib/utils';
-import { isCategoryComplete } from '../lib/bible';
+import { DAILY_PROVERB_PART_ID, isCategoryComplete, partsReadToday } from '../lib/bible';
 
 import { getChapterInfo, getCachedReadTime } from '../lib/bibleCache';
 
@@ -99,20 +99,12 @@ function DashboardComponent({
     [state.completedBooks]
   );
 
-  // Reading-plan parts with reading left that were touched today, for the phone
-  // summary strip ("2 of 6 parts today" when one part is 100% finished).
+  // Parts with reading left that count as read today ("2 of 6 parts today"
+  // when one part is 100% finished). Reading the daily proverb counts as the
+  // Wisdom part: Proverbs is Wisdom's daily book (see partsReadToday).
   const partsDoneToday = useMemo(
-    () =>
-      new Set(
-        state.progress
-          .filter(
-            p =>
-              p.localDate === todayStr &&
-              !isCategoryComplete(p.categoryId, state.completedBooks)
-          )
-          .map(p => p.categoryId)
-      ),
-    [state.progress, state.completedBooks, todayStr]
+    () => partsReadToday(state.progress, state.history, state.completedBooks, todayStr),
+    [state.progress, state.history, state.completedBooks, todayStr]
   );
 
   // Today's proverb counts as read once logProverbRead has logged it — the same
@@ -149,8 +141,7 @@ function DashboardComponent({
   // (in plan order); active parts already read today come next; 100% completed
   // parts sink below all active parts.
   const orderedCategories = useMemo(() => {
-    const doneToday = (catId: string) =>
-      state.progress.find(p => p.categoryId === catId)?.localDate === todayStr;
+    const doneToday = (catId: string) => partsDoneToday.has(catId);
     return CATEGORIES
       .map((cat, idx) => ({
         cat,
@@ -164,7 +155,7 @@ function DashboardComponent({
         if (aDone !== bDone) return aDone ? 1 : -1;
         return a.idx - b.idx;
       });
-  }, [state.progress, state.completedBooks, todayStr]);
+  }, [partsDoneToday, state.completedBooks]);
 
   useEffect(() => {
     let active = true;
@@ -366,7 +357,7 @@ function DashboardComponent({
             if (!prog) return null;
 
             const book = cat.books[prog.bookIndex];
-            const isDone = prog.localDate === todayStr;
+            const isDone = partsDoneToday.has(cat.id);
             const bookIsCompleted = isCatComplete || state.completedBooks.has(`${cat.id}:${book.name}`);
             const infoKey = `${bibleVersion}:${cat.id}:${prog.bookIndex}:${prog.chapter}`;
             const info = chapterInfos[infoKey];
@@ -378,7 +369,8 @@ function DashboardComponent({
                 idx={idx}
                 prog={prog}
                 book={book}
-                isDone={isDone as boolean}
+                isDone={isDone}
+                doneNote={cat.id === DAILY_PROVERB_PART_ID && proverbReadToday ? `Proverbs ${dayOfMonth} read today` : undefined}
                 bookIsCompleted={bookIsCompleted}
                 categoryIsCompleted={isCatComplete}
                 info={info}
@@ -413,6 +405,8 @@ interface CategoryCardProps {
   prog: Progress;
   book: typeof CATEGORIES[number]['books'][number];
   isDone: boolean;
+  /** Why a part counts as read today when it isn't a plan chapter (the daily proverb). */
+  doneNote?: string;
   bookIsCompleted: boolean;
   categoryIsCompleted: boolean;
   info: { firstVerse: string, readTime: number } | undefined;
@@ -429,6 +423,7 @@ const CategoryCard = memo(({
   prog,
   book,
   isDone,
+  doneNote,
   bookIsCompleted,
   categoryIsCompleted,
   info,
@@ -466,6 +461,12 @@ const CategoryCard = memo(({
           {!isDone && !bookIsCompleted && !categoryIsCompleted && (
             <span className="text-[9px] font-bold uppercase text-brand animate-pulse tracking-widest block leading-none mt-1">
               Next to Read
+            </span>
+          )}
+          {isDone && doneNote && !categoryIsCompleted && (
+            <span className="text-[9px] font-bold uppercase text-brand tracking-widest leading-none mt-1 flex items-center gap-1">
+              <Check size={10} strokeWidth={3.5} />
+              {doneNote}
             </span>
           )}
 

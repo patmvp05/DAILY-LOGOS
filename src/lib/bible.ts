@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CATEGORIES_BY_ID } from '../constants';
-import { Progress as ProgressType } from '../types';
+import { CATEGORIES, CATEGORIES_BY_ID } from '../constants';
+import { HistoryEntry, Progress as ProgressType } from '../types';
 
 export interface HistoryStep {
   bookIndex: number;
@@ -93,6 +93,42 @@ export function isCategoryComplete(categoryId: string, completedBooks: Set<strin
   const planBooks = category.books.filter((b) => !b.dailyOnly);
   if (planBooks.length === 0) return false;
   return planBooks.every((b) => completedBooks.has(`${categoryId}:${b.name}`));
+}
+
+/**
+ * The part whose daily-only book is Proverbs (Wisdom). Patrick reads Proverbs
+ * every day as the daily proverb instead of as a plan book, so reading it
+ * counts as reading this part that day.
+ */
+export const DAILY_PROVERB_PART_ID: string | undefined = CATEGORIES.find((c) =>
+  c.books.some((b) => b.dailyOnly && b.name === 'Proverbs')
+)?.id;
+
+/**
+ * Parts with reading left that count as read today, for "X of 6 parts today"
+ * and the dashboard's done-today styling: a plan chapter was read in the part
+ * today (its progress `localDate` is today), or, for Wisdom, a daily proverb
+ * was read today. Finished parts never count (they are not in the "of 6").
+ */
+export function partsReadToday(
+  progress: ProgressType[],
+  history: HistoryEntry[],
+  completedBooks: Set<string>,
+  todayStr: string
+): Set<string> {
+  const done = new Set<string>();
+  for (const p of progress) {
+    if (p.localDate === todayStr && !isCategoryComplete(p.categoryId, completedBooks)) done.add(p.categoryId);
+  }
+  const wisdom = DAILY_PROVERB_PART_ID;
+  if (
+    wisdom &&
+    !isCategoryComplete(wisdom, completedBooks) &&
+    history.some((h) => h.bookName === 'Proverbs' && h.localDate === todayStr)
+  ) {
+    done.add(wisdom);
+  }
+  return done;
 }
 
 /**
