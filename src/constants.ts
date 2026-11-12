@@ -19,14 +19,12 @@ export interface Category {
   id: string;
   name: string;
   books: Book[];
-  color: string;
 }
 
 export const CATEGORIES: Category[] = [
   {
     id: 'law',
     name: 'The Law',
-    color: '#000000',
     books: [
       { name: 'Genesis', chapters: 50 },
       { name: 'Exodus', chapters: 40 },
@@ -38,7 +36,6 @@ export const CATEGORIES: Category[] = [
   {
     id: 'history',
     name: 'History',
-    color: '#000000',
     books: [
       { name: 'Joshua', chapters: 24 },
       { name: 'Judges', chapters: 21 },
@@ -57,7 +54,6 @@ export const CATEGORIES: Category[] = [
   {
     id: 'gospels',
     name: 'Gospels',
-    color: '#000000',
     books: [
       { name: 'Matthew', chapters: 28 },
       { name: 'Mark', chapters: 16 },
@@ -69,7 +65,6 @@ export const CATEGORIES: Category[] = [
   {
     id: 'wisdom',
     name: 'Wisdom',
-    color: '#000000',
     books: [
       { name: 'Job', chapters: 42 },
       { name: 'Proverbs', chapters: 31, dailyOnly: true },
@@ -80,7 +75,6 @@ export const CATEGORIES: Category[] = [
   {
     id: 'epistles',
     name: 'Epistles',
-    color: '#000000',
     books: [
       { name: 'Romans', chapters: 16 },
       { name: '1 Corinthians', chapters: 16 },
@@ -108,7 +102,6 @@ export const CATEGORIES: Category[] = [
   {
     id: 'prophecy',
     name: 'Prophecy',
-    color: '#000000',
     books: [
       { name: 'Isaiah', chapters: 66 },
       { name: 'Jeremiah', chapters: 52 },
@@ -133,7 +126,6 @@ export const CATEGORIES: Category[] = [
   {
     id: 'psalms',
     name: 'Psalms',
-    color: '#000000',
     books: [
       { name: 'Psalms', chapters: 150 },
     ],
@@ -165,7 +157,6 @@ export interface BibleVersion {
   name: string;                     // human-readable name for the dropdown
   source: 'bibleapi' | 'bolls';     // which backend serves the text
   code: string;                     // provider-specific code (see below)
-  modern?: boolean;                 // contemporary-English translation (for grouping/labels)
 }
 
 /**
@@ -191,20 +182,20 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
   // downloaded from BibleGateway by scripts/fetch-biblegateway.py. ('bolls' here
   // means "a static set", NOT a runtime bolls.life call. See AGENTS.md.)
   // The NIV is the 2011 text (the 1984 text shipped until Oct 2026).
-  { id: 'niv',  name: 'New International Version', source: 'bolls', code: 'NIV',  modern: true },
-  { id: 'nlt',  name: 'New Living Translation',    source: 'bolls', code: 'NLT',  modern: true },
-  { id: 'esv',  name: 'English Standard Version',  source: 'bolls', code: 'ESV',  modern: true },
-  { id: 'nkjv', name: 'New King James Version',    source: 'bolls', code: 'NKJV', modern: true },
-  { id: 'ncv',  name: 'New Century Version',        source: 'bolls', code: 'NCV',  modern: true },
+  { id: 'niv',  name: 'New International Version', source: 'bolls', code: 'NIV' },
+  { id: 'nlt',  name: 'New Living Translation',    source: 'bolls', code: 'NLT' },
+  { id: 'esv',  name: 'English Standard Version',  source: 'bolls', code: 'ESV' },
+  { id: 'nkjv', name: 'New King James Version',    source: 'bolls', code: 'NKJV' },
+  { id: 'ncv',  name: 'New Century Version',        source: 'bolls', code: 'NCV' },
   // Also static files, but NOT from bolls (it carries neither): CSB is scraped
   // from BibleGateway (scripts/fetch-biblegateway.py, BG_VERSION=CSB) and BSB is
   // built from bereanbible.com's single public-domain bulk file
   // (scripts/fetch-bsb-berean.mjs). `source: 'bolls'` only means "served from
   // public/bible/{CODE}/" — see AGENTS.md.
-  { id: 'csb',  name: 'Christian Standard Bible',  source: 'bolls', code: 'CSB',  modern: true },
-  { id: 'bsb',  name: 'Berean Standard Bible',     source: 'bolls', code: 'BSB',  modern: true },
+  { id: 'csb',  name: 'Christian Standard Bible',  source: 'bolls', code: 'CSB' },
+  { id: 'bsb',  name: 'Berean Standard Bible',     source: 'bolls', code: 'BSB' },
   // Modern, public-domain — via bible-api.com (always reliable, cached, offline)
-  { id: 'web',  name: 'World English Bible',       source: 'bibleapi', code: 'web', modern: true },
+  { id: 'web',  name: 'World English Bible',       source: 'bibleapi', code: 'web' },
   // Classic, public-domain — via bible-api.com
   { id: 'kjv',  name: 'King James Version',        source: 'bibleapi', code: 'kjv' },
 ];

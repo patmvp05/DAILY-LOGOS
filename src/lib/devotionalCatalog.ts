@@ -46,11 +46,6 @@ export function getDevotionalAuthor(id: string): string | null {
   return meta?.kind === 'internal' ? meta.author : null;
 }
 
-export function getDevotionalName(id: string): string | null {
-  const meta = CATALOG[id];
-  return meta?.kind === 'internal' ? meta.name : null;
-}
-
 /** Every devotional with an on-disk archive, in the order they should be read. */
 export const INTERNAL_DEVOTIONALS: readonly InternalDevotionalMeta[] = Object.values(CATALOG)
   .filter((m): m is InternalDevotionalMeta => m.kind === 'internal');

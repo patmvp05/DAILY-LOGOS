@@ -116,7 +116,7 @@ class Device {
   advance(categoryId: string, amount: number) {
     activeOffset = this.clockOffset;
     const prog = this.state.progress.find(p => p.categoryId === categoryId)!;
-    const { progress, newlyCompletedKeys, revertedCompletedKeys, historySteps, finishedBook } =
+    const { progress, newlyCompletedKeys, historySteps, finishedBook } =
       calculateNextProgress(categoryId, amount, prog, this.state.completedBooks);
     activeOffset = 0;
 
@@ -130,7 +130,6 @@ class Device {
       revisionDelta,
     });
     newlyCompletedKeys.forEach(key => this.dispatch({ type: 'TOGGLE_BOOK', key }));
-    revertedCompletedKeys.forEach(key => this.dispatch({ type: 'TOGGLE_BOOK', key }));
 
     const cat = CATEGORIES_BY_ID.get(categoryId)!;
     const entries: HistoryEntry[] = historySteps.map((step, i) => ({

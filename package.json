@@ -1,5 +1,5 @@
 {
-  "name": "react-example",
+  "name": "daily-logos",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -46,7 +46,6 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.4",
-    "autoprefixer": "^10.4.21",
     "eslint": "^10.2.1",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",

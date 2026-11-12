@@ -193,7 +193,7 @@ interface SettingsModalProps {
                     <button 
                       onClick={() => !isAuthLoading && !isSigningIn && handleLogin(false)}
                       disabled={syncStatus === 'syncing' || isAuthLoading || isSigningIn}
-                      className="w-full p-4 bg-brand text-white rounded-xl flex items-center justify-center gap-3 font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-evernote/20 disabled:opacity-50 cursor-pointer"
+                      className="w-full p-4 bg-brand text-white rounded-xl flex items-center justify-center gap-3 font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-brand/20 disabled:opacity-50 cursor-pointer"
                     >
                       {(isSigningIn || isAuthLoading) ? <RefreshCw size={16} className="animate-spin" /> : <LogIn size={16} />}
                       {(isSigningIn || isAuthLoading) ? 'Connecting...' : 'Sign In with Google'}
@@ -382,7 +382,7 @@ interface SettingsModalProps {
             <div className="space-y-6 pb-12">
               <button 
                 onClick={onExportJournals}
-                className="w-full p-6 bg-brand text-white rounded-xl mb-8 flex items-center justify-between shadow-xl shadow-evernote/20 hover:translate-y-[-2px] transition-all"
+                className="w-full p-6 bg-brand text-white rounded-xl mb-8 flex items-center justify-between shadow-xl shadow-brand/20 hover:translate-y-[-2px] transition-all"
               >
                 <div className="text-left">
                   <p className="text-[10px] font-black uppercase tracking-[0.12em] opacity-80">Archive Export</p>

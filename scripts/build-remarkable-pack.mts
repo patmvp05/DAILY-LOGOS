@@ -18,7 +18,8 @@
  *   would diverge the first time you read two chapters in a day, and would then
  *   silently send the wrong chapters forever.
  *
- * The forward walk is ported from src/lib/prefetchBible.ts:32-63, whose own
+ * The forward walk is ported from the look-ahead src/lib/prefetchBible.ts had
+ * when this was written (it has since moved to calculateNextProgress), whose own
  * docstring calls the goal "always a week ahead" — same boundary crossing, same
  * guards, with fs.readFileSync in place of the browser's fetch+IndexedDB.
  *
@@ -208,7 +209,7 @@ interface ChapterRef {
 /**
  * Walk forward `count` chapters from a pointer, crossing book boundaries.
  *
- * Ported verbatim in behaviour from src/lib/prefetchBible.ts:32-63 — including
+ * Ported verbatim in behaviour from the original src/lib/prefetchBible.ts walk — including
  * the out-of-range chapter guard and stopping at the end of a part rather than
  * spilling into the next one. Returns fewer than `count` only when the part runs
  * out (e.g. you are in Revelation 20) or the pointer is corrupt.

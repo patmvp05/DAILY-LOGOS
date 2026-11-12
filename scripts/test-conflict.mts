@@ -6,7 +6,7 @@
  * reconciliation decision. Run with: npx tsx scripts/test-conflict.mts
  */
 import { resolveProgressConflict, appReducer, HISTORY_CAP } from '../src/state/appReducer';
-import { calculateNextProgress, isBackwardJump } from '../src/lib/bible';
+import { calculateNextProgress } from '../src/lib/bible';
 import type { Progress, AppState, HistoryEntry, ProverbJournal } from '../src/types';
 
 let pass = 0;
@@ -274,7 +274,7 @@ function expect(name: string, cond: boolean) {
   const back = calculateNextProgress('wisdom', -1, fwd.progress, completedAfterFwd);
   expect('back-nav: minus stays at Ecclesiastes ch1', back.progress.bookIndex === 2 && back.progress.chapter === 1);
   expect('back-nav: no history logged', back.historySteps.length === 0);
-  expect('back-nav: Job stays completed on minus', back.revertedCompletedKeys.length === 0);
+  expect('back-nav: minus completes nothing', back.newlyCompletedKeys.length === 0);
 
   // Explicit Undo via UNDO_FINISH_BOOK puts user back on Job 42 and un-marks Job
   const stateAfterFwd = baseState([fwd.progress]);
@@ -344,23 +344,6 @@ function jr(id: string, content: string): ProverbJournal {
   const same = [jr('j2', 'two'), jr('j1', 'same')];
   const next = appReducer(s, { type: 'CLOUD_SYNC_JOURNALS', journals: same });
   expect('journal identical: no re-render', next === s);
-}
-
-// ── Round 8: jump-to-book confirmation only on backward moves ─────────
-// PRD 2.3: a forward skip applies immediately; only a backward jump prompts.
-{
-  const cur = (bookIndex: number, chapter: number): Progress =>
-    ({ categoryId: 'a', bookIndex, chapter });
-  // Forward to a later book → not backward (no prompt).
-  expect('jump fwd to later book → no prompt', isBackwardJump(cur(2, 5), 5) === false);
-  // Backward to an earlier book → backward (prompt).
-  expect('jump back to earlier book → prompt', isBackwardJump(cur(5, 3), 2) === true);
-  // Same book, currently past chapter 1 → jump to ch1 is backward (prompt).
-  expect('jump to ch1 of current book mid-book → prompt', isBackwardJump(cur(3, 7), 3) === true);
-  // Same book, already at chapter 1 → no movement (no prompt).
-  expect('jump to current book at ch1 → no prompt', isBackwardJump(cur(3, 1), 3) === false);
-  // No existing progress (fresh) → no prompt.
-  expect('jump with no current progress → no prompt', isBackwardJump(undefined, 4) === false);
 }
 
 console.log(`\nPASS ${pass} / ${pass + fail}`);

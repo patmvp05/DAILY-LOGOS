@@ -193,7 +193,7 @@ export default function App() {
           <Onboarding onComplete={handleSetInitialDate} />
         ) : (
           <ErrorBoundary label="Dashboard">
-            <React.Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><div className="w-8 h-8 border-4 border-evernote border-t-transparent rounded-full animate-spin" /></div>}>
+            <React.Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center"><div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin" /></div>}>
               <Dashboard handleLogin={handleLoginLocal} isSigningIn={isSigningIn} user={user} isAuthLoading={isAuthLoading} />
             </React.Suspense>
           </ErrorBoundary>

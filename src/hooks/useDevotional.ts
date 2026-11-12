@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { getDevotional, type DevotionalContent } from '../lib/devotionalContent';
 import { getLocalMonthDay } from '../lib/devotionalCatalog';
 
-export function useDevotional(slug: string | null, monthDay?: string) {
+export function useDevotional(slug: string | null) {
   const [devotionalContent, setDevotionalContent] = useState<DevotionalContent | null>(null);
   const [isFetchingDevotional, setIsFetchingDevotional] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +27,7 @@ export function useDevotional(slug: string | null, monthDay?: string) {
       setIsFetchingDevotional(true);
       setError(null);
       try {
-        const day = monthDay || getLocalMonthDay();
-        const data = await getDevotional(slug, day);
+        const data = await getDevotional(slug, getLocalMonthDay());
         if (!active) return;
         setDevotionalContent(data);
       } catch (err) {
@@ -42,7 +41,7 @@ export function useDevotional(slug: string | null, monthDay?: string) {
 
     fetchContent();
     return () => { active = false; };
-  }, [slug, monthDay]);
+  }, [slug]);
 
   return {
     devotionalContent,

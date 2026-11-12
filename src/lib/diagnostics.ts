@@ -125,7 +125,3 @@ export function getDiagnosticReport(): string {
   ];
   return lines.join('\n');
 }
-
-export function clearDiagnostics() {
-  writeLog([]);
-}

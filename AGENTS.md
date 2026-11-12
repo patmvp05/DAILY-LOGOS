@@ -178,7 +178,12 @@
   stale entries from a prior architecture.
 - **Look-ahead prefetch:** `src/lib/prefetchBible.ts` warms the next 7 chapters per
   category in the selected version on app start / progress change / reconnect (wired in
-  `src/state/AppContext.tsx`). It's best-effort and idempotent.
+  `src/state/AppContext.tsx`). It's best-effort and idempotent. "The next 7" comes from the
+  plan itself: `upcomingChapters` returns the `historySteps` of `calculateNextProgress`, i.e.
+  exactly what seven presses of `+` would log (skips finished books, wraps to the first unread
+  book at the end of a part, resumes a half-read book at its saved chapter). Do not walk the
+  book list by hand here: the old hand-rolled walk preloaded finished books and stopped at the
+  end of a part (Nov 2026).
 - **Static-file caching (important):** a chapter URL may not exist yet (a version not
   scraped), and Firebase's SPA rewrite answers a missing file with `index.html` (HTTP 200).
   To stop that poisoning caches: `firebase.json` serves `/bible/**` as `no-cache`; the SW
@@ -188,8 +193,10 @@
   if it recurs). Files are NOT precached — only chapters opened or prefetched get stored.
 
 ## Deployment & Syncing
-- Firebase Hosting auto-deploys on push to `main` (the `dist/` build). Cloud Functions do
-  NOT auto-deploy. `.github/workflows/deploy.yml` is the ONLY push-triggered deploy, and it
+- Firebase Hosting auto-deploys on push to `main` (the `dist/` build). There are no Cloud
+  Functions: the `functions/` folder held only the bolls.life `bibleProxy`, which nothing had
+  called since the text moved to static files, and was removed from the repo in Nov 2026 (if
+  a copy is still deployed, delete it in the Firebase console). `.github/workflows/deploy.yml` is the ONLY push-triggered deploy, and it
   publishes the Firestore rules before hosting. A duplicate `firebase-hosting-deploy.yml`
   ran alongside it on every push (Node 20, no rules step) until it was removed in Oct 2026;
   don't add another. `daily-devotional-deploy.yml` also builds and deploys whenever its
@@ -363,7 +370,10 @@ Daily Logos as an EPUB for a reMarkable Paper Pro, built and delivered every mor
   `users/{uid}/completedBooks` via `firebase-admin` (dynamically imported, so `--from-start`
   needs no credentials). It must read the **named** database (`firestoreDatabaseId` in
   `firebase-applet-config.json`); reading `(default)` returns zero docs, which looks exactly
-  like "never started reading". The forward walk is ported from `prefetchBible.ts:32-63`.
+  like "never started reading". Its forward walk (`walkChapters`) is a hand copy of the app's OLD look-ahead (next book in
+  the list, stop at the end of the part); the app's prefetch has since moved to
+  `calculateNextProgress` (see Caching & Prefetch), so the pack can differ from the app when
+  books are read out of order. Switch it to `upcomingChapters` if the pack is ever revived.
   The builder **validates its own output and exits non-zero** rather than writing a bad pack.
 - **Deterministic by construction:** every zip entry gets a fixed timestamp and
   `dcterms:modified` comes from the pack's date, never the clock. Same `--date` → identical

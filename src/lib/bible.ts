@@ -24,7 +24,6 @@ export interface FinishedBookTransition {
 export interface CalculatedProgress {
   progress: ProgressType;
   newlyCompletedKeys: string[];
-  revertedCompletedKeys: string[];
   historySteps: HistoryStep[];
   finishedBook?: FinishedBookTransition;
 }
@@ -238,19 +237,6 @@ export function switchBookInProgress(
 }
 
 /**
- * Legacy helper retained for compatibility.
- */
-export function isBackwardJump(
-  currentProgress: ProgressType | undefined,
-  targetBookIndex: number
-): boolean {
-  if (!currentProgress) return false;
-  if (targetBookIndex < currentProgress.bookIndex) return true;
-  if (targetBookIndex === currentProgress.bookIndex && currentProgress.chapter > 1) return true;
-  return false;
-}
-
-/**
  * Pure function to calculate Bible reading progress advancement.
  * Optimized to run without side effects.
  */
@@ -266,7 +252,6 @@ export function calculateNextProgress(
   let currentBookIndex = normalized.bookIndex;
   let currentChapter = normalized.chapter;
   const newlyCompletedKeys: string[] = [];
-  const revertedCompletedKeys: string[] = [];
   const historySteps: HistoryStep[] = [];
   const effectiveCompleted = new Set(completedBooks);
   const partialChapters: Record<string, number> = { ...(normalized.partialChapters || {}) };
@@ -361,7 +346,6 @@ export function calculateNextProgress(
       lastReadAt: new Date().toISOString(),
     },
     newlyCompletedKeys,
-    revertedCompletedKeys,
     historySteps,
     finishedBook,
   };
