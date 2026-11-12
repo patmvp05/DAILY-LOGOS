@@ -15,12 +15,6 @@ export interface ToastState {
   };
 }
 
-export interface JournalDraftState {
-  id: string | null;
-  content: string;
-  verse: string;
-}
-
 export interface ConfirmDialogState {
   isOpen: boolean;
   title: string;
@@ -67,8 +61,6 @@ export interface UiContextType {
   setShowSprintModal: (val: boolean) => void;
   isStartMenuOpen: boolean;
   setIsStartMenuOpen: (val: boolean) => void;
-  journalDraft: JournalDraftState;
-  setJournalDraft: (val: JournalDraftState) => void;
   toast: ToastState | null;
   setToast: (val: ToastState | null) => void;
   showToast: (message: string, type?: ToastType, action?: ToastState['action']) => void;

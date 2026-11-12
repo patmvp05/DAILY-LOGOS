@@ -44,7 +44,7 @@ export default function App() {
     activeInternalDevotional, setActiveInternalDevotional,
     showProverbModal, setShowProverbModal, showSprintModal, setShowSprintModal,
     isStartMenuOpen, setIsStartMenuOpen, confirmDialog, setConfirmDialog,
-    closeConfirmDialog, toast, setToast, showToast, setJournalDraft,
+    closeConfirmDialog, toast, setToast, showToast,
     setSyncStatus, setLastSyncTime, setShowSyncCheck,
     syncStatus, lastSyncTime, showSyncCheck
   } = useUi();
@@ -134,8 +134,6 @@ export default function App() {
   }, [login, showToast, setConfirmDialog]);
 
   useKeyboardShortcuts({
-    onSearch: () => {},
-    onNewJournal: () => { setJournalDraft({ id: null, content: '', verse: '' }); setShowProverbModal(true); },
     onClose: () => {
       setShowSettings(false); setShowHistory(false); setActivePlanCategory(null); setSelectingCategoryId(null);
       setBookFinishedPrompt(null);

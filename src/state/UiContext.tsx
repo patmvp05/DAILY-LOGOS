@@ -8,7 +8,6 @@ import type { ReactNode } from 'react';
 import { ToastType } from '../components/Toast';
 import { 
   UiContext, 
-  JournalDraftState, 
   ToastState, 
   ConfirmDialogState,
   BookFinishedPromptState
@@ -26,11 +25,6 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
   const [showProverbModal, setShowProverbModal] = React.useState(false);
   const [showSprintModal, setShowSprintModal] = React.useState(false);
   const [isStartMenuOpen, setIsStartMenuOpen] = React.useState(false);
-  const [journalDraft, setJournalDraft] = React.useState<JournalDraftState>({
-    id: null,
-    content: '',
-    verse: ''
-  });
 
   const [toast, setToast] = React.useState<ToastState | null>(null);
   const [confirmDialog, setConfirmDialog] = React.useState<ConfirmDialogState>({
@@ -64,7 +58,6 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
     isStartMenuOpen, setIsStartMenuOpen,
     confirmDialog, setConfirmDialog, closeConfirmDialog,
     toast, setToast, showToast,
-    journalDraft, setJournalDraft,
     syncStatus, setSyncStatus,
     lastSyncTime, setLastSyncTime,
     showSyncCheck, setShowSyncCheck
@@ -73,7 +66,7 @@ export function UiContextProvider({ children }: { children: ReactNode }) {
     bookFinishedPrompt,
     readerCategoryId,
     activeDevotion, activeInternalDevotional, showProverbModal, showSprintModal, isStartMenuOpen, confirmDialog,
-    toast, journalDraft, syncStatus, lastSyncTime, showSyncCheck
+    toast, syncStatus, lastSyncTime, showSyncCheck
   ]);
 
   return (

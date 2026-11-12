@@ -17,14 +17,13 @@ import {
   getProgressCollection,
   getHistoryCollection,
   getJournalsCollection,
-  getDevotionalsCollection,
   getCompletedBooksCollection,
   getSprintsCollection,
   bookKeyToDocId,
   getDocsCacheFirst
 } from './firebase';
 import { type User } from 'firebase/auth';
-import { Progress, UserSettings, HistoryEntry, ProverbJournal, SprintHour } from '../types';
+import { Progress, UserSettings, HistoryEntry, SprintHour } from '../types';
 import { logDiagnostic } from './diagnostics';
 import { syncTracker, recordSyncError } from './syncStatus';
 
@@ -104,10 +103,8 @@ export const deleteSprint = track('deleteSprint', async (uid: string, date: stri
   await deleteDoc(doc(getSprintsCollection(uid), date));
 });
 
-export const writeJournal = track('writeJournal', async (uid: string, journal: ProverbJournal) => {
-  await setDoc(doc(getJournalsCollection(uid), journal.id), journal);
-});
-
+// (Journals can still be read, exported and deleted. Writing one went with the
+// daily proverb's journal in Oct 2026.)
 export const deleteJournal = track('deleteJournal', async (uid: string, id: string) => {
   await deleteDoc(doc(getJournalsCollection(uid), id));
 });
@@ -232,12 +229,14 @@ export async function initializeUser(user: User) {
 }
 
 export const resetUserData = track('resetUserData', async (uid: string) => {
+  // Only the reading plan. The confirmation promises "Your journal history
+  // will be kept", and the app keeps journals and custom devotionals on the
+  // device, but this used to delete both collections in the cloud. Nothing
+  // re-uploads them, so they survived only on devices that already had a copy.
   const collections = [
     getProgressCollection(uid),
     getHistoryCollection(uid),
-    getJournalsCollection(uid),
     getCompletedBooksCollection(uid),
-    getDevotionalsCollection(uid),
   ];
 
   await Promise.all(collections.map(async (col) => {

@@ -44,7 +44,6 @@ export type AppAction =
       historyId?: string;
       previousPartialChapters?: Record<string, number>;
     }
-  | { type: 'UPSERT_JOURNAL', journal: ProverbJournal }
   | { type: 'DELETE_JOURNAL', id: string }
   | { type: 'SET_THEME', theme: 'light' | 'dark' | 'system' | 'xp' | 'audible' | 'textbook' }
   | { type: 'SET_BIBLE_VERSION', version: string }
@@ -52,7 +51,6 @@ export type AppAction =
   | { type: 'ADD_DEVOTIONAL', devotional: Devotional }
   | { type: 'DELETE_DEVOTIONAL', id: string }
   | { type: 'LOG_HISTORY', entry: HistoryEntry }
-  | { type: 'DELETE_HISTORY_ENTRY', id: string }
   | { type: 'CLEAR_HISTORY' }
   // Carries the FULL resulting slot rather than a "toggle" instruction, so the
   // caller can write the identical object to Firestore. Deriving the new value
@@ -687,15 +685,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       if (JSON.stringify(capped) === JSON.stringify(local)) return state;
       return { ...state, scriptureSprints: capped };
     }
-    case 'UPSERT_JOURNAL': {
-      const existingJournal = state.proverbJournals.find(j => j.id === action.journal.id);
-      return {
-        ...state,
-        proverbJournals: existingJournal
-          ? state.proverbJournals.map(j => j.id === action.journal.id ? action.journal : j)
-          : [...state.proverbJournals, action.journal]
-      };
-    }
     case 'DELETE_JOURNAL': {
       return { ...state, proverbJournals: state.proverbJournals.filter(j => j.id !== action.id) };
     }
@@ -754,9 +743,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       if (updatedHistory.length > HISTORY_CAP) updatedHistory.length = HISTORY_CAP;
 
       return { ...state, history: updatedHistory };
-    }
-    case 'DELETE_HISTORY_ENTRY': {
-      return { ...state, history: state.history.filter(h => h.id !== action.id) };
     }
     case 'CLEAR_HISTORY': {
       return { ...state, history: [] };

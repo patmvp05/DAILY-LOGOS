@@ -5,7 +5,7 @@
 
 import { useCallback, useRef, Dispatch, useEffect } from 'react';
 import { format, isToday, parseISO } from 'date-fns';
-import { AppState, HistoryEntry, ProverbJournal, SprintHour } from '../types';
+import { AppState, HistoryEntry, SprintHour } from '../types';
 import { AppAction, getSprintHour } from '../state/appReducer';
 import { CATEGORIES_BY_ID, CATEGORIES, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
 import { triggerHaptic } from '../lib/haptic';
@@ -21,7 +21,6 @@ import {
   writeActionBatch, 
   deleteCompletedBook, 
   writeCompletedBook, 
-  writeJournal, 
   deleteJournal as deleteJournalFromCloud,
   resetUserData,
   writeSprintHour,
@@ -39,8 +38,6 @@ export function useReadingActions(
   const {
     showToast,
     setConfirmDialog,
-    setJournalDraft,
-    setShowProverbModal,
     setSelectingCategoryId,
     setBookFinishedPrompt,
   } = useUi();
@@ -358,36 +355,6 @@ export function useReadingActions(
     });
   }, [setConfirmDialog, toggleBookCompletion]);
 
-  const saveProverbJournal = useCallback(async (content: string, verse: string, id: string | null) => {
-    if (!content.trim()) return;
-    
-    const journalId = id || (
-      (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) 
-        ? window.crypto.randomUUID() 
-        : Math.random().toString(36).substring(2, 11)
-    );
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const dayOfMonth = new Date().getDate();
-    
-    const newJournal: ProverbJournal = {
-      id: journalId,
-      date: id ? state.proverbJournals.find(j => j.id === id)!.date : today,
-      chapter: id ? state.proverbJournals.find(j => j.id === id)!.chapter : dayOfMonth,
-      content,
-      verse
-    };
-
-    dispatch({ type: 'UPSERT_JOURNAL', journal: newJournal });
-    if (user) {
-      writeJournal(user.uid, newJournal);
-    }
-
-    setJournalDraft({ id: null, content: '', verse: '' });
-    setShowProverbModal(false);
-    triggerHaptic('heavy');
-    showToast(id ? 'Journal updated!' : 'Journal entry saved!');
-  }, [state.proverbJournals, user, dispatch, setJournalDraft, setShowProverbModal, showToast]);
-
   const deleteJournal = useCallback((id: string) => {
     setConfirmDialog({
       isOpen: true,
@@ -600,7 +567,6 @@ export function useReadingActions(
     clearSprint,
     toggleBookCompletion,
     requestToggleBookCompletion,
-    saveProverbJournal,
     deleteJournal,
     resetProgress,
     logProverbRead,
