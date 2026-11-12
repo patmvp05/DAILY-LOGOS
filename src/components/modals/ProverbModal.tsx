@@ -18,7 +18,6 @@ import { TextCheckBadge } from '../TextCheck';
 
 interface ProverbContent {
   verses?: { verse: number; text: string; verseEnd?: number }[];
-  text?: string;
   translation_id?: string;
   translation_name?: string;
   check?: ChapterCheck;
@@ -185,20 +184,6 @@ function ProverbModal({
                           {v.text}
                         </div>
                       ))
-                    ) : proverbContent?.text ? (
-                      proverbContent.text.split('\n').map((para: string, i: number) => {
-                        const verseMatch = para.match(/^\[(\d+)\]\s(.*)/);
-                        if (verseMatch) {
-                          return (
-                            <div key={i} className="mb-[1.1em]">
-                              <span className="text-[12px] font-bold align-super mr-1.5 text-brand/70 tabular-nums select-none">{verseMatch[1]}</span>
-                              {verseMatch[2]}
-                            </div>
-                          );
-                        }
-                        if (!para.trim()) return null;
-                        return <p key={i} className="mb-[1.1em]">{para}</p>;
-                      })
                     ) : (
                       <p className="text-base italic text-[var(--text-secondary)]">No text available for this chapter.</p>
                     )}

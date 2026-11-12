@@ -28,7 +28,6 @@ export interface ChapterTextResponse {
   verses: ChapterVerse[];
   translationId: string;
   translationName: string;
-  _cachedAt?: number;
   // True when this is the KJV safety-net, not the requested translation (e.g. a
   // modern version's static file wasn't deployed yet). Fallbacks are NEVER
   // persisted to disk — only memory-cached for the session — so the moment the
@@ -133,13 +132,7 @@ async function fetchFromBibleApi(
     // actually loaded — never a version we requested but didn't get.
     translationId: data.translation_id || code,
     translationName: data.translation_name || BIBLE_VERSION_NAMES[code] || code,
-    _cachedAt: Date.now(),
   };
-}
-
-interface BollsVerse {
-  verse?: number;
-  text?: string;
 }
 
 async function fetchFromStatic(
@@ -156,28 +149,13 @@ async function fetchFromStatic(
   const res = await fetch(url, { signal });
   if (!res.ok) return null;
 
-  const data = (await res.json()) as ChapterTextResponse | BollsVerse[];
-
-  if (!Array.isArray(data) && Array.isArray(data.verses) && data.verses.length > 0) {
-    return { ...data, translationName: displayName, _cachedAt: Date.now() };
-  }
-
-  if (Array.isArray(data)) {
-    const verses = data
-      .map((v) => ({ verse: Number(v.verse), text: cleanVerseText(v.text || '') }))
-      .filter((v) => Number.isFinite(v.verse) && v.text.length > 0)
-      .sort((a, b) => a.verse - b.verse);
-    if (verses.length === 0) return null;
-    return {
-      reference: `${bookName} ${chapter}`,
-      verses,
-      translationId: slug,
-      translationName: displayName,
-      _cachedAt: Date.now(),
-    };
-  }
-
-  return null;
+  // Every file under public/bible is this one shape (both scrapers write it and
+  // the integrity test reads all 8,323). The bare-array shape bolls.life served
+  // was reshaped here until Nov 2026; no file has had it since the scrapers
+  // started cleaning at write time.
+  const data = (await res.json()) as ChapterTextResponse;
+  if (!Array.isArray(data?.verses) || data.verses.length === 0) return null;
+  return { ...data, translationName: displayName };
 }
 
 /**
@@ -205,11 +183,11 @@ async function fetchWithTimeout<T>(
 /**
  * Fetch a full chapter's text for the selected translation.
  *
- * Backend is chosen per-version: public-domain texts come straight from
- * bible-api.com; modern copyrighted texts (NIV/NLT/ESV/NKJV/NCV) come from
- * same-origin static files (public/bible/, pre-fetched from bolls.life). Two-
- * tier cache (memory + IndexedDB): once read, a chapter is cached permanently
- * and works offline. If the requested translation fails for any reason, falls
+ * Backend is chosen per-version: WEB and KJV come straight from bible-api.com;
+ * the seven stored translations (NIV/NLT/ESV/NKJV/NCV/CSB/BSB) come from
+ * same-origin static files under public/bible/ (see AGENTS.md for where each
+ * was sourced). Two-tier cache (memory + IndexedDB): once read, a complete
+ * chapter is kept and works offline. If the requested translation fails for any reason, falls
  * back to the public-domain KJV — but the returned translationName reflects
  * whatever genuinely loaded, so the UI never mislabels KJV as another version.
  */
@@ -245,8 +223,8 @@ export async function getChapterText(
   let result: ChapterTextResponse | null = null;
 
   // 1. Primary: the selected translation, from its own backend, under its own
-  //    timeout. Modern (NIV/ESV/NLT/NKJV/NCV) → same-origin static file;
-  //    public-domain → bible-api.com.
+  //    timeout. Stored translation → same-origin static file; WEB/KJV →
+  //    bible-api.com.
   try {
     result = await fetchWithTimeout((signal) =>
       entry.source === 'bolls'

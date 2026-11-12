@@ -79,8 +79,12 @@ export function useTextCheckVersion(): number {
   return useSyncExternalStore(subscribe, () => version, () => version);
 }
 
-/** Test seam. */
-export function _resetTextChecks() {
-  entries = {};
-  version++;
+/**
+ * When one chapter was last checked (0 if never). Re-renders the caller only
+ * when THAT chapter is checked again, i.e. when it has been loaded afresh from
+ * storage or the network. A chapter already in memory is not re-checked.
+ */
+export function useTextCheckedAt(key: string): number {
+  const read = () => entries[key]?.at ?? 0;
+  return useSyncExternalStore(subscribe, read, read);
 }

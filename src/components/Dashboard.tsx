@@ -274,7 +274,7 @@ function DashboardComponent({
           totalRead={totalRead}
           totalChapters={totalChaptersCount}
           sprintCompleted={sprintCompleted}
-          textCheck={<TextCheckSummary progress={state.progress} bibleVersion={bibleVersion} proverbChapter={dayOfMonth} />}
+          textCheck={<TextCheckSummary progress={state.progress} completedBooks={state.completedBooks} bibleVersion={bibleVersion} proverbChapter={dayOfMonth} />}
           onOpenPlan={() => setActivePlanCategory('_all')}
           onOpenSprint={() => setShowSprintModal(true)}
         />

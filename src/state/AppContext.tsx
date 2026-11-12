@@ -102,7 +102,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hasHydrated) return;
     const triggerPrefetch = () => {
-      if (navigator.onLine) prefetchBibleChapters(stateRef.current.progress, bibleVersion);
+      if (navigator.onLine) prefetchBibleChapters(stateRef.current.progress, stateRef.current.completedBooks, bibleVersion);
     };
     const timer = setTimeout(triggerPrefetch, 2000);
     window.addEventListener('online', triggerPrefetch);
@@ -110,7 +110,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       clearTimeout(timer);
       window.removeEventListener('online', triggerPrefetch);
     };
-  }, [hasHydrated, state.progress, bibleVersion]);
+  }, [hasHydrated, state.progress, state.completedBooks, bibleVersion]);
 
   // Async fallback hydration from IndexedDB (only needed when localStorage was empty)
   useEffect(() => {

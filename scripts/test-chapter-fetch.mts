@@ -37,7 +37,7 @@ function parseStaticUrl(url: string) {
 // bible-api.com. `staticFails` simulates a missing static file (→ KJV fallback);
 // `staticRaw` serves the legacy raw-bolls array shape (to exercise runtime
 // cleaning/reshaping) instead of the preferred final ChapterTextResponse shape.
-function installFetch(opts: { staticFails?: boolean; staticRaw?: boolean } = {}) {
+function installFetch(opts: { staticFails?: boolean } = {}) {
   calls.length = 0;
   globalThis.fetch = (async (input: RequestInfo | URL): Promise<FetchResponse> => {
     const url = typeof input === 'string' ? input : input.toString();
@@ -48,17 +48,7 @@ function installFetch(opts: { staticFails?: boolean; staticRaw?: boolean } = {})
       if (opts.staticFails) {
         return { ok: false, status: 404, statusText: 'Not Found', json: async () => ({}) };
       }
-      if (opts.staticRaw) {
-        // Legacy raw-bolls shape: array of { verse, text(HTML) }.
-        return {
-          ok: true, status: 200, statusText: 'OK',
-          json: async () => ([
-            { pk: 1, verse: 1, text: 'For God so loved<S>25</S> the world,' },
-            { pk: 2, verse: 2, text: '<i>that</i> he gave his only Son.' },
-          ]),
-        };
-      }
-      // Preferred final shape: already-cleaned ChapterTextResponse.
+      // The shape every stored chapter has.
       return {
         ok: true, status: 200, statusText: 'OK',
         json: async () => ({
@@ -103,12 +93,6 @@ async function run() {
   ok('NIV returns all verses', niv.verses.length === 2, String(niv.verses.length));
   ok('NIV success is not flagged as a fallback', !niv._fallback);
 
-  // 1b. Legacy raw-bolls shape is still cleaned + reshaped at runtime.
-  installFetch({ staticRaw: true });
-  const nivRaw = await getChapterText('John', 3, 'niv');
-  ok('legacy raw static file strips Strong\'s/markup', nivRaw.verses[0].text === 'For God so loved the world,', nivRaw.verses[0].text);
-  ok('legacy raw static file still labeled NIV', nivRaw.translationName === 'New International Version', nivRaw.translationName);
-
   // 2. Public-domain version (WEB) goes straight to bible-api.com.
   installFetch();
   const web = await getChapterText('Genesis', 1, 'web');
@@ -138,7 +122,7 @@ async function run() {
   ok('proverb (NIV) loads from /bible static file', calls.some((u) => u.includes('/bible/NIV/20/10.json')),
     `calls=${JSON.stringify(calls)}`);
   ok('proverb (NIV) labeled New International Version', provNiv.translation_name === 'New International Version', provNiv.translation_name);
-  ok('proverb (NIV) has joined text', provNiv.text.length > 0 && provNiv.verses.length > 0);
+  ok('proverb (NIV) has verses', provNiv.verses.length > 0);
 
   installFetch();
   const provWeb = await getProverb(11, 'web');

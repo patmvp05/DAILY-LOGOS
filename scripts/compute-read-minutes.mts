@@ -14,7 +14,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CATEGORIES, BOLLS_BIBLE_BOOK_IDS } from '../src/constants.ts';
-import { cleanVerseText } from '../src/lib/chapterText.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -39,9 +38,7 @@ export function computeChapterReadTimeFromFile(versionCode: string, bookName: st
   if (!bookId) throw new Error(`Unknown book: ${bookName}`);
   const filePath = path.join(ROOT, 'public', 'bible', versionCode, String(bookId), `${chapter}.json`);
   const raw = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  const verses: Array<{ verse?: number; text?: string }> = Array.isArray(raw)
-    ? raw.map((v) => ({ verse: Number(v.verse), text: cleanVerseText(v.text || '') }))
-    : raw.verses;
+  const verses: Array<{ verse?: number; text?: string }> = raw.verses;
 
   const wordCount = verses.reduce((acc, v) => acc + (v.text ? v.text.split(/\s+/).length : 0), 0);
   return Math.max(1, Math.round(wordCount / WORDS_PER_MINUTE));

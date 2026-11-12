@@ -78,7 +78,8 @@ export function seedChapterInfoFromText(
   chapter: number,
   version: string | undefined,
   verses: Array<{ text: string }>,
-  isFallback?: boolean
+  /** True for a KJV stand-in or a copy that failed its text check: this session only. */
+  memoryOnly?: boolean
 ): number {
   const id = resolveBibleVersion(version);
   const key = cacheKey(id, bookName, chapter);
@@ -87,7 +88,7 @@ export function seedChapterInfoFromText(
   const readTime = Math.max(1, Math.round(wordCount / 225));
   const result: ChapterInfo = { firstVerse, readTime };
   memoryCache.set(key, result);
-  if (!isFallback) {
+  if (!memoryOnly) {
     try {
       localStorage.setItem(key, JSON.stringify(result));
     } catch {
@@ -135,9 +136,18 @@ export async function getChapterInfo(
 
     const result: ChapterInfo = { firstVerse, readTime };
 
-    // Memory-cache always; only persist a preview built from the genuinely
-    // requested translation — never a KJV fallback (ct._fallback), so a missing
-    // modern version's card preview self-heals once its static files deploy.
+    // A copy that failed its text check is not kept at all, in memory or on
+    // disk. getChapterText refuses to save such a copy, but its preview used to
+    // be saved here anyway, so a chapter that arrived short kept its short
+    // reading time (and that is the time written into the reading history) even
+    // after "Download again" had fetched the complete text. Re-deriving it is
+    // cheap: getChapterText holds the chapter in memory for the session.
+    if (ct._check?.ok === false && !ct._fallback) return result;
+
+    // Otherwise memory-cache always; only persist a preview built from the
+    // genuinely requested translation — never a KJV fallback (ct._fallback), so
+    // a missing modern version's card preview self-heals once its static files
+    // deploy.
     memoryCache.set(key, result);
     if (!ct._fallback) {
       try {

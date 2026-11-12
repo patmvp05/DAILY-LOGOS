@@ -77,11 +77,13 @@ export function TextCheckBadge({
  */
 export function TextCheckSummary({
   progress,
+  completedBooks,
   bibleVersion,
   proverbChapter,
   className,
 }: {
   progress: Progress[];
+  completedBooks: Set<string>;
   bibleVersion?: string;
   /** Today's proverb (chapter = day of month), checked when it preloads. */
   proverbChapter?: number;
@@ -90,7 +92,7 @@ export function TextCheckSummary({
   useTextCheckVersion();
   const [fixing, setFixing] = useState(false);
   const versionId = resolveBibleVersion(bibleVersion);
-  const chapters = upcomingChapters(progress).map(({ bookName, chapter }) => ({ bookName, chapter }));
+  const chapters = upcomingChapters(progress, completedBooks).map(({ bookName, chapter }) => ({ bookName, chapter }));
   if (proverbChapter) chapters.push({ bookName: 'Proverbs', chapter: proverbChapter });
   const rows = chapters.map((c) => ({
     ...c,

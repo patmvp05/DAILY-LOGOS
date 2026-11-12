@@ -12,47 +12,36 @@ import { resolveBibleVersion } from '../constants';
 export interface ProverbResponse {
   reference: string;
   verses: { verse: number; text: string; verseEnd?: number }[];
-  text: string;
   translation_id: string;
   translation_name: string;
-  _cachedAt?: number;
   /** Text check of this copy (src/lib/chapterCheck.ts). */
   check?: ChapterCheck;
 }
-
-// L1 cache, keyed by version + chapter so switching translations never serves
-// the previous version's text. (The heavy lifting — network, IndexedDB cache,
-// HTML cleaning, KJV fall-back — is all handled by getChapterText, the single
-// source of truth for scripture text across the whole app.)
-const memoryCache = new Map<string, ProverbResponse>();
 
 /**
  * Fetch a chapter of Proverbs in the user's selected Bible version. Delegates
  * to getChapterText so the daily proverb, the in-app reader, and the card
  * previews always agree on the same text for a given version.
+ *
+ * Keeps no cache of its own. getChapterText already holds the chapter in memory
+ * and IndexedDB; a second copy here went stale whenever the chapter was
+ * downloaded again by anything other than refetchProverb (the dashboard's
+ * "Download again" calls refetchChapterText directly).
  */
 export async function getProverb(chapter: number, version?: string): Promise<ProverbResponse> {
   const id = resolveBibleVersion(version);
-  const memKey = `${id}_${chapter}`;
-
-  const memCached = memoryCache.get(memKey);
-  if (memCached) return memCached;
-
   const ct = await getChapterText('Proverbs', chapter, id);
-  seedChapterInfoFromText('Proverbs', chapter, id, ct.verses, ct._fallback);
+  // The reading time of a KJV stand-in or of a copy that failed its check is
+  // good for this session only: never written to storage.
+  seedChapterInfoFromText('Proverbs', chapter, id, ct.verses, ct._fallback || ct._check?.ok === false);
 
-  const result: ProverbResponse = {
+  return {
     reference: ct.reference,
     verses: ct.verses,
-    text: ct.verses.map((v) => v.text).join(' '),
     translation_id: ct.translationId,
     translation_name: ct.translationName,
-    _cachedAt: ct._cachedAt,
     check: ct._check,
   };
-
-  memoryCache.set(memKey, result);
-  return result;
 }
 
 /**
@@ -61,7 +50,6 @@ export async function getProverb(chapter: number, version?: string): Promise<Pro
  */
 export async function refetchProverb(chapter: number, version?: string): Promise<ProverbResponse> {
   const id = resolveBibleVersion(version);
-  memoryCache.delete(`${id}_${chapter}`);
   await refetchChapterText('Proverbs', chapter, id);
   return getProverb(chapter, id);
 }
