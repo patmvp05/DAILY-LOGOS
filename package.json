@@ -19,7 +19,7 @@
     "fuzz:ui": "vite build && node scripts/fuzz-ui.mjs",
     "emulators": "firebase emulators:start --only auth,firestore",
     "dev:emulator": "VITE_USE_FIREBASE_EMULATOR=true vite --port=3000 --host=0.0.0.0",
-    "test:bible": "tsx scripts/test-chapter-check.mts && tsx scripts/test-bible-integrity.mts && python3 scripts/test-biblegateway-parser.py"
+    "test:bible": "tsx scripts/test-chapter-check.mts && tsx scripts/test-bible-integrity.mts && python3 scripts/test-biblegateway-parser.py && python3 scripts/test-insight-refresh.py"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",

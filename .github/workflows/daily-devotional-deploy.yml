@@ -1,13 +1,20 @@
 name: Daily Devotional Refresh & Deploy
 
-# Runs daily at 22:00 UTC (05:00 Vietnam / ~17:00 US Eastern).
+# Runs daily at 06:30 UTC (13:30 Vietnam / 00:30 US Central).
 # Scrapes the latest Insight for Living devotional from insight.org,
-# commits any new files, then builds + deploys to Firebase Hosting.
+# commits any new or changed files, then builds + deploys to Firebase Hosting.
 # Can also be triggered manually via workflow_dispatch.
+#
+# Why 06:30 UTC: insight.org publishes a day's post at midnight US Central
+# (06:00 UTC), and it was 22:00 UTC before, the evening BEFORE that, so every
+# run fetched the previous day's post and the newest file was always a day
+# behind. GitHub also starts scheduled runs late (3 to 6 hours, measured Nov
+# 2026), which only helps here. The other three devotionals are perennial: their
+# 366 files exist and this run only matters for Insight.
 
 on:
   schedule:
-    - cron: '0 22 * * *'
+    - cron: '30 6 * * *'
   workflow_dispatch:
 
 concurrency:

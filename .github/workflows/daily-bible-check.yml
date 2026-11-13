@@ -6,7 +6,7 @@ name: Daily Bible text check
 # Added Oct 2026 after NCV Numbers 7 went live with 17 of its 89 verses.
 on:
   schedule:
-    # 22:47 UTC = 05:47 in Vietnam, after the 05:00 devotional deploy.
+    # 22:47 UTC = 05:47 in Vietnam, well after the 06:30 UTC devotional deploy.
     - cron: '47 22 * * *'
   workflow_dispatch:
     inputs:

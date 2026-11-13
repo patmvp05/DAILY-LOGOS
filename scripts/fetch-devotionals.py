@@ -810,22 +810,42 @@ def main():
 
         count = 0
         skipped = 0
+        # Insight for Living is the one source that is NOT perennial: the site
+        # keeps only the recent posts, and files are named by month-day, so next
+        # March's post for 03-19 must replace this March's. Skipping files that
+        # already exist (right for the other three, whose text never changes)
+        # would freeze it on last year's entries from 19 March 2027.
+        rolling = slug == "insight-for-living"
+        if rolling:
+            _load_insight_date_map()
         for month, day, month_day in all_month_days():
             out_path = os.path.join(slug_dir, f"{month_day}.json")
-            if os.path.exists(out_path):
+            if os.path.exists(out_path) and not rolling:
+                skipped += 1
+                continue
+            if rolling and month_day not in (_insight_date_map or {}):
+                # Not in the site's window: keep what is on disk, and do not
+                # wait DELAY seconds for a day there is nothing to fetch for.
                 skipped += 1
                 continue
 
             result = scraper(month, day, month_day)
             if result:
+                text = json.dumps(result, ensure_ascii=False, indent=2)
+                if rolling and os.path.exists(out_path):
+                    with open(out_path, encoding="utf-8") as f:
+                        if f.read() == text:
+                            skipped += 1  # unchanged: no write, no git diff
+                            continue
                 with open(out_path, "w", encoding="utf-8") as f:
-                    json.dump(result, f, ensure_ascii=False, indent=2)
+                    f.write(text)
                 count += 1
                 print(f"  [{slug}] {month_day} -> {len(result['entries'])} entries")
             else:
                 print(f"  [{slug}] {month_day} -> MISSING (no content)")
 
-            time.sleep(DELAY)
+            if not rolling:
+                time.sleep(DELAY)
 
         print(f"[{slug}] Done: {count} new, {skipped} skipped (already existed)")
 

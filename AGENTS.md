@@ -158,7 +158,16 @@
   - **Insight for Living** (`insight-for-living`, Swindoll) — insight.org WP REST API
     (`/wp-json/wp/v2/daily-devotional`) returns content HTML directly; scripture from
     `<blockquote>`, body from `<p class=wp-block-paragraph>`. **Rolling ~93-day window** —
-    only recent dates are available (not a full 366), unlike the other three.
+    only recent dates are available (not a full 366), unlike the other three. It is the only
+    non-perennial one, so it is handled differently in three places (Nov 2026):
+    the scraper REFRESHES its files instead of skipping existing ones (files are named by
+    month-day, so next March's post must replace this March's; `scripts/test-insight-refresh.py`),
+    the phone treats a saved Insight copy as stale after 20 hours (`ROLLING_SLUGS` in
+    `devotionalContent.ts`; an old copy is still shown offline), and the daily run is at
+    **06:30 UTC**, because insight.org posts a day's devotional at midnight US Central (06:00
+    UTC) and the old 22:00 UTC run fetched the previous day's post every time. Insight follows
+    the US date: in Vietnam the newest file is yesterday's until the afternoon, and the reader
+    walks back to it (from the saved copy, with no request).
 - **Content pipeline:** `scripts/fetch-devotionals.py` + `.github/workflows/scrape-devotionals.yml`
   (GitHub Actions — the sandbox/WebFetch can't reach these sites but the runner can; some block
   bot UAs so a Chrome UA `bg_session` is used). Fail-fast smoke (Jan 1, or today for Insight's
@@ -399,9 +408,9 @@ Daily Logos as an EPUB for a reMarkable Paper Pro, built and delivered every mor
   document (auth → folder → upload → verify → delete) because this sandbox cannot reach
   reMarkable's cloud to test any of it. Then `daily-remarkable.yml` is meant to run at `30 22 * * *` — **currently PAUSED** (the
   schedule is removed; manual `workflow_dispatch` only, because it failed nightly and emailed
-  daily before the secrets existed; the cron to restore is in that file's header comment) —
-  deliberately 30 minutes after the 22:00 devotional refresh so the pack picks up that
-  morning's content. The EPUB is never committed — it's a build artifact only.
+  daily before the secrets existed; the cron to restore is in that file's header comment).
+  (It was timed 30 minutes after the devotional refresh; that refresh now runs at 06:30 UTC, so
+  move the pack's cron after it when reviving.) The EPUB is never committed — it's a build artifact only.
 - **Tests:** `scripts/test-remarkable-pack.mts` (in `npm test`) runs fully offline against
   the committed static files — the forward walk, boundary crossing, chapter-to-day mapping,
   EPUB structure, reproducibility, and the prune guards.

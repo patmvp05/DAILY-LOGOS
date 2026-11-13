@@ -30,6 +30,40 @@ const STATIC_CACHE_BUST = 'b=1';
 
 const memoryCache = new Map<string, DevotionalContent>();
 
+/**
+ * Devotionals whose files are named by month-day but are NOT perennial: Insight
+ * for Living publishes one post per day and the site keeps only the recent
+ * ones, so the file for "03-19" is overwritten by the next year's post. A phone
+ * that saved last year's copy forever would show it under this year's date, so a
+ * saved copy of these is re-checked once it is older than this. The saved copy
+ * is still what you get when offline. (Spurgeon, Chambers and Cowman wrote a
+ * fixed 366 days: their saved copies never go stale.)
+ */
+const ROLLING_SLUGS = new Set(['insight-for-living']);
+const ROLLING_MAX_AGE_MS = 20 * 60 * 60 * 1000;
+
+export function isCacheFresh(slug: string, entry: Pick<DevotionalContent, '_cachedAt'>, now = Date.now()): boolean {
+  if (!ROLLING_SLUGS.has(slug)) return true;
+  return typeof entry._cachedAt === 'number' && now - entry._cachedAt < ROLLING_MAX_AGE_MS;
+}
+
+/** A saved copy of one day, from memory or IndexedDB, of any age. */
+async function readCached(slug: string, day: string): Promise<DevotionalContent | null> {
+  const memKey = `${slug}_${day}`;
+  const mem = memoryCache.get(memKey);
+  if (mem) return mem;
+  try {
+    const stored = await get<DevotionalContent>(`${CACHE_PREFIX}${memKey}`);
+    if (stored) {
+      memoryCache.set(memKey, stored);
+      return stored;
+    }
+  } catch {
+    // IndexedDB unavailable
+  }
+  return null;
+}
+
 async function fetchWithTimeout<T>(
   fn: (signal: AbortSignal) => Promise<T>
 ): Promise<T> {
@@ -47,21 +81,9 @@ export async function getDevotional(
   monthDay?: string
 ): Promise<DevotionalContent> {
   const day = monthDay || getLocalMonthDay();
-  const memKey = `${slug}_${day}`;
 
-  const mem = memoryCache.get(memKey);
-  if (mem) return mem;
-
-  const cacheKey = `${CACHE_PREFIX}${memKey}`;
-  try {
-    const cached = await get<DevotionalContent>(cacheKey);
-    if (cached) {
-      memoryCache.set(memKey, cached);
-      return cached;
-    }
-  } catch {
-    // fall through to fetch
-  }
+  const cachedToday = await readCached(slug, day);
+  if (cachedToday && isCacheFresh(slug, cachedToday)) return cachedToday;
 
   let result: DevotionalContent | null = null;
   let resolvedDay = day;
@@ -71,7 +93,19 @@ export async function getDevotional(
   // leap year so '02-29' is a valid base date.
   const baseDate = monthDay ? parse(monthDay, 'MM-dd', new Date(2024, 0, 1)) : new Date();
   const fallbackDays = isValid(baseDate) ? getRecentMonthDays(8, baseDate) : [day];
-  for (const tryDay of fallbackDays) {
+  for (const [i, tryDay] of fallbackDays.entries()) {
+    // An earlier day that is already saved needs no request. Without this the
+    // walk back asked the network for every missing day, then re-downloaded the
+    // copy it already held: for Insight (whose newest file is always the US
+    // date, a day behind in Vietnam) that was most of nine requests per launch.
+    if (i > 0) {
+      const saved = await readCached(slug, tryDay);
+      if (saved && isCacheFresh(slug, saved)) {
+        result = saved;
+        resolvedDay = tryDay;
+        break;
+      }
+    }
     try {
       result = await fetchWithTimeout(async (signal) => {
         const url = `/devotionals/${slug}/${tryDay}.json?${STATIC_CACHE_BUST}`;
@@ -88,15 +122,7 @@ export async function getDevotional(
       // copy if we have one. Results are cached under the RESOLVED day, so
       // without this probe a fallback shown yesterday is unreachable offline
       // (the top-of-function lookup only checks the requested day).
-      const tryKey = `${slug}_${tryDay}`;
-      result = memoryCache.get(tryKey) ?? null;
-      if (!result) {
-        try {
-          result = (await get<DevotionalContent>(`${CACHE_PREFIX}${tryKey}`)) ?? null;
-        } catch {
-          // IndexedDB unavailable — keep walking back
-        }
-      }
+      result = await readCached(slug, tryDay);
     }
     if (result) {
       resolvedDay = tryDay;

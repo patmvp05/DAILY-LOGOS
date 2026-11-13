@@ -7,7 +7,7 @@
  *
  * Run with: npx tsx scripts/test-devotional-content.mts
  */
-import { getDevotional, type DevotionalContent } from '../src/lib/devotionalContent';
+import { getDevotional, isCacheFresh, type DevotionalContent } from '../src/lib/devotionalContent';
 import {
   getLocalMonthDay,
   getAdjacentMonthDays,
@@ -226,6 +226,65 @@ try {
   threw = true;
 }
 ok('404: throws on missing content', threw);
+
+// ── Insight for Living is not perennial: its saved copy goes stale ──
+// Its files are named by month-day and replaced each year, so a copy saved in
+// March 2026 must not be shown under March 2027's date.
+{
+  const realNow = Date.now;
+  let clock = new Date(2026, 6, 1, 8, 0).getTime();
+  Date.now = () => clock;
+  try {
+    const H = 60 * 60 * 1000;
+
+    ok('fresh: a just-saved Insight copy is fresh', isCacheFresh('insight-for-living', { _cachedAt: clock }));
+    ok('fresh: 19 hours later it still is', isCacheFresh('insight-for-living', { _cachedAt: clock - 19 * H }));
+    ok('fresh: 21 hours later it is not', !isCacheFresh('insight-for-living', { _cachedAt: clock - 21 * H }));
+    ok('fresh: an Insight copy with no timestamp is not', !isCacheFresh('insight-for-living', {}));
+    ok('fresh: Spurgeon never goes stale',
+      isCacheFresh('morning-evening', { _cachedAt: clock - 4000 * H }) && isCacheFresh('morning-evening', {}));
+
+    installFetch();
+    await getDevotional('insight-for-living', '07-01');
+    const first = fetchCalls.length;
+    await getDevotional('insight-for-living', '07-01');
+    ok('rolling: a second read inside the window makes no request', fetchCalls.length === first);
+
+    clock += 21 * H;
+    await getDevotional('insight-for-living', '07-01');
+    ok('rolling: after 21 hours it is downloaded again', fetchCalls.length > first);
+
+    // A perennial devotional is never downloaded again, however old.
+    installFetch();
+    await getDevotional('my-utmost', '07-01');
+    const utmostCalls = fetchCalls.length;
+    clock += 400 * 24 * H;
+    await getDevotional('my-utmost', '07-01');
+    ok('perennial: My Utmost is not re-downloaded a year later', fetchCalls.length === utmostCalls);
+
+    // Offline, an old Insight copy beats an error.
+    clock += 24 * H;
+    (globalThis as any).fetch = async () => { throw new Error('offline'); };
+    const offline = await getDevotional('insight-for-living', '07-01');
+    ok('offline: a stale Insight copy is still shown', offline.slug === 'insight-for-living');
+
+    // Walking back to an earlier saved day costs no request for that day. In
+    // Vietnam the newest Insight file is the US date, a day behind: today's file
+    // 404s and yesterday's is already saved.
+    clock += 24 * H;
+    installFetch();
+    await getDevotional('insight-for-living', '08-01');
+    installFetch({ fail404: '08-02' });
+    const walked = await getDevotional('insight-for-living', '08-02');
+    ok('walk-back: today is requested (and missing)', fetchCalls.some((u) => u.includes('08-02')));
+    ok('walk-back: yesterday comes from the saved copy, not the network', !fetchCalls.some((u) => u.includes('08-01')),
+      fetchCalls.join(', '));
+    ok('walk-back: and it is yesterday\'s entry', walked.slug === 'insight-for-living');
+    ok('walk-back: one request in total', fetchCalls.length === 1, String(fetchCalls.length));
+  } finally {
+    Date.now = realNow;
+  }
+}
 
 // ── Report ──
 
