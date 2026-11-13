@@ -101,6 +101,17 @@ async function run() {
   ok('WEB never touches /bible static files', !calls.some((u) => u.includes('/bible/')));
   ok('WEB labeled correctly', web.translationName === 'World English Bible', web.translationName);
 
+  // 2b. The single-chapter books must ask bible-api.com for the whole chapter:
+  //     without the parameter "Jude 1" means verse 1 and only one verse comes
+  //     back (checked against the live service, Nov 2026).
+  installFetch();
+  await getChapterText('Jude', 1, 'web');
+  ok('bible-api requests ask for the whole chapter of a single-chapter book',
+    calls.length > 0 && calls.every((u) => u.includes('single_chapter_book_matching=indifferent')), calls.join(' '));
+  installFetch();
+  await getChapterText('Obadiah', 1, 'kjv');
+  ok('KJV requests do too', calls.every((u) => u.includes('single_chapter_book_matching=indifferent')), calls.join(' '));
+
   // 3. A missing static file for a modern version falls back to public-domain
   //    KJV, honestly labeled "King James Version" (never mislabeled as ESV).
   installFetch({ staticFails: true });

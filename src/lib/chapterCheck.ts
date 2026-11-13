@@ -40,7 +40,22 @@ const alternates = VERSE_COUNTS.alternateLastVerse as unknown as Record<string, 
 const omittable = VERSE_COUNTS.omittable.verses as string[];
 const JUNK_TEXT = /prohibited me from using|bolls\.life|biblegateway\.com|All rights reserved|Copyright ©/i;
 
-export function checkChapterVerses(verses: NumberedVerse[], bookName: string, chapter: number): ChapterCheck {
+/**
+ * Where the World English Bible numbers a chapter differently from the table
+ * (ESV-style). The text is the same; WEB prints the doxology at Romans 16:25-27
+ * as Romans 14:24-26. Read from the live service, not guessed: Romans 14 has 26
+ * verses and Romans 16 has 25. Applies to WEB only, so the seven stored
+ * translations are checked exactly as strictly as before. Other WEB chapters
+ * have not been surveyed: one that differs shows the red notice, never wrong text.
+ */
+const WEB_LAST_VERSE: Record<string, number> = { 'Romans 14': 26, 'Romans 16': 25 };
+
+export function checkChapterVerses(
+  verses: NumberedVerse[],
+  bookName: string,
+  chapter: number,
+  versionId?: string
+): ChapterCheck {
   const fail = (problems: string[], lastVerse = 0, missing: number[] = []): ChapterCheck =>
     ({ ok: false, lastVerse, footnoted: [], missing, problems });
 
@@ -50,7 +65,12 @@ export function checkChapterVerses(verses: NumberedVerse[], bookName: string, ch
   }
   const key = `${bookName} ${chapter}`;
   const alt = alternates[key];
-  const allowedLast = [chapterCounts[chapter - 1], ...(Array.isArray(alt) ? alt : [])];
+  const webLast = versionId === 'web' ? WEB_LAST_VERSE[key] : undefined;
+  const allowedLast = [
+    chapterCounts[chapter - 1],
+    ...(Array.isArray(alt) ? alt : []),
+    ...(webLast !== undefined ? [webLast] : []),
+  ];
   const mayOmit = new Set(
     omittable.filter((r) => r.split(':')[0] === key).map((r) => Number(r.split(':')[1]))
   );

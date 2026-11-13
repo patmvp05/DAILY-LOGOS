@@ -124,6 +124,14 @@
   `TEXT_VERSION` in the scraper AND the cache prefixes in `chapterText.ts` (`chapter_text_v8_`)
   and `bibleCache.ts` (`bible_chapter_cache_v13_`) plus `STATIC_CACHE_BUST`: a phone otherwise
   keeps the chapter (and its reading time) it cached from the old text forever.
+- **WEB and KJV come from bible-api.com and need two accommodations (verified against the live
+  service, Nov 2026).** (1) Every request carries `single_chapter_book_matching=indifferent`:
+  without it "Jude 1" means verse 1, so Obadiah, Philemon, 2 John, 3 John and Jude loaded ONE
+  verse. (2) WEB numbers Romans 14 (26 verses) and Romans 16 (25) differently from the verse table;
+  `WEB_LAST_VERSE` in `chapterCheck.ts` allows that for WEB only (the stored translations are
+  checked exactly as strictly as before). The rest of WEB has not been surveyed chapter by chapter
+  (the service asks not to be used to download a whole Bible and allows 15 requests per 30
+  seconds): a WEB chapter that differs shows the red notice, never wrong text.
 - **Honest fallback:** if a chapter fails to load, `getChapterText()` falls back to
   public-domain KJV but labels it "King James Version" (never mislabeled) and flags the
   result `_fallback`. **Fallbacks are memory-only — NEVER persisted to IndexedDB/localStorage**

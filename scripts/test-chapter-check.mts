@@ -95,6 +95,26 @@ const john3 = load('NCV', 'John', 3);
   ok('3 John may end at 14 or 15', j3.ok && e3.ok && [14, 15].includes(j3.lastVerse) && [14, 15].includes(e3.lastVerse),
     `${j3.lastVerse} ${e3.lastVerse}`);
 }
+// 3. WEB (bible-api.com): two chapters are numbered differently from the table
+//    (verified against the live service), and the single-chapter-book bug.
+{
+  const run = (n: number) => Array.from({ length: n }, (_, i) => ({ verse: i + 1, text: `Verse ${i + 1}.` }));
+  const rom14web = checkChapterVerses(run(26), 'Romans', 14, 'web');
+  ok('WEB Romans 14 (26 verses) passes', rom14web.ok && rom14web.lastVerse === 26, rom14web.problems.join('; '));
+  const rom16web = checkChapterVerses(run(25), 'Romans', 16, 'web');
+  ok('WEB Romans 16 (25 verses) passes', rom16web.ok && rom16web.lastVerse === 25, rom16web.problems.join('; '));
+  ok('the usual count still passes for WEB', checkChapterVerses(run(23), 'Romans', 14, 'web').ok);
+  // The exception is WEB's alone: a stored translation with 26 verses in Romans
+  // 14 is still wrong, and so is KJV.
+  ok('Romans 14 with 26 verses still FAILS for NIV', !checkChapterVerses(run(26), 'Romans', 14, 'niv').ok);
+  ok('... and for KJV', !checkChapterVerses(run(26), 'Romans', 14, 'kjv').ok);
+  ok('... and with no version given', !checkChapterVerses(run(26), 'Romans', 14).ok);
+  ok('WEB is not a blanket pass: a truncated WEB Romans 14 fails', !checkChapterVerses(run(10), 'Romans', 14, 'web').ok);
+  // What bible-api.com returned for "Jude 1" before the parameter was added.
+  const jude = checkChapterVerses(run(1), 'Jude', 1, 'web');
+  ok('a single-verse reply for Jude is caught', !jude.ok && jude.problems.includes('Missing verses 2–25'), jude.problems.join('; '));
+  ok('the whole of Jude passes', checkChapterVerses(run(25), 'Jude', 1, 'web').ok);
+}
 ok('describeVerses one', describeVerses([4]) === 'verse 4');
 ok('describeVerses run', describeVerses([3, 4]) === 'verses 3–4');
 ok('describeVerses runs', describeVerses([85, 12, 13, 14]) === 'verses 12–14 and 85', describeVerses([85, 12, 13, 14]));

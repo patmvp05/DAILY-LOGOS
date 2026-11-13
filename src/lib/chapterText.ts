@@ -111,7 +111,11 @@ async function fetchFromBibleApi(
   code: string,
   signal: AbortSignal
 ): Promise<ChapterTextResponse | null> {
-  const url = `https://bible-api.com/${encodeURIComponent(bookName)}+${chapter}?translation=${code}`;
+  // single_chapter_book_matching=indifferent: without it "Jude 1" means VERSE 1
+  // of Jude, so Obadiah, Philemon, 2 John, 3 John and Jude loaded a single verse
+  // on WEB and KJV (verified against the live service, Nov 2026: Jude came back
+  // with 1 verse, and with this parameter all 25). Ignored for every other book.
+  const url = `https://bible-api.com/${encodeURIComponent(bookName)}+${chapter}?translation=${code}&single_chapter_book_matching=indifferent`;
   const res = await fetch(url, { signal });
   if (!res.ok) return null;
 
@@ -288,7 +292,7 @@ function withCheck(
   bookName: string,
   chapter: number
 ): ChapterTextResponse {
-  const check = checkChapterVerses(result.verses, bookName, chapter);
+  const check = checkChapterVerses(result.verses, bookName, chapter, versionId);
   const shown: ChapterCheck = result._fallback
     ? { ...check, ok: false, problems: [`Showing the King James Version: the ${BIBLE_VERSION_NAMES[versionId] ?? versionId} copy could not be loaded`, ...check.problems] }
     : check;
