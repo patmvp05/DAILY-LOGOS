@@ -99,7 +99,7 @@ function DashboardComponent({
     [state.completedBooks]
   );
 
-  // Parts with reading left that count as read today ("2 of 6 parts today"
+  // Parts with reading left in which a chapter was read today ("2 of 6 parts today"
   // when one part is 100% finished). Reading the daily proverb counts as the
   // Wisdom part: Proverbs is Wisdom's daily book (see partsReadToday).
   const partsDoneToday = useMemo(

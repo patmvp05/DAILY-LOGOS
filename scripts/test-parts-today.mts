@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * "X of 6 parts today": which parts count as read today (partsReadToday).
- * A plan chapter read today counts for its part, and reading the daily proverb
- * counts as the Wisdom part, because Proverbs is Wisdom's daily book (Patrick
- * reads it every day instead of as a plan book). Finished parts never count.
+ * A part counts when a chapter was actually READ in it today (an entry in
+ * today's history), not when its place merely moved. The daily proverb counts
+ * as the Wisdom part, because Proverbs is Wisdom's daily book (Patrick reads it
+ * every day instead of as a plan book). Finished parts never count.
  *
  * Run with: npx tsx scripts/test-parts-today.mts
  */
@@ -22,15 +23,19 @@ function ok(name: string, cond: boolean, detail = '') {
 
 const TODAY = '2026-11-03';
 const YESTERDAY = '2026-11-02';
-const progress = (overrides: Partial<Record<string, string>> = {}): Progress[] =>
-  ['law', 'history', 'gospels', 'wisdom', 'epistles', 'prophecy', 'psalms'].map((id) => ({
+const PARTS = ['law', 'history', 'gospels', 'wisdom', 'epistles', 'prophecy', 'psalms'];
+// A part's pointer is stamped with the day it LAST CHANGED, which is not the
+// same as the day a chapter was read there (see `moved`).
+const progress = (moved: string[] = []): Progress[] =>
+  PARTS.map((id) => ({
     categoryId: id, bookIndex: id === 'wisdom' ? 2 : 0, chapter: 3,
-    lastReadAt: `${YESTERDAY}T00:05:00.000Z`, localDate: overrides[id] ?? YESTERDAY,
+    lastReadAt: `${YESTERDAY}T00:05:00.000Z`, localDate: moved.includes(id) ? TODAY : YESTERDAY,
   } as Progress));
-const proverb = (localDate: string, chapter = 3): HistoryEntry => ({
-  id: `p${localDate}`, timestamp: `${localDate}T01:00:00.000Z`, timestampMillis: 0, localDate,
-  categoryId: 'wisdom', categoryName: 'Daily Proverb', bookName: 'Proverbs', chapter, readTime: 3,
+const read = (categoryId: string, localDate: string, bookName = 'Genesis', categoryName = 'Part'): HistoryEntry => ({
+  id: `${categoryId}${localDate}`, timestamp: `${localDate}T01:00:00.000Z`, timestampMillis: 0, localDate,
+  categoryId, categoryName, bookName, chapter: 3, readTime: 3,
 });
+const proverb = (localDate: string): HistoryEntry => read('wisdom', localDate, 'Proverbs', 'Daily Proverb');
 const none = new Set<string>();
 const show = (s: Set<string>) => JSON.stringify([...s].sort());
 
@@ -38,8 +43,20 @@ ok('the daily proverb belongs to Wisdom', DAILY_PROVERB_PART_ID === 'wisdom', St
 
 ok('nothing read today: 0 parts', partsReadToday(progress(), [], none, TODAY).size === 0);
 
-ok('a plan chapter read today counts for its part',
-  show(partsReadToday(progress({ law: TODAY }), [], none, TODAY)) === '["law"]');
+ok('a chapter read today counts for its part',
+  show(partsReadToday(progress(), [read('law', TODAY)], none, TODAY)) === '["law"]');
+
+ok('a chapter read yesterday does not',
+  partsReadToday(progress(), [read('law', YESTERDAY)], none, TODAY).size === 0);
+
+// THE POINT: moving a part's place is not reading. The reducer stamps the
+// part's localDate on minus, on switching books, on finishing or undoing a
+// book; none of that read anything, and the card showed 0 chapters and 0 minutes.
+ok('a part whose place merely moved today (minus, switch, undo) does NOT count',
+  partsReadToday(progress(['law', 'gospels']), [], none, TODAY).size === 0);
+
+ok('moved AND read: counts once, for the part that was read',
+  show(partsReadToday(progress(['law', 'gospels']), [read('law', TODAY)], none, TODAY)) === '["law"]');
 
 ok("today's proverb counts as the Wisdom part",
   show(partsReadToday(progress(), [proverb(TODAY)], none, TODAY)) === '["wisdom"]');
@@ -47,19 +64,25 @@ ok("today's proverb counts as the Wisdom part",
 ok("yesterday's proverb does not count today",
   partsReadToday(progress(), [proverb(YESTERDAY)], none, TODAY).size === 0);
 
+ok('an older Proverbs entry filed under another category still counts for Wisdom',
+  show(partsReadToday(progress(), [read('devotional', TODAY, 'Proverbs')], none, TODAY)) === '["wisdom"]');
+
 ok('proverb plus a Law chapter: 2 parts',
-  show(partsReadToday(progress({ law: TODAY }), [proverb(TODAY)], none, TODAY)) === '["law","wisdom"]');
+  show(partsReadToday(progress(), [read('law', TODAY), proverb(TODAY)], none, TODAY)) === '["law","wisdom"]');
 
 ok('proverb plus an Ecclesiastes chapter: Wisdom counts once',
-  show(partsReadToday(progress({ wisdom: TODAY }), [proverb(TODAY)], none, TODAY)) === '["wisdom"]');
+  show(partsReadToday(progress(), [read('wisdom', TODAY, 'Ecclesiastes'), proverb(TODAY)], none, TODAY)) === '["wisdom"]');
+
+ok('a devotional read today is not a Bible part',
+  partsReadToday(progress(), [read('devotional', TODAY, 'Morning and Evening')], none, TODAY).size === 0);
 
 const wisdomFinished = new Set(['wisdom:Job', 'wisdom:Ecclesiastes', 'wisdom:Song of Solomon']);
 ok('a finished Wisdom part is not counted (it is not in the "of N")',
   partsReadToday(progress(), [proverb(TODAY)], wisdomFinished, TODAY).size === 0);
 
 const gospelsFinished = new Set(['gospels:Matthew', 'gospels:Mark', 'gospels:Luke', 'gospels:John', 'gospels:Acts']);
-ok('a finished part is not counted even if its pointer moved today',
-  partsReadToday(progress({ gospels: TODAY }), [], gospelsFinished, TODAY).size === 0);
+ok('a finished part is not counted even if it was read today',
+  partsReadToday(progress(), [read('gospels', TODAY, 'Acts')], gospelsFinished, TODAY).size === 0);
 
 if (fail === 0) {
   console.log(`PARTS-TODAY PASS ${pass} / ${pass}`);

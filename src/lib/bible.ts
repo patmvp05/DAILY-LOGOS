@@ -105,9 +105,17 @@ export const DAILY_PROVERB_PART_ID: string | undefined = CATEGORIES.find((c) =>
 
 /**
  * Parts with reading left that count as read today, for "X of 6 parts today"
- * and the dashboard's done-today styling: a plan chapter was read in the part
- * today (its progress `localDate` is today), or, for Wisdom, a daily proverb
- * was read today. Finished parts never count (they are not in the "of 6").
+ * and the dashboard's done-today styling: a chapter was actually READ in the
+ * part today, meaning today's reading history has an entry for it. Finished
+ * parts never count (they are not in the "of 6").
+ *
+ * The daily proverb counts for Wisdom because it is logged under that part
+ * (and any older Proverbs entry is treated the same way).
+ *
+ * This used to look at the part's progress `localDate`, which the reducer
+ * stamps on EVERY change to the part's position: the minus button, switching
+ * books, marking a book finished or undoing it all made a part look read today,
+ * with 0 chapters and 0 minutes in the same card.
  */
 export function partsReadToday(
   progress: ProgressType[],
@@ -115,17 +123,14 @@ export function partsReadToday(
   completedBooks: Set<string>,
   todayStr: string
 ): Set<string> {
+  const readToday = new Set<string>();
+  for (const h of history) {
+    if (h.localDate !== todayStr) continue;
+    readToday.add(h.bookName === 'Proverbs' && DAILY_PROVERB_PART_ID ? DAILY_PROVERB_PART_ID : h.categoryId);
+  }
   const done = new Set<string>();
   for (const p of progress) {
-    if (p.localDate === todayStr && !isCategoryComplete(p.categoryId, completedBooks)) done.add(p.categoryId);
-  }
-  const wisdom = DAILY_PROVERB_PART_ID;
-  if (
-    wisdom &&
-    !isCategoryComplete(wisdom, completedBooks) &&
-    history.some((h) => h.bookName === 'Proverbs' && h.localDate === todayStr)
-  ) {
-    done.add(wisdom);
+    if (readToday.has(p.categoryId) && !isCategoryComplete(p.categoryId, completedBooks)) done.add(p.categoryId);
   }
   return done;
 }
