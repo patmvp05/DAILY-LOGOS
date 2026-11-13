@@ -15,9 +15,8 @@
   fetched ONCE and committed. Do NOT reintroduce a runtime bolls.life or proxy fetch for
   Bible text; it does not work in production.
 - **Where each version's static files come from (verified):**
-  - bolls.life HAS: NIV, NIV2011, ESV, NLT, NKJV, NASB, AMP, NET → scrape with
-    `scripts/fetch-bible-static.mjs` (clean JSON API). It does NOT have NCV/CSB/NRSV/NASB2020
-    (its get-text endpoint returns `[]`).
+  - bolls.life was the first source for NIV/NLT/ESV/NKJV and is no longer used: its scraper
+    and workflows were removed in Nov 2026 (see "All six modern translations" below for why).
   - **NCV** → scraped from **BibleGateway** (`scripts/fetch-biblegateway.py`,
     requests+BeautifulSoup). bolls lacks it and the `meaningless` lib rejects it. 1189/1189 files
     (they were all present yet 38 were missing combined passages until Oct 2026: "all files exist"
@@ -34,10 +33,10 @@
     as `Obadiah 1:1`, and 16 intentionally empty verses (Matt 17:21, Mark 7:16, …) that are
     skipped. It refuses to write unless all 1189 chapters parse, so a truncated download
     can't commit a half-Bible. Parser is unit-tested offline (`scripts/test-bsb-parser.mts`).
-  - Probing a new translation: `.github/workflows/probe-translations.yml` dumps what each
-    candidate source actually returns. Established that bolls, getbible.net and
-    bible-api.com all 404 for BSB **and** CSB, and that BibleGateway serves no verse spans
-    for BSB — so don't retry those routes.
+  - Probing a new source: the repo's pattern is a throwaway workflow on a branch that runs the
+    requests on a GitHub runner (the sandbox reaches none of these hosts). It established that
+    bolls, getbible.net and bible-api.com all 404 for BSB **and** CSB, and that BibleGateway
+    serves no verse spans for BSB — so don't retry those routes.
   - **NIV / NLT / ESV / NKJV** → BibleGateway since Oct 2026 (same scraper, `BG_VERSION=NIV` …);
     they came from bolls.life before (see "All six modern translations" below for why that
     stopped). All seven stored versions (NCV, CSB, NIV, NLT, ESV, NKJV, BSB) have 1189/1189
@@ -46,10 +45,8 @@
   ON GITHUB'S RUNNERS, which CAN reach bolls.life / BibleGateway (the sandbox can't).
   - NCV: `.github/workflows/scrape-ncv-bg.yml` (BibleGateway). Has a fail-fast smoke test,
     is time-bounded + always-commits + resumable (re-run fills gaps), reports completeness.
-  - bolls (no longer a source for any shipped version): `.github/workflows/scrape-bolls.yml` runs `scripts/fetch-bible-static.mjs`
-    (honors `ONLY_VERSION=NIV,ESV,...`), one version per job. Resumable (skips existing files);
-    its `force` input re-fetches chapters already on disk after a parser change. The NCV/CSB
-    workflows take a `refetch` input that re-downloads only files below the current `textVersion`.
+  - Changing what a scraper writes: both take a `refetch` input / `REFETCH=1` that re-downloads
+    only files below the current `textVersion`.
 - **Every stored chapter must be complete (Oct 2026).** NCV Numbers 7 shipped with 17 of its
   89 verses and nothing noticed. `scripts/test-bible-integrity.mts` (in `npm test` AND run by
   `deploy.yml` / `daily-devotional-deploy.yml` before building) reads all 1,189 chapters of
@@ -111,9 +108,8 @@
   headings, speaker labels ("Young Woman") and an editor's note (NLT Mark 16:8) inside verses.
   BibleGateway marks headings as `h3`, so there is nothing to guess. Before switching, a second
   BibleGateway copy of 413 chapters was compared word for word: NKJV matched 8,985 of 8,990 verses
-  (the rest are bolls placing "before the LORD" in the wrong verse). `fetch-bible-static.mjs`
-  and `scrape-bolls.yml` are kept for reference but feed no shipped translation; do not point
-  them at NIV.
+  (the rest are bolls placing "before the LORD" in the wrong verse). The bolls scraper is gone;
+  do not rebuild it for NIV.
 - **The NIV is now the 2011 text** (BibleGateway's NIV; Ps 23:1 "I lack nothing"). The app used to
   ship bolls' 1984 NIV, which had lost poetry lines and can no longer be re-downloaded anywhere.
   The ESV is BibleGateway's current text, which differs from the old bolls copy in a handful of
@@ -312,6 +308,10 @@
     of in the plan, so a Proverbs history entry dated today fills Wisdom's segment in "X of 6
     parts today", and the Wisdom card shows done-for-today ("✓ Proverbs 3 read today", sorted
     after unread parts). It never moves Wisdom's plan pointer. `scripts/test-parts-today.mts`.
+    A part counts as read today only when TODAY'S HISTORY has an entry for it, never because its
+    pointer's `localDate` is today: the reducer stamps that on every change to the position (minus,
+    switching books, finishing or undoing a book), which made a part look done with 0 chapters read
+    (changed Nov 2026).
 - **Revision-aware conflict resolution & signed-out completion tracking:**
   - `Progress` docs carry a monotonic `revision` integer. Every user progress change sets
     `revision` to `(current.revision ?? 0) + 1`. In `resolveProgressConflict`, higher

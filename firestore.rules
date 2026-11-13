@@ -103,11 +103,6 @@ service cloud.firestore {
     }
 
     // Collection Rules
-    match /diag/{userId} {
-      allow write: if isOwner(userId) && incoming().keys().hasOnly(['heartBeat']) && incoming().heartBeat != null;
-      allow read: if isOwner(userId);
-    }
-
     // Write-only client diagnostics. Lets us debug device/browser-specific
     // issues (e.g. sign-in failures, before a user is authenticated) without
     // physical access to the device. No client can read, update, or delete.

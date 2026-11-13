@@ -9,7 +9,6 @@ import { BookOpen, Check, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 
 import { useUi } from '../../state/UiContextCore';
-import { triggerHaptic } from '../../lib/haptic';
 import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 import VerseCopyPopup from '../VerseCopyPopup';
 import { lastVerseInChapter, verseLabel } from '../../lib/verseLabel';
@@ -175,7 +174,6 @@ function ProverbModal({
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedVerse(v.verse);
-                              triggerHaptic('light');
                             }}
                             className="text-[12px] font-bold align-super mr-1.5 text-brand/70 tabular-nums select-none cursor-pointer hover:text-brand active:scale-110 transition-all inline"
                           >

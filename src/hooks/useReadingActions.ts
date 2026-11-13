@@ -8,7 +8,6 @@ import { format, isToday, parseISO } from 'date-fns';
 import { AppState, HistoryEntry, SprintHour } from '../types';
 import { AppAction, getSprintHour } from '../state/appReducer';
 import { CATEGORIES_BY_ID, CATEGORIES, BOOK_READ_MINUTES, DEFAULT_BOOK_MINUTES } from '../constants';
-import { triggerHaptic } from '../lib/haptic';
 import {
   calculateNextProgress,
   switchBookInProgress,
@@ -195,7 +194,6 @@ export function useReadingActions(
 
   const advanceChapter = useCallback((categoryId: string, amount: number) => {
     // Immediate haptic feedback for every tap per requirements
-    triggerHaptic(amount > 0 ? 'medium' : 'light');
     
     // Accumulate taps (net results if + and - are mixed)
     pendingTaps.current[categoryId] = (pendingTaps.current[categoryId] || 0) + amount;
@@ -234,7 +232,6 @@ export function useReadingActions(
     const nextRevision = (normalized.revision ?? 0) + 1;
 
     dispatch({ type: 'JUMP_TO_BOOK', categoryId, bookIndex });
-    triggerHaptic('light');
 
     if (userRef.current) {
       writeActionBatch(userRef.current.uid, {
@@ -286,7 +283,6 @@ export function useReadingActions(
       }).catch(e => console.error("Undo finish book sync failed:", e));
     }
     setBookFinishedPrompt(null);
-    triggerHaptic('light');
   }, [dispatch, setBookFinishedPrompt]);
 
   const toggleBookCompletion = useCallback((categoryId: string, bookName: string) => {
@@ -294,7 +290,6 @@ export function useReadingActions(
     const isCompleted = stateRef.current.completedBooks.has(key);
     
     dispatch({ type: 'TOGGLE_BOOK', key, signedOut: !userRef.current });
-    triggerHaptic(isCompleted ? 'light' : 'heavy');
     
     if (userRef.current) {
       if (isCompleted) {
@@ -438,7 +433,6 @@ export function useReadingActions(
         history: [entry]
       }).catch(err => console.error("Proverb sync failed:", err));
     }
-    triggerHaptic('medium');
   }, [state.history, state.settings.bibleVersion, user, dispatch]);
 
   const logDevotionalRead = useCallback((slug: string, name: string) => {
@@ -473,7 +467,6 @@ export function useReadingActions(
         history: [entry]
       }).catch(err => console.error("Devotional sync failed:", err));
     }
-    triggerHaptic('medium');
   }, [state.history, user, dispatch]);
 
   // ── 24-hour sprint ────────────────────────────────────────────────────
@@ -513,7 +506,6 @@ export function useReadingActions(
     const prev = getSprintHour(stateRef.current.scriptureSprints, date, hour);
     const next: SprintHour = { ...prev, done: !prev.done };
     applySprintHour(date, hour, next);
-    triggerHaptic('medium');
     pushSprintHour(date, hour, next);
   }, [applySprintHour, pushSprintHour]);
 

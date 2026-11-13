@@ -10,7 +10,6 @@ import { ChevronUp, ChevronDown, X, Copy } from 'lucide-react';
 import { useUi } from '../state/UiContextCore';
 import { BOOK_ABBREVIATIONS } from '../constants';
 import { getChapterText, type ChapterVerse } from '../lib/chapterText';
-import { triggerHaptic } from '../lib/haptic';
 import { lastVerseInChapter, lastVerseOf, nextEntryEnd, prevEntryEnd, verseLabel, verseLabelPlain } from '../lib/verseLabel';
 import { useOverlayDismiss, useTapGuard } from '../hooks/useOverlayDismiss';
 
@@ -74,7 +73,6 @@ function VerseCopyPopup({
     if (rangeEndVerse < lastVerseInEndChapter) {
       const endVerses = rangeEndChapter === chapter ? currentVerses : (extraChapters.get(rangeEndChapter) ?? []);
       setRangeEndVerse(nextEntryEnd(endVerses, rangeEndVerse) ?? rangeEndVerse + 1);
-      triggerHaptic('light');
       return;
     }
 
@@ -85,7 +83,6 @@ function VerseCopyPopup({
       const first = extraChapters.get(nextCh)?.[0];
       setRangeEndChapter(nextCh);
       setRangeEndVerse(first ? lastVerseOf(first) : 1);
-      triggerHaptic('light');
       return;
     }
 
@@ -95,7 +92,6 @@ function VerseCopyPopup({
       setExtraChapters(prev => new Map(prev).set(nextCh, data.verses));
       setRangeEndChapter(nextCh);
       setRangeEndVerse(data.verses[0] ? lastVerseOf(data.verses[0]) : 1);
-      triggerHaptic('light');
     } catch {
       showToast("Couldn't load next chapter", 'error');
     } finally {
@@ -120,7 +116,6 @@ function VerseCopyPopup({
     } else {
       setRangeEndVerse(Math.max(prevEntryEnd(currentVerses, rangeEndVerse) ?? anchorEnd, anchorEnd));
     }
-    triggerHaptic('light');
   }, [atAnchor, rangeEndChapter, rangeEndVerse, chapter, currentVerses, extraChapters, anchorEnd]);
 
   const abbr = BOOK_ABBREVIATIONS[bookName] || bookName;
@@ -189,7 +184,6 @@ function VerseCopyPopup({
     const text = buildCopyText();
     try {
       await navigator.clipboard.writeText(text);
-      triggerHaptic('medium');
       showToast('Copied!', 'success');
       onClose();
     } catch {

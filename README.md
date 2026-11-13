@@ -35,7 +35,3 @@ npm run test:rules   # Firestore rules, against the emulator (needs Java)
 
 Pushing to `main` builds the app and deploys the Firestore rules and Firebase Hosting
 (`.github/workflows/deploy.yml`). Nothing else deploys it.
-
-The project began as a Google AI Studio app
-(https://ai.studio/apps/a46f4fd8-5659-438f-bae6-32f259d36ce9); `metadata.json` and
-`.env.example` date from that.

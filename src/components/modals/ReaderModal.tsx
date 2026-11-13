@@ -12,7 +12,6 @@ import { useUi } from '../../state/UiContextCore';
 import { CATEGORIES_BY_ID, DEFAULT_BIBLE_VERSION } from '../../constants';
 import { calculateNextProgress } from '../../lib/bible';
 import { getChapterText, refetchChapterText, type ChapterTextResponse } from '../../lib/chapterText';
-import { triggerHaptic } from '../../lib/haptic';
 import { READER_END_SLOP_PX, READER_TAIL_CSS } from '../../lib/readerLayout';
 import { useOverlayDismiss, useTapGuard } from '../../hooks/useOverlayDismiss';
 import VerseCopyPopup from '../VerseCopyPopup';
@@ -250,7 +249,6 @@ function ReaderModal({ advanceChapter }: ReaderModalProps) {
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedVerse(v.verse);
-                          triggerHaptic('light');
                         }}
                         className="text-[12px] font-bold align-super mr-1.5 text-brand/70 tabular-nums select-none cursor-pointer hover:text-brand active:scale-110 transition-all inline"
                       >

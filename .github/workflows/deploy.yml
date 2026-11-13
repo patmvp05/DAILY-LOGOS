@@ -5,6 +5,16 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# One deploy at a time, in push order. Two pushes a few minutes apart used to
+# run as two parallel deploys, and whichever finished LAST won, which could be
+# the older commit. Never cancel one that is already running: a half-finished
+# Firebase deploy is worse than a late one. (GitHub keeps only one WAITING run
+# per group, so with three quick pushes the middle one is dropped; the newest
+# always runs, which is the one that matters.)
+concurrency:
+  group: deploy-hosting
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
