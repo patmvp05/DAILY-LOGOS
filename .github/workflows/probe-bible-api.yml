@@ -1,0 +1,59 @@
+name: Probe bible-api.com (temporary)
+
+on:
+  push:
+    branches: [probe-bible-api]
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: What does bible-api.com return?
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, urllib.parse, time
+          def get(url):
+              req = urllib.request.Request(url, headers={"User-Agent": "daily-logos-probe"})
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as r:
+                      return r.status, dict(r.headers), r.read().decode()
+              except urllib.error.HTTPError as e:
+                  return e.code, dict(e.headers), e.read().decode()
+              except Exception as e:
+                  return 0, {}, str(e)
+          def show(label, url):
+              s, h, body = get(url)
+              try:
+                  d = json.loads(body)
+                  vs = d.get("verses") or []
+                  nums = [v["verse"] for v in vs]
+                  print(f"{label:48} HTTP {s}  ref={d.get('reference')!r}  verses={len(vs)}  first={nums[0] if nums else None} last={nums[-1] if nums else None}  trans={d.get('translation_id')}")
+              except Exception:
+                  print(f"{label:48} HTTP {s}  non-JSON: {body[:120]!r}")
+              time.sleep(2.2)
+              return h
+          base = "https://bible-api.com/"
+          print("=== single-chapter books: default vs single_chapter_book_matching=indifferent ===")
+          for book in ["obadiah", "philemon", "2+john", "3+john", "jude"]:
+              for tr in ["web", "kjv"]:
+                  show(f"{book} 1 {tr} (as the app asks)", f"{base}{book}+1?translation={tr}" if book[0] != "2" and book[0] != "3" else f"{base}{book.replace('+','%20')}+1?translation={tr}")
+                  show(f"{book} 1 {tr} +indifferent", f"{base}{book}+1?translation={tr}&single_chapter_book_matching=indifferent" if book[0] not in "23" else f"{base}{book.replace('+','%20')}+1?translation={tr}&single_chapter_book_matching=indifferent")
+          print("=== Romans 14 and 16 ===")
+          for ch in [14, 16]:
+              for tr in ["web", "kjv"]:
+                  show(f"romans {ch} {tr}", f"{base}romans+{ch}?translation={tr}")
+          print("=== baselines ===")
+          show("genesis 1 web", f"{base}genesis+1?translation=web")
+          h = show("psalms 23 kjv", f"{base}psalms+23?translation=kjv")
+          print("rate-limit headers:", {k: v for k, v in h.items() if "limit" in k.lower() or "remaining" in k.lower() or "retry" in k.lower()})
+          print("=== docs page ===")
+          s, h, body = get(base)
+          import re
+          text = re.sub(r"<[^>]+>", " ", body)
+          text = re.sub(r"\s+", " ", text)
+          for kw in ["single_chapter", "single chapter", "rate", "15 requests", "requests per"]:
+              for m in re.finditer(kw, text, re.I):
+                  print(f"[{kw}] ...{text[max(0,m.start()-160):m.end()+260]}...")
+                  break
+          PY
