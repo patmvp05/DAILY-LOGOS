@@ -174,6 +174,19 @@
   rolling window), resumable, commits `public/devotionals/**`. A `PROBE=insight` mode dumps a
   site's URL scheme + HTML/API structure into the logs (how parsers are derived without local
   access). Same GITHUB_TOKEN-doesn't-deploy caveat as the Bible scrapers (see Deployment).
+- **"My Devotionals" in Settings syncs across devices (Nov 2026)** — `src/lib/devotionalSync.ts`.
+  The list holds the five built-in entries (`DEFAULT_DEVOTIONALS` in `storage.ts`) plus ones added
+  in Settings. Before, it was device-only: the listener and rules existed but nothing wrote. The
+  cloud copy is now the master list and the built-ins are stored in it like any other entry
+  (deleting one on a phone removes it on the iPad). On the first snapshot after launch
+  `devotionalsToUpload` seeds an EMPTY cloud with everything on the device; when the cloud has
+  entries it wins, and only the user's own additions are uploaded (a built-in missing from the
+  cloud was deleted elsewhere and must not come back). Order is fixed by `orderDevotionals`
+  (built-ins in their usual order, then the user's by name) because a snapshot arrives sorted by
+  random UUID. The stored document is EXACTLY `{name, description, url}` — the id is the document
+  name — and a URL over 500 characters is refused in Settings before any write (a rejected write
+  latches the sync badge red). `test-devotional-sync.mts` is offline; `npm run
+  test:rules-devotionals` runs the real rules in the emulator.
 - **External `{{date}}` interpolation** (`interpolateDevotionalUrl`): `{{date}}`→`yyyy-MM-dd`,
   plus `{{YYYY}}`/`{{MM}}`/`{{DD}}`, all local time, applied at click time. The old blocked
   `<iframe>` is gone — external devotionals open in a new tab via a clean launch screen.

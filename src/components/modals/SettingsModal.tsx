@@ -29,7 +29,8 @@ import { format, parseISO } from 'date-fns';
 import { cn } from '../../lib/utils';
 import { BIBLE_VERSIONS, resolveBibleVersion } from '../../constants';
 
-import { setUserSettings } from '../../lib/sync';
+import { setUserSettings, writeDevotionals, deleteDevotional } from '../../lib/sync';
+import { MAX_DEVOTIONAL_URL_LENGTH } from '../../lib/devotionalSync';
 import { getDiagnosticReport } from '../../lib/diagnostics';
 import { useApp } from '../../state/AppContextCore';
 import { useUi } from '../../state/UiContextCore';
@@ -458,15 +459,20 @@ interface SettingsModalProps {
                     <button 
                       onClick={() => {
                         if (newDevotional.name && newDevotional.url) {
-                          dispatch({ 
-                            type: 'ADD_DEVOTIONAL', 
-                            devotional: { 
-                              ...newDevotional, 
-                              id: (typeof crypto !== 'undefined' && crypto.randomUUID) 
-                                ? crypto.randomUUID() 
-                                : Math.random().toString(36).substring(2, 11) 
-                            } 
-                          });
+                          if (newDevotional.url.length > MAX_DEVOTIONAL_URL_LENGTH) {
+                            // The cloud rejects a longer one, and a rejected write
+                            // would show the sync badge red until relaunch.
+                            showToast(`That link is too long (${MAX_DEVOTIONAL_URL_LENGTH} characters at most).`, 'error');
+                            return;
+                          }
+                          const devotional = {
+                            ...newDevotional,
+                            id: (typeof crypto !== 'undefined' && crypto.randomUUID)
+                              ? crypto.randomUUID()
+                              : Math.random().toString(36).substring(2, 11)
+                          };
+                          dispatch({ type: 'ADD_DEVOTIONAL', devotional });
+                          if (user) writeDevotionals(user.uid, [devotional]).catch(() => {});
                           setNewDevotional({ name: '', description: '', url: '' });
                         }
                       }}
@@ -485,7 +491,10 @@ interface SettingsModalProps {
                       <p className="text-[10px] text-[var(--audible-text-secondary)] font-bold uppercase tracking-[0.12em]">{dev.description}</p>
                     </div>
                     <button
-                      onClick={() => dispatch({ type: 'DELETE_DEVOTIONAL', id: dev.id })}
+                      onClick={() => {
+                        dispatch({ type: 'DELETE_DEVOTIONAL', id: dev.id });
+                        if (user) deleteDevotional(user.uid, dev.id).catch(() => {});
+                      }}
                       aria-label={`Remove ${dev.name}`}
                       className="text-red-500 opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100 transition-opacity p-2 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full"
                     >

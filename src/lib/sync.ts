@@ -17,13 +17,15 @@ import {
   getProgressCollection,
   getHistoryCollection,
   getJournalsCollection,
+  getDevotionalsCollection,
   getCompletedBooksCollection,
   getSprintsCollection,
   bookKeyToDocId,
   getDocsCacheFirst
 } from './firebase';
 import { type User } from 'firebase/auth';
-import { Progress, UserSettings, HistoryEntry, SprintHour } from '../types';
+import { Progress, UserSettings, HistoryEntry, SprintHour, Devotional } from '../types';
+import { toDevotionalDoc } from './devotionalSync';
 import { logDiagnostic } from './diagnostics';
 import { syncTracker, recordSyncError } from './syncStatus';
 
@@ -101,6 +103,17 @@ export const writeSprintHour = async (
 
 export const deleteSprint = track('deleteSprint', async (uid: string, date: string) => {
   await deleteDoc(doc(getSprintsCollection(uid), date));
+});
+
+/** Save devotionals to the cloud list (see src/lib/devotionalSync.ts). */
+export const writeDevotionals = track('writeDevotionals', async (uid: string, list: Devotional[]) => {
+  const batch = writeBatch(db);
+  list.forEach((d) => batch.set(doc(getDevotionalsCollection(uid), d.id), toDevotionalDoc(d)));
+  await batch.commit();
+});
+
+export const deleteDevotional = track('deleteDevotional', async (uid: string, id: string) => {
+  await deleteDoc(doc(getDevotionalsCollection(uid), id));
 });
 
 // (Journals can still be read, exported and deleted. Writing one went with the

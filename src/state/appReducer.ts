@@ -6,6 +6,7 @@
 import { format } from 'date-fns';
 import { AppState, Progress as ProgressType, HistoryEntry, ProverbJournal, Devotional, UserSettings, ScriptureSprint, SprintHour } from '../types';
 import { CATEGORIES_BY_ID } from '../constants';
+import { orderDevotionals } from '../lib/devotionalSync';
 import {
   normalizeProgressPosition,
   switchBookInProgress,
@@ -437,8 +438,12 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'CLOUD_SYNC_DEVOTIONALS': {
       if (action.devotionals.length === 0 && state.customDevotionals.length > 0) return state;
-      if (listContentEqual(state.customDevotionals, action.devotionals)) return state;
-      return { ...state, customDevotionals: action.devotionals };
+      const ordered = orderDevotionals(action.devotionals);
+      if (
+        listContentEqual(state.customDevotionals, ordered) &&
+        state.customDevotionals.every((d, i) => d.id === ordered[i].id)
+      ) return state;
+      return { ...state, customDevotionals: ordered };
     }
     case 'CLOUD_SYNC_HISTORY': {
       // Use a Map for O(1) deduplication by ID
@@ -725,7 +730,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, settings: { ...state.settings, typography: action.typography } };
     }
     case 'ADD_DEVOTIONAL': {
-      return { ...state, customDevotionals: [...state.customDevotionals, action.devotional] };
+      return { ...state, customDevotionals: orderDevotionals([...state.customDevotionals, action.devotional]) };
     }
     case 'DELETE_DEVOTIONAL': {
       return { ...state, customDevotionals: state.customDevotionals.filter(d => d.id !== action.id) };

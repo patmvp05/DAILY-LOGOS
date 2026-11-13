@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppState, Progress, UserSettings } from '../types';
+import { AppState, Devotional, Progress, UserSettings } from '../types';
 import { CATEGORIES } from '../constants';
 import { normalizeProgressPosition } from './bible';
 import { get, set } from 'idb-keyval';
@@ -29,7 +29,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   theme: 'system',
 };
 
-const DEFAULT_DEVOTIONALS = [
+export const DEFAULT_DEVOTIONALS: Devotional[] = [
   { 
     id: 'insight', 
     name: 'Insight for Living', 

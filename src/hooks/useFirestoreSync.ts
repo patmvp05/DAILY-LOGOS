@@ -28,7 +28,8 @@ import { AppAction, resolveProgressConflict } from '../state/appReducer';
 import { isChapterUnreadInPlan } from '../lib/bible';
 import { Progress, HistoryEntry, ProverbJournal, Devotional, AppState, UserSettings, ScriptureSprint, SprintHour } from '../types';
 import { logDiagnostic } from '../lib/diagnostics';
-import { writeActionBatch, writeSprintHour, recordSyncError, syncTracker } from '../lib/sync';
+import { writeActionBatch, writeSprintHour, writeDevotionals, recordSyncError, syncTracker } from '../lib/sync';
+import { devotionalsToUpload } from '../lib/devotionalSync';
 
 const COLLECTION_COUNT = 7;
 
@@ -211,7 +212,19 @@ export function useFirestoreSync(user: User | null, dispatch: React.Dispatch<App
 
     // 5. Devotionals
     listen<QuerySnapshot>('Devotionals', getDevotionalsCollection(user.uid), (snap) => {
-      dispatch({ type: 'CLOUD_SYNC_DEVOTIONALS', devotionals: snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as Devotional)) });
+      const cloud = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as Devotional));
+      // First snapshot only: put this device's list into the cloud (see
+      // devotionalsToUpload). Later snapshots are authoritative, so a delete
+      // on another device is never re-uploaded from here.
+      let effective = cloud;
+      if (!firstFire.has('Devotionals')) {
+        const missing = devotionalsToUpload(stateRef.current.customDevotionals, cloud);
+        if (missing.length) {
+          effective = [...cloud, ...missing];
+          writeDevotionals(user.uid, missing).catch((err) => logDiagnostic('sync', 'error', 'Devotional upload failed', err));
+        }
+      }
+      dispatch({ type: 'CLOUD_SYNC_DEVOTIONALS', devotionals: effective });
     });
 
     // 6. History — unbounded for accurate streak calculation
